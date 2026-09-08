@@ -7,7 +7,7 @@ const CANOPY_COLORS = ['#4f9c3f', '#3f8a37', '#63ad46', '#2f7a35']
 const FLOWER_COLORS = ['#f4d03f', '#ef6f8b', '#f0f3f5', '#a06fd6']
 
 /** Everything beyond this radius gets palms instead of round trees. */
-const PALM_RADIUS = 29
+const PALM_RADIUS = 92
 
 export function Foliage() {
   const { broadleaf, palms } = useMemo(() => {
@@ -57,7 +57,7 @@ function Hills() {
 function BroadleafTrees({ trees }: { trees: Scatter[] }) {
   return (
     <group>
-      <Instances limit={200} range={trees.length} castShadow receiveShadow>
+      <Instances limit={640} range={trees.length} castShadow receiveShadow>
         <cylinderGeometry args={[0.2, 0.32, 2.4, 6]} />
         <meshStandardMaterial color="#7d5a3a" flatShading roughness={1} />
         {trees.map((t, i) => (
@@ -70,7 +70,7 @@ function BroadleafTrees({ trees }: { trees: Scatter[] }) {
         ))}
       </Instances>
 
-      <Instances limit={200} range={trees.length} castShadow>
+      <Instances limit={640} range={trees.length} castShadow>
         <icosahedronGeometry args={[1.5, 0]} />
         <meshStandardMaterial flatShading roughness={1} />
         {trees.map((t, i) => (
@@ -84,7 +84,7 @@ function BroadleafTrees({ trees }: { trees: Scatter[] }) {
         ))}
       </Instances>
 
-      <Instances limit={200} range={trees.length} castShadow>
+      <Instances limit={640} range={trees.length} castShadow>
         <icosahedronGeometry args={[1, 0]} />
         <meshStandardMaterial flatShading roughness={1} />
         {trees.map((t, i) => (
@@ -113,7 +113,7 @@ function Pines({ trees }: { trees: Scatter[] }) {
   ]
   return (
     <group>
-      <Instances limit={60} range={trees.length} castShadow>
+      <Instances limit={120} range={trees.length} castShadow>
         <cylinderGeometry args={[0.16, 0.24, 1.6, 5]} />
         <meshStandardMaterial color="#6b4a30" flatShading roughness={1} />
         {trees.map((t, i) => (
@@ -125,7 +125,7 @@ function Pines({ trees }: { trees: Scatter[] }) {
         ))}
       </Instances>
       {tiers.map((tier, ti) => (
-        <Instances key={ti} limit={60} range={trees.length} castShadow>
+        <Instances key={ti} limit={120} range={trees.length} castShadow>
           <coneGeometry args={[tier.r, tier.h, 7]} />
           <meshStandardMaterial color="#2f7a45" flatShading roughness={1} />
           {trees.map((t, i) => (
@@ -184,7 +184,7 @@ function Palm({ data }: { data: Scatter }) {
 
 function Rocks() {
   return (
-    <Instances limit={80} range={ROCKS.length} castShadow receiveShadow>
+    <Instances limit={260} range={ROCKS.length} castShadow receiveShadow>
       <dodecahedronGeometry args={[0.7, 0]} />
       <meshStandardMaterial color="#9aa3a8" flatShading roughness={1} />
       {ROCKS.map((r, i) => (
@@ -203,7 +203,7 @@ function Rocks() {
 function Flowers() {
   return (
     <group>
-      <Instances limit={260} range={FLOWERS.length}>
+      <Instances limit={460} range={FLOWERS.length}>
         <cylinderGeometry args={[0.03, 0.03, 0.4, 4]} />
         <meshStandardMaterial color="#3d8a3a" roughness={1} />
         {FLOWERS.map((f, i) => (
@@ -214,7 +214,7 @@ function Flowers() {
           />
         ))}
       </Instances>
-      <Instances limit={260} range={FLOWERS.length}>
+      <Instances limit={460} range={FLOWERS.length}>
         <icosahedronGeometry args={[0.13, 0]} />
         <meshStandardMaterial flatShading roughness={0.8} />
         {FLOWERS.map((f, i) => (
@@ -232,7 +232,7 @@ function Flowers() {
 
 function Tufts() {
   return (
-    <Instances limit={300} range={TUFTS.length}>
+    <Instances limit={560} range={TUFTS.length}>
       <coneGeometry args={[0.22, 0.6, 4]} />
       <meshStandardMaterial color="#57a03d" flatShading roughness={1} />
       {TUFTS.map((t, i) => (

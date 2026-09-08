@@ -17,7 +17,11 @@ export const MOVE_KEYS: Record<string, [number, number]> = {
   ArrowRight: [1, 0],
 }
 
-export const INTERACT_KEYS = new Set(['KeyE', 'Space', 'Enter', 'KeyZ'])
+/** Keys that trigger the thing you are standing next to. */
+export const INTERACT_KEYS = new Set(['KeyE', 'Enter', 'KeyZ'])
+
+/** Keys that turn a page of dialogue, or start the game. Space included. */
+export const ADVANCE_KEYS = new Set(['KeyE', 'Space', 'Enter', 'KeyZ'])
 
 export function setKey(code: string, down: boolean) {
   if (down) pressed.add(code)
@@ -40,6 +44,52 @@ export function consumeInteract() {
   const q = interactQueued
   interactQueued = false
   return q
+}
+
+let jumpQueued = false
+
+export function queueJump() {
+  jumpQueued = true
+}
+
+export function consumeJump() {
+  const q = jumpQueued
+  jumpQueued = false
+  return q
+}
+
+/* ------------------------------- paintball ------------------------------- */
+
+/** Keys that throw a paintball. */
+export const FIRE_KEYS = new Set(['Space', 'KeyF'])
+/** Keys held to crouch under incoming paint. */
+export const CROUCH_KEYS = ['ControlLeft', 'ControlRight', 'KeyX']
+
+/** Mouse or on-screen fire button, held rather than tapped. */
+export const firePointer = { held: false }
+/** Set by the on-screen crouch button. */
+export const touchCrouch = { on: false }
+
+let fireQueued = false
+
+export function queueFire() {
+  fireQueued = true
+}
+
+/** True once for a tap, or every frame while the trigger is held. */
+export function consumeFire() {
+  const q = fireQueued
+  fireQueued = false
+  return (
+    q ||
+    firePointer.held ||
+    pressed.has('Space') ||
+    pressed.has('KeyF')
+  )
+}
+
+export function isCrouching() {
+  return touchCrouch.on || CROUCH_KEYS.some((k) => pressed.has(k))
 }
 
 export interface MoveAxis {
@@ -79,4 +129,35 @@ export function readCameraTurn() {
   if (pressed.has('KeyR')) turn -= 1
   if (pressed.has('BracketRight')) turn -= 1
   return turn
+}
+
+/* -------------------------------- balloon -------------------------------- */
+
+/** Keys that let a water bomb go, and keys that throw a handful of confetti. */
+export const WATER_KEYS = new Set(['Space'])
+export const CONFETTI_KEYS = new Set(['KeyF', 'KeyG'])
+
+export type Payload = 'water' | 'confetti'
+
+/** Set while an on-screen drop button is held down. */
+export const dropHeld: Record<Payload, boolean> = {
+  water: false,
+  confetti: false,
+}
+
+const dropQueued: Record<Payload, boolean> = { water: false, confetti: false }
+
+export function queueDrop(kind: Payload) {
+  dropQueued[kind] = true
+}
+
+/** True once for a tap, or every frame while the button is held down. */
+export function consumeDrop(kind: Payload) {
+  const q = dropQueued[kind]
+  dropQueued[kind] = false
+  if (q || dropHeld[kind]) return true
+  for (const code of kind === 'water' ? WATER_KEYS : CONFETTI_KEYS) {
+    if (pressed.has(code)) return true
+  }
+  return false
 }

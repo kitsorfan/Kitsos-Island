@@ -3,7 +3,7 @@ import { useGame } from '../state/store'
 import * as sfx from '../game/audio'
 import { dialogueBridge } from './useKeyboard'
 
-const CHARS_PER_SECOND = 55
+const CHARS_PER_SECOND = 120
 
 export function DialogueBox() {
   const dialogue = useGame((s) => s.dialogue)
@@ -27,7 +27,7 @@ export function DialogueBox() {
       last = now
       count = Math.min(line.length, count + delta * CHARS_PER_SECOND)
       sinceBlip += delta
-      if (sinceBlip > 0.055) {
+      if (sinceBlip > 0.042) {
         sinceBlip = 0
         if (count < line.length) sfx.blip()
       }

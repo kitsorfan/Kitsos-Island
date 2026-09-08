@@ -15,7 +15,7 @@ const scratch = new Color()
 export function Terrain() {
   const geometry = useMemo(() => {
     const size = ISLAND_EDGE * 2.4
-    const segments = 168
+    const segments = 208
     const geo = new PlaneGeometry(size, size, segments, segments)
     geo.rotateX(-Math.PI / 2)
 
@@ -34,14 +34,14 @@ export function Terrain() {
       const patch =
         0.5 +
         0.5 *
-          Math.sin(x * 0.17 + Math.cos(z * 0.13) * 1.7) *
-          Math.cos(z * 0.19 - Math.sin(x * 0.11) * 1.3)
+          Math.sin(x * 0.06 + Math.cos(z * 0.045) * 1.7) *
+          Math.cos(z * 0.065 - Math.sin(x * 0.038) * 1.3)
       scratch.copy(GRASS_A).lerp(GRASS_B, patch)
-      scratch.lerp(GRASS_DARK, smoothstep((r - 20) / 26) * 0.35)
+      scratch.lerp(GRASS_DARK, smoothstep((r - 55) / 60) * 0.35)
 
-      scratch.lerp(SAND, smoothstep((r - 33.5) / 3.5))
-      scratch.lerp(WET_SAND, smoothstep((r - 40) / 4))
-      scratch.lerp(SEABED, smoothstep((r - 45) / 8))
+      scratch.lerp(SAND, smoothstep((r - 101) / 10))
+      scratch.lerp(WET_SAND, smoothstep((r - 121) / 12))
+      scratch.lerp(SEABED, smoothstep((r - 136) / 26))
 
       colors[i * 3] = scratch.r
       colors[i * 3 + 1] = scratch.g

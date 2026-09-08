@@ -3,12 +3,15 @@ import { useFrame } from '@react-three/fiber'
 import {
   ExtrudeGeometry,
   Shape,
+  type Group,
   type Mesh,
   type MeshBasicMaterial,
   type MeshStandardMaterial,
 } from 'three'
 import type { BuildingKind } from '../../types'
 import { TextPlane } from '../TextSign'
+import { GreekFlag } from '../InteriorProps'
+import { IbmMark, NtuaSeal, VeltistonMark } from '../Emblems'
 
 /** Triangular prism used for gable roofs; the ridge runs along local Z. */
 function useGable(width: number, height: number, depth: number) {
@@ -230,13 +233,14 @@ function UniversityModel() {
         >
           <meshStandardMaterial color="#f0e6d0" flatShading roughness={0.95} />
         </mesh>
+        <NtuaSeal size={1.9} position={[0, 8.15, 0.86]} />
         <TextPlane
-          text="ΕΜΠ · NTUA"
-          width={6}
-          aspect={7}
+          text="ΕΘΝΙΚΟ ΜΕΤΣΟΒΙΟ ΠΟΛΥΤΕΧΝΕΙΟ"
+          width={9.4}
+          aspect={13}
           color="#2f5fa8"
           outline="#f7efdd"
-          position={[0, 7.9, 0.85]}
+          position={[0, 6.72, 1.33]}
         />
       </group>
 
@@ -268,14 +272,52 @@ function UniversityModel() {
         />
       ))}
 
-      {/* Flagpole */}
-      <group position={[-8.5, 0, D / 2 + 4]}>
+      {/* Foundation stone carrying the school's seal */}
+      <group position={[-9.4, 0, 9.6]}>
+        <mesh position={[0, 0.16, 0]} receiveShadow>
+          <boxGeometry args={[3.2, 0.32, 1]} />
+          <meshStandardMaterial color="#cfc2a6" flatShading roughness={1} />
+        </mesh>
+        <mesh position={[0, 1.7, 0]} castShadow receiveShadow>
+          <boxGeometry args={[2.8, 2.8, 0.55]} />
+          <meshStandardMaterial color="#e6dbc3" flatShading roughness={1} />
+        </mesh>
+        <mesh position={[0, 3.16, 0]} castShadow>
+          <boxGeometry args={[3.1, 0.22, 0.75]} />
+          <meshStandardMaterial color="#d8cdb4" flatShading roughness={1} />
+        </mesh>
+        <NtuaSeal size={2.1} position={[0, 1.78, 0.29]} />
+      </group>
+
+      {/* Flagpole, kept clear of the foundation stone */}
+      <group position={[9.4, 0, D / 2 + 4]}>
         <mesh position={[0, 3.4, 0]} castShadow>
           <cylinderGeometry args={[0.09, 0.11, 6.8, 8]} />
           <meshStandardMaterial color="#c9cdd2" metalness={0.5} roughness={0.4} />
         </mesh>
         <Flag y={5.9} />
       </group>
+    </group>
+  )
+}
+
+/** Hangs any banner off a pole and gives it a lazy wave. */
+function WavingFlag({
+  y,
+  children,
+}: {
+  y: number
+  children: React.ReactNode
+}) {
+  const group = useRef<Group>(null)
+  useFrame((state) => {
+    if (!group.current) return
+    group.current.rotation.y = Math.sin(state.clock.elapsedTime * 1.9) * 0.14
+    group.current.position.z = Math.sin(state.clock.elapsedTime * 2.4) * 0.07
+  })
+  return (
+    <group ref={group} position={[0.06, y, 0]}>
+      {children}
     </group>
   )
 }
@@ -351,6 +393,7 @@ function WorkModel() {
         <boxGeometry args={[7.8, 0.5, 10.1]} />
         <meshStandardMaterial color="#22313f" flatShading roughness={0.7} />
       </mesh>
+      <VeltistonMark width={6.6} position={[-2.6, 14.2, FRONT + 0.35]} />
       <mesh position={[-2.6, 15.6, FRONT - 4.75]} castShadow>
         <cylinderGeometry args={[0.09, 0.12, 2.4, 6]} />
         <meshStandardMaterial color="#9aa5ad" metalness={0.6} roughness={0.4} />
@@ -362,7 +405,7 @@ function WorkModel() {
         <boxGeometry args={[5.2, 6.4, 6.6]} />
         <meshStandardMaterial color="#48627a" flatShading roughness={0.7} />
       </mesh>
-      {[1.5, 3.5, 5.5].map((y) => (
+      {[1.5, 3.5].map((y) => (
         <mesh key={y} position={[3.6, y, FRONT - 0.23]}>
           <boxGeometry args={[4.4, 0.9, 0.14]} />
           <meshStandardMaterial
@@ -373,6 +416,24 @@ function WorkModel() {
           />
         </mesh>
       ))}
+
+      {/* Tenant board on the forecourt, at reading height */}
+      <group position={[4.6, 0, 6.2]}>
+        <mesh position={[0, 0.14, 0]} receiveShadow>
+          <boxGeometry args={[5, 0.28, 1.1]} />
+          <meshStandardMaterial color="#d5d8da" flatShading roughness={1} />
+        </mesh>
+        <mesh position={[0, 2.05, 0]} castShadow receiveShadow>
+          <boxGeometry args={[4.6, 3.6, 0.5]} />
+          <meshStandardMaterial color="#2b3a49" flatShading roughness={0.7} />
+        </mesh>
+        <VeltistonMark width={3.9} position={[0, 2.85, 0.27]} />
+        <mesh position={[0, 2.15, 0.27]}>
+          <planeGeometry args={[3.7, 0.07]} />
+          <meshBasicMaterial color="#2fb59a" />
+        </mesh>
+        <IbmMark width={2.5} position={[0, 1.35, 0.27]} />
+      </group>
 
       {/* Entrance canopy + doors */}
       <mesh position={[-2.6, 3.6, FRONT + 1.1]} castShadow>
@@ -530,11 +591,17 @@ function ArmyModel() {
 
       {/* Flagpole */}
       <group position={[5.2, 0, D / 2 - 1.4]}>
-        <mesh position={[0, 3, 0]} castShadow>
-          <cylinderGeometry args={[0.08, 0.1, 6, 8]} />
+        <mesh position={[0, 3.6, 0]} castShadow>
+          <cylinderGeometry args={[0.08, 0.1, 7.2, 8]} />
           <meshStandardMaterial color="#c9cdd2" metalness={0.5} roughness={0.4} />
         </mesh>
-        <Flag y={5.1} color="#4f5a3a" />
+        <mesh position={[0, 7.3, 0]}>
+          <sphereGeometry args={[0.14, 8, 6]} />
+          <meshStandardMaterial color="#f0c14b" metalness={0.6} roughness={0.3} />
+        </mesh>
+        <WavingFlag y={6.1}>
+          <GreekFlag width={2.6} />
+        </WavingFlag>
       </group>
 
       {/* Gate posts */}
@@ -776,7 +843,114 @@ function SignalRings() {
   )
 }
 
+/* ------------------------------------------------------------------ */
+/* The Old Lighthouse — the locked reward on the north-west cape       */
+/* ------------------------------------------------------------------ */
+
+function LighthouseModel() {
+  const beam = useRef<Group>(null)
+  const bands = [0, 1, 2, 3, 4, 5]
+
+  useFrame((state) => {
+    if (beam.current) beam.current.rotation.y = state.clock.elapsedTime * 0.55
+  })
+
+  return (
+    <group>
+      {/* Rocky outcrop it stands on */}
+      <mesh position={[0, -0.6, 0]} receiveShadow>
+        <cylinderGeometry args={[6.4, 7.6, 1.6, 12]} />
+        <meshStandardMaterial color="#8d949a" flatShading roughness={1} />
+      </mesh>
+
+      {/* Tapered tower in painted bands */}
+      {bands.map((i) => (
+        <mesh key={i} position={[0, 1.4 + i * 2.6, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[3.5 - i * 0.34, 3.85 - i * 0.34, 2.6, 16]} />
+          <meshStandardMaterial
+            color={i % 2 === 0 ? '#f6f1e4' : '#c0392b'}
+            flatShading
+            roughness={0.9}
+          />
+        </mesh>
+      ))}
+
+      {/* Gallery deck and railing */}
+      <mesh position={[0, 17.1, 0]} castShadow>
+        <cylinderGeometry args={[2.9, 2.4, 0.4, 16]} />
+        <meshStandardMaterial color="#4a5057" flatShading roughness={0.8} />
+      </mesh>
+      {Array.from({ length: 12 }, (_, i) => {
+        const a = (i / 12) * Math.PI * 2
+        return (
+          <mesh
+            key={i}
+            position={[Math.cos(a) * 2.6, 17.8, Math.sin(a) * 2.6]}
+          >
+            <boxGeometry args={[0.1, 1, 0.1]} />
+            <meshStandardMaterial color="#4a5057" flatShading />
+          </mesh>
+        )
+      })}
+      <mesh position={[0, 18.35, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[2.6, 0.07, 6, 20]} />
+        <meshStandardMaterial color="#4a5057" flatShading />
+      </mesh>
+
+      {/* Lantern room */}
+      <mesh position={[0, 19.4, 0]} castShadow>
+        <cylinderGeometry args={[1.7, 1.7, 2.4, 12]} />
+        <meshStandardMaterial
+          color="#ffe9a8"
+          emissive="#ffbe4d"
+          emissiveIntensity={0.9}
+          transparent
+          opacity={0.75}
+          roughness={0.2}
+        />
+      </mesh>
+      <group ref={beam} position={[0, 19.4, 0]}>
+        <mesh position={[0, 0, 5]} rotation={[Math.PI / 2, 0, 0]}>
+          <coneGeometry args={[1.7, 11, 4, 1, true]} />
+          <meshBasicMaterial
+            color="#ffe9a8"
+            transparent
+            opacity={0.16}
+            depthWrite={false}
+            side={2}
+          />
+        </mesh>
+      </group>
+      <mesh position={[0, 21, 0]} castShadow>
+        <coneGeometry args={[2.2, 1.6, 12]} />
+        <meshStandardMaterial color="#2f3a44" flatShading roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 22.2, 0]}>
+        <cylinderGeometry args={[0.06, 0.06, 1, 6]} />
+        <meshStandardMaterial color="#9aa5ad" metalness={0.6} />
+      </mesh>
+
+      {/* Keeper's door, facing the road */}
+      <Door position={[0, 1.4, 3.75]} width={1.6} height={2.8} color="#7a4a2c" />
+
+      {/* Keeper's cottage tucked against the base */}
+      <group position={[5.4, 0, 2.6]} rotation={[0, -0.5, 0]}>
+        <mesh position={[0, 1.5, 0]} castShadow receiveShadow>
+          <boxGeometry args={[5, 3, 4.2]} />
+          <meshStandardMaterial color="#efe4cd" flatShading roughness={0.95} />
+        </mesh>
+        <mesh position={[0, 3.4, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
+          <coneGeometry args={[3.7, 1.6, 4]} />
+          <meshStandardMaterial color="#8d4a33" flatShading roughness={0.95} />
+        </mesh>
+        <Win position={[0, 1.7, 2.13]} size={[1, 1]} frame="#b08a5c" lit />
+      </group>
+    </group>
+  )
+}
+
 export const BUILDING_MODELS: Record<BuildingKind, () => React.ReactElement> = {
+  lighthouse: LighthouseModel,
   house: HouseModel,
   university: UniversityModel,
   work: WorkModel,

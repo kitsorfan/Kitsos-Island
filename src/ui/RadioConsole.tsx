@@ -9,7 +9,7 @@ const SUBJECTS = [
   'Just saying hello',
 ]
 
-type CopyKey = 'email' | 'phone' | null
+type CopyKey = 'email' | 'link' | 'message' | null
 
 export function RadioConsole() {
   const [name, setName] = useState('')
@@ -72,34 +72,25 @@ export function RadioConsole() {
 
         <a
           className="channel"
-          href={`tel:${PROFILE.phone.replace(/\s/g, '')}`}
-          onClick={() => sfx.confirm()}
-        >
-          <span className="channel__band">Channel 2 · Phone</span>
-          <strong>{PROFILE.phone}</strong>
-        </a>
-        <button
-          className="channel channel--button"
-          onClick={() => copy('phone', PROFILE.phone)}
-        >
-          <span className="channel__band">Clipboard</span>
-          <strong>{copied === 'phone' ? 'Copied ✓' : 'Copy number'}</strong>
-        </button>
-
-        <a
-          className="channel channel--wide"
           href={PROFILE.linkedin}
           target="_blank"
           rel="noreferrer"
           onClick={() => sfx.confirm()}
         >
-          <span className="channel__band">Channel 3 · LinkedIn</span>
+          <span className="channel__band">Channel 2 · LinkedIn</span>
           <strong>{PROFILE.linkedinLabel}</strong>
         </a>
+        <button
+          className="channel channel--button"
+          onClick={() => copy('link', PROFILE.linkedin)}
+        >
+          <span className="channel__band">Clipboard</span>
+          <strong>{copied === 'link' ? 'Copied ✓' : 'Copy profile'}</strong>
+        </button>
       </div>
 
       <div className="radio__desk">
-        <h3 className="panel__heading">Channel 4 · Message desk</h3>
+        <h3 className="panel__heading">Channel 3 · Message desk</h3>
         <p className="panel__text">
           This island has no backend — the desk hands your message to your own mail
           client, already addressed and written.
@@ -154,9 +145,9 @@ export function RadioConsole() {
           </button>
           <button
             className="button"
-            onClick={() => copy('email', `${PROFILE.email}\n\n${body}`)}
+            onClick={() => copy('message', `${PROFILE.email}\n\n${body}`)}
           >
-            Copy message
+            {copied === 'message' ? 'Copied ✓' : 'Copy message'}
           </button>
         </div>
         {sent && (

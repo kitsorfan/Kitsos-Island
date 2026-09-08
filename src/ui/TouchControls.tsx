@@ -1,5 +1,15 @@
 import { useEffect, useRef } from 'react'
-import { queueInteract, touchStick } from '../game/input'
+import {
+  dropHeld,
+  firePointer,
+  queueDrop,
+  queueFire,
+  queueInteract,
+  queueJump,
+  setKey,
+  touchCrouch,
+  touchStick,
+} from '../game/input'
 import { useGame } from '../state/store'
 import { dialogueBridge } from './useKeyboard'
 import { useCoarsePointer } from './useCoarsePointer'
@@ -10,6 +20,9 @@ const RADIUS = 52
 export function TouchControls() {
   const coarse = useCoarsePointer()
   const mode = useGame((s) => s.mode)
+  const fighting = useGame((s) => s.paintball?.status === 'playing')
+  const riding = useGame((s) => s.moto?.status === 'riding')
+  const flying = useGame((s) => s.balloon?.status === 'flying')
   const openJournal = useGame((s) => s.openJournal)
   const base = useRef<HTMLDivElement>(null)
   const knob = useRef<HTMLDivElement>(null)
@@ -19,6 +32,10 @@ export function TouchControls() {
     touchStick.active = false
     touchStick.x = 0
     touchStick.y = 0
+    touchCrouch.on = false
+    firePointer.held = false
+    dropHeld.water = false
+    dropHeld.confetti = false
   }, [])
 
   if (!coarse || (mode !== 'explore' && mode !== 'dialogue')) return null
@@ -67,28 +84,157 @@ export function TouchControls() {
       </div>
 
       <div className="touch__buttons">
-        {mode === 'explore' && (
+        {mode === 'explore' && !fighting && !riding && !flying && (
+          <>
+            <button
+              className="round-button round-button--small"
+              onPointerDown={(e) => {
+                e.preventDefault()
+                sfx.confirm()
+                openJournal()
+              }}
+            >
+              J
+            </button>
+            <button
+              className="round-button round-button--jump"
+              onPointerDown={(e) => {
+                e.preventDefault()
+                queueJump()
+              }}
+              aria-label="Jump"
+            >
+              ⤒
+            </button>
+          </>
+        )}
+
+        {flying ? (
+          <>
+            {/* The burner is the only altitude control on a touch screen —
+                let go of it and the balloon sinks back down on its own. */}
+            <button
+              className="round-button round-button--burn"
+              onPointerDown={(e) => {
+                e.preventDefault()
+                setKey('ShiftLeft', true)
+              }}
+              onPointerUp={() => setKey('ShiftLeft', false)}
+              onPointerCancel={() => setKey('ShiftLeft', false)}
+              onPointerLeave={() => setKey('ShiftLeft', false)}
+              aria-label="Burner"
+            >
+              BURN
+            </button>
+            <button
+              className="round-button round-button--water"
+              onPointerDown={(e) => {
+                e.preventDefault()
+                dropHeld.water = true
+                queueDrop('water')
+              }}
+              onPointerUp={() => {
+                dropHeld.water = false
+              }}
+              onPointerCancel={() => {
+                dropHeld.water = false
+              }}
+              onPointerLeave={() => {
+                dropHeld.water = false
+              }}
+              aria-label="Drop a water bomb"
+            >
+              💧
+            </button>
+            <button
+              className="round-button round-button--confetti"
+              onPointerDown={(e) => {
+                e.preventDefault()
+                dropHeld.confetti = true
+                queueDrop('confetti')
+              }}
+              onPointerUp={() => {
+                dropHeld.confetti = false
+              }}
+              onPointerCancel={() => {
+                dropHeld.confetti = false
+              }}
+              onPointerLeave={() => {
+                dropHeld.confetti = false
+              }}
+              aria-label="Throw confetti"
+            >
+              🎉
+            </button>
+          </>
+        ) : riding ? (
           <button
-            className="round-button round-button--small"
+            className="round-button round-button--wheelie"
             onPointerDown={(e) => {
               e.preventDefault()
-              sfx.confirm()
-              openJournal()
+              setKey('Space', true)
+            }}
+            onPointerUp={() => setKey('Space', false)}
+            onPointerCancel={() => setKey('Space', false)}
+            onPointerLeave={() => setKey('Space', false)}
+            aria-label="Wheelie"
+          >
+            WHEELIE
+          </button>
+        ) : fighting ? (
+          <>
+            <button
+              className="round-button round-button--duck"
+              onPointerDown={(e) => {
+                e.preventDefault()
+                touchCrouch.on = true
+              }}
+              onPointerUp={() => {
+                touchCrouch.on = false
+              }}
+              onPointerCancel={() => {
+                touchCrouch.on = false
+              }}
+              onPointerLeave={() => {
+                touchCrouch.on = false
+              }}
+              aria-label="Get down"
+            >
+              DUCK
+            </button>
+            <button
+              className="round-button round-button--fire"
+              onPointerDown={(e) => {
+                e.preventDefault()
+                firePointer.held = true
+                queueFire()
+              }}
+              onPointerUp={() => {
+                firePointer.held = false
+              }}
+              onPointerCancel={() => {
+                firePointer.held = false
+              }}
+              onPointerLeave={() => {
+                firePointer.held = false
+              }}
+              aria-label="Shoot paint"
+            >
+              FIRE
+            </button>
+          </>
+        ) : (
+          <button
+            className="round-button"
+            onPointerDown={(e) => {
+              e.preventDefault()
+              if (mode === 'dialogue') dialogueBridge.advance()
+              else queueInteract()
             }}
           >
-            J
+            A
           </button>
         )}
-        <button
-          className="round-button"
-          onPointerDown={(e) => {
-            e.preventDefault()
-            if (mode === 'dialogue') dialogueBridge.advance()
-            else queueInteract()
-          }}
-        >
-          A
-        </button>
       </div>
     </div>
   )

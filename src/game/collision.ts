@@ -1,14 +1,18 @@
 import type { Collider } from './terrain'
-import { ISLAND_WALK_RADIUS } from '../data/world'
+
+export type Bounds =
+  | { kind: 'circle'; radius: number }
+  | { kind: 'rect'; hx: number; hz: number }
 
 /**
  * Pushes a circle of `radius` out of every collider it overlaps and keeps it
- * on the island. Mutates and returns the given tuple.
+ * inside `bounds`. Mutates and returns the given tuple.
  */
 export function resolveCollisions(
   out: [number, number],
   radius: number,
   colliders: Collider[],
+  bounds: Bounds,
 ): [number, number] {
   for (const c of colliders) {
     const dx = out[0] - c.x
@@ -40,10 +44,15 @@ export function resolveCollisions(
     }
   }
 
-  const r = Math.hypot(out[0], out[1])
-  if (r > ISLAND_WALK_RADIUS) {
-    out[0] = (out[0] / r) * ISLAND_WALK_RADIUS
-    out[1] = (out[1] / r) * ISLAND_WALK_RADIUS
+  if (bounds.kind === 'circle') {
+    const r = Math.hypot(out[0], out[1])
+    if (r > bounds.radius) {
+      out[0] = (out[0] / r) * bounds.radius
+      out[1] = (out[1] / r) * bounds.radius
+    }
+  } else {
+    out[0] = Math.min(bounds.hx, Math.max(-bounds.hx, out[0]))
+    out[1] = Math.min(bounds.hz, Math.max(-bounds.hz, out[1]))
   }
   return out
 }

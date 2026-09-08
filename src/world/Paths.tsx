@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { PATHS } from '../data/world'
+import { PATHS, PLAZA_RADIUS } from '../data/world'
 import { PATH_WIDTH } from '../game/terrain'
 
 const PATH_COLOR = '#dcc394'
@@ -37,12 +37,12 @@ export function Paths() {
     <group>
       {/* Plaza */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.015, 0]} receiveShadow>
-        <circleGeometry args={[8.5, 48]} />
-        <meshStandardMaterial color={PLAZA_COLOR} roughness={1} />
+        <circleGeometry args={[PLAZA_RADIUS, 64]} />
+        <meshStandardMaterial color={PLAZA_COLOR} roughness={1} polygonOffset polygonOffsetFactor={-1} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-        <ringGeometry args={[7.8, 8.5, 48]} />
-        <meshStandardMaterial color="#c2a878" roughness={1} />
+        <ringGeometry args={[PLAZA_RADIUS - 1.1, PLAZA_RADIUS, 64]} />
+        <meshStandardMaterial color="#c2a878" roughness={1} polygonOffset polygonOffsetFactor={-2} />
       </mesh>
 
       {segments.map((s, i) => (
@@ -53,7 +53,7 @@ export function Paths() {
           receiveShadow
         >
           <planeGeometry args={[PATH_WIDTH, s.length]} />
-          <meshStandardMaterial color={PATH_COLOR} roughness={1} />
+          <meshStandardMaterial color={PATH_COLOR} roughness={1} polygonOffset polygonOffsetFactor={-1} />
         </mesh>
       ))}
 
@@ -65,7 +65,7 @@ export function Paths() {
           position={[p[0], 0.011, p[1]]}
         >
           <circleGeometry args={[PATH_WIDTH / 2, 16]} />
-          <meshStandardMaterial color={PATH_COLOR} roughness={1} />
+          <meshStandardMaterial color={PATH_COLOR} roughness={1} polygonOffset polygonOffsetFactor={-1} />
         </mesh>
       ))}
     </group>

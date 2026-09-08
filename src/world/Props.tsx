@@ -1,8 +1,8 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import type { Group, Mesh } from 'three'
-import { FOUNTAIN, PATHS, SIGNS } from '../data/world'
-import { terrainHeight } from '../game/terrain'
+import { FOUNTAIN, PATHS, PLAZA_RADIUS, SIGNS } from '../data/world'
+import { groundHeight } from '../game/terrain'
 import { useGame } from '../state/store'
 import { TextPlane } from './TextSign'
 
@@ -13,6 +13,7 @@ export function Props() {
       <CompassRose />
       <Lamps />
       <Benches />
+      <Planters />
       <Signposts />
       <ChessCorner />
       <VolunteerTent />
@@ -32,30 +33,28 @@ function Fountain() {
 
   useFrame((state) => {
     const t = state.clock.elapsedTime
-    if (water.current) {
-      water.current.position.y = 0.92 + Math.sin(t * 1.6) * 0.02
-    }
+    if (water.current) water.current.position.y = 1.24 + Math.sin(t * 1.6) * 0.03
     if (jets.current) {
       jets.current.children.forEach((drop, i) => {
         const phase = (t * 0.9 + i * 0.17) % 1
-        drop.position.y = 2.4 + phase * 1.5 - phase * phase * 2.6
-        drop.scale.setScalar(0.9 - phase * 0.5)
+        drop.position.y = 3.3 + phase * 2 - phase * phase * 3.4
+        drop.scale.setScalar(1.1 - phase * 0.6)
       })
     }
   })
 
   return (
     <group position={[FOUNTAIN[0], 0, FOUNTAIN[1]]}>
-      <mesh position={[0, 0.35, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[2.3, 2.5, 0.7, 20]} />
+      <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[3.1, 3.4, 0.9, 22]} />
         <meshStandardMaterial color="#dcd3bd" flatShading roughness={1} />
       </mesh>
-      <mesh position={[0, 0.75, 0]}>
-        <torusGeometry args={[2.3, 0.16, 8, 24]} />
+      <mesh position={[0, 1, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[3.1, 0.2, 8, 26]} />
         <meshStandardMaterial color="#c7bda4" flatShading roughness={1} />
       </mesh>
-      <mesh ref={water} position={[0, 0.92, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[2.15, 24]} />
+      <mesh ref={water} position={[0, 1.24, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[2.95, 26]} />
         <meshStandardMaterial
           color="#59c6e0"
           transparent
@@ -64,20 +63,20 @@ function Fountain() {
           metalness={0.15}
         />
       </mesh>
-      <mesh position={[0, 1.6, 0]} castShadow>
-        <cylinderGeometry args={[0.3, 0.45, 1.5, 10]} />
+      <mesh position={[0, 2.2, 0]} castShadow>
+        <cylinderGeometry args={[0.42, 0.62, 2.1, 10]} />
         <meshStandardMaterial color="#dcd3bd" flatShading roughness={1} />
       </mesh>
-      <mesh position={[0, 2.35, 0]} castShadow>
-        <cylinderGeometry args={[1, 0.35, 0.35, 14]} />
+      <mesh position={[0, 3.25, 0]} castShadow>
+        <cylinderGeometry args={[1.4, 0.5, 0.45, 16]} />
         <meshStandardMaterial color="#dcd3bd" flatShading roughness={1} />
       </mesh>
       <group ref={jets}>
-        {Array.from({ length: 8 }, (_, i) => {
-          const a = (i / 8) * Math.PI * 2
+        {Array.from({ length: 10 }, (_, i) => {
+          const a = (i / 10) * Math.PI * 2
           return (
-            <mesh key={i} position={[Math.cos(a) * 0.8, 2.4, Math.sin(a) * 0.8]}>
-              <sphereGeometry args={[0.13, 6, 5]} />
+            <mesh key={i} position={[Math.cos(a) * 1.1, 3.3, Math.sin(a) * 1.1]}>
+              <sphereGeometry args={[0.17, 6, 5]} />
               <meshStandardMaterial
                 color="#9fe4f5"
                 transparent
@@ -92,27 +91,27 @@ function Fountain() {
   )
 }
 
-/** Mosaic in the middle of the square, pointing at the four districts. */
+/** Mosaic in the middle of the square, pointing at the districts. */
 function CompassRose() {
   return (
     <group position={[0, 0.03, 0]}>
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[2.1, 2.45, 40]} />
-        <meshStandardMaterial color="#c2a878" roughness={1} />
+        <ringGeometry args={[4.4, 5, 48]} />
+        <meshStandardMaterial color="#c2a878" roughness={1} polygonOffset polygonOffsetFactor={-2} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[0.42, 20]} />
-        <meshStandardMaterial color="#c2a878" roughness={1} />
+        <circleGeometry args={[0.9, 20]} />
+        <meshStandardMaterial color="#c2a878" roughness={1} polygonOffset polygonOffsetFactor={-2} />
       </mesh>
       {[0, 1, 2, 3].map((i) => (
         <group key={i} rotation={[0, (i * Math.PI) / 2, 0]}>
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.001, 1.3]}>
-            <planeGeometry args={[0.5, 1.5]} />
-            <meshStandardMaterial color="#b39a6a" roughness={1} />
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.001, 2.7]}>
+            <planeGeometry args={[1, 3.2]} />
+            <meshStandardMaterial color="#b39a6a" roughness={1} polygonOffset polygonOffsetFactor={-3} />
           </mesh>
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.001, 2.15]}>
-            <circleGeometry args={[0.3, 3]} />
-            <meshStandardMaterial color="#9c8354" roughness={1} />
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.001, 4.5]}>
+            <circleGeometry args={[0.62, 3]} />
+            <meshStandardMaterial color="#9c8354" roughness={1} polygonOffset polygonOffsetFactor={-4} />
           </mesh>
         </group>
       ))}
@@ -122,26 +121,28 @@ function CompassRose() {
 
 function Benches() {
   const spots: [number, number, number][] = [
-    [8.2, 1.6, -Math.PI * 0.72],
-    [-6.4, -4.2, Math.PI * 0.42],
-    [1.8, -6.9, -Math.PI * 0.08],
-    [14.8, 5.4, -Math.PI * 0.7],
+    [14, -3, -Math.PI * 0.72],
+    [-13.5, -8, Math.PI * 0.42],
+    [3, -15.5, -Math.PI * 0.08],
+    [-8, 14.5, Math.PI * 0.98],
+    [15.5, 8, -Math.PI * 0.4],
+    [30, 18, -Math.PI * 0.7],
   ]
   return (
     <group>
       {spots.map(([x, z, rot], i) => (
-        <group key={i} position={[x, terrainHeight(x, z), z]} rotation={[0, rot, 0]}>
+        <group key={i} position={[x, groundHeight(x, z), z]} rotation={[0, rot, 0]}>
           <mesh position={[0, 0.52, 0]} castShadow>
-            <boxGeometry args={[2.2, 0.14, 0.7]} />
+            <boxGeometry args={[2.4, 0.14, 0.75]} />
             <meshStandardMaterial color="#a97c4e" flatShading roughness={1} />
           </mesh>
-          <mesh position={[0, 0.95, -0.32]} rotation={[-0.2, 0, 0]} castShadow>
-            <boxGeometry args={[2.2, 0.6, 0.12]} />
+          <mesh position={[0, 0.95, -0.34]} rotation={[-0.2, 0, 0]} castShadow>
+            <boxGeometry args={[2.4, 0.6, 0.12]} />
             <meshStandardMaterial color="#a97c4e" flatShading roughness={1} />
           </mesh>
-          {[-0.9, 0.9].map((lx) => (
+          {[-1, 1].map((lx) => (
             <mesh key={lx} position={[lx, 0.25, 0]}>
-              <boxGeometry args={[0.14, 0.5, 0.62]} />
+              <boxGeometry args={[0.14, 0.5, 0.66]} />
               <meshStandardMaterial color="#6f7377" flatShading roughness={0.9} />
             </mesh>
           ))}
@@ -151,9 +152,53 @@ function Benches() {
   )
 }
 
+/** Stone planters that keep the big square from reading as empty. */
+function Planters() {
+  const spots: [number, number][] = [
+    [-15, 4],
+    [10, 15],
+    [-6, -15],
+    [16.5, -14],
+  ]
+  return (
+    <group>
+      {spots.map(([x, z], i) => (
+        <group key={i} position={[x, groundHeight(x, z), z]}>
+          <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[1.5, 1.7, 0.9, 10]} />
+            <meshStandardMaterial color="#d8cdb4" flatShading roughness={1} />
+          </mesh>
+          <mesh position={[0, 0.98, 0]}>
+            <cylinderGeometry args={[1.4, 1.4, 0.2, 10]} />
+            <meshStandardMaterial color="#6b4a30" roughness={1} />
+          </mesh>
+          {[0, 1, 2, 3].map((j) => {
+            const a = (j / 4) * Math.PI * 2 + i
+            return (
+              <mesh
+                key={j}
+                position={[Math.cos(a) * 0.6, 1.5, Math.sin(a) * 0.6]}
+                castShadow
+              >
+                <icosahedronGeometry args={[0.7, 0]} />
+                <meshStandardMaterial
+                  color={j % 2 ? '#4f9c3f' : '#63ad46'}
+                  flatShading
+                  roughness={1}
+                />
+              </mesh>
+            )
+          })}
+        </group>
+      ))}
+    </group>
+  )
+}
+
 /* ------------------------------- lamps ---------------------------- */
 
 function Lamps() {
+  const night = useGame((s) => s.night)
   const positions = useMemo(() => {
     const out: [number, number][] = []
     for (const [a, b] of PATHS) {
@@ -162,15 +207,17 @@ function Lamps() {
       const length = Math.hypot(dx, dz)
       const nx = -dz / length
       const nz = dx / length
-      const step = 10
-      for (let d = step; d < length - 2; d += step) {
+      const step = 17
+      for (let d = step; d < length - 4; d += step) {
         const t = d / length
         const side = out.length % 2 === 0 ? 1 : -1
-        out.push([
-          a[0] + dx * t + nx * side * 2.6,
-          a[1] + dz * t + nz * side * 2.6,
-        ])
+        out.push([a[0] + dx * t + nx * side * 4, a[1] + dz * t + nz * side * 4])
       }
+    }
+    // A ring of lamps around the square itself.
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2 + 0.4
+      out.push([Math.cos(a) * (PLAZA_RADIUS - 2), Math.sin(a) * (PLAZA_RADIUS - 2)])
     }
     return out
   }, [])
@@ -178,26 +225,53 @@ function Lamps() {
   return (
     <group>
       {positions.map(([x, z], i) => (
-        <group key={i} position={[x, terrainHeight(x, z), z]}>
+        <group key={i} position={[x, groundHeight(x, z), z]}>
           <mesh position={[0, 0.15, 0]}>
-            <cylinderGeometry args={[0.28, 0.34, 0.3, 8]} />
+            <cylinderGeometry args={[0.3, 0.36, 0.3, 8]} />
             <meshStandardMaterial color="#4a5057" flatShading roughness={0.9} />
           </mesh>
-          <mesh position={[0, 1.8, 0]} castShadow>
-            <cylinderGeometry args={[0.08, 0.11, 3.4, 8]} />
+          <mesh position={[0, 2, 0]} castShadow>
+            <cylinderGeometry args={[0.09, 0.12, 3.8, 8]} />
             <meshStandardMaterial color="#4a5057" flatShading roughness={0.9} />
           </mesh>
-          <mesh position={[0, 3.6, 0]}>
-            <icosahedronGeometry args={[0.32, 0]} />
+          <mesh position={[0, 4, 0]}>
+            <icosahedronGeometry args={[0.36, 0]} />
             <meshStandardMaterial
               color="#fff3c4"
               emissive="#ffd166"
-              emissiveIntensity={0.9}
+              emissiveIntensity={night ? 2.6 : 0.9}
               flatShading
             />
           </mesh>
-          <mesh position={[0, 3.92, 0]}>
-            <coneGeometry args={[0.38, 0.28, 8]} />
+          {night && (
+            <>
+              {/* Glow around the bulb, and the pool it throws on the road.
+                  Both are flat meshes: a light per lamp would be dozens. */}
+              <mesh position={[0, 4, 0]}>
+                <sphereGeometry args={[0.95, 12, 10]} />
+                <meshBasicMaterial
+                  color="#ffd9a0"
+                  transparent
+                  opacity={0.2}
+                  depthWrite={false}
+                />
+              </mesh>
+              <mesh
+                position={[0, 0.06, 0]}
+                rotation={[-Math.PI / 2, 0, 0]}
+              >
+                <circleGeometry args={[3.6, 18]} />
+                <meshBasicMaterial
+                  color="#ffc978"
+                  transparent
+                  opacity={0.13}
+                  depthWrite={false}
+                />
+              </mesh>
+            </>
+          )}
+          <mesh position={[0, 4.36, 0]}>
+            <coneGeometry args={[0.42, 0.3, 8]} />
             <meshStandardMaterial color="#3c4148" flatShading roughness={0.9} />
           </mesh>
         </group>
@@ -212,7 +286,13 @@ function Signposts() {
   return (
     <group>
       {SIGNS.map((sign) => (
-        <SignpostMesh key={sign.id} id={sign.id} label={sign.label} pos={sign.position} facing={sign.facing} />
+        <SignpostMesh
+          key={sign.id}
+          id={sign.id}
+          label={sign.label}
+          pos={sign.position}
+          facing={sign.facing}
+        />
       ))}
     </group>
   )
@@ -242,7 +322,7 @@ function SignpostMesh({
 
   const [x, z] = pos
   return (
-    <group position={[x, terrainHeight(x, z), z]} rotation={[0, facing, 0]}>
+    <group position={[x, groundHeight(x, z), z]} rotation={[0, facing, 0]} scale={1.4}>
       <mesh position={[0, 0.85, 0]} castShadow>
         <boxGeometry args={[0.16, 1.7, 0.16]} />
         <meshStandardMaterial color="#8a6642" flatShading roughness={1} />
@@ -272,10 +352,10 @@ function SignpostMesh({
 /* ------------------------- scenery vignettes ---------------------- */
 
 function ChessCorner() {
-  const x = 12.6
-  const z = 8.4
+  const x = 29.5
+  const z = 18.5
   return (
-    <group position={[x, terrainHeight(x, z), z]} rotation={[0, -0.6, 0]}>
+    <group position={[x, groundHeight(x, z), z]} rotation={[0, -0.6, 0]}>
       <mesh position={[0, 0.4, 0]} castShadow>
         <cylinderGeometry args={[0.15, 0.18, 0.8, 8]} />
         <meshStandardMaterial color="#7a6a55" flatShading roughness={1} />
@@ -316,10 +396,10 @@ function ChessCorner() {
 }
 
 function VolunteerTent() {
-  const x = -11
-  const z = 9.6
+  const x = -27
+  const z = 23.5
   return (
-    <group position={[x, terrainHeight(x, z), z]} rotation={[0, 0.4, 0]}>
+    <group position={[x, groundHeight(x, z), z]} rotation={[0, 0.4, 0]} scale={1.3}>
       <mesh position={[0, 2.5, 0]} castShadow>
         <boxGeometry args={[4.6, 0.16, 4]} />
         <meshStandardMaterial color="#e05a6f" flatShading roughness={0.9} />
@@ -343,7 +423,6 @@ function VolunteerTent() {
         <boxGeometry args={[3.4, 0.12, 1.1]} />
         <meshStandardMaterial color="#c39a63" flatShading roughness={1} />
       </mesh>
-      {/* Red cross box for the blood drive */}
       <group position={[0, 1.25, -1.5]}>
         <mesh castShadow>
           <boxGeometry args={[0.7, 0.5, 0.5]} />
@@ -364,28 +443,24 @@ function VolunteerTent() {
 
 function Dock() {
   const DECK_Y = -0.55
-  const Z = 7
-  const planks = Array.from({ length: 9 }, (_, i) => -39 - i * 1.35)
+  const Z = 20
+  const planks = Array.from({ length: 10 }, (_, i) => -116 - i * 2)
 
   return (
     <group>
       {planks.map((x, i) => (
         <group key={i}>
           <mesh position={[x, DECK_Y, Z]} castShadow receiveShadow>
-            <boxGeometry args={[1.25, 0.16, 3.2]} />
+            <boxGeometry args={[1.9, 0.2, 4.4]} />
             <meshStandardMaterial color="#b08a5c" flatShading roughness={1} />
           </mesh>
           {i % 3 === 0 &&
-            [-1.45, 1.45].map((dz) => {
-              const ground = terrainHeight(x, Z + dz)
-              const height = DECK_Y - ground + 0.5
+            [-2, 2].map((dz) => {
+              const ground = groundHeight(x, Z + dz)
+              const height = DECK_Y - ground + 0.6
               return (
-                <mesh
-                  key={dz}
-                  position={[x, DECK_Y - height / 2, Z + dz]}
-                  castShadow
-                >
-                  <cylinderGeometry args={[0.13, 0.13, height, 6]} />
+                <mesh key={dz} position={[x, DECK_Y - height / 2, Z + dz]} castShadow>
+                  <cylinderGeometry args={[0.16, 0.16, height, 6]} />
                   <meshStandardMaterial color="#7d6242" flatShading roughness={1} />
                 </mesh>
               )
@@ -394,13 +469,13 @@ function Dock() {
       ))}
 
       {/* Moored rowing boat at the far end */}
-      <group position={[-51.4, -1.05, Z + 2.4]} rotation={[0, 0.25, 0]}>
+      <group position={[-137, -1.05, Z + 3.4]} rotation={[0, 0.25, 0]}>
         <mesh castShadow>
-          <capsuleGeometry args={[0.62, 2.5, 4, 8]} />
+          <capsuleGeometry args={[0.8, 3.2, 4, 8]} />
           <meshStandardMaterial color="#e6eaed" flatShading roughness={0.9} />
         </mesh>
-        <mesh position={[0, 0.38, 0]}>
-          <boxGeometry args={[0.95, 0.3, 2.7]} />
+        <mesh position={[0, 0.45, 0]}>
+          <boxGeometry args={[1.2, 0.36, 3.4]} />
           <meshStandardMaterial color="#3f6f8c" flatShading roughness={0.9} />
         </mesh>
       </group>
@@ -411,36 +486,40 @@ function Dock() {
 function HouseFence() {
   const segments = useMemo(() => {
     const out: { x: number; z: number; rot: number }[] = []
-    const cx = -20
-    const cz = 18
-    const hw = 7.5
-    const hd = 7
-    for (let x = -hw; x <= hw; x += 1.5) {
+    const cx = -62
+    const cz = 56
+    const hw = 12
+    const hd = 11
+    for (let x = -hw; x <= hw; x += 2) {
       out.push({ x: cx + x, z: cz + hd, rot: 0 })
       out.push({ x: cx + x, z: cz - hd, rot: 0 })
     }
-    for (let z = -hd + 1.5; z <= hd - 1.5; z += 1.5) {
+    for (let z = -hd + 2; z <= hd - 2; z += 2) {
       out.push({ x: cx - hw, z: cz + z, rot: Math.PI / 2 })
       out.push({ x: cx + hw, z: cz + z, rot: Math.PI / 2 })
     }
     // Leave a gap for the front path.
-    return out.filter((p) => !(Math.abs(p.x - cx) < 1.6 && p.z < cz))
+    return out.filter((p) => !(Math.abs(p.x - cx) < 2.6 && p.z < cz))
   }, [])
 
   return (
     <group>
       {segments.map((p, i) => (
-        <group key={i} position={[p.x, terrainHeight(p.x, p.z), p.z]} rotation={[0, p.rot, 0]}>
-          <mesh position={[0, 0.55, 0]} castShadow>
-            <boxGeometry args={[0.12, 1.1, 0.12]} />
+        <group
+          key={i}
+          position={[p.x, groundHeight(p.x, p.z), p.z]}
+          rotation={[0, p.rot, 0]}
+        >
+          <mesh position={[0, 0.6, 0]} castShadow>
+            <boxGeometry args={[0.14, 1.2, 0.14]} />
             <meshStandardMaterial color="#e8e2d2" flatShading roughness={1} />
           </mesh>
-          <mesh position={[0.75, 0.75, 0]}>
-            <boxGeometry args={[1.5, 0.12, 0.06]} />
+          <mesh position={[1, 0.82, 0]}>
+            <boxGeometry args={[2, 0.13, 0.07]} />
             <meshStandardMaterial color="#e8e2d2" flatShading roughness={1} />
           </mesh>
-          <mesh position={[0.75, 0.4, 0]}>
-            <boxGeometry args={[1.5, 0.12, 0.06]} />
+          <mesh position={[1, 0.44, 0]}>
+            <boxGeometry args={[2, 0.13, 0.07]} />
             <meshStandardMaterial color="#e8e2d2" flatShading roughness={1} />
           </mesh>
         </group>
@@ -455,21 +534,21 @@ function Clouds() {
   const group = useRef<Group>(null)
   const clouds = useMemo(
     () =>
-      Array.from({ length: 9 }, (_, i) => {
-        const a = (i / 9) * Math.PI * 2 + 0.4
-        const r = 42 + (i % 3) * 12
+      Array.from({ length: 16 }, (_, i) => {
+        const a = (i / 16) * Math.PI * 2 + 0.4
+        const r = 110 + (i % 4) * 26
         return {
           x: Math.cos(a) * r,
-          y: 26 + (i % 4) * 4,
+          y: 52 + (i % 5) * 9,
           z: Math.sin(a) * r,
-          scale: 2.4 + (i % 3) * 0.9,
+          scale: 5 + (i % 3) * 2.4,
         }
       }),
     [],
   )
 
   useFrame((_, delta) => {
-    if (group.current) group.current.rotation.y += delta * 0.006
+    if (group.current) group.current.rotation.y += delta * 0.004
   })
 
   return (
@@ -498,9 +577,9 @@ function Birds() {
   useFrame((state) => {
     if (!flock.current) return
     const t = state.clock.elapsedTime
-    flock.current.rotation.y = t * 0.07
+    flock.current.rotation.y = t * 0.05
     flock.current.children.forEach((bird, i) => {
-      bird.position.y = 17 + Math.sin(t * 0.8 + i) * 1.6
+      bird.position.y = 34 + Math.sin(t * 0.8 + i) * 3
       bird.children.forEach((wing, w) => {
         wing.rotation.z = (w === 0 ? 1 : -1) * (0.3 + Math.sin(t * 7 + i) * 0.45)
       })
@@ -509,11 +588,16 @@ function Birds() {
 
   return (
     <group ref={flock}>
-      {Array.from({ length: 5 }, (_, i) => {
-        const a = (i / 5) * Math.PI * 2
-        const r = 26 + i * 2.5
+      {Array.from({ length: 7 }, (_, i) => {
+        const a = (i / 7) * Math.PI * 2
+        const r = 62 + i * 6
         return (
-          <group key={i} position={[Math.cos(a) * r, 18, Math.sin(a) * r]} rotation={[0, -a, 0]}>
+          <group
+            key={i}
+            position={[Math.cos(a) * r, 34, Math.sin(a) * r]}
+            rotation={[0, -a, 0]}
+            scale={2}
+          >
             {[0, 1].map((w) => (
               <mesh key={w} position={[w === 0 ? -0.4 : 0.4, 0, 0]}>
                 <boxGeometry args={[0.9, 0.06, 0.24]} />

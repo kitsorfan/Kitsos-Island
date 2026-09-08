@@ -1,40 +1,291 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Billboard } from '@react-three/drei'
 import type { Group } from 'three'
 import { NPCS } from '../data/world'
-import { terrainHeight } from '../game/terrain'
+import { ACTOR_POS } from '../game/actors'
+import { groundHeight } from '../game/terrain'
+import { ARENA, PAINT } from '../game/paintball'
+import { REACTIONS } from '../game/balloon'
+import { PARTY, danceSpot } from '../game/party'
+import { CHALLENGE_EARSHOT, GUARD } from '../game/guard'
+import { resolveCollisions } from '../game/collision'
+import { ISLAND_WALK_RADIUS } from '../data/world'
+import { STATIC_COLLIDERS } from '../game/terrain'
 import { useGame } from '../state/store'
-import { Character } from './Character'
+import { Character, type CharacterMotion } from './Character'
 import { PLAYER_POS } from './Player'
 import type { Npc } from '../types'
 
-export function Npcs() {
+/** How close you have to be before someone stops walking to greet you. */
+const GREET_RANGE = 6
+
+/** How fast an islander gets away from a water bomb that has just landed. */
+const BOLT_SPEED = 7.4
+
+export function Npcs({ area }: { area: string }) {
+  const night = useGame((s) => s.night)
+  // The night shift is only out there once the lamps are on.
+  const here = NPCS.filter(
+    (n) => n.area === area && (!n.shift || n.shift === (night ? 'night' : 'day')),
+  )
   return (
     <group>
-      {NPCS.map((npc, i) => (
-        <NpcActor key={npc.id} npc={npc} seed={i * 1.7} />
+      {here.map((npc, i) => (
+        <NpcActor
+          key={npc.id}
+          npc={npc}
+          seed={i * 1.7}
+          index={i}
+          indoors={area !== 'island'}
+        />
       ))}
     </group>
   )
 }
 
-function NpcActor({ npc, seed }: { npc: Npc; seed: number }) {
+function NpcActor({
+  npc,
+  seed,
+  index,
+  indoors,
+}: {
+  npc: Npc
+  seed: number
+  /** Their place in the crowd, which decides where they dance. */
+  index: number
+  indoors: boolean
+}) {
   const group = useRef<Group>(null)
   const marker = useRef<Group>(null)
+  const motion = useRef<CharacterMotion>({ moving: false, speed: 0 })
+  const at = useRef<[number, number]>([...npc.position])
+  const leg = useRef(0)
+  /** Eased fall, for someone who has just been painted out. */
+  const fall = useRef(0)
+  const body = useRef<Group>(null)
   const met = useGame((s) => Boolean(s.visited[npc.id]))
-  const [x, z] = npc.position
-  const y = terrainHeight(x, z)
 
-  useFrame((state, delta) => {
+  // Both of these are primitives, so a mid-match ammo change costs nothing.
+  const team = useGame((s) =>
+    s.paintball && s.paintball.status !== 'briefing'
+      ? s.paintball.friends.includes(npc.id)
+        ? 'friend'
+        : 'enemy'
+      : null,
+  )
+  const painted = useGame((s) => Boolean(s.paintball?.out[npc.id]))
+
+  useEffect(() => {
+    ACTOR_POS.set(npc.id, { x: npc.position[0], z: npc.position[1] })
+    return () => {
+      ACTOR_POS.delete(npc.id)
+    }
+  }, [npc.id, npc.position])
+
+  useFrame((state, rawDelta) => {
     if (!group.current) return
+    const delta = Math.min(rawDelta, 0.05)
 
-    // Turn to face the player once they are close enough to talk.
-    const dx = PLAYER_POS.x - x
-    const dz = PLAYER_POS.z - z
-    const dist = Math.hypot(dx, dz)
-    const desired = dist < 6 ? Math.atan2(dx, dz) : npc.facing
+    // A match takes the wheel: paintball.ts owns where everyone stands.
+    const unit = ARENA.active ? ARENA.units.get(npc.id) : undefined
+    if (unit) {
+      at.current[0] = unit.x
+      at.current[1] = unit.z
+      motion.current.moving = unit.moving
+      motion.current.speed = unit.speed
 
+      const y = groundHeight(unit.x, unit.z)
+      group.current.position.set(unit.x, y, unit.z)
+      ACTOR_POS.set(npc.id, { x: unit.x, z: unit.z })
+
+      let turn = unit.facing - group.current.rotation.y
+      while (turn > Math.PI) turn -= Math.PI * 2
+      while (turn < -Math.PI) turn += Math.PI * 2
+      group.current.rotation.y += turn * Math.min(1, delta * 7)
+
+      // Whoever is out goes flat on their back until the round is over.
+      fall.current += ((unit.out ? 1 : 0) - fall.current) * Math.min(1, delta * 7)
+      if (body.current) {
+        body.current.rotation.x = -fall.current * 1.42
+        body.current.position.y = fall.current * 0.14
+      }
+      return
+    }
+
+    if (fall.current > 0.001) {
+      fall.current = Math.max(0, fall.current - delta * 4)
+      if (body.current) {
+        body.current.rotation.x = -fall.current * 1.42
+        body.current.position.y = fall.current * 0.14
+      }
+    }
+
+    // A party pulls everyone into the square: walk to your spot on the
+    // floor, then dance until the music stops. Everyone, that is, except
+    // whoever is on shift — the night watch does not leave the gate.
+    if (PARTY.active && !indoors && npc.shift !== 'night') {
+      const spot = danceSpot(index)
+      const gapX = spot.x - at.current[0]
+      const gapZ = spot.z - at.current[1]
+      const gap = Math.hypot(gapX, gapZ)
+
+      if (gap > 0.5) {
+        const step = Math.min(gap, 4.6 * delta)
+        at.current[0] += (gapX / gap) * step
+        at.current[1] += (gapZ / gap) * step
+        motion.current.moving = true
+        motion.current.speed = 4.6
+        motion.current.dance = 0
+      } else {
+        motion.current.moving = false
+        motion.current.speed = 0
+        motion.current.dance = 1
+      }
+
+      const [dxp, dzp] = at.current
+      group.current.position.set(dxp, indoors ? 0 : groundHeight(dxp, dzp), dzp)
+      ACTOR_POS.set(npc.id, { x: dxp, z: dzp })
+
+      // Face in at the middle of the floor, where everyone else is.
+      const inward = Math.atan2(-dxp, -dzp)
+      let turn = inward - group.current.rotation.y
+      while (turn > Math.PI) turn -= Math.PI * 2
+      while (turn < -Math.PI) turn += Math.PI * 2
+      group.current.rotation.y += turn * Math.min(1, delta * 4)
+      return
+    }
+    motion.current.dance = 0
+
+    // Somebody has walked up on the gate. Whoever is standing on it turns
+    // round and puts a hand out; the whistle has already gone.
+    const onWatch = npc.shift === 'night' && GUARD.left > 0
+    const challenged =
+      onWatch &&
+      Math.hypot(at.current[0] - GUARD.x, at.current[1] - GUARD.z) <
+        CHALLENGE_EARSHOT
+    motion.current.halt = challenged ? 1 : 0
+    if (challenged) {
+      motion.current.moving = false
+      motion.current.speed = 0
+      const [gx, gz] = at.current
+      group.current.position.set(gx, groundHeight(gx, gz), gz)
+      let square = Math.atan2(GUARD.x - gx, GUARD.z - gz) - group.current.rotation.y
+      while (square > Math.PI) square -= Math.PI * 2
+      while (square < -Math.PI) square += Math.PI * 2
+      group.current.rotation.y += square * Math.min(1, delta * 9)
+      return
+    }
+
+    // Something has just gone off next to them. Whatever they were doing,
+    // they are doing this instead until it wears off: away from a water
+    // bomb with both hands over the head, or cheering the confetti.
+    const shock = indoors ? undefined : REACTIONS.get(npc.id)
+    if (shock) {
+      if (shock.kind === 'fright') {
+        // They bolt, but only so far — nobody ends the flight on the far
+        // side of the island because a bomb went off by their bench.
+        const strayed = Math.hypot(
+          at.current[0] - npc.position[0],
+          at.current[1] - npc.position[1],
+        )
+        if (strayed < 11) {
+          const awayX = at.current[0] - shock.x
+          const awayZ = at.current[1] - shock.z
+          const len = Math.hypot(awayX, awayZ) || 1
+          const to: [number, number] = [
+            at.current[0] + (awayX / len) * BOLT_SPEED * delta,
+            at.current[1] + (awayZ / len) * BOLT_SPEED * delta,
+          ]
+          resolveCollisions(to, 0.5, STATIC_COLLIDERS, {
+            kind: 'circle',
+            radius: ISLAND_WALK_RADIUS - 2,
+          })
+          at.current[0] = to[0]
+          at.current[1] = to[1]
+          motion.current.moving = true
+          motion.current.speed = BOLT_SPEED
+        } else {
+          motion.current.moving = false
+          motion.current.speed = 0
+        }
+        motion.current.fright = 1
+      } else {
+        motion.current.moving = false
+        motion.current.speed = 0
+        motion.current.fright = 0
+        motion.current.dance = 1
+      }
+
+      const [sx, sz] = at.current
+      group.current.position.set(sx, groundHeight(sx, sz), sz)
+      ACTOR_POS.set(npc.id, { x: sx, z: sz })
+
+      // Running, they face the way out. Cheering, they face the balloon.
+      const facing =
+        shock.kind === 'fright'
+          ? Math.atan2(sx - shock.x, sz - shock.z)
+          : Math.atan2(PLAYER_POS.x - sx, PLAYER_POS.z - sz)
+      let spin = facing - group.current.rotation.y
+      while (spin > Math.PI) spin -= Math.PI * 2
+      while (spin < -Math.PI) spin += Math.PI * 2
+      group.current.rotation.y += spin * Math.min(1, delta * 8)
+      return
+    }
+    motion.current.fright = 0
+
+    const dx = PLAYER_POS.x - at.current[0]
+    const dz = PLAYER_POS.z - at.current[1]
+    const toPlayer = Math.hypot(dx, dz)
+    const greeting = toPlayer < GREET_RANGE
+
+    let heading: number | null = null
+
+    if (npc.route && npc.route.length > 1 && !greeting) {
+      const target = npc.route[leg.current % npc.route.length]
+      const tx = target[0] - at.current[0]
+      const tz = target[1] - at.current[1]
+      const dist = Math.hypot(tx, tz)
+
+      if (dist < 0.4) {
+        leg.current = (leg.current + 1) % npc.route.length
+      } else {
+        const pace = npc.pace ?? 1.5
+        const step = Math.min(dist, pace * delta)
+        at.current[0] += (tx / dist) * step
+        at.current[1] += (tz / dist) * step
+        heading = Math.atan2(tx / dist, tz / dist)
+        motion.current.moving = true
+        motion.current.speed = pace
+      }
+    } else {
+      // Standing at their post — or ambling back to it, if a match or a
+      // water bomb has left them somewhere they do not belong.
+      const backX = npc.position[0] - at.current[0]
+      const backZ = npc.position[1] - at.current[1]
+      const off = Math.hypot(backX, backZ)
+      if (!greeting && off > 0.5) {
+        const step = Math.min(off, 2.2 * delta)
+        at.current[0] += (backX / off) * step
+        at.current[1] += (backZ / off) * step
+        heading = Math.atan2(backX / off, backZ / off)
+        motion.current.moving = true
+        motion.current.speed = 2.2
+      } else {
+        motion.current.moving = false
+        motion.current.speed = 0
+      }
+    }
+
+    const [x, z] = at.current
+    const y = indoors ? 0 : groundHeight(x, z)
+    group.current.position.set(x, y, z)
+    ACTOR_POS.set(npc.id, { x, z })
+
+    // Face the player when close, otherwise face the way they are walking.
+    const desired = greeting
+      ? Math.atan2(dx, dz)
+      : (heading ?? npc.facing)
     let diff = desired - group.current.rotation.y
     while (diff > Math.PI) diff -= Math.PI * 2
     while (diff < -Math.PI) diff += Math.PI * 2
@@ -47,13 +298,38 @@ function NpcActor({ npc, seed }: { npc: Npc; seed: number }) {
   })
 
   return (
-    <group position={[x, y, z]} rotation={[0, npc.facing, 0]} ref={group}>
-      <Character colors={npc.colors} prop={npc.prop} seed={seed} />
+    <group
+      ref={group}
+      position={[npc.position[0], indoors ? 0 : groundHeight(...npc.position), npc.position[1]]}
+      rotation={[0, npc.facing, 0]}
+    >
+      <group ref={body}>
+        <Character
+          colors={npc.colors}
+          prop={npc.prop}
+          seed={seed}
+          motion={motion}
+          hand={npc.hand}
+          gun={Boolean(team) && !painted}
+          gunColor={team === 'friend' ? PAINT.friend : PAINT.enemy}
+          paint={painted ? (team === 'enemy' ? PAINT.player : PAINT.enemy) : undefined}
+        />
+      </group>
+      {team && !painted && (
+        <mesh position={[0, 2.62, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.3, 0.46, 14]} />
+          <meshBasicMaterial
+            color={team === 'friend' ? PAINT.friend : PAINT.enemy}
+            transparent
+            opacity={0.95}
+          />
+        </mesh>
+      )}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
         <circleGeometry args={[0.5, 14]} />
         <meshBasicMaterial color="#2a4a22" transparent opacity={0.2} />
       </mesh>
-      {!met && (
+      {!met && !team && npc.journal && (
         <Billboard>
           <group ref={marker} position={[0, 2.6, 0]} scale={1.35}>
             <mesh position={[0, 0.12, 0]}>

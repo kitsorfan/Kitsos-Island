@@ -1,9 +1,10 @@
 # Kitsos Island — a playable CV
 
 A frontend-only 3D personal site for **Christos "Kitsos" Orfanopoulos**, built as a
-Pokémon-style island you walk around. Townspeople tell you about him, the six
-buildings open up as full CV sections, and the Radio Center hands your message
-straight to your own mail client.
+Pokémon-style island you walk around. Townspeople tell you about him, seven
+buildings open up and let you walk **inside**, five hidden keys unlock the Old
+Lighthouse, and the Radio Center hands your message straight to your own mail
+client.
 
 No backend, no API keys, no runtime network calls beyond the Google Fonts
 stylesheet — it deploys as static files anywhere.
@@ -33,32 +34,51 @@ npm run lint
 | Action | Keyboard | Touch |
 | --- | --- | --- |
 | Move | `W A S D` / arrows | left stick |
-| Run | `Shift` | — |
-| Interact | `E` / `Space` / `Enter` | `A` button |
+| Sprint | `Shift` | — |
+| Interact | `E` / `Enter` | `A` button |
+| Jump | `Space` | `⤒` button |
 | Turn camera | `Q` / `R` | — |
+| Map & fast travel | `M` | minimap / Map button |
 | Journal | `J` | `J` button |
-| Mute | `M` | HUD button |
-| Back | `Esc` | tap outside |
+| Contact & full CV | `C` | Say hi button |
+| Music | `B` | HUD button |
+| Sound | `N` | HUD button |
+| Back / leave a building | `Esc` | tap outside |
 
 ## The island
 
-Everything radiates from the town plaza. Each building opens a panel of real CV
-content; each of the 17 townspeople gives a few lines of dialogue and files an
-entry in the journal. Talking to everyone and entering every building fills the
-23-entry journal.
+Seven roads radiate from the town square. Each district building can be entered:
+walking through the door swaps the world for a hand-built room full of exhibits,
+people and — in five of them — a key.
 
-| Place | What it holds |
+| Place | Inside |
 | --- | --- |
-| **Kitsos House** (south-west) | Profile, languages, hobbies |
-| **NTUA Academy** (north) | MEng at NTUA, thesis, student representation, contests |
-| **Work District** (east) | Veltiston.AI, IBM Consulting, full skills matrix |
-| **Army Camp** (south-east) | Marine Special Forces reserve service |
-| **Town School** (west) | Early education, awards, volunteering and teaching |
-| **Radio Center** (south) | Email, phone, LinkedIn and a message desk |
+| **Kitsos House** (SW) | Trainer card, languages, hobbies, the workbench · 🔑 Brass Key |
+| **NTUA Academy** (N) | Degree, thesis and contests, published research, certifications, two academic references, student council · 🔑 Lecture Hall Key |
+| **Work District** (E) | Veltiston AI, the platform, IBM, full skills matrix · 🔑 Server Room Key |
+| **Army Camp** (SE) | Service record and the Battalion Commander's letter, under the Greek flag · 🔑 Footlocker Key |
+| **Town School** (W) | Early education, teaching and volunteering, the foundation's letter · 🔑 Cabinet Key |
+| **Radio Center** (S) | The transmitter — email, LinkedIn and a message desk |
+| **The Old Lighthouse** (NW cape) | Sealed with five locks. Inside: the career summary, what he is good at, what he is looking for, and a CV download |
 
-The Radio Center's message desk composes a `mailto:` link from the form and
-hands it to the visitor's mail client, with a clipboard fallback — which is what
-lets the site stay backend-free.
+### Missions and keys
+
+Five missions, one per district. Talking to the right person marks the mission
+active and sharpens the hint; searching the right piece of furniture hands over
+the key. The HUD tracks the next objective, the badge shows the keyring, and the
+map lists every mission's state. With all five keys the lighthouse door opens.
+
+Nothing a recruiter needs is ever locked away. The **Say hi** button — on the HUD
+and on the title screen, always — opens a card where Kitsos himself waves, warns
+you that you will miss all the fun, and then hands over the entire CV plus the
+message desk. The lighthouse is a reward, not a gate.
+
+### Getting around
+
+The island is about 220 units across, so the map (`M`) doubles as fast travel:
+every building you have walked near is marked, and clicking a found place walks
+you to its door. A live minimap sits in the corner with people, roads and your
+heading on it.
 
 ## Layout of the code
 
@@ -66,38 +86,82 @@ lets the site stay backend-free.
 src/
   data/
     profile.ts    all CV copy, as structured panel blocks
-    world.ts      island layout: buildings, NPCs, signposts, paths
+    world.ts      island layout: buildings, NPCs, signposts, roads, keys, missions
+    interiors.ts  one room per building: furniture, exhibits, key stands
+    cv.ts         renders the panel data into a downloadable Markdown CV
   game/
     terrain.ts    height field, colliders, prop scattering, camera occlusion
-    collision.ts  circle/AABB push-out and the island boundary
+    interior.ts   furniture footprints and room collision
+    collision.ts  circle/AABB push-out, circular and rectangular bounds
     input.ts      keyboard + virtual stick, read by the frame loop
+    actors.ts     live NPC positions, shared with the player and the map
     audio.ts      WebAudio blips and jingles (no audio files)
-  state/store.ts  zustand: mode, dialogue, panels, journal progress
-  world/          the 3D scene — terrain, water, foliage, props, characters
-    buildings/    one low-poly model per building kind
-  ui/             title screen, dialogue box, panels, journal, HUD, touch pad
+    music.ts      the soundtrack, sequenced note by note in WebAudio
+  state/store.ts  zustand: area, dialogue, panels, journal, keys, missions
+  world/          the 3D scene
+    Island.tsx      terrain, water, foliage, props, buildings
+    Interior.tsx    the room shell, exhibits and key stands
+    InteriorProps.tsx  the furniture kit, and the Greek flag
+    buildings/      one low-poly model per building kind
+  ui/             title, dialogue, panels, journal, HUD, minimap, map, touch pad
 ```
 
 Some notes on how it hangs together:
 
-- **Nothing is fetched.** Terrain, water, characters, buildings and props are all
-  procedural geometry; signage text is drawn to a canvas at runtime
+- **Nothing is fetched.** Terrain, water, characters, buildings, furniture and
+  props are all procedural geometry; signage text is drawn to a canvas at runtime
   (`world/TextSign.tsx`). The only external request is the font stylesheet.
+- **The music is composed in code**, not shipped as a file — a I–V–vi–IV loop in
+  D major with a pad, bass, arpeggio, melody and light percussion, scheduled a
+  bar and a half ahead of the audio clock. Original by construction, so there is
+  no licence to honour, and it adds nothing to the bundle. It thins out indoors
+  and opens up again in the lighthouse. `B` turns it off, `N` mutes everything.
+- **One area is mounted at a time.** `Scene.tsx` swaps the island for a room, so
+  indoor scenes light themselves and the draw call count stays low. The player
+  controller is shared and picks its colliders, bounds, ground height and camera
+  from whichever area is active.
 - **The frame loop never re-renders React.** `Player.tsx` reads input, resolves
-  collisions and drives the camera inside `useFrame`, writing to refs. The store
-  is only touched when something actually changes (a new nearby target, a new
-  journal entry).
+  collisions and drives the camera inside `useFrame`, writing to refs. Walking
+  NPCs publish their positions to `game/actors.ts` rather than to state, so a
+  strolling townsperson costs nothing.
 - **`terrainHeight()` is the single source of truth** for the ground, shared by
   the mesh generator and the player controller, so nothing floats or sinks.
-- **The camera swings, it does not clip.** `probeCamera()` finds a building
-  standing between the lens and the player and rotates the boom to the open side
-  — needed because every door faces the plaza, which puts half the buildings
-  behind you as you approach.
+- **The Academy's steps are real.** `groundHeight()` layers walkable ramps and
+  ledges over the terrain, so you climb the colonnade rather than gliding
+  through it; the door and its marker sit on the top tread.
+- **Ground decals use polygon offset**, not hair-thin Y gaps, and the camera's
+  near plane is far enough out to keep depth precision — between them that is
+  what stopped the entrance rings shimmering.
+- **The camera swings, it does not clip.** `probeCamera()` finds a building or
+  hill standing between the lens and the player and rotates the boom to the open
+  side — needed because every door faces the plaza, which puts half the buildings
+  behind you as you approach. Indoors, the wall nearest the camera hides itself.
 
 ## Editing the content
 
-All the wording lives in two files. `src/data/profile.ts` holds the panel copy
-as typed blocks (`text`, `list`, `stats`, `tags`, `timeline`, `quote`), and
-`src/data/world.ts` holds the map: where each building and person stands, what
-they say, and what they file in the journal. Adding a townsperson is one entry
-in `NPCS` — the model, marker, dialogue and journal slot follow automatically.
+All the wording lives in three files. `src/data/profile.ts` holds the copy as
+typed blocks (`text`, `list`, `stats`, `tags`, `timeline`, `quote`);
+`src/data/world.ts` holds the map — where each building and person stands, what
+they say, and which mission they hand out; `src/data/interiors.ts` furnishes each
+room and places its exhibits.
+
+Referees live in `profile.ts` as `Letter` objects, grouped into
+`REFERENCE_*_SECTIONS` so each is shown in the district it came from, with all
+four concatenated into the full CV. They render as a **Recommendations**
+accordion — collapsed until you click a name. The two Greek letters are
+translated there; referees' own contact details are deliberately left out.
+
+Scans of the originals go in `public/letters/` (see the README there for the
+filenames). Any that are absent simply do not render, so the transcripts always
+stand on their own.
+
+Institution marks work the same way. `public/marks/ntua.png`, `ibm.png` and
+`veltiston.png` are used on the Academy's foundation stone and the Work
+District's tenant board when present; without them, `src/world/Emblems.tsx`
+draws stylised stand-ins so the island always renders.
+
+Adding a townsperson is one entry in `NPCS` — the model, marker, dialogue,
+journal slot and map dot follow automatically. Adding a new exhibit to a room is
+one entry in that room's `exhibits`, pointing at a section from `profile.ts`.
+The downloadable CV is generated from the same sections, so it never drifts out
+of sync with the island.

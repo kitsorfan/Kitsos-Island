@@ -1,4 +1,4 @@
-import type { PanelSection } from '../types'
+import type { Letter, PanelSection } from '../types'
 
 export const PROFILE = {
   firstName: 'Christos',
@@ -7,7 +7,6 @@ export const PROFILE = {
   title: 'Senior Software Engineer & Technical Lead',
   location: 'Athens, Greece',
   nationality: 'Greek',
-  phone: '+30 6933225477',
   email: 'kitsorfan@protonmail.com',
   linkedin: 'https://linkedin.com/in/kitsorfan/',
   linkedinLabel: 'linkedin.com/in/kitsorfan',
@@ -19,15 +18,15 @@ export const HOUSE_SECTIONS: PanelSection[] = [
     blocks: [
       {
         type: 'text',
-        text: 'Senior Full Stack Engineer and Technical Lead based in Athens, Greece. I build cloud-native products end to end — Java and Spring Boot on the backend, React on the front, AWS underneath — and I lead the teams that ship them.',
+        text: 'Senior Software Engineer and Technical Lead based in Athens, Greece. I build cloud-native healthcare products end to end — Java and Spring Boot on the backend, React on the front, AWS underneath — and I lead the teams that ship them into hospitals.',
       },
       {
         type: 'stats',
         stats: [
           { label: 'Home', value: 'Athens, Greece' },
           { label: 'Nationality', value: 'Greek' },
-          { label: 'Field', value: 'Full stack / cloud' },
-          { label: 'Currently', value: 'Technical Lead' },
+          { label: 'Field', value: 'Full stack / cloud / health tech' },
+          { label: 'Currently', value: 'Senior Software Engineer' },
         ],
       },
     ],
@@ -39,8 +38,8 @@ export const HOUSE_SECTIONS: PanelSection[] = [
         type: 'list',
         items: [
           'Greek — native speaker',
-          'English — proficiency level',
-          'French — lower level',
+          'English — proficiency, ECPE (University of Michigan, 2016)',
+          'French — B2, DELF (2019)',
         ],
       },
     ],
@@ -73,6 +72,27 @@ export const HOUSE_SECTIONS: PanelSection[] = [
   },
 ]
 
+export const WORKSHOP_SECTIONS: PanelSection[] = [
+  {
+    heading: 'The workbench',
+    blocks: [
+      {
+        type: 'text',
+        text: 'Half the furniture in this house was built here. DIY is the same loop as engineering: measure, cut, discover the wall is not square, adapt.',
+      },
+      {
+        type: 'list',
+        items: [
+          'Running and cycling — the thinking happens somewhere around kilometre six',
+          'Hiking and camping, usually somewhere with no signal',
+          'Chess, badly but stubbornly',
+          'Theater, from the audience these days',
+        ],
+      },
+    ],
+  },
+]
+
 export const UNIVERSITY_SECTIONS: PanelSection[] = [
   {
     heading: 'Higher education',
@@ -86,7 +106,8 @@ export const UNIVERSITY_SECTIONS: PanelSection[] = [
             meta: '2017 – 2022 · GPA 8.4',
             bullets: [
               'Five-year integrated Master of Engineering in the School of Electrical and Computer Engineering.',
-              'Thesis: "Movement compliance application using machine learning" (2022).',
+              'Thesis: compliance analysis of movement exercises using machine learning, supervised by Prof. Panagiotis Tsanakas, Dean of the School — graded with distinction, and later published on arXiv.',
+              'Coursework with the Dean included Operating Systems and Software Service Technologies.',
             ],
           },
         ],
@@ -94,7 +115,231 @@ export const UNIVERSITY_SECTIONS: PanelSection[] = [
     ],
   },
   {
-    heading: 'Campus life',
+    heading: 'Seminars & workshops',
+    blocks: [
+      {
+        type: 'list',
+        items: [
+          'IBM graduate program (2024)',
+          'Agile & Enterprise Design Thinking bootcamp, Hamburg (2024)',
+          'Arduino IEEE Workshop at NTUA (2018)',
+        ],
+      },
+    ],
+  },
+]
+
+export const PUBLICATION_SECTIONS: PanelSection[] = [
+  {
+    heading: 'Published research',
+    blocks: [
+      {
+        type: 'timeline',
+        entries: [
+          {
+            title:
+              'An M-Health Algorithmic Approach to Identify and Assess Physiotherapy Exercises in Real Time',
+            org: 'arXiv, Cornell University',
+            meta: '11 December 2025',
+            bullets: [
+              'Grew out of the NTUA thesis: judging how a physiotherapy movement is actually performed against how it should be.',
+              'Reads a movement as a sequence of static poses, estimated from a phone camera by a pose-estimation neural network.',
+              'Turns body keypoints into trigonometric angle features and classifies them with lightweight supervised models, giving per-frame pose predictions and accuracy scores.',
+              'Recognises whole exercises and locates the inaccuracies using dynamic programming over a modified Levenshtein distance.',
+              'Runs entirely client-side, which is what keeps it scalable and real time.',
+            ],
+            tags: [
+              'Pose estimation',
+              'Machine learning',
+              'Dynamic programming',
+              'Levenshtein distance',
+              'm-Health',
+            ],
+          },
+        ],
+      },
+      {
+        type: 'quote',
+        text: 'Applicable to remote physiotherapy supervision — the patient’s own phone does the assessment, so nothing leaves the device.',
+      },
+    ],
+  },
+]
+
+export const THESIS_SECTIONS: PanelSection[] = [
+  {
+    heading: 'Diploma thesis, 2022',
+    blocks: [
+      {
+        type: 'text',
+        text: 'Compliance analysis of movement exercises using machine learning — a system that watches how a movement is performed and judges it against how it should be performed. Supervised by Prof. Panagiotis Tsanakas, Dean of the School of ECE, who called it "marked by scientific soundness and technological originality" and graded it with distinction. Three years later it became a published paper.',
+      },
+      {
+        type: 'list',
+        items: [
+          'Machine learning over motion data rather than hand-written rules',
+          'The engineering lesson that stuck: a model is only as good as the pipeline feeding it',
+          'First real taste of shipping something a non-engineer has to trust',
+        ],
+      },
+    ],
+  },
+  {
+    heading: 'Contests & awards',
+    blocks: [
+      {
+        type: 'list',
+        items: [
+          'National Biology Competition 2016 — ranked 2nd',
+          'Awards in Physics, Mathematics, Informatics and Literature contests',
+        ],
+      },
+    ],
+  },
+]
+
+export const CERTIFICATIONS_SECTIONS: PanelSection[] = [
+  {
+    heading: 'AI, research & engineering',
+    blocks: [
+      {
+        type: 'timeline',
+        entries: [
+          {
+            title: 'Universal AI Foundational Modules',
+            org: 'MIT Open Learning',
+            meta: 'August 2026 · Credential b8a1b1aa-1d2e-4c81-9c45-822df5f29a29',
+            bullets: [
+              'Foundations of modern AI, including artificial neural networks.',
+            ],
+            tags: ['AI', 'Artificial Neural Networks'],
+          },
+          {
+            title: 'Group 1: Biomedical Research Investigators',
+            org: 'CITI Program',
+            meta: 'May 2026 – May 2029 · Credential 76841212',
+            bullets: [
+              'Human-subjects research conduct and ethics, and HIPAA — the compliance side of building for hospitals.',
+            ],
+            tags: ['Clinical Research', 'HIPAA'],
+          },
+          {
+            title: 'Docker Essentials: A Developer Introduction',
+            org: 'IBM',
+            meta: 'May 2024',
+            tags: ['Docker'],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    heading: 'Language certificates',
+    blocks: [
+      {
+        type: 'timeline',
+        entries: [
+          {
+            title: 'ECPE — Certificate of Proficiency in English (C2)',
+            org: 'University of Michigan',
+            meta: 'May 2016',
+          },
+          {
+            title: 'ECCE — Certificate of Competency in English (B2)',
+            org: 'University of Michigan',
+            meta: 'May 2015',
+          },
+          {
+            title: 'DELF B2 — Diplôme d’études en langue française',
+            org: 'Centre international d’études pédagogiques',
+            meta: 'February 2019',
+          },
+        ],
+      },
+    ],
+  },
+]
+
+const LETTER_TSANAKAS: Letter = {
+  id: 'tsanakas',
+  from: 'Prof. Panagiotis Tsanakas',
+  role: 'Dean, School of Electrical & Computer Engineering, NTUA',
+  note: 'Thesis supervisor and course lecturer · 29 November 2023 · translated from Greek',
+  scans: ['tsanakas.jpg'],
+  paragraphs: [
+    'Christos (Kitsos) Orfanopoulos was my student in the following undergraduate courses: Operating Systems, and Software Service Technologies. He was a diligent student with a strong interest in the subjects, as his performance in the assignments and examinations of those courses shows. I also had the opportunity to supervise his diploma thesis, on "Compliance analysis of movement exercises using machine learning techniques". That thesis was marked by scientific soundness and technological originality, and was deservedly graded with distinction.',
+    'At the same time, Kitsos was active within the Polytechnic, helping younger students through their first academic steps. He contributed as an assistant in the first-year programming labs, answered their questions and shared his notes online. He also wrote a many-page "survival guide" setting down useful advice and observations for every compulsory course in the School.',
+    'It is also worth noting that he took a particular interest in confronting a chronic affliction which unfortunately prevails in the Greek university, caused by extreme minorities who created dysfunction and obstructed the normal democratic processes. He led a movement of "Independent Students" with the aim of establishing a system of electronic voting, and met considerable hostility from groups with no connection to the student community. In that context he represented his fellow students with great responsibility in the faculty assemblies, listened to the requests of all sides, and kept everyone continuously informed.',
+    'As a character he stands out for his organisation, his courage and his persistence. He is sincere, cooperative and good-humoured. Judging by his academic course, I am certain that he will excel in his professional career as an electrical and computer engineer.',
+  ],
+}
+
+const LETTER_KANDYLAKIS: Letter = {
+  id: 'kandylakis',
+  from: 'Stelios Kandylakis',
+  role: 'Senior Product Manager, Financial Data Intelligence',
+  note: 'Classmate and collaborator at ECE NTUA · November 2025',
+  scans: ['kandylakis.jpg'],
+  paragraphs: [
+    'I highly recommend Christos, with whom I collaborated on numerous university projects and coding competitions while we were both studying at ECE NTUA. He has very strong coding skills, a solution-oriented mindset, and is a person of integrity. Christos always showed strong leadership, making him a valuable asset to any team or organization.',
+  ],
+}
+
+const LETTER_MITSIDIS: Letter = {
+  id: 'mitsidis',
+  from: 'Lt Col Georgios Mitsidis',
+  role: 'Commander, 575 Marine Battalion',
+  note: 'Commanding officer during the reserve posting · Athens, 24 June 2024',
+  scans: ['mitsidis.jpg'],
+  paragraphs: [
+    'Christos V. Orfanopoulos reported to the Unit as an Officer Designate on February 11, 2023 and was released as a Special Forces Second Lieutenant on November 22, 2023 after completing his military service in the Hellenic Armed Forces. During that period, he was assigned as a Platoon Leader and Weapons Officer for a Marine Company.',
+    'While active, he demonstrated exemplary behavior to everyone, accomplished his tasks successfully without the need of supervision and participated with enthusiasm in every activity of the Unit. He was distinguished for his team spirit, his critical thinking, as well as his attention to formality and detail.',
+    'Moreover, he demonstrated interest in proposing ideas and implementing best practices for the improvement of the functions of the Unit, and took initiatives for that purpose, following the Command\u2019s guidelines.',
+    'Undoubtedly, Christos V. Orfanopoulos possesses high professional, leadership and ethical qualifications. I am proud that he has been an Officer in my Unit; he honored the green beret and his tenet, and with the utmost confidence I recommend him as a valuable and trusted partner in every occupational field he will choose.',
+  ],
+}
+
+const LETTER_OIKONOMOU: Letter = {
+  id: 'oikonomou',
+  from: 'Kyriakos Oikonomou',
+  role: 'Justice of the Hellenic Supreme Court (Areios Pagos), retired',
+  note: 'Vice-President of the Christian Youth Foundation "Pantokrator" since 2020 · Paleo Faliro, 22 November 2023 · translated from Greek',
+  scans: ['oikonomou-1.jpg', 'oikonomou-2.jpg'],
+  paragraphs: [
+    'Christos (Kitsos) Orfanopoulos has for a number of years been a volunteer at the Christian Youth Foundation "Pantokrator" of Paleo Faliro, of which I happen to be Vice-President since 2020. During 2021 and 2022 he served as Director of the Foundation, a post he filled in exemplary fashion, leaving behind him significant work and a valuable legacy for those who followed, through the steps he took towards the renovation, upgrading and modernisation of the building infrastructure and of the Foundation\u2019s operations in general.',
+    'Specifically, when a vacancy arose in the Foundation\u2019s Directorship in 2021, I turned to young Christos, then a student at the National Technical University of Athens, and proposed that he take on the Director\u2019s post \u2014 because we considered that his bearing, the traits of his character, the particular quality of his personality, his abilities and above all his warm love for the Foundation made him right for the role. Indeed, when after a year and a half he had to end his work with us, because he had completed his studies and had to fulfil his military obligations, his overall contribution had far exceeded our expectations. The field of his activities was broad, running from the maintenance and management of the premises through to the organisation of events, making the most of the volunteers, and the management of digital media.',
+    'He was highly organised, focused on his duties, hard-working and conscientious, and kept us regularly informed of everything he did. He continually took on new initiatives and always tried to address the cause of whatever problems he found in the Foundation\u2019s running. He kept good relations with the children of the Foundation, whom he had been called to educate and look after during their time on the premises. He talked with them and took an interest in their problems, and moreover guided them with useful advice, and had succeeded in being trusted and heeded by them. By character he was approachable, welcoming, friendly and particularly likeable.',
+    'Christos is distinguished by his sincerity, his discipline and his dedication to every task he undertakes to see through. He is modest, serious, dignified, and a person who inspires trust. I consider Christos Orfanopoulos to be a worthy scientist and a capable professional, and I judge that he will prove useful, effective and indispensable, bringing significant benefit to any business working environment.',
+  ],
+}
+
+const recommendations = (letters: Letter[]): PanelSection[] => [
+  {
+    heading: 'Recommendations',
+    blocks: [{ type: 'letters', letters }],
+  },
+]
+
+export const REFERENCE_ACADEMY_SECTIONS = recommendations([
+  LETTER_TSANAKAS,
+  LETTER_KANDYLAKIS,
+])
+
+export const REFERENCE_ARMY_SECTIONS = recommendations([LETTER_MITSIDIS])
+
+export const REFERENCE_FOUNDATION_SECTIONS = recommendations([LETTER_OIKONOMOU])
+
+/** All four referees, for the full CV and the download. */
+export const REFERENCES_SECTIONS = recommendations([
+  LETTER_TSANAKAS,
+  LETTER_MITSIDIS,
+  LETTER_OIKONOMOU,
+  LETTER_KANDYLAKIS,
+])
+
+export const STUDENT_LIFE_SECTIONS: PanelSection[] = [
+  {
+    heading: 'Student representation',
     blocks: [
       {
         type: 'text',
@@ -105,21 +350,21 @@ export const UNIVERSITY_SECTIONS: PanelSection[] = [
         items: [
           'Campaigned for the establishment of e-voting',
           'Pushed for the depoliticization of the university',
-          'Representation and problem-solving through realistic, lawful and democratic means',
+          'Represented fellow students in faculty assemblies — listening to all sides and reporting back continuously',
+          'Took real hostility from groups outside the student body, and kept going anyway',
         ],
       },
     ],
   },
   {
-    heading: 'Seminars, courses & contests',
+    heading: 'Teaching the year below',
     blocks: [
       {
         type: 'list',
         items: [
-          'IBM graduate program (2024)',
-          'Arduino IEEE Workshop at NTUA (2018)',
-          'National Biology Competition 2016 — ranked 2nd',
-          'Awards in Physics, Mathematics, Informatics and Literature contests',
+          'Assisted in the first-year programming laboratories',
+          'Answered younger students’ questions and published his own notes online',
+          'Wrote a many-page "survival guide" covering every compulsory course in the School',
         ],
       },
     ],
@@ -138,25 +383,26 @@ export const UNIVERSITY_SECTIONS: PanelSection[] = [
   },
 ]
 
-export const WORK_SECTIONS: PanelSection[] = [
+export const VELTISTON_SECTIONS: PanelSection[] = [
   {
-    heading: 'Experience',
+    heading: 'Veltiston AI — two and a half years',
     blocks: [
+      {
+        type: 'text',
+        text: 'Joined an AI healthcare startup founded by MIT Professor Dimitris Bertsimas as one of its first engineers, and grew into Technical Lead of the flagship Nurse Scheduling platform — concept to production, with teams across Greece, Boston and Morocco.',
+      },
       {
         type: 'timeline',
         entries: [
           {
-            title: 'Senior Full Stack Software Engineer & Technical Lead',
-            org: 'Veltiston.AI',
-            meta: 'May 2024 – today',
+            title: 'Senior Software Engineer',
+            org: 'Veltiston AI · Athens, hybrid',
+            meta: 'May 2026 – present',
             bullets: [
-              'Early engineering hire at an AI healthcare startup founded by MIT Professor Dimitris Bertsimas, progressing to Technical Lead of the flagship Nurse Scheduling platform.',
-              'Lead cross-functional engineering teams of 5–10 developers across Greece, Boston (USA) and Morocco — architecture, feature delivery, code reviews, sprint planning and technical decision-making.',
-              'Architected and built a cloud-native healthcare platform with Java, Spring Boot, React, MySQL and AWS, now deployed across four major U.S. hospitals.',
-              'Modernized a legacy Java/Angular application by introducing Agile processes, engineering standards, CI/CD improvements, documentation and incremental refactoring.',
-              'Designed and delivered secure, scalable capabilities: AI-powered documentation assistance (RAG), SMART on FHIR integration, SAML SSO, notification services, audit logging and third-party healthcare integrations.',
-              'Partner with customers, product managers and DevOps teams to deliver weekly production releases while ensuring reliability, security and HIPAA compliance.',
-              'Lead technical interviews, mentor engineers and onboard new team members.',
+              'Project lead on three projects.',
+              'Leads cross-functional teams of 5–10 developers: architecture, technical decisions, code reviews, sprint planning and customer delivery.',
+              'Mentors engineers, runs technical interviews and coordinates distributed international teams.',
+              'Works with Product, Design, QA and DevOps to deliver weekly production releases.',
             ],
             tags: [
               'Java',
@@ -166,55 +412,123 @@ export const WORK_SECTIONS: PanelSection[] = [
               'MySQL',
               'AWS',
               'Docker',
-              'Jenkins',
-              'GitLab CI',
-              'Flyway',
-              'REST APIs',
               'Microservices',
-              'SMART on FHIR',
-              'SAML',
-              'Grafana',
-              'Graylog',
-              'Sentry',
             ],
           },
           {
-            title: 'Dev(Sec)Ops Engineer — Hybrid Cloud',
-            org: 'IBM Consulting',
-            meta: '2023 – 2024',
+            title: 'Full-stack Software Engineer',
+            org: 'Veltiston AI · Athens, hybrid',
+            meta: 'May 2024 – May 2026',
             bullets: [
-              'Contributed to the cloud transformation of NBG’s core banking system through integration with Infosys Finacle.',
-              'Designed integration architecture for legacy subsystems and modern platforms.',
-              'Participated in deployment processes and automation using Jenkins, Podman, ELK and Grafana.',
-              'Represented IBM Greece in an international Agile bootcamp in Hamburg, working in a diverse, multicultural team.',
-            ],
-            tags: [
-              'Jenkins',
-              'Docker Compose',
-              'Podman',
-              'ELK Stack',
-              'Grafana',
-              'Jira',
-              'Confluence',
-            ],
-          },
-          {
-            title: 'Director of the Christian Youth Foundation "Pantokrator"',
-            meta: '2021 – 2022',
-            bullets: ['Led the foundation’s youth programme in Paleo Faliro.'],
-          },
-          {
-            title: 'Children’s tutor in Robotics',
-            org: 'Citylab, Alimos',
-            meta: '2020 – 2021',
-            bullets: [
-              'Taught robotics fundamentals to children through hands-on projects.',
+              'One of the company’s first engineers; built the flagship Nurse Scheduling platform from concept to production.',
+              'Led production deployments across four major U.S. hospitals, working directly with hospital stakeholders.',
+              'Modernized legacy applications: Agile practices, engineering standards, CI/CD pipelines, documentation, automated testing and incremental refactoring.',
             ],
           },
         ],
       },
     ],
   },
+  {
+    heading: 'Alongside it',
+    blocks: [
+      {
+        type: 'timeline',
+        entries: [
+          {
+            title: 'Lead Software Engineer',
+            org: 'Holistic Hospital Optimization · contract, remote',
+            meta: 'May 2024 – present',
+            bullets: [
+              'Software lead on AI-powered healthcare applications for U.S. hospitals.',
+              'Nurse scheduling, hospital length-of-stay optimization, SMART on FHIR integrations and enterprise healthcare platform work.',
+            ],
+            tags: ['HIPAA', 'FHIR', 'Healthcare platforms'],
+          },
+        ],
+      },
+    ],
+  },
+]
+
+export const PLATFORM_SECTIONS: PanelSection[] = [
+  {
+    heading: 'What I shipped',
+    blocks: [
+      {
+        type: 'list',
+        items: [
+          'Technical lead of the flagship Nurse Scheduling platform, live in four major U.S. hospitals.',
+          'An AI-powered documentation assistant built on Spring AI, retrieval-augmented generation and agentic AI.',
+          'A SMART on FHIR application embedded inside Epic EHR.',
+          'A Length of Stay analytics plugin delivered into Epic EHR through SMART on FHIR.',
+          'Integration with UKG workforce management systems.',
+          'SAML 2.0 single sign-on against Microsoft ADFS.',
+          'A secure notification framework and comprehensive activity audit logging.',
+          'A Jira-integrated ticketing system with Google reCAPTCHA for secure issue submission and workflow automation.',
+          'HIPAA-compliant security and data handling architecture across all of it.',
+        ],
+      },
+      {
+        type: 'quote',
+        text: 'Secure and scalable, or it does not ship.',
+      },
+    ],
+  },
+  {
+    heading: 'How it stays up',
+    blocks: [
+      {
+        type: 'tags',
+        groups: [
+          { label: 'Observability', tags: ['Grafana', 'Graylog', 'Sentry'] },
+          {
+            label: 'Delivery',
+            tags: ['Docker', 'Jenkins', 'GitLab CI', 'Flyway'],
+          },
+          { label: 'Testing', tags: ['JUnit', 'Mockito', 'JaCoCo'] },
+        ],
+      },
+    ],
+  },
+]
+
+export const IBM_SECTIONS: PanelSection[] = [
+  {
+    heading: 'Before the startup',
+    blocks: [
+      {
+        type: 'timeline',
+        entries: [
+          {
+            title: 'DevOps Engineer',
+            org: 'IBM · Athens, on-site',
+            meta: 'November 2023 – May 2024',
+            bullets: [
+              'Selected for the IBM Associate Program, training in DevOps and integration.',
+              'Worked on the Cosmos Project at the National Bank of Greece — a core banking transformation migrating legacy PL/I and COBOL systems to Infosys Finacle.',
+              'Coordinated integration calls across bank subsystems to support Finacle onboarding.',
+              'Designed integration architecture for both the transitional coexistence state and the target state.',
+              'Supported DevOps operations: ticket deployments and CI/CD pipeline automation.',
+              'Represented IBM Greece at an international Agile & Enterprise Design Thinking bootcamp in Hamburg, February 2024.',
+            ],
+            tags: [
+              'Jenkins',
+              'Podman',
+              'Docker Compose',
+              'ELK Stack',
+              'Grafana',
+              'Jira',
+              'Confluence',
+            ],
+          },
+        ],
+      },
+    ],
+  },
+]
+
+export const SKILLS_SECTIONS: PanelSection[] = [
   {
     heading: 'Skills',
     blocks: [
@@ -235,7 +549,16 @@ export const WORK_SECTIONS: PanelSection[] = [
               'Hibernate',
               'REST APIs',
               'Microservices',
+            ],
+          },
+          {
+            label: 'AI',
+            tags: [
               'Spring AI',
+              'RAG',
+              'Agentic AI',
+              'Artificial neural networks',
+              'Pose estimation',
             ],
           },
           {
@@ -249,6 +572,7 @@ export const WORK_SECTIONS: PanelSection[] = [
               'AWS (EC2, S3, SES, SNS)',
               'Docker',
               'Docker Compose',
+              'Podman',
               'Jenkins',
               'GitLab CI',
               'Bitbucket Pipelines',
@@ -266,7 +590,16 @@ export const WORK_SECTIONS: PanelSection[] = [
           },
           {
             label: 'Healthcare & security',
-            tags: ['SMART on FHIR', 'SAML SSO', 'JWT', 'HIPAA'],
+            tags: [
+              'SMART on FHIR',
+              'Epic EHR',
+              'UKG',
+              'SAML 2.0 SSO',
+              'Microsoft ADFS',
+              'JWT',
+              'HIPAA',
+              'reCAPTCHA',
+            ],
           },
         ],
       },
@@ -282,12 +615,16 @@ export const ARMY_SECTIONS: PanelSection[] = [
         type: 'timeline',
         entries: [
           {
-            title: 'Reservist Second Lieutenant',
-            org: 'Marine Special Forces',
-            meta: '2022 – 2023',
+            title: 'Reservist Second Lieutenant, Special Forces',
+            org: 'Hellenic Armed Forces — 575 Marine Battalion',
+            meta: 'September 2022 – 22 November 2023',
             bullets: [
-              'Served as a reservist officer in the Marine Special Forces after graduating from NTUA.',
-              'Responsible for a unit of soldiers: planning, training, discipline and welfare.',
+              'Basic training at the Center of Special Forces, Nea Peramos.',
+              'Graduated 3rd in class from the Infantry Reserve Officers School, Heraklion.',
+              'Completed the Rangers’ Basic Training School — Guerilla Warfare School, Rentina.',
+              'Reported to the 575 Marine Battalion as an Officer Designate on 11 February 2023.',
+              'Served as Platoon Leader and Weapons Officer for a Marine Company, and as Deputy Company Commander.',
+              'Released as a Special Forces Second Lieutenant, having earned the green beret.',
             ],
           },
         ],
@@ -295,15 +632,15 @@ export const ARMY_SECTIONS: PanelSection[] = [
     ],
   },
   {
-    heading: 'What the camp taught me',
+    heading: 'What the job actually was',
     blocks: [
       {
         type: 'list',
         items: [
-          'Leading people you did not pick, toward objectives you did not choose — and still building trust.',
-          'Calm decision-making under pressure and with incomplete information.',
-          'Planning, briefing and debriefing as a habit rather than a ceremony.',
-          'Endurance — the same stubbornness I bring to long refactors and release nights.',
+          'Led and supervised personnel through training and field operations.',
+          'Coordinated logistics, weaponry and readiness for company-level exercises.',
+          'Held the line on discipline, operational efficiency and safety compliance.',
+          'Acted as liaison between commanding officers and enlisted troops.',
         ],
       },
       {
@@ -334,26 +671,48 @@ export const SCHOOL_SECTIONS: PanelSection[] = [
       },
     ],
   },
+]
+
+export const VOLUNTEER_SECTIONS: PanelSection[] = [
   {
-    heading: 'Contests & awards',
+    heading: 'Running a youth foundation',
     blocks: [
       {
-        type: 'list',
-        items: [
-          'National Biology Competition 2016 — ranked 2nd',
-          'Awards in Physics, Mathematics, Informatics and Literature contests',
+        type: 'timeline',
+        entries: [
+          {
+            title: 'Director',
+            org: 'Christian Youth Foundation "Pantokrator" · Paleo Faliro',
+            meta: 'February 2021 – September 2022',
+            bullets: [
+              'Appointed by the foundation’s council after years as a volunteer, while finishing the degree — the Vice-President approached him directly to fill the vacancy.',
+              'Renovated, upgraded and modernised the building infrastructure and the foundation’s day-to-day operations.',
+              'Supervised and taught the children in the foundation’s programmes.',
+              'Coordinated staff and volunteers, and managed the facilities themselves.',
+              'Organised athletic, theatrical, cultural and ecological events, field trips and youth activities.',
+              'Led charitable initiatives: tree planting, donation drives and outreach to vulnerable groups.',
+              'Built the foundation’s presence on social media and YouTube, and ran live streaming through the COVID-19 lockdowns.',
+              'Oversaw financial operations and pursued alternative funding through grants and partnerships.',
+              'Kept the board and the municipal authorities in the loop.',
+            ],
+            tags: [
+              'People management',
+              'Facility management',
+              'Event management',
+              'Financial oversight',
+            ],
+          },
         ],
       },
     ],
   },
   {
-    heading: 'Teaching & volunteering',
+    heading: 'Still going',
     blocks: [
       {
         type: 'list',
         items: [
-          'Leading volunteer at the Christian Youth Foundation "Pantokrator", Paleo Faliro — 2017–2021 and 2023 to today',
-          'Director of the same foundation, 2021–2022',
+          'Leading volunteer at the same foundation — 2017–2021 and 2023 to today',
           'Children’s tutor in Robotics at Citylab, Alimos — 2020–2021',
           'Blood donor since 2017',
         ],
@@ -368,8 +727,81 @@ export const RADIO_SECTIONS: PanelSection[] = [
     blocks: [
       {
         type: 'text',
-        text: 'The Radio Center broadcasts on four frequencies. Pick one and the message goes straight to me — no operator in between.',
+        text: 'The Radio Center broadcasts on three frequencies. Pick one and the message goes straight to me — no operator in between.',
       },
     ],
   },
+]
+
+/* ------------------ the reward at the top of the island ----------------- */
+
+export const LIGHTHOUSE_SECTIONS: PanelSection[] = [
+  {
+    heading: 'The short version',
+    blocks: [
+      {
+        type: 'text',
+        text: 'Nine years of building things other people depend on: five at NTUA, one in uniform, half a year at IBM inside a bank, and two and a half leading platform work at an AI healthcare startup whose software now runs in four U.S. hospitals. One published paper along the way.',
+      },
+      {
+        type: 'stats',
+        stats: [
+          { label: 'Now', value: 'Senior Software Engineer, Veltiston AI' },
+          { label: 'Core stack', value: 'Java · Spring Boot · React · AWS' },
+          { label: 'Team', value: '5–10 engineers, 3 countries' },
+          { label: 'Cadence', value: 'Weekly production releases' },
+        ],
+      },
+    ],
+  },
+  {
+    heading: 'What I am actually good at',
+    blocks: [
+      {
+        type: 'list',
+        items: [
+          'Owning a system end to end — schema, service, API, UI, pipeline, dashboard — instead of one slice of it.',
+          'Taking a legacy codebase nobody wants to touch and making it shippable again, in increments, without a rewrite.',
+          'Leading engineers across time zones: reviews that teach, sprints that finish, decisions that are written down.',
+          'Working where correctness is not negotiable — healthcare data, HIPAA, audit trails, Epic and FHIR integrations.',
+          'Translating between hospital stakeholders, product and engineering without losing detail in either direction.',
+        ],
+      },
+    ],
+  },
+  {
+    heading: 'What I am looking for',
+    blocks: [
+      {
+        type: 'text',
+        text: 'Hard problems with real users attached, a team that reviews each other honestly, and enough ownership to fix the root cause instead of the symptom. Remote, hybrid or Athens-based.',
+      },
+      {
+        type: 'quote',
+        text: 'If the island convinced you, the Radio Center is a two-minute walk south.',
+      },
+    ],
+  },
+]
+
+/**
+ * Everything, in reading order — used by the "skip ahead" card so nobody has
+ * to hunt for keys to see the whole CV.
+ */
+export const FULL_CV_SECTIONS: PanelSection[] = [
+  ...LIGHTHOUSE_SECTIONS,
+  ...VELTISTON_SECTIONS,
+  ...PLATFORM_SECTIONS,
+  ...IBM_SECTIONS,
+  ...SKILLS_SECTIONS,
+  ...UNIVERSITY_SECTIONS,
+  ...PUBLICATION_SECTIONS,
+  ...CERTIFICATIONS_SECTIONS,
+  ...THESIS_SECTIONS,
+  ...STUDENT_LIFE_SECTIONS,
+  ...ARMY_SECTIONS,
+  ...SCHOOL_SECTIONS,
+  ...VOLUNTEER_SECTIONS,
+  ...REFERENCES_SECTIONS,
+  ...HOUSE_SECTIONS,
 ]

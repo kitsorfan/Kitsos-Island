@@ -1,7 +1,35 @@
 import { useEffect, useState } from 'react'
-import { MAG_SIZE, RELOAD_MS, START_LIVES } from '../game/paintball'
+import { ARENA, MAG_SIZE, RELOAD_MS, START_LIVES } from '../game/paintball'
+import { isCrouching } from '../game/input'
 import { useGame } from '../state/store'
 import { useCoarsePointer } from './useCoarsePointer'
+
+/**
+ * The clock before the whistle, and whether he is flat on the ground. Both
+ * live outside React, so the panel reads them on a frame of its own.
+ */
+function useField(active: boolean) {
+  const [state, setState] = useState({ countdown: 0, down: false })
+
+  useEffect(() => {
+    if (!active) return
+    let raf = 0
+    const tick = () => {
+      setState((was) => {
+        const countdown = Math.ceil(ARENA.countdown)
+        const down = isCrouching()
+        return was.countdown === countdown && was.down === down
+          ? was
+          : { countdown, down }
+      })
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [active])
+
+  return state
+}
 
 /** Fraction of the six-second refill still to run, 1 down to 0. */
 function useReload(reloadAt: number | null) {
@@ -25,6 +53,7 @@ export function PaintballHud() {
   const game = useGame((s) => s.paintball)
   const coarse = useCoarsePointer()
   const left = useReload(game?.reloadAt ?? null)
+  const field = useField(game?.status === 'playing')
 
   if (!game || game.status !== 'playing') return null
 
@@ -33,6 +62,13 @@ export function PaintballHud() {
 
   return (
     <div className="pb">
+      {field.countdown > 0 && (
+        <div className="pb-count" aria-live="polite">
+          <strong key={field.countdown}>{field.countdown}</strong>
+          <em>Markers down until the whistle</em>
+        </div>
+      )}
+
       {game.feed?.kind === 'bad' && (
         <div key={game.feed.at} className="pb__flash" aria-hidden />
       )}
@@ -65,6 +101,10 @@ export function PaintballHud() {
             ))}
           </span>
         </div>
+
+        {field.down && (
+          <p className="pb__down">Down — you cannot shoot from here</p>
+        )}
 
         <div className={`pb__reload${reloading ? ' pb__reload--on' : ''}`}>
           <div

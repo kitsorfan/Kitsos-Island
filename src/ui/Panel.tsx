@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { downloadCv } from '../data/cv'
+import { downloadCv } from './downloadCv'
 import { useGame } from '../state/store'
 import * as sfx from '../game/audio'
 import { RadioConsole } from './RadioConsole'

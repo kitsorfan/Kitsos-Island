@@ -69,6 +69,28 @@ function renderSections(sections: PanelSection[]): string[] {
   return out
 }
 
+/**
+ * The CV in reading order. Both the Markdown copy and the plain HTML page
+ * are built from this, so neither can drift from the other.
+ */
+export const CV_PARTS: [string, PanelSection[]][] = [
+  ['Summary', LIGHTHOUSE_SECTIONS],
+  ['Experience', VELTISTON_SECTIONS],
+  ['Platform work', PLATFORM_SECTIONS],
+  ['Earlier roles', IBM_SECTIONS],
+  ['Skills', SKILLS_SECTIONS],
+  ['Education', UNIVERSITY_SECTIONS],
+  ['Publications', PUBLICATION_SECTIONS],
+  ['Certifications', CERTIFICATIONS_SECTIONS],
+  ['Thesis, contests and awards', THESIS_SECTIONS],
+  ['University life', STUDENT_LIFE_SECTIONS],
+  ['Military service', ARMY_SECTIONS],
+  ['Early education', SCHOOL_SECTIONS],
+  ['Volunteering and teaching', VOLUNTEER_SECTIONS],
+  ['References', REFERENCES_SECTIONS],
+  ['Personal', HOUSE_SECTIONS],
+]
+
 /** The whole CV as Markdown, built from the same data the island shows. */
 export function buildCvText(): string {
   const lines: string[] = [
@@ -85,43 +107,10 @@ export function buildCvText(): string {
     '',
   ]
 
-  const parts: [string, PanelSection[]][] = [
-    ['Summary', LIGHTHOUSE_SECTIONS],
-    ['Experience', VELTISTON_SECTIONS],
-    ['Platform work', PLATFORM_SECTIONS],
-    ['Earlier roles', IBM_SECTIONS],
-    ['Skills', SKILLS_SECTIONS],
-    ['Education', UNIVERSITY_SECTIONS],
-    ['Publications', PUBLICATION_SECTIONS],
-    ['Certifications', CERTIFICATIONS_SECTIONS],
-    ['Thesis, contests and awards', THESIS_SECTIONS],
-    ['University life', STUDENT_LIFE_SECTIONS],
-    ['Military service', ARMY_SECTIONS],
-    ['Early education', SCHOOL_SECTIONS],
-    ['Volunteering and teaching', VOLUNTEER_SECTIONS],
-    ['References', REFERENCES_SECTIONS],
-    ['Personal', HOUSE_SECTIONS],
-  ]
-
-  for (const [title, sections] of parts) {
+  for (const [title, sections] of CV_PARTS) {
     lines.push(`# ${title}`, '', ...renderSections(sections), '')
   }
 
   lines.push('---', '', 'Generated from kitsos-island, the playable CV.')
   return lines.join('\n')
-}
-
-/** Hands the visitor a Markdown copy of the CV. */
-export function downloadCv() {
-  const blob = new Blob([buildCvText()], {
-    type: 'text/markdown;charset=utf-8',
-  })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `${PROFILE.lastName}-${PROFILE.firstName}-CV.md`
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
-  URL.revokeObjectURL(url)
 }

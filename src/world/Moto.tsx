@@ -1,85 +1,108 @@
 import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import type { Group, Mesh } from 'three'
-import { PLAYER_COLORS } from '../data/world'
-import { COINS, MOTO, nearestCoin, stepMoto } from '../game/moto'
+import { CIRCUIT, PLAYER_COLORS } from '../data/world'
+import {
+  MOTO,
+  RIVALS,
+  ROAD_HALF,
+  pointAt,
+  racerColors,
+  stepMoto,
+} from '../game/moto'
 import { isDown, readMove } from '../game/input'
 import { groundHeight } from '../game/terrain'
 import { isInteractive, useGame } from '../state/store'
 import { Character, type CharacterMotion } from './Character'
 import { PLAYER_POS, PLAYER_VIEW } from './Player'
+import type { Npc } from '../types'
 import * as sfx from '../game/audio'
 
-const GOLD = '#f5c33b'
-const GOLD_DEEP = '#c9911c'
-/** How far a coin floats above the ring it leaves on the grass. */
-const COIN_LIFT = 1.1
-
-/* --------------------------------- coins ---------------------------------- */
+/* ------------------------------ start line -------------------------------- */
 
 /**
- * The coins, all of them in one group. They are taken outside React, so each
- * frame reads the flags and hides the ones that are gone rather than
- * re-rendering the lot.
+ * The line, laid across the road where the circuit meets the road up to the
+ * Radio Center. Two posts and a board over the top, so it reads as the place
+ * the race starts from at any distance.
  */
-function Coins() {
-  const coins = useRef<(Group | null)[]>([])
-
-  useFrame((state) => {
-    const t = state.clock.elapsedTime
-    for (let i = 0; i < COINS.length; i++) {
-      const group = coins.current[i]
-      if (!group) continue
-      const gone = MOTO.taken[i]
-      group.visible = !gone
-      if (gone) continue
-      group.rotation.y = t * 2.2 + i
-      group.position.y = COINS[i].y + Math.sin(t * 2 + i * 1.3) * 0.14
-    }
-  })
+function StartLine() {
+  const here = pointAt(0)
+  const across = ROAD_HALF + 0.6
+  const squares = 12
 
   return (
-    <group>
-      {COINS.map((coin, i) => (
-        <group
-          key={i}
-          ref={(el) => {
-            coins.current[i] = el
-          }}
-          position={[coin.x, coin.y, coin.z]}
-        >
-          {/* The coin itself, stood on its edge so it reads while it spins */}
-          <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
-            <cylinderGeometry args={[0.52, 0.52, 0.13, 14]} />
-            <meshStandardMaterial
-              color={GOLD}
-              flatShading
-              roughness={0.28}
-              metalness={0.55}
-            />
-          </mesh>
-          {/* Inset face, so it is not a plain disc */}
-          {[0.075, -0.075].map((z) => (
-            <mesh key={z} position={[0, 0, z]} rotation={[Math.PI / 2, 0, 0]}>
-              <cylinderGeometry args={[0.34, 0.34, 0.02, 12]} />
-              <meshStandardMaterial
-                color={GOLD_DEEP}
-                flatShading
-                roughness={0.35}
-                metalness={0.5}
-              />
+    <group position={[here.x, 0, here.z]} rotation={[0, here.heading, 0]}>
+      {/* Chequered paint. Two rows offset by one, as on any start line. */}
+      {[0, 1].map((row) =>
+        Array.from({ length: squares }, (_, i) => {
+          if ((i + row) % 2 === 1) return null
+          const width = (across * 2) / squares
+          return (
+            <mesh
+              key={`${row}-${i}`}
+              position={[-across + width * (i + 0.5), 0.03, row * 0.85 - 0.42]}
+              rotation={[-Math.PI / 2, 0, 0]}
+            >
+              <planeGeometry args={[width, 0.85]} />
+              <meshBasicMaterial color="#f7f7f4" />
             </mesh>
-          ))}
-          {/* A ring on the grass, so one behind a bush still shows */}
-          <mesh
-            position={[0, -COIN_LIFT, 0]}
-            rotation={[-Math.PI / 2, 0, 0]}
-          >
-            <ringGeometry args={[0.7, 0.95, 16]} />
-            <meshBasicMaterial color={GOLD} transparent opacity={0.4} />
+          )
+        }),
+      )}
+
+      {[-1, 1].map((side) => (
+        <group key={side} position={[side * (across + 0.7), 0, 0]}>
+          <mesh position={[0, 2.4, 0]} castShadow>
+            <cylinderGeometry args={[0.16, 0.2, 4.8, 8]} />
+            <meshStandardMaterial color="#d9dee6" flatShading roughness={0.6} />
           </mesh>
         </group>
       ))}
+
+      <mesh position={[0, 5.1, 0]} castShadow>
+        <boxGeometry args={[across * 2 + 1.8, 1.2, 0.22]} />
+        <meshStandardMaterial color="#e8442f" flatShading roughness={0.6} />
+      </mesh>
+      <mesh position={[0, 5.1, -0.13]}>
+        <boxGeometry args={[across * 2 + 0.4, 0.5, 0.02]} />
+        <meshBasicMaterial color="#ffd76b" />
+      </mesh>
+    </group>
+  )
+}
+
+/** Marker boards down the outside of the circuit, so the road reads ahead. */
+function Markers() {
+  return (
+    <group>
+      {CIRCUIT.map(([x, z], i) => {
+        const next = CIRCUIT[(i + 1) % CIRCUIT.length]
+        const heading = Math.atan2(next[0] - x, next[1] - z)
+        const out = Math.hypot(x, z)
+        // Always on the seaward side, which is the outside of the loop.
+        const side = ((ROAD_HALF + 1.4) * (x || 0.001)) / out
+        const sideZ = ((ROAD_HALF + 1.4) * z) / out
+        return (
+          <group
+            key={i}
+            position={[x + side, groundHeight(x + side, z + sideZ), z + sideZ]}
+            rotation={[0, heading, 0]}
+          >
+            <mesh position={[0, 0.75, 0]} castShadow>
+              <boxGeometry args={[0.12, 1.5, 0.12]} />
+              <meshStandardMaterial color="#e9edf2" flatShading roughness={0.8} />
+            </mesh>
+            <mesh position={[0, 1.5, 0]}>
+              <boxGeometry args={[0.7, 0.34, 0.06]} />
+              <meshStandardMaterial
+                color={i % 3 === 0 ? '#e8442f' : '#f4f6f8'}
+                flatShading
+                roughness={0.7}
+              />
+            </mesh>
+          </group>
+        )
+      })}
     </group>
   )
 }
@@ -114,19 +137,24 @@ function Bike({
   fork,
   rider,
   night,
+  frame,
+  colors,
 }: {
   rear: React.RefObject<Group | null>
   front: React.RefObject<Group | null>
   fork: React.RefObject<Group | null>
   rider: React.RefObject<CharacterMotion>
   night: boolean
+  /** Frame colour: every bike on the grid is a different one. */
+  frame: string
+  colors: Npc['colors']
 }) {
   return (
     <group>
       {/* Frame spine and engine block */}
       <mesh position={[0, 0.66, 0.02]} castShadow>
         <boxGeometry args={[0.26, 0.3, 1.34]} />
-        <meshStandardMaterial color="#c0392b" flatShading roughness={0.6} />
+        <meshStandardMaterial color={frame} flatShading roughness={0.6} />
       </mesh>
       <mesh position={[0, 0.5, -0.1]} castShadow>
         <boxGeometry args={[0.34, 0.34, 0.5]} />
@@ -135,7 +163,7 @@ function Bike({
       {/* Tank and seat */}
       <mesh position={[0, 0.92, -0.16]} castShadow>
         <boxGeometry args={[0.36, 0.3, 0.6]} />
-        <meshStandardMaterial color="#e8442f" flatShading roughness={0.5} />
+        <meshStandardMaterial color={frame} flatShading roughness={0.5} />
       </mesh>
       <mesh position={[0, 0.94, 0.4]} castShadow>
         <boxGeometry args={[0.32, 0.14, 0.66]} />
@@ -215,22 +243,80 @@ function Bike({
         )}
       </group>
 
-      {/* The rider, sitting on it */}
+      {/* The rider, sitting on it, and nobody rides this island bare-headed */}
       <group position={[0, 0.6, 0.22]} scale={0.92}>
-        <Character colors={PLAYER_COLORS} motion={rider} pose="ride" prop="cap" />
+        <Character colors={colors} motion={rider} pose="ride" helmet={frame} />
       </group>
     </group>
   )
 }
 
-/* ---------------------------------- ride ---------------------------------- */
+/* --------------------------------- rivals --------------------------------- */
+
+/**
+ * One of the other three. Their race is run on arc length inside moto.ts, so
+ * all this does each frame is read where they ended up and put them there.
+ */
+function RivalBike({ index, night }: { index: number; night: boolean }) {
+  const kit = RIVALS[index]
+  const body = useRef<Group>(null)
+  const rear = useRef<Group>(null)
+  const front = useRef<Group>(null)
+  const fork = useRef<Group>(null)
+  const shadow = useRef<Mesh>(null)
+  const rider = useRef<CharacterMotion>({ moving: false, speed: 0 })
+
+  useEffect(() => {
+    if (body.current) body.current.rotation.order = 'YXZ'
+  }, [])
+
+  useFrame(() => {
+    const rival = MOTO.rivals[index]
+    const shown = Boolean(rival) && MOTO.active
+    if (body.current) body.current.visible = shown
+    if (shadow.current) shadow.current.visible = shown
+    if (!rival || !body.current) return
+
+    const y = groundHeight(rival.x, rival.z)
+    body.current.position.set(rival.x, y, rival.z)
+    body.current.rotation.y = rival.heading
+    body.current.rotation.z = rival.roll
+    if (rear.current) rear.current.rotation.x = rival.wheel
+    if (front.current) front.current.rotation.x = rival.wheel
+    if (shadow.current) shadow.current.position.set(rival.x, y + 0.04, rival.z)
+    rider.current.moving = rival.speed > 1
+    rider.current.speed = rival.speed * 0.15
+  })
+
+  return (
+    <group>
+      <group ref={body} visible={false}>
+        <Bike
+          rear={rear}
+          front={front}
+          fork={fork}
+          rider={rider}
+          night={night}
+          frame={kit.bike}
+          colors={racerColors(kit.id) ?? PLAYER_COLORS}
+        />
+      </group>
+      <mesh ref={shadow} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
+        <circleGeometry args={[0.9, 18]} />
+        <meshBasicMaterial color="#2a4a22" transparent opacity={0.24} />
+      </mesh>
+    </group>
+  )
+}
+
+/* ---------------------------------- race ---------------------------------- */
 
 const CAM = { distance: 24, height: 11 }
 
 /**
- * Drives the ride: reads the controls, steps the bike, and owns the camera
- * while you are on it. Mounted in place of <Player/>, so the two never fight
- * over where the camera is looking.
+ * Drives the race: reads the controls, steps the bike and the other three,
+ * and owns the camera while you are on it. Mounted in place of <Player/>, so
+ * the two never fight over where the camera is looking.
  */
 export function MotoGame() {
   const camera = useThree((s) => s.camera)
@@ -268,7 +354,9 @@ export function MotoGame() {
       })
 
       if (events.bumped) sfx.thud()
-      for (let i = 0; i < events.collected; i++) sfx.coin()
+      if (events.light) sfx.blip()
+      if (events.green) sfx.jingle()
+      if (events.lap) sfx.coin()
       if (events.finished) store.finishMoto()
     }
 
@@ -289,22 +377,18 @@ export function MotoGame() {
     rider.current.moving = Math.abs(MOTO.speed) > 1
     rider.current.speed = Math.abs(MOTO.speed) * 0.15
 
-    // An arrow over the bike, pointing at whichever coin is nearest. Twenty
-    // five coins around a whole island need something to aim at.
+    // An arrow over the bike pointing the way round. A ring road looks the
+    // same in both directions from the saddle, and it is the wrong one that
+    // costs you the lap.
     if (pointer.current) {
-      const target = live ? nearestCoin() : null
-      pointer.current.visible = Boolean(target && target.distance > 6)
-      if (target) {
-        pointer.current.position.set(
-          MOTO.x,
-          y + 3.4 + Math.sin(state.clock.elapsedTime * 3) * 0.12,
-          MOTO.z,
-        )
-        pointer.current.rotation.y = Math.atan2(
-          target.coin.x - MOTO.x,
-          target.coin.z - MOTO.z,
-        )
-      }
+      const ahead = pointAt(MOTO.progress + 20)
+      pointer.current.visible = live && MOTO.offRoad
+      pointer.current.position.set(
+        MOTO.x,
+        y + 3.4 + Math.sin(state.clock.elapsedTime * 3) * 0.12,
+        MOTO.z,
+      )
+      pointer.current.rotation.y = Math.atan2(ahead.x - MOTO.x, ahead.z - MOTO.z)
     }
 
     PLAYER_POS.set(MOTO.x, y, MOTO.z)
@@ -336,7 +420,12 @@ export function MotoGame() {
 
   return (
     <group>
-      <Coins />
+      <StartLine />
+      <Markers />
+      {RIVALS.map((kit, i) => (
+        <RivalBike key={kit.id} index={i} night={night} />
+      ))}
+
       <group ref={body}>
         <Bike
           rear={rear}
@@ -344,6 +433,8 @@ export function MotoGame() {
           fork={fork}
           rider={rider}
           night={night}
+          frame="#e8442f"
+          colors={PLAYER_COLORS}
         />
       </group>
       <mesh ref={shadow} rotation={[-Math.PI / 2, 0, 0]}>
@@ -354,7 +445,7 @@ export function MotoGame() {
       <group ref={pointer} visible={false}>
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <coneGeometry args={[0.3, 0.8, 4]} />
-          <meshBasicMaterial color={GOLD} />
+          <meshBasicMaterial color="#ffd76b" />
         </mesh>
       </group>
     </group>

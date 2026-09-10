@@ -1,29 +1,49 @@
 import { useEffect, useRef, useState } from 'react'
-import { COIN_TOTAL, MOTO, nearestCoin } from '../game/moto'
+import { LAPS, MOTO, racerName, standings } from '../game/moto'
 import { useGame } from '../state/store'
 import { useCoarsePointer } from './useCoarsePointer'
 
+interface Board {
+  id: string
+  name: string
+  /** Metres behind the leader; zero for whoever is leading. */
+  gap: number
+  you: boolean
+}
+
 interface Readout {
-  coins: number
+  place: number
+  lap: number
   elapsed: number
+  best: number
   speed: number
   wheelie: boolean
-  /** Metres to the nearest coin still out there. */
-  nearest: number | null
+  offRoad: boolean
+  /** How much of a tow the bike in front is giving you. */
+  tow: number
+  countdown: number
+  board: Board[]
+}
+
+const EMPTY: Readout = {
+  place: 4,
+  lap: 1,
+  elapsed: 0,
+  best: 0,
+  speed: 0,
+  wheelie: false,
+  offRoad: false,
+  tow: 0,
+  countdown: 0,
+  board: [],
 }
 
 /**
- * The ride is stepped outside React, so the panel polls it on its own frame
- * rather than pushing every coin through the store.
+ * The race is stepped outside React, so the panel polls it on its own frame
+ * rather than pushing every metre through the store.
  */
 function useReadout(active: boolean): Readout {
-  const [state, setState] = useState<Readout>({
-    coins: 0,
-    elapsed: 0,
-    speed: 0,
-    wheelie: false,
-    nearest: null,
-  })
+  const [state, setState] = useState<Readout>(EMPTY)
   const last = useRef(0)
 
   useEffect(() => {
@@ -33,13 +53,22 @@ function useReadout(active: boolean): Readout {
       // A tenth of a second is as fine as any of these need to read.
       if (now - last.current > 90) {
         last.current = now
-        const near = nearestCoin()
         setState({
-          coins: MOTO.coins,
+          place: MOTO.place,
+          lap: MOTO.lap,
           elapsed: MOTO.elapsed,
+          best: MOTO.best,
           speed: Math.abs(MOTO.speed),
           wheelie: MOTO.wheelie > 0.4,
-          nearest: near ? near.distance : null,
+          offRoad: MOTO.offRoad,
+          tow: MOTO.tow,
+          countdown: MOTO.countdown,
+          board: standings().map((entry) => ({
+            id: entry.id,
+            name: racerName(entry.id),
+            gap: entry.gap,
+            you: entry.id === 'player',
+          })),
         })
       }
       raf = requestAnimationFrame(tick)
@@ -54,8 +83,11 @@ function useReadout(active: boolean): Readout {
 const clock = (seconds: number) => {
   const m = Math.floor(seconds / 60)
   const s = Math.floor(seconds % 60)
-  return `${m}:${s.toString().padStart(2, '0')}`
+  const t = Math.floor((seconds * 10) % 10)
+  return `${m}:${s.toString().padStart(2, '0')}.${t}`
 }
+
+const ORDINAL = ['', '1st', '2nd', '3rd', '4th']
 
 export function MotoHud() {
   const riding = useGame((s) => s.moto?.status === 'riding')
@@ -63,24 +95,42 @@ export function MotoHud() {
   const coarse = useCoarsePointer()
 
   if (!riding) return null
+  const counting = Math.ceil(readout.countdown)
 
   return (
     <div className="moto">
+      {counting > 0 && (
+        <div className="moto-lights" aria-live="polite">
+          <strong key={counting}>{counting}</strong>
+          <em>Hold it</em>
+        </div>
+      )}
+
       <div className="moto__panel">
-        <span className="moto__label">Island ride</span>
+        <span className="moto__label">Island Circuit</span>
 
-        <div className="moto__coins">
-          <span className="moto__coin" aria-hidden />
-          <strong key={readout.coins}>{readout.coins}</strong>
-          <em>of {COIN_TOTAL}</em>
+        <div className="moto__place">
+          <strong key={readout.place}>{ORDINAL[readout.place]}</strong>
+          <em>of 4</em>
+          <span className="moto__lap">
+            Lap {readout.lap}/{LAPS}
+          </span>
         </div>
 
-        <div className="moto__bar">
-          <div
-            className="moto__bar-fill"
-            style={{ width: `${(readout.coins / COIN_TOTAL) * 100}%` }}
-          />
-        </div>
+        <ol className="moto-board">
+          {readout.board.map((entry, i) => (
+            <li
+              key={entry.id}
+              className={entry.you ? 'moto-board__row moto-board__row--you' : 'moto-board__row'}
+            >
+              <span className="moto-board__pos">{i + 1}</span>
+              <span className="moto-board__name">{entry.name}</span>
+              <span className="moto-board__gap">
+                {i === 0 ? 'leader' : `+${Math.round(entry.gap)}m`}
+              </span>
+            </li>
+          ))}
+        </ol>
 
         <div className="moto__row">
           <span className="moto__speed">
@@ -90,12 +140,17 @@ export function MotoHud() {
         </div>
 
         <div className="moto__row">
-          {readout.nearest === null ? (
-            <span className="moto__flag moto__flag--done">Every coin in</span>
-          ) : (
+          {readout.best > 0 && (
             <span className="moto__next">
-              Nearest coin <strong>{Math.round(readout.nearest)}m</strong>
+              Best lap <strong>{clock(readout.best)}</strong>
             </span>
+          )}
+          {readout.offRoad ? (
+            <span className="moto__flag moto__flag--off">Off the circuit</span>
+          ) : (
+            readout.tow > 0.3 && (
+              <span className="moto__flag moto__flag--tow">Tow</span>
+            )
           )}
           {readout.wheelie && (
             <span className="moto__flag moto__flag--wheelie">Wheelie</span>

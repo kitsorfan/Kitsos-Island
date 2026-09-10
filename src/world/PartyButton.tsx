@@ -8,7 +8,7 @@ import { useGame } from '../state/store'
 import { TextPlane } from './TextSign'
 
 /**
- * The big red button, on the far side of the south road from the games board.
+ * The big red button, across Collaboration Road from the games board.
  *
  * It stands in the square by day too — an invisible thing you can walk into
  * would be worse than a dead one you can look at — but it only has anything

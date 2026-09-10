@@ -23,6 +23,7 @@ export function TouchControls() {
   const fighting = useGame((s) => s.paintball?.status === 'playing')
   const riding = useGame((s) => s.moto?.status === 'riding')
   const flying = useGame((s) => s.balloon?.status === 'flying')
+  const onWatch = useGame((s) => s.hide?.status === 'playing')
   const openJournal = useGame((s) => s.openJournal)
   const base = useRef<HTMLDivElement>(null)
   const knob = useRef<HTMLDivElement>(null)
@@ -84,7 +85,7 @@ export function TouchControls() {
       </div>
 
       <div className="touch__buttons">
-        {mode === 'explore' && !fighting && !riding && !flying && (
+        {mode === 'explore' && !fighting && !riding && !flying && !onWatch && (
           <>
             <button
               className="round-button round-button--small"
@@ -109,7 +110,18 @@ export function TouchControls() {
           </>
         )}
 
-        {flying ? (
+        {onWatch ? (
+          <button
+            className="round-button round-button--pulse"
+            onPointerDown={(e) => {
+              e.preventDefault()
+              queueFire()
+            }}
+            aria-label="Wide pulse"
+          >
+            PULSE
+          </button>
+        ) : flying ? (
           <>
             {/* The burner is the only altitude control on a touch screen —
                 let go of it and the balloon sinks back down on its own. */}

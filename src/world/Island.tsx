@@ -1,4 +1,6 @@
 import { BalloonGame } from './Balloon'
+import { BoatGame } from './Boat'
+import { Hide } from './Hide'
 import { Buildings } from './Buildings'
 import { Daylight } from './Daylight'
 import { Foliage } from './Foliage'
@@ -20,6 +22,8 @@ export function Island() {
   const match = useGame((s) => s.paintball !== null)
   const riding = useGame((s) => s.moto !== null)
   const flying = useGame((s) => s.balloon !== null)
+  const sailing = useGame((s) => s.rescue !== null)
+  const hiding = useGame((s) => s.hide !== null)
   const night = useGame((s) => s.night)
   const party = useGame((s) => s.party)
   const amaliaHere = useGame((s) => s.amaliaHere)
@@ -36,9 +40,18 @@ export function Island() {
       <GamesBoard />
       <PartyButton />
       <Npcs area="island" />
-      {/* On the bike or up in the basket the game owns the camera, so no two
-          of them are ever driving it at once */}
-      {riding ? <MotoGame /> : flying ? <BalloonGame /> : <Player />}
+      {/* On the bike, up in the basket or out at sea the game owns the
+          camera, so no two of them are ever driving it at once */}
+      {riding ? (
+        <MotoGame />
+      ) : flying ? (
+        <BalloonGame />
+      ) : sailing ? (
+        <BoatGame />
+      ) : (
+        <Player />
+      )}
+      {hiding && <Hide />}
       {night && <NightLights />}
       {party && <Party amalia={amaliaHere} />}
       {match && <Paintball />}

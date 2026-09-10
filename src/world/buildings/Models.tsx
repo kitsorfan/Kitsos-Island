@@ -85,7 +85,12 @@ function Door({
         <sphereGeometry args={[0.08, 8, 6]} />
         <meshStandardMaterial color="#f0c14b" metalness={0.6} roughness={0.3} />
       </mesh>
-      <mesh position={[0, -height / 2 - 0.1, 0.55]}>
+      {/* The step. Its top used to sit at exactly the height of the ground,
+          which put two flat surfaces on the same plane and left the pair of
+          them fighting over the depth buffer — the flicker you saw at the
+          house, the school, the camp and the radio mast. It stands a little
+          proud of the grass now, which is what a doorstep does anyway. */}
+      <mesh position={[0, -height / 2 - 0.04, 0.55]} receiveShadow>
         <boxGeometry args={[width + 1, 0.2, 1.2]} />
         <meshStandardMaterial color="#cfc2a6" flatShading roughness={1} />
       </mesh>
@@ -97,61 +102,332 @@ function Door({
 /* Kitsos House — whitewashed Greek cube with a terracotta roof        */
 /* ------------------------------------------------------------------ */
 
-function HouseModel() {
-  const W = 8.8
-  const D = 7.8
-  const H = 4.2
-  const roof = useGable(W + 0.9, 2.4, D + 0.9)
+const HOUSE = { W: 8.8, D: 7.8, H: 4.2 }
+
+/**
+ * Louvered shutters, thrown back against the wall either side of a window.
+ * Nobody in this climate has a window without them, and they are most of
+ * what stops a whitewashed box reading as a whitewashed box.
+ */
+function Shutters({
+  position,
+  width = 1,
+  height = 1.2,
+  rotation = [0, 0, 0],
+  color = '#2f6bb3',
+}: {
+  position: [number, number, number]
+  width?: number
+  height?: number
+  rotation?: [number, number, number]
+  color?: string
+}) {
+  const leaf = width * 0.56
+  return (
+    <group position={position} rotation={rotation}>
+      {[-1, 1].map((side) => (
+        <group
+          key={side}
+          position={[side * (width / 2 + leaf / 2 + 0.02), 0, 0.12]}
+          rotation={[0, side * -0.32, 0]}
+        >
+          <mesh castShadow>
+            <boxGeometry args={[leaf, height + 0.16, 0.07]} />
+            <meshStandardMaterial color={color} flatShading roughness={0.8} />
+          </mesh>
+          {Array.from({ length: 5 }, (_, i) => (
+            <mesh key={i} position={[0, height * 0.4 - i * (height / 5), 0.05]}>
+              <boxGeometry args={[leaf - 0.1, height / 9, 0.03]} />
+              <meshStandardMaterial
+                color="#25548f"
+                flatShading
+                roughness={0.85}
+              />
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </group>
+  )
+}
+
+/**
+ * The roof. It was a bare triangular prism, which from the road read as a
+ * wedge of clay rather than a roof — so this lays courses of pantiles up
+ * each pitch, with a ridge along the top and an eaves board under the
+ * overhang. Same prism underneath, still one geometry.
+ */
+function TiledRoof({
+  width,
+  rise,
+  depth,
+}: {
+  width: number
+  rise: number
+  depth: number
+}) {
+  const gable = useGable(width, rise, depth)
+  const half = width / 2
+  const slope = Math.atan2(rise, half)
+  const run = Math.hypot(half, rise)
+  const courses = 6
 
   return (
     <group>
-      <mesh position={[0, H / 2, 0]} castShadow receiveShadow>
+      <mesh geometry={gable} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <meshStandardMaterial color="#b04e35" flatShading roughness={0.9} />
+      </mesh>
+
+      {[-1, 1].map((side) =>
+        Array.from({ length: courses }, (_, i) => {
+          // Up the pitch, from the eaves to just short of the ridge.
+          const t = (i + 0.5) / courses
+          const x = side * half * (1 - t)
+          const y = rise * t
+          return (
+            <mesh
+              key={`${side}-${i}`}
+              position={[x, y + 0.04, 0]}
+              rotation={[0, 0, side * -slope]}
+              castShadow
+            >
+              <boxGeometry args={[run / courses - 0.05, 0.1, depth + 0.04]} />
+              <meshStandardMaterial
+                color={i % 2 ? '#bd5739' : '#a9482f'}
+                flatShading
+                roughness={0.95}
+              />
+            </mesh>
+          )
+        }),
+      )}
+
+      {/* Ridge capping, and the board that closes the eaves. */}
+      <mesh position={[0, rise + 0.02, 0]} castShadow>
+        <boxGeometry args={[0.55, 0.22, depth + 0.1]} />
+        <meshStandardMaterial color="#8f3d29" flatShading roughness={0.95} />
+      </mesh>
+      {[-1, 1].map((side) => (
+        <mesh key={side} position={[side * (half - 0.06), 0.02, 0]} castShadow>
+          <boxGeometry args={[0.26, 0.3, depth + 0.08]} />
+          <meshStandardMaterial color="#8f6242" flatShading roughness={0.95} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+function HouseModel() {
+  const { W, D, H } = HOUSE
+  const vine = useRef<Group>(null)
+
+  useFrame((state) => {
+    if (!vine.current) return
+    // The bougainvillea moves, which is the only thing on the whole island
+    // that says the air is doing anything.
+    const t = state.clock.elapsedTime
+    vine.current.rotation.z = Math.sin(t * 0.7) * 0.035
+  })
+
+  return (
+    <group>
+      {/* Stone plinth. A whitewashed box sitting straight on grass looks
+          dropped there; every house here stands on a course of stone. */}
+      <mesh position={[0, 0.32, 0]} castShadow receiveShadow>
+        <boxGeometry args={[W + 0.5, 0.64, D + 0.5]} />
+        <meshStandardMaterial color="#b8ad97" flatShading roughness={1} />
+      </mesh>
+
+      <mesh position={[0, H / 2 + 0.5, 0]} castShadow receiveShadow>
         <boxGeometry args={[W, H, D]} />
         <meshStandardMaterial color="#f6f1e4" flatShading roughness={0.95} />
       </mesh>
-      <mesh
-        geometry={roof}
-        position={[0, H, 0]}
-        rotation={[Math.PI / 2, 0, 0]}
-        castShadow
-      >
-        <meshStandardMaterial color="#c85a3f" flatShading roughness={0.9} />
-      </mesh>
 
-      <Door position={[0, 1.2, D / 2 + 0.02]} color="#2f6bb3" />
-      <Win position={[-2.6, 2.4, D / 2 + 0.02]} lit />
-      <Win position={[2.6, 2.4, D / 2 + 0.02]} />
-      <Win position={[-2.6, 2.4, -D / 2 - 0.02]} rotation={[0, Math.PI, 0]} />
+      <group position={[0, H + 0.5, 0]}>
+        <TiledRoof width={W + 0.9} rise={2.4} depth={D + 0.9} />
+      </group>
+
+      {/* Front: the door under the pergola, two windows with shutters. */}
+      <Door position={[0, 1.92, D / 2 + 0.02]} color="#2f6bb3" />
+      {/* Two treads down off the plinth. Without them the front door opens
+          two thirds of a metre above the path. */}
+      {[
+        [0.44, 1.5],
+        [0.16, 2.3],
+      ].map(([y, z]) => (
+        <mesh key={z} position={[0, y, D / 2 + z]} receiveShadow castShadow>
+          <boxGeometry args={[3.4, 0.3, 0.9]} />
+          <meshStandardMaterial color="#cfc2a6" flatShading roughness={1} />
+        </mesh>
+      ))}
+      <Win position={[-2.6, 2.9, D / 2 + 0.02]} lit />
+      <Shutters position={[-2.6, 2.9, D / 2 + 0.02]} />
+      <Win position={[2.6, 2.9, D / 2 + 0.02]} />
+      <Shutters position={[2.6, 2.9, D / 2 + 0.02]} />
+      <Win position={[-2.6, 2.9, -D / 2 - 0.02]} rotation={[0, Math.PI, 0]} />
+      <Shutters
+        position={[-2.6, 2.9, -D / 2 - 0.02]}
+        rotation={[0, Math.PI, 0]}
+      />
       <Win
-        position={[W / 2 + 0.02, 2.4, 1.4]}
+        position={[W / 2 + 0.02, 2.9, 1.4]}
         rotation={[0, Math.PI / 2, 0]}
         lit
       />
+      <Shutters
+        position={[W / 2 + 0.02, 2.9, 1.4]}
+        rotation={[0, Math.PI / 2, 0]}
+      />
 
-      {/* Chimney */}
-      <mesh position={[-2.6, H + 1.9, -1.6]} castShadow>
-        <boxGeometry args={[0.8, 1.9, 0.8]} />
+      {/* The basement, from outside: light wells along the plinth, because a
+          cellar with a family in it should be visible from the road. */}
+      {[-3.2, 3.2].map((x) => (
+        <group key={x} position={[x, 0.38, D / 2 + 0.28]}>
+          <mesh>
+            <boxGeometry args={[1.1, 0.52, 0.12]} />
+            <meshStandardMaterial color="#8f8778" flatShading roughness={1} />
+          </mesh>
+          <mesh position={[0, 0, 0.07]}>
+            <planeGeometry args={[0.9, 0.34]} />
+            <meshStandardMaterial
+              color="#2b2f38"
+              emissive="#ffbe4d"
+              emissiveIntensity={0.45}
+            />
+          </mesh>
+          {[-0.22, 0.22].map((bx) => (
+            <mesh key={bx} position={[bx, 0, 0.09]}>
+              <boxGeometry args={[0.05, 0.34, 0.04]} />
+              <meshStandardMaterial color="#6f6a5e" flatShading />
+            </mesh>
+          ))}
+        </group>
+      ))}
+
+      {/* And the way the car gets in. The ground falls away on this side,
+          which is how a basement garage works anywhere with a slope. */}
+      <group position={[W / 2 + 0.02, 0, -1.1]} rotation={[0, Math.PI / 2, 0]}>
+        <mesh position={[0, 1.15, 0]}>
+          <boxGeometry args={[3.4, 2.3, 0.16]} />
+          <meshStandardMaterial color="#6b727a" flatShading roughness={0.7} />
+        </mesh>
+        {Array.from({ length: 7 }, (_, i) => (
+          <mesh key={i} position={[0, 0.24 + i * 0.31, 0.1]}>
+            <boxGeometry args={[3.24, 0.24, 0.06]} />
+            <meshStandardMaterial
+              color={i % 2 ? '#858d96' : '#767e87'}
+              flatShading
+              roughness={0.65}
+              metalness={0.25}
+            />
+          </mesh>
+        ))}
+        <mesh position={[0, 2.42, 0.06]} castShadow>
+          <boxGeometry args={[3.8, 0.3, 0.44]} />
+          <meshStandardMaterial color="#e6ddca" flatShading roughness={1} />
+        </mesh>
+        {/* The apron it runs out onto. */}
+        <mesh position={[0, 0.03, 1.9]} receiveShadow>
+          <boxGeometry args={[3.9, 0.1, 3.6]} />
+          <meshStandardMaterial color="#b0a894" flatShading roughness={1} />
+        </mesh>
+      </group>
+
+      {/* Chimney, tapered, with a cap on it. */}
+      <mesh position={[-2.6, H + 2.4, -1.6]} castShadow>
+        <cylinderGeometry args={[0.42, 0.52, 2, 4]} />
         <meshStandardMaterial color="#e6ddca" flatShading roughness={1} />
       </mesh>
-      <mesh position={[-2.6, H + 2.95, -1.6]}>
-        <boxGeometry args={[1, 0.22, 1]} />
+      <mesh position={[-2.6, H + 3.48, -1.6]}>
+        <boxGeometry args={[1.05, 0.2, 1.05]} />
         <meshStandardMaterial color="#a8492f" flatShading roughness={1} />
       </mesh>
 
-      {/* Porch canopy */}
-      <mesh position={[0, 3.1, D / 2 + 0.9]} castShadow>
-        <boxGeometry args={[3.6, 0.18, 1.9]} />
-        <meshStandardMaterial color="#8c6242" flatShading roughness={0.9} />
+      {/* The aerial and the dish, which is the lab downstairs showing on the
+          roof: that server has to reach the world somehow. */}
+      <mesh position={[2.9, H + 3.1, -2.2]} castShadow>
+        <cylinderGeometry args={[0.05, 0.05, 2.2, 5]} />
+        <meshStandardMaterial color="#6f757c" flatShading metalness={0.4} />
       </mesh>
-      {[-1.6, 1.6].map((x) => (
-        <mesh key={x} position={[x, 1.5, D / 2 + 1.7]} castShadow>
-          <cylinderGeometry args={[0.11, 0.11, 3, 6]} />
-          <meshStandardMaterial color="#8c6242" flatShading roughness={0.9} />
+      {[0, 0.34, 0.68].map((y, i) => (
+        <mesh key={y} position={[2.9, H + 3.6 + y, -2.2]}>
+          <boxGeometry args={[1.5 - i * 0.3, 0.05, 0.05]} />
+          <meshStandardMaterial color="#6f757c" flatShading metalness={0.4} />
         </mesh>
       ))}
+      <group position={[1.9, H + 1.9, -2.9]} rotation={[-0.7, 0.5, 0]}>
+        <mesh castShadow>
+          <sphereGeometry
+            args={[0.52, 12, 8, 0, Math.PI * 2, 0, Math.PI / 3]}
+          />
+          <meshStandardMaterial
+            color="#e8e3d6"
+            side={2}
+            flatShading
+            roughness={0.8}
+          />
+        </mesh>
+        <mesh position={[0, 0.3, 0]}>
+          <cylinderGeometry args={[0.05, 0.05, 0.6, 5]} />
+          <meshStandardMaterial color="#6f757c" flatShading />
+        </mesh>
+      </group>
 
-      {/* Flower pots by the door */}
-      {[-1.1, 1.1].map((x) => (
+      {/* Pergola over the door, with a vine over that. A flat plank canopy
+          is a carport; four rafters and a bougainvillea is a house. */}
+      <group position={[0, 0, D / 2 + 1.1]}>
+        {[-1.85, 1.85].map((x) => (
+          <mesh key={x} position={[x, 1.75, 0.7]} castShadow>
+            <boxGeometry args={[0.18, 3.5, 0.18]} />
+            <meshStandardMaterial color="#8c6242" flatShading roughness={0.9} />
+          </mesh>
+        ))}
+        {[-1.85, 1.85].map((x) => (
+          <mesh key={`b${x}`} position={[x, 3.42, -0.25]} castShadow>
+            <boxGeometry args={[0.16, 0.16, 2.1]} />
+            <meshStandardMaterial color="#8c6242" flatShading roughness={0.9} />
+          </mesh>
+        ))}
+        {[-0.45, 0.15, 0.75, 1.35].map((z) => (
+          <mesh key={z} position={[0, 3.56, z - 0.55]} castShadow>
+            <boxGeometry args={[4.1, 0.12, 0.12]} />
+            <meshStandardMaterial color="#a0764f" flatShading roughness={0.9} />
+          </mesh>
+        ))}
+        <group ref={vine} position={[0, 3.62, 0.1]}>
+          {[
+            [-1.7, -0.5],
+            [-0.9, 0.5],
+            [-0.1, -0.2],
+            [0.7, 0.6],
+            [1.5, -0.4],
+            [1.9, 0.3],
+          ].map(([x, z], i) => (
+            <group key={i} position={[x, 0, z]}>
+              <mesh>
+                <icosahedronGeometry args={[0.42, 0]} />
+                <meshStandardMaterial
+                  color="#3f7a42"
+                  flatShading
+                  roughness={1}
+                />
+              </mesh>
+              <mesh position={[0.08, -0.26, 0.05]}>
+                <icosahedronGeometry args={[0.24, 0]} />
+                <meshStandardMaterial
+                  color={i % 2 ? '#c9366b' : '#e0567c'}
+                  flatShading
+                  roughness={1}
+                />
+              </mesh>
+            </group>
+          ))}
+        </group>
+      </group>
+
+      {/* Flower pots by the door, and the number on the wall. */}
+      {/* Beside the steps rather than on them, and standing on the path. */}
+      {[-2.4, 2.4].map((x) => (
         <group key={x} position={[x, 0, D / 2 + 1.5]}>
           <mesh position={[0, 0.28, 0]} castShadow>
             <cylinderGeometry args={[0.32, 0.24, 0.55, 8]} />
@@ -163,6 +439,10 @@ function HouseModel() {
           </mesh>
         </group>
       ))}
+      <mesh position={[1.1, 3.05, D / 2 + 0.04]}>
+        <boxGeometry args={[0.34, 0.34, 0.06]} />
+        <meshStandardMaterial color="#2f6bb3" flatShading roughness={0.7} />
+      </mesh>
     </group>
   )
 }
@@ -293,7 +573,11 @@ function UniversityModel() {
       <group position={[9.4, 0, D / 2 + 4]}>
         <mesh position={[0, 3.4, 0]} castShadow>
           <cylinderGeometry args={[0.09, 0.11, 6.8, 8]} />
-          <meshStandardMaterial color="#c9cdd2" metalness={0.5} roughness={0.4} />
+          <meshStandardMaterial
+            color="#c9cdd2"
+            metalness={0.5}
+            roughness={0.4}
+          />
         </mesh>
         <Flag y={5.9} />
       </group>
@@ -302,13 +586,7 @@ function UniversityModel() {
 }
 
 /** Hangs any banner off a pole and gives it a lazy wave. */
-function WavingFlag({
-  y,
-  children,
-}: {
-  y: number
-  children: React.ReactNode
-}) {
+function WavingFlag({ y, children }: { y: number; children: React.ReactNode }) {
   const group = useRef<Group>(null)
   useFrame((state) => {
     if (!group.current) return
@@ -443,7 +721,11 @@ function WorkModel() {
       {[-5, -0.2].map((x) => (
         <mesh key={x} position={[x, 1.8, FRONT + 2.3]}>
           <cylinderGeometry args={[0.08, 0.08, 3.6, 6]} />
-          <meshStandardMaterial color="#2fb59a" metalness={0.3} roughness={0.5} />
+          <meshStandardMaterial
+            color="#2fb59a"
+            metalness={0.3}
+            roughness={0.5}
+          />
         </mesh>
       ))}
       <mesh position={[-2.6, 1.7, FRONT + 0.09]}>
@@ -482,7 +764,11 @@ function Beacon({
   return (
     <mesh ref={mesh} position={position}>
       <sphereGeometry args={[0.22, 10, 8]} />
-      <meshStandardMaterial color={color} emissive={color} emissiveIntensity={1.5} />
+      <meshStandardMaterial
+        color={color}
+        emissive={color}
+        emissiveIntensity={1.5}
+      />
     </mesh>
   )
 }
@@ -511,7 +797,12 @@ function ArmyModel() {
         >
           <meshStandardMaterial color="#4f5a3a" flatShading roughness={1} />
         </mesh>
-        <Door position={[0, 1.1, 3.62]} width={1.3} height={2.2} color="#4a5233" />
+        <Door
+          position={[0, 1.1, 3.62]}
+          width={1.3}
+          height={2.2}
+          color="#4a5233"
+        />
         <Win
           position={[-2.6, 2, 3.62]}
           size={[0.9, 0.9]}
@@ -532,7 +823,11 @@ function ArmyModel() {
         [4.2, -3.4],
       ].map(([x, z], i) => (
         <group key={i} position={[x, 0, z]}>
-          <mesh position={[0, 1.1, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
+          <mesh
+            position={[0, 1.1, 0]}
+            rotation={[0, Math.PI / 4, 0]}
+            castShadow
+          >
             <coneGeometry args={[2.1, 2.2, 4]} />
             <meshStandardMaterial color="#69754a" flatShading roughness={1} />
           </mesh>
@@ -593,11 +888,19 @@ function ArmyModel() {
       <group position={[5.2, 0, D / 2 - 1.4]}>
         <mesh position={[0, 3.6, 0]} castShadow>
           <cylinderGeometry args={[0.08, 0.1, 7.2, 8]} />
-          <meshStandardMaterial color="#c9cdd2" metalness={0.5} roughness={0.4} />
+          <meshStandardMaterial
+            color="#c9cdd2"
+            metalness={0.5}
+            roughness={0.4}
+          />
         </mesh>
         <mesh position={[0, 7.3, 0]}>
           <sphereGeometry args={[0.14, 8, 6]} />
-          <meshStandardMaterial color="#f0c14b" metalness={0.6} roughness={0.3} />
+          <meshStandardMaterial
+            color="#f0c14b"
+            metalness={0.6}
+            roughness={0.3}
+          />
         </mesh>
         <WavingFlag y={6.1}>
           <GreekFlag width={2.6} />
@@ -644,7 +947,12 @@ function SchoolModel() {
         <meshStandardMaterial color="#a8452f" flatShading roughness={0.95} />
       </mesh>
 
-      <Door position={[0, 1.3, D / 2 + 0.02]} width={1.8} height={2.6} color="#7d4a2c" />
+      <Door
+        position={[0, 1.3, D / 2 + 0.02]}
+        width={1.8}
+        height={2.6}
+        color="#7d4a2c"
+      />
       {[-4.4, -2.4, 2.4, 4.4].map((x) => (
         <Win
           key={x}
@@ -679,13 +987,21 @@ function SchoolModel() {
           <meshStandardMaterial color="#7d4a2c" />
         </mesh>
         <Clock position={[0, H + 1.9, 1.36]} />
-        <mesh position={[0, H + 4, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
+        <mesh
+          position={[0, H + 4, 0]}
+          rotation={[0, Math.PI / 4, 0]}
+          castShadow
+        >
           <coneGeometry args={[2.2, 2, 4]} />
           <meshStandardMaterial color="#a8452f" flatShading roughness={0.95} />
         </mesh>
         <mesh position={[0, H + 5.3, 0]}>
           <sphereGeometry args={[0.22, 8, 6]} />
-          <meshStandardMaterial color="#f0c14b" metalness={0.6} roughness={0.3} />
+          <meshStandardMaterial
+            color="#f0c14b"
+            metalness={0.6}
+            roughness={0.3}
+          />
         </mesh>
       </group>
 
@@ -693,7 +1009,11 @@ function SchoolModel() {
       <group position={[6.2, 0, D / 2 + 3.4]}>
         <mesh position={[0, 1.6, 0]} castShadow>
           <cylinderGeometry args={[0.09, 0.11, 3.2, 8]} />
-          <meshStandardMaterial color="#8d979d" metalness={0.4} roughness={0.5} />
+          <meshStandardMaterial
+            color="#8d979d"
+            metalness={0.4}
+            roughness={0.5}
+          />
         </mesh>
         <mesh position={[0, 3.3, 0.3]} castShadow>
           <boxGeometry args={[1.5, 1, 0.08]} />
@@ -759,7 +1079,12 @@ function RadioModel() {
         <meshStandardMaterial color="#b95fd0" flatShading roughness={0.85} />
       </mesh>
 
-      <Door position={[0, 1.2, D / 2 - 0.05]} width={1.5} height={2.4} color="#7a3f92" />
+      <Door
+        position={[0, 1.2, D / 2 - 0.05]}
+        width={1.5}
+        height={2.4}
+        color="#7a3f92"
+      />
       {[-2.2, 2.2].map((x) => (
         <Win
           key={x}
@@ -786,7 +1111,11 @@ function RadioModel() {
         ].map(([x, z], i) => (
           <mesh key={`l${i}`} position={[x * 0.7, 12, z * 0.7]} castShadow>
             <cylinderGeometry args={[0.06, 0.1, 13, 5]} />
-            <meshStandardMaterial color="#d0d5d8" metalness={0.5} roughness={0.4} />
+            <meshStandardMaterial
+              color="#d0d5d8"
+              metalness={0.5}
+              roughness={0.4}
+            />
           </mesh>
         ))}
         <Beacon position={[0, 18.8, 0]} color="#ff4d4d" />
@@ -799,7 +1128,9 @@ function RadioModel() {
       {/* Satellite dish */}
       <group ref={mast} position={[2.9, 6.2, 0.8]}>
         <mesh rotation={[-0.9, 0, 0]} castShadow>
-          <sphereGeometry args={[1.5, 14, 10, 0, Math.PI * 2, 0, Math.PI / 3]} />
+          <sphereGeometry
+            args={[1.5, 14, 10, 0, Math.PI * 2, 0, Math.PI / 3]}
+          />
           <meshStandardMaterial
             color="#f4f0f6"
             side={2}
@@ -836,7 +1167,12 @@ function SignalRings() {
       {[0, 1, 2].map((i) => (
         <mesh key={i} rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.85, 1, 18]} />
-          <meshBasicMaterial color="#ff8080" transparent opacity={0.4} depthWrite={false} />
+          <meshBasicMaterial
+            color="#ff8080"
+            transparent
+            opacity={0.4}
+            depthWrite={false}
+          />
         </mesh>
       ))}
     </group>
@@ -883,10 +1219,7 @@ function LighthouseModel() {
       {Array.from({ length: 12 }, (_, i) => {
         const a = (i / 12) * Math.PI * 2
         return (
-          <mesh
-            key={i}
-            position={[Math.cos(a) * 2.6, 17.8, Math.sin(a) * 2.6]}
-          >
+          <mesh key={i} position={[Math.cos(a) * 2.6, 17.8, Math.sin(a) * 2.6]}>
             <boxGeometry args={[0.1, 1, 0.1]} />
             <meshStandardMaterial color="#4a5057" flatShading />
           </mesh>
@@ -931,7 +1264,12 @@ function LighthouseModel() {
       </mesh>
 
       {/* Keeper's door, facing the road */}
-      <Door position={[0, 1.4, 3.75]} width={1.6} height={2.8} color="#7a4a2c" />
+      <Door
+        position={[0, 1.4, 3.75]}
+        width={1.6}
+        height={2.8}
+        color="#7a4a2c"
+      />
 
       {/* Keeper's cottage tucked against the base */}
       <group position={[5.4, 0, 2.6]} rotation={[0, -0.5, 0]}>

@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Sky, Stars } from '@react-three/drei'
 import type { Group } from 'three'
+import { useGame } from '../state/store'
 
 /**
  * The island's two skies and the light that comes with each.
@@ -12,6 +13,9 @@ import type { Group } from 'three'
 export function Daylight({ night }: { night: boolean }) {
   return night ? <Night /> : <Day />
 }
+
+/** How far the night is turned down while hide and seek is being played. */
+const DARK = 0.34
 
 function Day() {
   return (
@@ -56,6 +60,9 @@ function Day() {
 
 function Night() {
   const moon = useRef<Group>(null)
+  // Lights out means lights out: the moon and the sky bounce come most of
+  // the way down too, or there is no point carrying a torch.
+  const dim = useGame((s) => (s.hide === null ? 1 : DARK))
 
   useFrame((state) => {
     // The moon drifts, very slowly, so a long night is not a still image.
@@ -107,11 +114,11 @@ function Night() {
       </group>
 
       {/* Moonlight: cold, dim, and from the same side as the moon. */}
-      <hemisphereLight args={['#2b3f66', '#101a24', 0.5]} />
-      <ambientLight intensity={0.1} color="#7f95c4" />
+      <hemisphereLight args={['#2b3f66', '#101a24', 0.5 * dim]} />
+      <ambientLight intensity={0.1 * dim} color="#7f95c4" />
       <directionalLight
         position={[-120, 110, -100]}
-        intensity={0.55}
+        intensity={0.55 * dim}
         color="#aec6ff"
         castShadow
         shadow-mapSize={[2048, 2048]}
@@ -128,7 +135,7 @@ function Night() {
           lamps around it without paying for a light per lamp. */}
       <pointLight
         position={[0, 9, 0]}
-        intensity={90}
+        intensity={90 * dim * dim}
         distance={46}
         decay={1.6}
         color="#ffd9a0"

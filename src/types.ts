@@ -44,13 +44,7 @@ export interface PanelSection {
 }
 
 export type BuildingKind =
-  | 'house'
-  | 'university'
-  | 'work'
-  | 'army'
-  | 'school'
-  | 'radio'
-  | 'lighthouse'
+  'house' | 'university' | 'work' | 'army' | 'school' | 'radio' | 'lighthouse'
 
 export interface Building {
   id: string
@@ -84,8 +78,9 @@ export interface Building {
   sentries?: boolean
 }
 
-/** What the player can carry in his off hand after dark. */
+/** What the player can carry in his off hand after dark, or nothing. */
 export type HandLight = 'torch' | 'flashlight'
+export type Carried = HandLight | 'none'
 
 /* ------------------------------ people ----------------------------- */
 
@@ -187,6 +182,21 @@ export type PropKind =
   | 'chessTable'
   | 'greekFlag'
   | 'lectern'
+  /* Downstairs: the garage, the lab, the library and the playroom. */
+  | 'car'
+  | 'bicycle'
+  | 'workbench'
+  | 'pegboard'
+  | 'toolChest'
+  | 'shelfUnit'
+  | 'boiler'
+  | 'longTable'
+  | 'photoWall'
+  | 'shutter'
+  | 'armchair'
+  | 'tv'
+  | 'beanbag'
+  | 'poster'
 
 export interface InteriorProp {
   kind: PropKind
@@ -222,6 +232,36 @@ export interface Exhibit {
   keyId?: string
   /** Journal entry filed the first time you use it. */
   journal?: { title: string; body: string }
+  /**
+   * Lets a secret out the first time it is examined, which is what opens an
+   * `InteriorLink` that needs one: the shelf tells you it is a door.
+   */
+  reveals?: { id: string; title: string; body: string }
+}
+
+/**
+ * A way from one room to another inside the same building: the stairs to the
+ * cellar, the door nobody has the key to, the shelf that turns out to swing.
+ */
+export interface InteriorLink {
+  id: string
+  /** Prompt shown when you stand at it. */
+  label: string
+  position: Vec2
+  rotation?: number
+  kind: 'stairsDown' | 'stairsUp' | 'door' | 'hatch' | 'locked'
+  /** Area it opens onto, and where you arrive in it. */
+  to?: string
+  arrive?: Vec2
+  /** What it says when it does not open, or on the way through. */
+  lines?: string[]
+  /**
+   * Stays shut until this secret has been let out — the id passed to
+   * `revealSecret`. Until then it is furniture.
+   */
+  needs?: string
+  /** Journal entry filed the first time it opens. */
+  journal?: { title: string; body: string }
 }
 
 export interface Interior {
@@ -229,6 +269,12 @@ export interface Interior {
   id: string
   name: string
   kicker: string
+  /**
+   * The building on the island this room sits inside, for rooms that are not
+   * the one behind the front door. Defaults to the room's own id, and is what
+   * puts the player back on the right doorstep from two floors down.
+   */
+  building?: string
   /** Half-extents of the room, walls sit on the boundary. */
   half: Vec2
   floor: string
@@ -239,4 +285,18 @@ export interface Interior {
   spawn: Vec2
   props: InteriorProp[]
   exhibits: Exhibit[]
+  /** Stairs and doors to other rooms of the same building. */
+  links?: InteriorLink[]
+  /**
+   * Where the way out leads, for a room with no front door of its own. Left
+   * off, it steps straight outside onto the island.
+   */
+  exit?: { to: string; arrive: Vec2; label: string }
+  /**
+   * Windows punched through the walls, as a fraction along each side from its
+   * middle. They light the room and give it an outside.
+   */
+  windows?: { side: 'north' | 'east' | 'west'; at: number }[]
+  /** No windows down here: a cellar is lit by what is screwed to the joists. */
+  underground?: boolean
 }

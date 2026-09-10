@@ -58,6 +58,10 @@ interface CharacterProps {
   suit?: boolean
   /** A bunch of flowers, in whichever hand is free. */
   bouquet?: boolean
+  /** A crash helmet in this colour, over the hair. Nobody rides without one. */
+  helmet?: string
+  /** Match kit in a team colour: a bib over the shirt and a mask over the eyes. */
+  kit?: string
 }
 
 const IDLE: CharacterMotion = { moving: false, speed: 0, airborne: false }
@@ -87,6 +91,8 @@ export function Character({
   danceStyle,
   suit = false,
   bouquet = false,
+  helmet,
+  kit,
 }: CharacterProps) {
   const root = useRef<Group>(null)
   const body = useRef<Group>(null)
@@ -448,6 +454,27 @@ export function Character({
               <meshStandardMaterial color={colors.shirt} flatShading roughness={0.9} />
             </mesh>
 
+            {/* Match kit: a team bib over whatever they turned up in */}
+            {kit && (
+              <group>
+                <mesh position={[0, 1.06, 0]} castShadow>
+                  <boxGeometry args={[0.66, 0.58, 0.42]} />
+                  <meshStandardMaterial color={kit} flatShading roughness={0.7} />
+                </mesh>
+                {/* A dark panel down the front, and a shoulder stripe each side */}
+                <mesh position={[0, 1.04, 0.213]}>
+                  <boxGeometry args={[0.2, 0.5, 0.02]} />
+                  <meshStandardMaterial color="#22262e" roughness={0.6} />
+                </mesh>
+                {[-0.33, 0.33].map((sx) => (
+                  <mesh key={sx} position={[sx, 1.26, 0]}>
+                    <boxGeometry args={[0.04, 0.16, 0.44]} />
+                    <meshStandardMaterial color="#22262e" roughness={0.6} />
+                  </mesh>
+                ))}
+              </group>
+            )}
+
             {/* A dinner jacket: white shirt, lapels, bow tie */}
             {suit && (
               <group>
@@ -550,16 +577,20 @@ export function Character({
                 <boxGeometry args={[0.56, 0.54, 0.52]} />
                 <meshStandardMaterial color={colors.skin} flatShading roughness={0.85} />
               </mesh>
-              {/* Hair */}
-              <mesh position={[0, 0.2, -0.03]} castShadow>
-                <boxGeometry args={[0.6, 0.24, 0.56]} />
-                <meshStandardMaterial color={colors.hair} flatShading roughness={0.9} />
-              </mesh>
-              <mesh position={[0, 0.03, -0.28]}>
-                <boxGeometry args={[0.58, 0.34, 0.1]} />
-                <meshStandardMaterial color={colors.hair} flatShading roughness={0.9} />
-              </mesh>
-              {hair === 'long' && (
+              {/* Hair, unless a helmet has swallowed it */}
+              {!helmet && (
+                <group>
+                  <mesh position={[0, 0.2, -0.03]} castShadow>
+                    <boxGeometry args={[0.6, 0.24, 0.56]} />
+                    <meshStandardMaterial color={colors.hair} flatShading roughness={0.9} />
+                  </mesh>
+                  <mesh position={[0, 0.03, -0.28]}>
+                    <boxGeometry args={[0.58, 0.34, 0.1]} />
+                    <meshStandardMaterial color={colors.hair} flatShading roughness={0.9} />
+                  </mesh>
+                </group>
+              )}
+              {hair === 'long' && !helmet && (
                 <group>
                   {/* Down the back, past the shoulders */}
                   <mesh position={[0, -0.52, -0.28]} castShadow>
@@ -614,11 +645,87 @@ export function Character({
                   ))}
                 </group>
               )}
-              <Accessory prop={prop} />
+              {helmet && <Helmet color={helmet} />}
+              {kit && !helmet && <Mask color={kit} />}
+              {!helmet && <Accessory prop={prop} />}
             </group>
           </group>
         </group>
       </group>
+    </group>
+  )
+}
+
+/**
+ * A crash helmet: one shell, a dark visor across the front and a chin bar
+ * under it. It sits over the head box and hides the hair entirely.
+ */
+function Helmet({ color }: { color: string }) {
+  return (
+    <group position={[0, 0.07, 0]}>
+      <mesh castShadow>
+        <boxGeometry args={[0.66, 0.6, 0.64]} />
+        <meshStandardMaterial color={color} flatShading roughness={0.32} metalness={0.15} />
+      </mesh>
+      {/* A crown stripe, because every helmet has one */}
+      <mesh position={[0, 0.31, 0]}>
+        <boxGeometry args={[0.16, 0.03, 0.66]} />
+        <meshStandardMaterial color="#fdf7e9" roughness={0.5} />
+      </mesh>
+      {/* Visor, and the chin bar under it */}
+      <mesh position={[0, 0.02, 0.325]}>
+        <boxGeometry args={[0.52, 0.24, 0.05]} />
+        <meshStandardMaterial
+          color="#1b2430"
+          roughness={0.12}
+          metalness={0.5}
+          emissive="#2a4a6a"
+          emissiveIntensity={0.25}
+        />
+      </mesh>
+      <mesh position={[0, -0.22, 0.3]}>
+        <boxGeometry args={[0.56, 0.18, 0.16]} />
+        <meshStandardMaterial color={color} flatShading roughness={0.4} />
+      </mesh>
+    </group>
+  )
+}
+
+/** A paintball mask: goggles across the eyes and a guard over the mouth. */
+function Mask({ color }: { color: string }) {
+  return (
+    <group>
+      {/* A team-coloured crown over the hair. The match camera looks down on
+          everybody, so the top of the head is the part that has to say which
+          side you are on. */}
+      <mesh position={[0, 0.34, 0.01]} castShadow>
+        <boxGeometry args={[0.64, 0.13, 0.62]} />
+        <meshStandardMaterial color={color} flatShading roughness={0.55} />
+      </mesh>
+      <mesh position={[0, 0.02, 0.2]} castShadow>
+        <boxGeometry args={[0.62, 0.26, 0.2]} />
+        <meshStandardMaterial color={color} flatShading roughness={0.45} />
+      </mesh>
+      {/* The lens, which is the bit you see across a field */}
+      <mesh position={[0, 0.02, 0.305]}>
+        <boxGeometry args={[0.5, 0.16, 0.04]} />
+        <meshStandardMaterial
+          color="#171d26"
+          roughness={0.1}
+          metalness={0.6}
+          emissive="#3a6a8a"
+          emissiveIntensity={0.3}
+        />
+      </mesh>
+      {/* Chin guard, and a strap round the back of the head */}
+      <mesh position={[0, -0.2, 0.24]}>
+        <boxGeometry args={[0.46, 0.16, 0.14]} />
+        <meshStandardMaterial color={color} flatShading roughness={0.5} />
+      </mesh>
+      <mesh position={[0, 0.02, -0.26]}>
+        <boxGeometry args={[0.58, 0.13, 0.1]} />
+        <meshStandardMaterial color="#22262e" roughness={0.8} />
+      </mesh>
     </group>
   )
 }

@@ -2,7 +2,12 @@ import type { Interior } from '../types'
 import {
   ARMY_SECTIONS,
   CERTIFICATIONS_SECTIONS,
+  FAMILY_SECTIONS,
+  GARAGE_SECTIONS,
   HOUSE_SECTIONS,
+  LAB_SECTIONS,
+  LIBRARY_SECTIONS,
+  PLAYROOM_SECTIONS,
   IBM_SECTIONS,
   LIGHTHOUSE_SECTIONS,
   PLATFORM_SECTIONS,
@@ -17,8 +22,8 @@ import {
   THESIS_SECTIONS,
   UNIVERSITY_SECTIONS,
   VELTISTON_SECTIONS,
+  VERNE_SECTIONS,
   VOLUNTEER_SECTIONS,
-  WORKSHOP_SECTIONS,
 } from './profile'
 
 /**
@@ -30,35 +35,76 @@ export const INTERIORS: Interior[] = [
     id: 'house',
     name: 'Kitsos House',
     kicker: 'Living room',
-    half: [12, 9.5],
+    half: [13.5, 10.5],
     floor: '#c9a273',
     rug: '#b8474a',
     wall: '#f6f1e4',
     accent: '#e0574a',
-    spawn: [0, 4],
+    spawn: [0, 5],
+    windows: [
+      { side: 'west', at: 0.42 },
+      { side: 'east', at: -0.2 },
+    ],
     props: [
-      { kind: 'rug', position: [-3, 0], scale: 1.4, solid: false },
-      { kind: 'sofa', position: [-3, 2.6] },
-      { kind: 'table', position: [-3, -1.2] },
-      { kind: 'chair', position: [-6, -1.2], rotation: Math.PI / 2 },
-      { kind: 'bookshelf', position: [-10.8, -5], rotation: Math.PI / 2 },
-      { kind: 'bookshelf', position: [-10.8, -1], rotation: Math.PI / 2 },
-      { kind: 'chessTable', position: [6, -3.5] },
-      { kind: 'chair', position: [8.4, -3.5], rotation: -Math.PI / 2 },
-      { kind: 'kitchen', position: [5.5, 7.6], rotation: Math.PI },
-      { kind: 'stove', position: [9, 7.6], rotation: Math.PI },
-      { kind: 'bed', position: [9, -7], rotation: -Math.PI / 2 },
-      { kind: 'plant', position: [-10.9, 7.6] },
-      { kind: 'plant', position: [11, 2] },
-      { kind: 'lamp', position: [-7.5, 4.2] },
-      { kind: 'painting', position: [-3, -9.2] },
+      /* The living half, west of the door. */
+      { kind: 'rug', position: [-7, 2], scale: 1.35, solid: false },
+      { kind: 'sofa', position: [-7.5, 5.2], rotation: Math.PI },
+      { kind: 'armchair', position: [-3.6, 3.4], rotation: -Math.PI / 2 },
+      { kind: 'table', position: [-7, 1.6] },
+      { kind: 'bookshelf', position: [-12.7, -5], rotation: Math.PI / 2 },
+      { kind: 'bookshelf', position: [-12.7, -1.5], rotation: Math.PI / 2 },
+      { kind: 'lamp', position: [-12.4, 7.4] },
+      { kind: 'plant', position: [-12.8, 9] },
+      { kind: 'painting', position: [-7, -10.2] },
+
+      /* The kitchen, and the table they actually eat at. */
+      { kind: 'stove', position: [2.6, 9.6], rotation: Math.PI },
+      { kind: 'kitchen', position: [6.5, 9.6], rotation: Math.PI },
+      { kind: 'kitchen', position: [10.6, 9.6], rotation: Math.PI },
+      { kind: 'table', position: [7.5, 3.6] },
+      { kind: 'chair', position: [7.5, 1.8] },
+      { kind: 'chair', position: [7.5, 5.4], rotation: Math.PI },
+      { kind: 'chair', position: [5.4, 3.6], rotation: Math.PI / 2 },
+      { kind: 'chair', position: [9.6, 3.6], rotation: -Math.PI / 2 },
+      { kind: 'plant', position: [12.9, 6.4] },
+
+      /* And the board that never gets put away. */
+      { kind: 'chessTable', position: [10.2, -6.4] },
+      { kind: 'chair', position: [10.2, -8.4], rotation: Math.PI },
+      { kind: 'chair', position: [8, -6.4], rotation: Math.PI / 2 },
+    ],
+    links: [
+      {
+        id: 'house-down',
+        kind: 'stairsDown',
+        label: 'the stairs to the cellar',
+        position: [3.4, -7.6],
+        to: 'house-basement',
+        arrive: [0, 5.4],
+        journal: {
+          title: 'The basement stairs',
+          body: 'Under Kitsos House: the basement where the family he grew up in still sits round the table, and the garage, the library and the lab off it.',
+        },
+      },
+      {
+        id: 'house-hall',
+        kind: 'locked',
+        label: 'the door down the hall',
+        position: [-2.6, -10.3],
+        lines: [
+          'Locked. Behind it, according to the plans, is the rest of the house.',
+          'The bedrooms are down there. So is a room that has been "the office" for two years, and a cupboard nobody has opened since the survey.',
+          'The handle turns about a centimetre and stops. Whatever is on the other side of it, it is not finished yet.',
+          'Come back in a later commit.',
+        ],
+      },
     ],
     exhibits: [
       {
         id: 'house-card',
         kind: 'board',
         label: 'the trainer card',
-        position: [1.5, -9.1],
+        position: [1.5, -10.1],
         panel: {
           kicker: 'Kitsos House',
           title: 'Who lives here',
@@ -66,27 +112,376 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'Kitsos House',
-          body: 'Athens-based senior full stack engineer and technical lead — Java, Spring Boot, React and AWS, with the teams to match.',
-        },
-      },
-      {
-        id: 'house-workshop',
-        kind: 'case',
-        label: 'the workbench',
-        position: [-8.5, -8.4],
-        rotation: 0,
-        panel: {
-          kicker: 'Kitsos House',
-          title: 'The workbench',
-          sections: WORKSHOP_SECTIONS,
+          body: 'Athens-based senior full stack engineer and technical lead \u2014 Java, Spring Boot, React and AWS, with the teams to match.',
         },
       },
       {
         id: 'house-key',
         kind: 'key',
         label: 'the shelf by the chessboard',
-        position: [6, -6.6],
+        position: [12.9, -8.6],
         keyId: 'key-house',
+      },
+    ],
+  },
+
+  /* ---------------------------- downstairs ---------------------------- */
+
+  /**
+   * The basement, and the hub of everything under the house: the table the
+   * family he grew up in still sits round, with the garage, the library and
+   * the lab off it. Three doors and a staircase, which is why the middle of
+   * the floor is kept clear.
+   */
+  {
+    id: 'house-basement',
+    name: 'Kitsos House',
+    kicker: 'The basement',
+    building: 'house',
+    half: [15, 11],
+    floor: '#9a8f7e',
+    rug: '#8a5a3c',
+    wall: '#e0d6c4',
+    accent: '#c2566b',
+    spawn: [0, 5.4],
+    underground: true,
+    exit: { to: 'house', arrive: [3.4, -5.4], label: 'Back up the stairs' },
+    props: [
+      { kind: 'stairs', position: [0, 9.4], rotation: Math.PI, solid: false },
+
+      /* The table, laid for all seven of them. */
+      { kind: 'rug', position: [0, -5], scale: 1.5, solid: false },
+      { kind: 'longTable', position: [0, -5] },
+      { kind: 'chair', position: [-6.4, -5], rotation: Math.PI / 2 },
+      { kind: 'chair', position: [6.4, -5], rotation: -Math.PI / 2 },
+      { kind: 'chair', position: [-2.6, -7.9] },
+      { kind: 'chair', position: [0, -7.9] },
+      { kind: 'chair', position: [2.6, -7.9] },
+      { kind: 'chair', position: [-1.3, -2.1], rotation: Math.PI },
+      { kind: 'chair', position: [1.3, -2.1], rotation: Math.PI },
+
+      /* And the wall of them, which is the whole point of the room. */
+      { kind: 'photoWall', position: [-4, -10.7], solid: false },
+      { kind: 'lamp', position: [-12.6, -8.6] },
+      { kind: 'plant', position: [12.8, -9.2] },
+      { kind: 'shelfUnit', position: [11.8, 9.6] },
+      { kind: 'boiler', position: [-13.4, 9.6] },
+    ],
+    links: [
+      {
+        id: 'basement-garage',
+        kind: 'door',
+        label: 'the door to the garage',
+        position: [-14.8, 2.5],
+        rotation: Math.PI / 2,
+        to: 'house-garage',
+        arrive: [0, 4.4],
+      },
+      {
+        id: 'basement-library',
+        kind: 'door',
+        label: 'the door to the library',
+        position: [-14.8, 7.5],
+        rotation: Math.PI / 2,
+        to: 'house-library',
+        arrive: [0, 3.4],
+      },
+      {
+        id: 'basement-lab',
+        kind: 'door',
+        label: 'the door to the lab',
+        position: [14.8, 5],
+        rotation: -Math.PI / 2,
+        to: 'house-lab',
+        arrive: [0, 3.4],
+      },
+    ],
+    exhibits: [
+      {
+        id: 'basement-family',
+        kind: 'board',
+        label: 'the photographs',
+        position: [5, -10.6],
+        panel: {
+          kicker: 'The basement',
+          title: 'The house I grew up in',
+          sections: FAMILY_SECTIONS,
+        },
+        journal: {
+          title: 'Seven at the table',
+          body: 'Father, mother, three brothers, one sister and him. A big family is a small organisation: nobody hands you a role, you find the thing that needs doing.',
+        },
+      },
+    ],
+  },
+
+  {
+    id: 'house-garage',
+    name: 'Kitsos House',
+    kicker: 'The garage',
+    building: 'house',
+    half: [13, 9],
+    floor: '#7e7a72',
+    rug: '#8a5a3c',
+    wall: '#cfc9bc',
+    accent: '#d9853f',
+    spawn: [0, 4.4],
+    underground: true,
+    exit: {
+      to: 'house-basement',
+      arrive: [-13, 2.5],
+      label: 'Back to the basement',
+    },
+    props: [
+      /* The shutter it all came in through, with the car nosed at it. */
+      { kind: 'shutter', position: [-5, -9.2], solid: false },
+      { kind: 'car', position: [-5, -3], rotation: Math.PI / 2 },
+      { kind: 'bicycle', position: [-12.2, 2], rotation: Math.PI / 2 },
+
+      /* The bench along the back wall, and the board over it. */
+      { kind: 'workbench', position: [5.6, -8.2] },
+      { kind: 'pegboard', position: [5.6, -8.9], solid: false },
+      { kind: 'toolChest', position: [9.6, -8.2] },
+      { kind: 'shelfUnit', position: [-11.4, -8.2] },
+      { kind: 'crate', position: [11.6, 4] },
+      { kind: 'crate', position: [11.4, 6.2] },
+      { kind: 'lamp', position: [11.8, -4.4] },
+    ],
+    exhibits: [
+      {
+        id: 'garage-bench',
+        kind: 'case',
+        label: 'the workbench',
+        position: [0, -8.3],
+        panel: {
+          kicker: 'The garage',
+          title: 'The garage',
+          sections: GARAGE_SECTIONS,
+        },
+        journal: {
+          title: 'The garage',
+          body: 'Tools on the board, bench along the back wall, car on one side and the bicycle on the other. Half the furniture upstairs was built here.',
+        },
+      },
+    ],
+  },
+
+  {
+    id: 'house-lab',
+    name: 'Kitsos House',
+    kicker: 'The lab',
+    building: 'house',
+    half: [11, 8],
+    floor: '#5f6470',
+    rug: '#2f4a6b',
+    wall: '#c9cdd4',
+    accent: '#3fa9d4',
+    spawn: [0, 3.4],
+    underground: true,
+    exit: {
+      to: 'house-basement',
+      arrive: [13, 5],
+      label: 'Back to the basement',
+    },
+    props: [
+      /* One small server doing far more jobs than it was ever sold for. */
+      { kind: 'serverRack', position: [-9.4, -6] },
+      { kind: 'serverRack', position: [-6.4, -6] },
+      { kind: 'desk', position: [4, -6.4] },
+      { kind: 'monitor', position: [3.2, -7], solid: false },
+      { kind: 'monitor', position: [4.8, -7], solid: false },
+      { kind: 'chair', position: [4, -4.6], rotation: Math.PI },
+
+      /* And the bench where things get soldered until they blink. */
+      { kind: 'desk', position: [9.4, -1.6], rotation: -Math.PI / 2 },
+      { kind: 'chair', position: [7.4, -1.6], rotation: -Math.PI / 2 },
+      {
+        kind: 'monitor',
+        position: [10, -2.4],
+        rotation: -Math.PI / 2,
+        solid: false,
+      },
+      { kind: 'shelfUnit', position: [-9.2, 6.4] },
+      { kind: 'crate', position: [8.8, 6.4] },
+      { kind: 'whiteboard', position: [0, -7.8], solid: false },
+      { kind: 'lamp', position: [-9.6, 2.4] },
+    ],
+    exhibits: [
+      {
+        id: 'lab-server',
+        kind: 'terminal',
+        label: 'the server',
+        position: [-8.2, -2.6],
+        rotation: Math.PI / 2,
+        panel: {
+          kicker: 'The lab',
+          title: 'The home lab',
+          sections: LAB_SECTIONS,
+        },
+        journal: {
+          title: 'The home lab',
+          body: 'A mini server on Linux and a bench of electronics. Everything he knows about running things he learned breaking his own machine at eleven at night, with nobody to escalate to.',
+        },
+      },
+    ],
+  },
+
+  {
+    id: 'house-library',
+    name: 'Kitsos House',
+    kicker: 'The library',
+    building: 'house',
+    half: [11, 8],
+    floor: '#8a6a4a',
+    rug: '#5d3f6b',
+    wall: '#e8dcc2',
+    accent: '#8a7233',
+    spawn: [0, 3.4],
+    underground: true,
+    exit: {
+      to: 'house-basement',
+      arrive: [-13, 7.5],
+      label: 'Back to the basement',
+    },
+    props: [
+      { kind: 'rug', position: [0, 0], solid: false },
+
+      /* The ones he goes back to, west wall. */
+      { kind: 'bookshelf', position: [-10.2, -4.4], rotation: Math.PI / 2 },
+      { kind: 'bookshelf', position: [-10.2, -1], rotation: Math.PI / 2 },
+      { kind: 'bookshelf', position: [-10.2, 2.4], rotation: Math.PI / 2 },
+
+      /* Verne, east wall, where he has always been. */
+      { kind: 'bookshelf', position: [10.2, -4.4], rotation: -Math.PI / 2 },
+      { kind: 'bookshelf', position: [10.2, -1], rotation: -Math.PI / 2 },
+
+      /* And the run along the back, one panel of which is not a shelf. */
+      { kind: 'bookshelf', position: [-4, -7.6] },
+      { kind: 'bookshelf', position: [4, -7.6] },
+
+      { kind: 'armchair', position: [0, 1.2], rotation: Math.PI },
+      { kind: 'table', position: [-2.8, 1.2], scale: 0.7 },
+      { kind: 'lamp', position: [3, 2.2] },
+    ],
+    links: [
+      {
+        id: 'library-playroom',
+        kind: 'hatch',
+        label: 'the shelf that swings',
+        position: [0, -7.8],
+        to: 'house-playroom',
+        arrive: [0, 2.6],
+        needs: 'playroom',
+        lines: ['The shelf swings out on a hinge nobody fitted by accident.'],
+        journal: {
+          title: 'The room that is not on the plans',
+          body: 'Behind the middle shelf in the library: a television, a Switch, two beanbags and the posters he never grew out of.',
+        },
+      },
+    ],
+    exhibits: [
+      {
+        id: 'library-shelf',
+        kind: 'case',
+        label: 'the bookshelf',
+        position: [-8.4, -1],
+        rotation: Math.PI / 2,
+        panel: {
+          kicker: 'The library',
+          title: 'The shelf downstairs',
+          sections: LIBRARY_SECTIONS,
+        },
+        journal: {
+          title: 'The shelf downstairs',
+          body: 'Dostoevsky, Hugo, Feynman, Orwell, Remarque, Steinbeck \u2014 six books he has gone back to, in a room with one shelf that turns out not to be only a shelf.',
+        },
+        reveals: {
+          id: 'playroom',
+          title: 'The shelf moves',
+          body: 'Taking a book off the end of the run, the whole middle shelf shifts a centimetre. There is a hinge behind it. There is a room behind that.',
+        },
+      },
+      {
+        id: 'library-verne',
+        kind: 'case',
+        label: 'the Verne shelf',
+        position: [8.4, -1],
+        rotation: -Math.PI / 2,
+        panel: {
+          kicker: 'The library',
+          title: 'The Verne shelf',
+          sections: VERNE_SECTIONS,
+        },
+        journal: {
+          title: 'The Verne shelf',
+          body: 'Five Weeks in a Balloon, Journey to the Centre of the Earth, Twenty Thousand Leagues, The Mysterious Island, A Captain at Fifteen, and A Drama in Livonia. Mostly people somewhere impossible, building their way out \u2014 which turned out to be a career.',
+        },
+      },
+    ],
+  },
+
+  {
+    id: 'house-playroom',
+    name: 'Kitsos House',
+    kicker: 'The room that is not on the plans',
+    building: 'house',
+    half: [8, 7],
+    floor: '#6d5f7a',
+    rug: '#3f4a86',
+    wall: '#2f2a3d',
+    accent: '#ffd166',
+    spawn: [0, 2.6],
+    underground: true,
+    exit: {
+      to: 'house-library',
+      arrive: [0, -6],
+      label: 'Back through the shelf',
+    },
+    props: [
+      { kind: 'rug', position: [0, -0.6], scale: 0.9, solid: false },
+      { kind: 'tv', position: [0, -6.4] },
+      { kind: 'beanbag', position: [-2.6, 0.6] },
+      { kind: 'beanbag', position: [2.6, 0.6] },
+      { kind: 'table', position: [0, -1.4], scale: 0.7 },
+      {
+        kind: 'poster',
+        position: [-7.8, -2.6],
+        rotation: Math.PI / 2,
+        color: '#1b2340',
+        solid: false,
+      },
+      {
+        kind: 'poster',
+        position: [-7.8, 1.4],
+        rotation: Math.PI / 2,
+        color: '#7a1f2b',
+        solid: false,
+      },
+      {
+        kind: 'poster',
+        position: [7.8, -2.6],
+        rotation: -Math.PI / 2,
+        color: '#20402c',
+        solid: false,
+      },
+      { kind: 'shelfUnit', position: [6.4, -6.4], scale: 0.8 },
+      { kind: 'lamp', position: [-6.6, 5.2] },
+    ],
+    exhibits: [
+      {
+        id: 'playroom-shelf',
+        kind: 'case',
+        label: 'the console under the television',
+        position: [3.4, -6.1],
+        panel: {
+          kicker: 'The playroom',
+          title: 'The room that is not on the plans',
+          sections: PLAYROOM_SECTIONS,
+        },
+        journal: {
+          title: 'Mario, still',
+          body: 'A Switch docked under the television, two beanbags, and the posters he never grew out of: Star Wars in order, the Marvel run in sequence.',
+        },
       },
     ],
   },

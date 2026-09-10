@@ -4,7 +4,7 @@ import type { Vec2 } from '../types'
 export const DANCEFLOOR = { x: 0, z: 0, radius: 9 }
 
 /**
- * The button, on the far side of the south road from the games board. It is
+ * The button, on the far side of Collaboration Road from the games board. It
  * out in the square all year; it just has nothing to switch on until dark.
  */
 export const PARTY_BUTTON = {

@@ -1,69 +1,124 @@
 /**
- * The night watch on a gate that is shut, and the moment they last had to
- * raise their voice.
+ * The night watch on a gate that is shut, and how far they are prepared to
+ * let you walk before they do something about it.
  *
- * Written by the player controller when somebody walks up on a guarded gate
- * after dark, read by <Npcs/> so the sentries can turn round and put a hand
- * out. It lives out here so a whistle never costs a React render.
+ * They notice you a good way out and blow the whistle. Keep coming and they
+ * simply will not have it: there is a line across the road that the player
+ * gets put back outside of, every frame, for as long as they lean on it, and
+ * the sentries themselves come off their posts to stand in the way.
+ *
+ * Stepped by the player controller and read by <Npcs/>, so none of it costs
+ * a React render.
  */
 import { BUILDINGS } from '../data/world'
 
-/** How long they keep looking at you once they have challenged you. */
+/** How far out they notice somebody coming. */
+const CHALLENGE_RANGE = 13
+/** And the line, measured from the gate, that nobody gets inside of. */
+const HOLD_LINE = 5
+/**
+ * A little slack outside it that still counts as leaning on the line, so
+ * somebody pressed up against it keeps being shouted at rather than sitting
+ * in silence exactly on the mark.
+ */
+const LEANING = 0.6
+/** Seconds between blasts while somebody keeps leaning on that line. */
+const BLAST_GAP = 1.5
+/** How long they stay squared up after you back off. */
 const CHALLENGE_TIME = 3.6
-/** How close to the gate you get before somebody says something. */
-const CHALLENGE_RANGE = 5.5
 /** How far from the challenge a sentry has to be to have heard it. */
-export const CHALLENGE_EARSHOT = 22
+export const CHALLENGE_EARSHOT = 26
 
 export const GUARD = {
   /** Seconds of the last challenge still to run. */
   left: 0,
-  /** Where whoever was challenged is standing. */
+  /** Where whoever is being challenged is standing. */
   x: 0,
   z: 0,
-  /** True while you are still inside the zone, so it fires once per approach. */
+  /** True while somebody is actually being held off the line. */
+  holding: false,
+  /** True while you are still inside the zone, so a walk-up fires once. */
   near: false,
+  /** Seconds until the next blast. */
+  blast: 0,
 }
 
 /** The gates that have soldiers on them rather than a dark lobby. */
 const GUARDED = BUILDINGS.filter((b) => b.closesAtNight && b.sentries)
 
-/** Whistles you back where you came from. */
-export function challenge(x: number, z: number) {
+function stand(x: number, z: number) {
   GUARD.left = CHALLENGE_TIME
   GUARD.x = x
   GUARD.z = z
 }
 
 /**
- * Stepped once a frame while you are outdoors. Returns true on the one frame
- * a whistle should sound — walking up on the gate is enough to earn it, and
- * you have to walk off again before you earn another.
+ * Holds the line at a guarded gate. Mutates the position tuple, putting it
+ * back outside the cordon, and returns true on any frame the whistle blows —
+ * once when you walk up, then over and over while you try to push through.
  */
-export function watchGates(
-  x: number,
-  z: number,
+export function holdTheLine(
+  at: [number, number],
   delta: number,
   night: boolean,
 ): boolean {
   GUARD.left = Math.max(0, GUARD.left - delta)
+  GUARD.blast = Math.max(0, GUARD.blast - delta)
+
   if (!night) {
     GUARD.near = false
+    GUARD.holding = false
     return false
   }
 
-  let near = false
+  let gate: (typeof GUARDED)[number] | null = null
+  let dist = Infinity
   for (const b of GUARDED) {
-    if (Math.hypot(b.door[0] - x, b.door[1] - z) <= CHALLENGE_RANGE) {
-      near = true
-      break
+    const d = Math.hypot(b.door[0] - at[0], b.door[1] - at[1])
+    if (d < dist) {
+      dist = d
+      gate = b
     }
   }
 
-  const first = near && !GUARD.near
-  GUARD.near = near
-  if (!first) return false
+  if (!gate || dist > CHALLENGE_RANGE) {
+    GUARD.near = false
+    GUARD.holding = false
+    return false
+  }
 
-  challenge(x, z)
-  return true
+  const walkedUp = !GUARD.near
+  GUARD.near = true
+
+  // Inside the line you get walked straight back out of it. There is no
+  // negotiating with this: it is applied every frame you are inside.
+  GUARD.holding = dist < HOLD_LINE + LEANING
+  if (dist < HOLD_LINE) {
+    let ox = at[0] - gate.door[0]
+    let oz = at[1] - gate.door[1]
+    let away = Math.hypot(ox, oz)
+    if (away < 0.01) {
+      // Standing exactly on the gate — arriving by map does that. Walked
+      // back out the way the door faces.
+      ox = gate.door[0] - gate.position[0]
+      oz = gate.door[1] - gate.position[1]
+      away = Math.hypot(ox, oz) || 1
+    }
+    at[0] = gate.door[0] + (ox / away) * HOLD_LINE
+    at[1] = gate.door[1] + (oz / away) * HOLD_LINE
+  }
+
+  stand(at[0], at[1])
+
+  if (walkedUp || (GUARD.holding && GUARD.blast <= 0)) {
+    GUARD.blast = BLAST_GAP
+    return true
+  }
+  return false
+}
+
+/** A deliberate try at the handle earns one whether you moved or not. */
+export function challenge(x: number, z: number) {
+  stand(x, z)
+  GUARD.blast = BLAST_GAP
 }

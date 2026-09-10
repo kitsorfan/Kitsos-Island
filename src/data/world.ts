@@ -1,4 +1,5 @@
 import type { Building, KeyItem, Mission, Npc, SignPost, Vec2 } from '../types'
+import { HOME_FAMILY, OLD_FAMILY } from './family'
 import { PROFILE } from './profile'
 
 /** Everything inside this radius is flat, walkable ground. */
@@ -120,8 +121,8 @@ export const BUILDINGS: Building[] = [
     height: 9,
     accent: '#6f7f4a',
     closesAtNight: [
-      'The gate is chained and the guardhouse lamp is lit. Two sentries on it, and neither of them has moved.',
-      'One of them will talk to you. Getting past them is not on the table.',
+      'The chain is on the gate and the searchlight is coming round again. Two sentries between you and it, and neither has taken their eyes off you.',
+      'One more step and a hand goes flat on your chest and walks you back. Getting through tonight is not on the table.',
     ],
     sentries: true,
   },
@@ -184,7 +185,12 @@ export const KEYS: KeyItem[] = [
     buildingId: 'work',
     color: '#2fb59a',
   },
-  { id: 'key-camp', name: 'Footlocker Key', buildingId: 'army', color: '#8a9a5a' },
+  {
+    id: 'key-camp',
+    name: 'Footlocker Key',
+    buildingId: 'army',
+    color: '#8a9a5a',
+  },
   {
     id: 'key-school',
     name: 'Cabinet Key',
@@ -256,7 +262,12 @@ export const NPCS: Npc[] = [
     area: 'island',
     position: [8, 10],
     facing: Math.PI,
-    colors: { skin: SKIN.tan, hair: '#4a3526', shirt: '#3d5a98', pants: '#2c3242' },
+    colors: {
+      skin: SKIN.tan,
+      hair: '#4a3526',
+      shirt: '#3d5a98',
+      pants: '#2c3242',
+    },
     prop: 'glasses',
     route: [
       [8, 10],
@@ -268,8 +279,8 @@ export const NPCS: Npc[] = [
     lines: [
       'Welcome to KITSOS TOWN! Small island, big CV.',
       `Everything here belongs to ${PROFILE.firstName} "${PROFILE.nickname}" ${PROFILE.lastName} — a senior full stack engineer and technical lead out of ${PROFILE.location}.`,
-      'Seven roads leave this square. Academy north, Work east, School west, House and Camp south, Radio Center due south.',
-      'And north-west, on the cape, the Old Lighthouse. Sealed for years. Five district keys open it — one hidden in each building.',
+      'Seven roads leave this square, and every one of them is named for what he took out of it. Motivation, Discipline, Curiosity, Caring, Leadership, Collaboration.',
+      'And north-west, Freedom Road, out to the Old Lighthouse on the cape. Sealed for years. Five district keys open it — one hidden in each building.',
       'Press M for the map if the walk gets long. Once you have found a place, you can travel straight back to it.',
     ],
     journal: {
@@ -284,7 +295,12 @@ export const NPCS: Npc[] = [
     area: 'island',
     position: [-24, 20],
     facing: Math.PI * 0.35,
-    colors: { skin: SKIN.light, hair: '#8a4a2c', shirt: '#d94f6b', pants: '#3a3f4d' },
+    colors: {
+      skin: SKIN.light,
+      hair: '#8a4a2c',
+      shirt: '#d94f6b',
+      pants: '#3a3f4d',
+    },
     route: [
       [-24, 20],
       [-19, 25],
@@ -312,7 +328,12 @@ export const NPCS: Npc[] = [
     area: 'island',
     position: [27, 16],
     facing: -Math.PI * 0.75,
-    colors: { skin: SKIN.deep, hair: '#2b2b2b', shirt: '#5c8a3a', pants: '#4a4436' },
+    colors: {
+      skin: SKIN.deep,
+      hair: '#2b2b2b',
+      shirt: '#5c8a3a',
+      pants: '#4a4436',
+    },
     prop: 'cap',
     lines: [
       'Sit down, I have white. …No? Fine.',
@@ -332,7 +353,12 @@ export const NPCS: Npc[] = [
     area: 'island',
     position: [-14, -14],
     facing: 0.4,
-    colors: { skin: SKIN.tan, hair: '#6b5b4a', shirt: '#7a6fb0', pants: '#3a3f4d' },
+    colors: {
+      skin: SKIN.tan,
+      hair: '#6b5b4a',
+      shirt: '#7a6fb0',
+      pants: '#3a3f4d',
+    },
     route: [
       [-14, -14],
       [14, -18],
@@ -342,7 +368,7 @@ export const NPCS: Npc[] = [
     pace: 1.5,
     lines: [
       'Lovely square, is it not? He rebuilt those benches himself.',
-      'Careful on the north road — the students cycle like maniacs.',
+      'Careful on Motivation Road — the students cycle like maniacs.',
     ],
   },
   {
@@ -352,7 +378,12 @@ export const NPCS: Npc[] = [
     area: 'island',
     position: [24, -16],
     facing: Math.PI,
-    colors: { skin: SKIN.light, hair: '#c08a4a', shirt: '#4fb0c0', pants: '#4c4358' },
+    colors: {
+      skin: SKIN.light,
+      hair: '#c08a4a',
+      shirt: '#4fb0c0',
+      pants: '#4c4358',
+    },
     route: [
       [24, -16],
       [32, 10],
@@ -361,7 +392,7 @@ export const NPCS: Npc[] = [
     ],
     pace: 1.3,
     lines: [
-      'Looking for the Lighthouse? North-west cape, follow the old road.',
+      'Looking for the Lighthouse? Freedom Road, north-west, out to the cape.',
       'Locked since before I moved here. Five keys, they say. One per district.',
     ],
   },
@@ -373,7 +404,12 @@ export const NPCS: Npc[] = [
     area: 'island',
     position: [86, 20],
     facing: -Math.PI * 0.55,
-    colors: { skin: SKIN.tan, hair: '#453224', shirt: '#f0653f', pants: '#2c3242' },
+    colors: {
+      skin: SKIN.tan,
+      hair: '#453224',
+      shirt: '#f0653f',
+      pants: '#2c3242',
+    },
     route: [
       [86, 20],
       [72, 52],
@@ -399,7 +435,12 @@ export const NPCS: Npc[] = [
     area: 'island',
     position: [-104, 20],
     facing: Math.PI * 0.55,
-    colors: { skin: SKIN.deep, hair: '#7d7d7d', shirt: '#3f6f8c', pants: '#43484f' },
+    colors: {
+      skin: SKIN.deep,
+      hair: '#7d7d7d',
+      shirt: '#3f6f8c',
+      pants: '#43484f',
+    },
     prop: 'cap',
     lines: [
       'Sea is calm. Good day for a long conversation.',
@@ -420,9 +461,16 @@ export const NPCS: Npc[] = [
     area: 'island',
     position: [-53, 44],
     facing: Math.PI * 0.7,
-    colors: { skin: SKIN.light, hair: '#8f8f8f', shirt: '#c96fa0', pants: '#4c4358' },
+    colors: {
+      skin: SKIN.light,
+      hair: '#8f8f8f',
+      shirt: '#c96fa0',
+      pants: '#4c4358',
+    },
     gives: 'm-house',
-    missionLines: ['Shelf by the chessboard. You cannot miss it, he never tidies.'],
+    missionLines: [
+      'Shelf by the chessboard. You cannot miss it, he never tidies.',
+    ],
     lines: [
       'That is his house, right there. Lights on late, always.',
       'Greek is his mother tongue, English at proficiency — the Michigan ECPE — and French to B2, he has the DELF for it.',
@@ -441,7 +489,12 @@ export const NPCS: Npc[] = [
     area: 'island',
     position: [-22, -60],
     facing: Math.PI * 0.15,
-    colors: { skin: SKIN.tan, hair: '#3b2a1e', shirt: '#e2a33f', pants: '#39435c' },
+    colors: {
+      skin: SKIN.tan,
+      hair: '#3b2a1e',
+      shirt: '#e2a33f',
+      pants: '#39435c',
+    },
     route: [
       [-22, -60],
       [-8, -56],
@@ -466,7 +519,12 @@ export const NPCS: Npc[] = [
     area: 'island',
     position: [-66, -36],
     facing: Math.PI * 0.1,
-    colors: { skin: SKIN.deep, hair: '#191919', shirt: '#d94f6b', pants: '#2f5aa8' },
+    colors: {
+      skin: SKIN.deep,
+      hair: '#191919',
+      shirt: '#d94f6b',
+      pants: '#2f5aa8',
+    },
     route: [
       [-66, -36],
       [-57, -32],
@@ -490,11 +548,18 @@ export const NPCS: Npc[] = [
     area: 'island',
     position: [66, 40],
     facing: -Math.PI * 0.8,
-    colors: { skin: SKIN.tan, hair: '#3a3129', shirt: '#6f7f4a', pants: '#4c5238' },
+    colors: {
+      skin: SKIN.tan,
+      hair: '#3a3129',
+      shirt: '#6f7f4a',
+      pants: '#4c5238',
+    },
     prop: 'beret',
     shift: 'day',
     gives: 'm-camp',
-    missionLines: ['Footlocker. End of the bunks. Do not rearrange my barracks.'],
+    missionLines: [
+      'Footlocker. End of the bunks. Do not rearrange my barracks.',
+    ],
     lines: [
       'Halt. …Relax, civilian, the camp is open today.',
       'Second Lieutenant Orfanopoulos, reservist. September 2022 to November 2023, straight out of NTUA.',
@@ -518,7 +583,12 @@ export const NPCS: Npc[] = [
     area: 'university',
     position: [-6, 2],
     facing: Math.PI * 0.85,
-    colors: { skin: SKIN.light, hair: '#d8d8d8', shirt: '#4b5b8c', pants: '#33384a' },
+    colors: {
+      skin: SKIN.light,
+      hair: '#d8d8d8',
+      shirt: '#4b5b8c',
+      pants: '#33384a',
+    },
     prop: 'glasses',
     gives: 'm-academy',
     missionLines: ['The thesis display, past the lectern. Mind the cables.'],
@@ -543,7 +613,12 @@ export const NPCS: Npc[] = [
     area: 'university',
     position: [10, -4],
     facing: -Math.PI * 0.6,
-    colors: { skin: SKIN.deep, hair: '#1f1a17', shirt: '#7b5fd0', pants: '#2f3446' },
+    colors: {
+      skin: SKIN.deep,
+      hair: '#1f1a17',
+      shirt: '#7b5fd0',
+      pants: '#2f3446',
+    },
     lines: [
       'The lab bench is open, mind the cables.',
       'See the certificate wall over there? MIT Open Learning for the AI foundations, CITI Program for biomedical research and HIPAA, Docker from IBM.',
@@ -563,7 +638,12 @@ export const NPCS: Npc[] = [
     area: 'work',
     position: [-7, 5],
     facing: Math.PI * 0.6,
-    colors: { skin: SKIN.light, hair: '#5a3a24', shirt: '#2fb59a', pants: '#2b3140' },
+    colors: {
+      skin: SKIN.light,
+      hair: '#5a3a24',
+      shirt: '#2fb59a',
+      pants: '#2b3140',
+    },
     gives: 'm-work',
     missionLines: ['Server rack, back wall. Do not touch anything blinking.'],
     lines: [
@@ -587,7 +667,12 @@ export const NPCS: Npc[] = [
     area: 'work',
     position: [9, 6],
     facing: -Math.PI * 0.2,
-    colors: { skin: SKIN.deep, hair: '#241c16', shirt: '#3f7bd6', pants: '#3a3f4d' },
+    colors: {
+      skin: SKIN.deep,
+      hair: '#241c16',
+      shirt: '#3f7bd6',
+      pants: '#3a3f4d',
+    },
     prop: 'headset',
     lines: [
       'Greece, Boston, Morocco — I am the Morocco part of the stand-up.',
@@ -607,7 +692,12 @@ export const NPCS: Npc[] = [
     area: 'work',
     position: [12, -6],
     facing: Math.PI * 0.9,
-    colors: { skin: SKIN.tan, hair: '#4d3a2a', shirt: '#586b7d', pants: '#31363f' },
+    colors: {
+      skin: SKIN.tan,
+      hair: '#4d3a2a',
+      shirt: '#586b7d',
+      pants: '#31363f',
+    },
     prop: 'hardhat',
     lines: [
       'You want the interesting part? The integrations.',
@@ -628,7 +718,12 @@ export const NPCS: Npc[] = [
     area: 'work',
     position: [-11, -7],
     facing: Math.PI * 0.25,
-    colors: { skin: SKIN.light, hair: '#2e2a26', shirt: '#1f4fa0', pants: '#2b3140' },
+    colors: {
+      skin: SKIN.light,
+      hair: '#2e2a26',
+      shirt: '#1f4fa0',
+      pants: '#2b3140',
+    },
     lines: [
       'Before the startup, there was the bank.',
       'November 2023 to May 2024, DevOps Engineer at IBM — picked for the IBM Associate Program.',
@@ -648,7 +743,12 @@ export const NPCS: Npc[] = [
     area: 'school',
     position: [-6, -3],
     facing: -Math.PI * 0.35,
-    colors: { skin: SKIN.light, hair: '#6b4a30', shirt: '#e6a63c', pants: '#3d4353' },
+    colors: {
+      skin: SKIN.light,
+      hair: '#6b4a30',
+      shirt: '#e6a63c',
+      pants: '#3d4353',
+    },
     gives: 'm-school',
     missionLines: ['Trophy case, beside the blackboard. Quietly, please.'],
     lines: [
@@ -674,7 +774,12 @@ export const NPCS: Npc[] = [
     // plaza — which is the only direction anybody arrives from at this hour.
     position: [64, -29.5],
     facing: -1.15,
-    colors: { skin: SKIN.tan, hair: '#2b2b2b', shirt: '#2f4858', pants: '#2b2f38' },
+    colors: {
+      skin: SKIN.tan,
+      hair: '#2b2b2b',
+      shirt: '#2f4858',
+      pants: '#2b2f38',
+    },
     prop: 'cap',
     hand: 'flashlight',
     shift: 'night',
@@ -695,12 +800,18 @@ export const NPCS: Npc[] = [
     // gate, which is as far as anybody gets after dark.
     position: [56, 41.5],
     facing: -2.2,
-    colors: { skin: SKIN.tan, hair: '#3a3129', shirt: '#6f7f4a', pants: '#4c5238' },
+    colors: {
+      skin: SKIN.tan,
+      hair: '#3a3129',
+      shirt: '#6f7f4a',
+      pants: '#4c5238',
+    },
     prop: 'beret',
     hand: 'flashlight',
     shift: 'night',
     lines: [
-      'Halt. The camp is sealed for the night — nothing goes in and nothing comes out before reveille.',
+      'Halt. Stop where you are — you are already closer than I let anyone get.',
+      'The camp is sealed until reveille. Nothing goes in, nothing comes out, and no, there is no exception being made tonight.',
       'Do not take it personally. That is the whole of the job: somebody stays awake so that everybody else can sleep.',
       'The Lieutenant understood that better than most of them. At the Infantry Reserve Officers School they made him cadet company leader, and he slept last and woke first, every night of it.',
       'So that when his company woke up he was already standing there, ready. Come back at first light and you can walk straight in.',
@@ -714,12 +825,19 @@ export const NPCS: Npc[] = [
     area: 'island',
     position: [64, 41.5],
     facing: -2.15,
-    colors: { skin: SKIN.deep, hair: '#241d18', shirt: '#6f7f4a', pants: '#4c5238' },
+    colors: {
+      skin: SKIN.deep,
+      hair: '#241d18',
+      shirt: '#6f7f4a',
+      pants: '#4c5238',
+    },
     prop: 'cap',
+    hand: 'flashlight',
     shift: 'night',
     lines: [
-      'Nothing goes in. The sergeant is over there if you want the reason.',
-      'This post is mine until four. Nobody has walked past it yet, and nobody is going to tonight.',
+      'Back. You do not cross this line.',
+      'Nothing goes in and nothing comes out. The sergeant will give you the reason; my job is the line.',
+      'Push it again and we do this the other way. This post is mine until four and nobody has walked past it yet.',
     ],
   },
 
@@ -730,7 +848,12 @@ export const NPCS: Npc[] = [
     area: 'radio',
     position: [-5, 3],
     facing: Math.PI * 0.4,
-    colors: { skin: SKIN.light, hair: '#2a2320', shirt: '#b95fd0', pants: '#343a4c' },
+    colors: {
+      skin: SKIN.light,
+      hair: '#2a2320',
+      shirt: '#b95fd0',
+      pants: '#343a4c',
+    },
     prop: 'headset',
     lines: [
       'Radio Center, Sofia speaking. Signal is strong today.',
@@ -742,6 +865,10 @@ export const NPCS: Npc[] = [
       body: `Reach Kitsos at ${PROFILE.email} or ${PROFILE.linkedinLabel}.`,
     },
   },
+
+  /* ------------------------ Kitsos House ------------------------- */
+  ...HOME_FAMILY,
+  ...OLD_FAMILY,
 ]
 
 export const SIGNS: SignPost[] = [
@@ -751,50 +878,53 @@ export const SIGNS: SignPost[] = [
     facing: 0,
     label: 'Town Plaza',
     lines: [
-      'KITSOS TOWN — Town Plaza. Seven roads leave this square.',
-      'North: NTUA Academy. East: Work District. West: Town School.',
-      'South-west: Kitsos House. South-east: Army Camp. Due south: Radio Center.',
-      'North-west, on the cape: the Old Lighthouse. Locked.',
-      'Press M for the map, J for the journal.',
+      'KITSOS TOWN — Town Plaza. Seven roads leave this square, and not one of them is named after where it goes.',
+      'North, Motivation Road, to the NTUA Academy. East, Discipline Road, to the Work District. West, Curiosity Road, to the Town School.',
+      'South-west, Caring Road, to Kitsos House. South-east, Leadership Road, to the Army Camp. Due south, Collaboration Road, to the Radio Center.',
+      'And north-west out to the cape: Freedom Road, and the Old Lighthouse at the end of it. Locked.',
+      'They are named for what he carried out of each of them. Press M for the map, J for the journal.',
     ],
   },
   {
     id: 'sign-north',
     position: [-4, -20],
     facing: 0,
-    label: 'North road',
+    label: 'Motivation Road',
     lines: [
-      'NTUA ACADEMY — straight on. Mind the bicycles.',
+      'MOTIVATION ROAD — the NTUA Academy, straight on. Mind the bicycles.',
       'Electrical & Computer Engineering, and the lecture hall behind it.',
+      'Five years of it. Nobody made him finish; that is rather the point of the name.',
     ],
   },
   {
     id: 'sign-east',
     position: [20, -11],
     facing: -Math.PI * 0.45,
-    label: 'East road',
+    label: 'Discipline Road',
     lines: [
-      'WORK DISTRICT — Veltiston.AI and IBM Consulting.',
+      'DISCIPLINE ROAD — the Work District. Veltiston.AI and IBM Consulting.',
       'Deploys on Thursdays. Coffee is free, the incidents are not.',
+      'Shipping the same standard on a bad week as on a good one is the whole trick.',
     ],
   },
   {
     id: 'sign-west',
     position: [-21, -9],
     facing: Math.PI * 0.6,
-    label: 'West road',
+    label: 'Curiosity Road',
     lines: [
-      'TOWN SCHOOL — where the whole thing started.',
+      'CURIOSITY ROAD — the Town School, where the whole thing started.',
       'Carry on past the school for the west beach and the dock.',
+      'Everything after this road is just the same question asked louder.',
     ],
   },
   {
     id: 'sign-cape',
     position: [-17, -18],
     facing: Math.PI * 0.25,
-    label: 'Cape road',
+    label: 'Freedom Road',
     lines: [
-      'THE OLD LIGHTHOUSE — north-west cape.',
+      'FREEDOM ROAD — the north-west cape, and the Old Lighthouse on the end of it.',
       'The door has five locks. One key waits in each district building.',
       'Nobody has opened it in years. Be the one who does.',
     ],
@@ -803,29 +933,140 @@ export const SIGNS: SignPost[] = [
     id: 'sign-south',
     position: [-4, 22],
     facing: Math.PI,
-    label: 'South road',
+    label: 'Collaboration Road',
     lines: [
-      'RADIO CENTER — straight ahead, follow the antenna.',
+      'COLLABORATION ROAD — the Radio Center, straight ahead. Follow the antenna.',
       'Open to recruiters, collaborators and old friends alike.',
+      'Nothing worth building on this island was built by one person.',
+    ],
+  },
+  {
+    id: 'sign-house',
+    // Off Caring Road itself, far enough to the side of it that nobody
+    // walks into the post on the way out of the square.
+    position: [-22.4, 11.4],
+    facing: 2.04,
+    label: 'Caring Road',
+    lines: [
+      'CARING ROAD — Kitsos House, south-west. Kyria Voula is usually on the step.',
+      'Home, and the people who made it one. Volunteering, the Foundation, the blood bank.',
+      'Everything on this road he does for nothing, which is how you know he means it.',
+    ],
+  },
+  {
+    id: 'sign-camp',
+    position: [22.1, 10.3],
+    facing: -2.005,
+    label: 'Leadership Road',
+    lines: [
+      'LEADERSHIP ROAD — the Army Camp, south-east. Ask for Sergeant Petros.',
+      'Marine Battalion, reserve. Platoon Leader and Weapons Officer.',
+      'He slept last and woke first. Nobody on this road had to be told twice.',
     ],
   },
 ]
 
 /**
- * Straight path segments (from → to). They stop at the rim of the paved plaza
- * rather than crossing it, so the square itself stays open to walk across.
+ * The ring road: a closed loop through the woods that encircles the town and
+ * crosses all seven district roads on its way round. It is the island's race
+ * circuit, and the start line is the point below, where it meets the road up
+ * to the Radio Center.
+ *
+ * The line was searched for rather than drawn: every point is at least six
+ * metres clear of every building, hill and shoreline, which is what keeps a
+ * bike at full lean on the tarmac and out of somebody's front wall. It cannot
+ * run along the coast, however much a coast road would suit it — the six
+ * hills and the Radio Center between them leave no continuous gap out there.
+ */
+export const CIRCUIT: Vec2[] = [
+  [0, 76],
+  [13.2, 74.8],
+  [23.9, 65.8],
+  [32, 55.4],
+  [37.3, 44.4],
+  [44.4, 37.3],
+  [55.4, 32],
+  [65.8, 23.9],
+  [68.9, 12.2],
+  [70, 0],
+  [67, -11.8],
+  [58.3, -21.2],
+  [53.7, -31],
+  [47.5, -39.9],
+  [39.9, -47.5],
+  [30, -52],
+  [20.5, -56.4],
+  [10.1, -57.1],
+  [0, -58],
+  [-10.1, -57.1],
+  [-21.9, -60.1],
+  [-32, -55.4],
+  [-45, -53.6],
+  [-53.6, -45],
+  [-60.6, -35],
+  [-60.1, -21.9],
+  [-63, -11.1],
+  [-70, 0],
+  [-74.8, 13.2],
+  [-71.4, 26],
+  [-62.4, 36],
+  [-50.6, 42.4],
+  [-42.4, 50.6],
+  [-36, 62.4],
+  [-24.6, 67.7],
+  [-13.2, 74.8],
+]
+
+/** The circuit as segments, which is the shape the rest of the world wants. */
+const CIRCUIT_PATHS: [Vec2, Vec2][] = CIRCUIT.map((point, i) => [
+  point,
+  CIRCUIT[(i + 1) % CIRCUIT.length],
+])
+
+/**
+ * Straight path segments (from → to). The seven spokes stop at the rim of the
+ * paved plaza rather than crossing it, so the square itself stays open to
+ * walk across; the ring road crosses every one of them.
  */
 export const PATHS: [Vec2, Vec2][] = [
-  [[0, -17], [0, -63.9]],
-  [[16, -8.2], [66, -34]],
-  [[-17.2, -5.5], [-69, -22]],
-  [[-13.1, -12.4], [-62.5, -59]],
-  [[-14.3, 10.9], [-62, 47]],
-  [[14.6, 10.5], [60, 43]],
-  [[0, 17], [0, 87]],
+  [
+    [0, -17],
+    [0, -63.9],
+  ],
+  [
+    [16, -8.2],
+    [66, -34],
+  ],
+  [
+    [-17.2, -5.5],
+    [-69, -22],
+  ],
+  [
+    [-13.1, -12.4],
+    [-62.5, -59],
+  ],
+  [
+    [-14.3, 10.9],
+    [-62, 47],
+  ],
+  [
+    [14.6, 10.5],
+    [60, 43],
+  ],
+  [
+    [0, 17],
+    [0, 87],
+  ],
   // Coastal spur out to the dock, past the school.
-  [[-69, -22], [-92, 4]],
-  [[-92, 4], [-103, 19]],
+  [
+    [-69, -22],
+    [-92, 4],
+  ],
+  [
+    [-92, 4],
+    [-103, 19],
+  ],
+  ...CIRCUIT_PATHS,
 ]
 
 export const BUILDING_BY_ID = new Map(BUILDINGS.map((b) => [b.id, b]))

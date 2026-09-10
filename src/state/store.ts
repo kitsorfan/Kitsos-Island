@@ -10,32 +10,32 @@ import {
   PLAYER_START,
 } from '../data/world'
 import { FULL_CV_SECTIONS, PROFILE, RADIO_SECTIONS } from '../data/profile'
-import type {
-  AreaId,
-  ExhibitKind,
-  HandLight,
-  PanelSection,
-  Vec2,
-} from '../types'
+import type { AreaId, Carried, ExhibitKind, PanelSection, Vec2 } from '../types'
 import * as sfx from '../game/audio'
 import { callAmalia, startParty, stopParty } from '../game/party'
 import {
   ARENA_CENTER,
   MAG_SIZE,
+  MAX_FRIENDS,
   RELOAD_MS,
   START_LIVES,
+  buildTeams,
   closeArena,
+  combatantName,
   openArena,
   pickTeams,
 } from '../game/paintball'
 import type { Side, Team } from '../game/paintball'
+import { MOTO, MOTO_START, closeRide, openRide } from '../game/moto'
 import {
-  COIN_TOTAL,
-  MOTO,
-  MOTO_START,
-  closeRide,
-  openRide,
-} from '../game/moto'
+  BOAT_START,
+  RESCUE,
+  SOULS,
+  closeWater,
+  openWater,
+} from '../game/rescue'
+import { COUNT, HEAD_START, HIDE, closeHide, openHide } from '../game/hide'
+import type { Role } from '../game/hide'
 import {
   BALLOON,
   BALLOON_START,
@@ -62,6 +62,10 @@ export type Mode =
   | 'moto'
   /** The balloon briefing, or the card at the end of a flight. */
   | 'balloon'
+  /** The hide-and-seek briefing, or the card at the end of a game. */
+  | 'hide'
+  /** The sea-rescue briefing, or the card at the end of a run. */
+  | 'rescue'
 
 export type MissionState = 'idle' | 'active' | 'done'
 
@@ -104,9 +108,10 @@ export interface PaintballGame {
 
 export interface MotoRun {
   status: 'briefing' | 'riding' | 'done'
-  /** Coins in the bag, and how long they took. Filled in at the end. */
-  coins: number
+  /** Where you came of the four, and the race and best-lap times with it. */
+  place: number
   seconds: number
+  best: number
   round: number
 }
 
@@ -121,6 +126,27 @@ export interface BalloonFlight {
   wrong: number
   dropped: number
   seconds: number
+  round: number
+}
+
+export interface RescueRun {
+  status: 'briefing' | 'sailing' | 'done'
+  /** How many came out of the water, and how long it took. */
+  saved: number
+  seconds: number
+  /** Everyone aboard, rather than a flare that went out. */
+  won: boolean
+  round: number
+}
+
+export interface HideGame {
+  status: 'briefing' | 'playing' | 'done'
+  /** Which way round it is being played. */
+  role: Role
+  /** How it went, read off the game when it ends. */
+  found: number
+  seconds: number
+  won: boolean
   round: number
 }
 
@@ -157,11 +183,17 @@ interface GameState {
 
   visited: Record<string, true>
   entries: JournalEntry[]
-  toast: { title: string; body: string; kind: 'journal' | 'key' | 'mission' } | null
+  toast: {
+    title: string
+    body: string
+    kind: 'journal' | 'key' | 'mission'
+  } | null
 
   keys: Record<string, true>
   missions: Record<string, MissionState>
   discovered: Record<string, true>
+  /** Things found that are not keys: a shelf that swings, and whatever next. */
+  secrets: Record<string, true>
   lighthouseOpen: boolean
   cvUnlocked: boolean
   greetingReturn: Mode
@@ -169,13 +201,15 @@ interface GameState {
   paintball: PaintballGame | null
   moto: MotoRun | null
   balloon: BalloonFlight | null
+  hide: HideGame | null
+  rescue: RescueRun | null
 
   muted: boolean
   musicOn: boolean
   /** Lights out: the island after dark. */
   night: boolean
   /** What he carries after dark. */
-  handLight: HandLight
+  handLight: Carried
   /** The square, dancing. Only after dark. */
   party: boolean
   /** True once he has walked into the middle and she has been called down. */
@@ -221,8 +255,22 @@ interface GameState {
   finishBalloon: () => void
   exitBalloon: () => void
 
+  openRescue: () => void
+  beginRescue: () => void
+  finishRescue: () => void
+  exitRescue: () => void
+
+  openHide: () => void
+  setRole: (role: Role) => void
+  beginHide: () => void
+  finishHide: (won: boolean) => void
+  exitHide: () => void
+
   openPaintball: () => void
   beginPaintball: () => void
+  toggleAlly: (id: string) => void
+  setEnemyCount: (count: number) => void
+  redrawTeams: () => void
   exitPaintball: () => void
   fireRound: () => void
   finishReload: () => void
@@ -231,6 +279,14 @@ interface GameState {
 
   enterBuilding: (id: string) => void
   leaveBuilding: () => void
+  /** Stairs and doors between the rooms of one building. */
+  goRoom: (to: string, arrive: Vec2) => void
+  /** Lets a secret out, which is what opens the doors that need one. */
+  /**
+   * Lets a secret out, which is what opens the doors that need one. The line
+   * is what the corner of the screen says about it.
+   */
+  revealSecret: (id: string, found?: { title: string; body: string }) => void
   travelTo: (buildingId: string) => void
   discover: (buildingId: string) => void
   activateMission: (id: string) => void
@@ -238,15 +294,24 @@ interface GameState {
   unlockLighthouse: () => void
 }
 
-const NPC_BY_ID = new Map(NPCS.map((n) => [n.id, n]))
-
 const JOURNAL_NPCS = NPCS.filter((n) => n.journal)
 const JOURNAL_EXHIBITS = INTERIORS.flatMap((i) =>
   i.exhibits.filter((e) => e.journal),
 )
+/**
+ * Stairs and doors file entries too, and leaving them out of the total is how
+ * the counter ended up able to read 40 of 38.
+ */
+const JOURNAL_LINKS = INTERIORS.flatMap((i) =>
+  (i.links ?? []).filter((l) => l.journal),
+)
 
-/** Everything the journal can hold: people worth remembering plus exhibits. */
-export const TOTAL_ENTRIES = JOURNAL_NPCS.length + JOURNAL_EXHIBITS.length
+/**
+ * Everything the journal can hold: people worth remembering, the exhibits,
+ * and the ways through that are worth remembering having found.
+ */
+export const TOTAL_ENTRIES =
+  JOURNAL_NPCS.length + JOURNAL_EXHIBITS.length + JOURNAL_LINKS.length
 export const TOTAL_KEYS = KEYS.length
 
 export const useGame = create<GameState>((set, get) => ({
@@ -266,12 +331,15 @@ export const useGame = create<GameState>((set, get) => ({
     MISSIONS.map((m) => [m.id, 'idle' as MissionState]),
   ),
   discovered: {},
+  secrets: {},
   lighthouseOpen: false,
   cvUnlocked: false,
   greetingReturn: 'explore',
   paintball: null,
   moto: null,
   balloon: null,
+  hide: null,
+  rescue: null,
 
   muted: false,
   musicOn: true,
@@ -354,18 +422,26 @@ export const useGame = create<GameState>((set, get) => ({
   dismissToast: () => set({ toast: null }),
   toggleMute: () => set((s) => ({ muted: !s.muted })),
   toggleMusic: () => set((s) => ({ musicOn: !s.musicOn })),
-  /** Turning the lights back on ends the party, which needs the dark. */
-  toggleNight: () =>
+  /**
+   * Turning the lights back on ends the party, which needs the dark — and is
+   * refused outright mid hide-and-seek, which needs the dark rather more.
+   */
+  toggleNight: () => {
+    if (get().hide) return
     set((s) => {
       const night = !s.night
       if (!night && s.party) stopParty()
       if (night || !s.party) return { night }
       return { night, party: false, amaliaHere: false, outfit: 'islander' }
-    }),
+    })
+  },
 
   toggleParty: () => {
-    const { night, party } = get()
+    const { night, party, hide } = get()
     if (!night) return
+    // A party walks every islander into the square to dance, which would
+    // empty every hiding place on the island. Not during a game.
+    if (hide) return
     if (party) {
       stopParty()
       sfx.cancel()
@@ -387,9 +463,15 @@ export const useGame = create<GameState>((set, get) => ({
     sfx.jingle()
     set({ amaliaHere: true, outfit: 'tuxedo' })
   },
+  /** Flashlight, torch, then nothing at all — which the camp run needs. */
   toggleHandLight: () =>
     set((s) => ({
-      handLight: s.handLight === 'flashlight' ? 'torch' : 'flashlight',
+      handLight:
+        s.handLight === 'flashlight'
+          ? 'torch'
+          : s.handLight === 'torch'
+            ? 'none'
+            : 'flashlight',
     })),
   markMoved: () => {
     if (!get().hasMoved) set({ hasMoved: true })
@@ -398,22 +480,12 @@ export const useGame = create<GameState>((set, get) => ({
   /* ----------------------------- arcade ----------------------------- */
 
   /**
-   * The board in the plaza, and the P key, both land here. All three are
-   * daylight games, so after dark this does nothing but say so.
+   * The board in the plaza, and the P key, both land here. It reads at any
+   * hour now — three of the four want daylight and one wants the dark, and
+   * the card itself says which is which.
    */
   openArcade: () => {
     const state = get()
-    if (state.night) {
-      sfx.cancel()
-      state.talk({
-        speaker: 'Games Board',
-        role: 'Closed for the night',
-        lines: [
-          'All three games are played in daylight. The button across the road is the one for after dark.',
-        ],
-      })
-      return
-    }
     if (state.area !== 'island') state.leaveBuilding()
     sfx.confirm()
     set({ mode: 'arcade', dialogue: null, panel: null, nearby: null })
@@ -431,8 +503,8 @@ export const useGame = create<GameState>((set, get) => ({
     if (state.night) return
     if (state.area !== 'island') state.leaveBuilding()
     sfx.confirm()
-    // Puts the bike back on the start line with every coin out again, so the
-    // briefing shows the island as the ride will start it.
+    // Puts all four bikes back on the grid, so the briefing shows the island
+    // exactly as the race will start it.
     openRide()
     set((s) => ({
       mode: 'moto',
@@ -441,8 +513,9 @@ export const useGame = create<GameState>((set, get) => ({
       nearby: null,
       moto: {
         status: 'briefing',
-        coins: 0,
+        place: 0,
         seconds: 0,
+        best: 0,
         round: (s.moto?.round ?? 0) + 1,
       },
     }))
@@ -457,7 +530,7 @@ export const useGame = create<GameState>((set, get) => ({
       mode: 'explore',
       area: 'island',
       nearby: null,
-      moto: { ...run, status: 'riding', coins: 0, seconds: 0 },
+      moto: { ...run, status: 'riding', place: 0, seconds: 0, best: 0 },
       spawn: {
         area: 'island',
         position: [MOTO_START.x, MOTO_START.z] as Vec2,
@@ -466,7 +539,7 @@ export const useGame = create<GameState>((set, get) => ({
     }))
   },
 
-  /** The last coin went in: park the bike and show the ride's card. */
+  /** The flag is out: park the bike and show the race's card. */
   finishMoto: () => {
     const run = get().moto
     if (!run || run.status !== 'riding') return
@@ -476,8 +549,9 @@ export const useGame = create<GameState>((set, get) => ({
       moto: {
         ...run,
         status: 'done',
-        coins: Math.min(MOTO.coins, COIN_TOTAL),
+        place: MOTO.finish,
         seconds: MOTO.elapsed,
+        best: MOTO.best,
       },
     })
   },
@@ -572,6 +646,181 @@ export const useGame = create<GameState>((set, get) => ({
     }))
   },
 
+  /* --------------------------- the sea rescue ------------------------ */
+
+  /**
+   * The lifeboat. She is tied up off the end of the dock, so opening the
+   * briefing puts the boat and the sea back the way the run will start them.
+   */
+  openRescue: () => {
+    const state = get()
+    if (state.night) return
+    if (state.area !== 'island') state.leaveBuilding()
+    sfx.confirm()
+    openWater()
+    set((s) => ({
+      mode: 'rescue',
+      dialogue: null,
+      panel: null,
+      nearby: null,
+      rescue: {
+        status: 'briefing',
+        saved: 0,
+        seconds: 0,
+        won: false,
+        round: (s.rescue?.round ?? 0) + 1,
+      },
+    }))
+  },
+
+  beginRescue: () => {
+    const run = get().rescue
+    if (!run) return
+    openWater()
+    sfx.jingle()
+    set((s) => ({
+      mode: 'explore',
+      area: 'island',
+      nearby: null,
+      rescue: { ...run, status: 'sailing', saved: 0, seconds: 0, won: false },
+      // He is aboard rather than on the sand, but the token still draws the
+      // curtain over the moment the camera goes out to sea.
+      spawn: {
+        area: 'island',
+        position: [BOAT_START.x, BOAT_START.z] as Vec2,
+        token: s.spawn.token + 1,
+      },
+    }))
+  },
+
+  /** Everyone out of the water, or a flare that went out. */
+  finishRescue: () => {
+    const run = get().rescue
+    if (!run || run.status !== 'sailing') return
+    if (RESCUE.won) sfx.jingle()
+    else sfx.hurt()
+    set({
+      mode: 'rescue',
+      rescue: {
+        ...run,
+        status: 'done',
+        saved: Math.min(SOULS, RESCUE.saved),
+        seconds: RESCUE.elapsed,
+        won: RESCUE.won,
+      },
+    })
+  },
+
+  /** Ties her up again and puts him back on the dock. */
+  exitRescue: () => {
+    closeWater()
+    sfx.cancel()
+    set((s) => ({
+      mode: 'explore',
+      rescue: null,
+      nearby: null,
+      spawn: {
+        area: 'island',
+        position: [-100, 22] as Vec2,
+        token: s.spawn.token + 1,
+      },
+    }))
+  },
+
+  /* ------------------------- hide and seek -------------------------- */
+
+  /**
+   * The night game. Either they hide and you go looking, or you hide and
+   * every one of them does — and either way the island's lights go out for
+   * the duration, so a torch is the only thing burning on it.
+   */
+  openHide: () => {
+    const state = get()
+    if (!state.night) return
+    if (state.area !== 'island') state.leaveBuilding()
+    // Nobody can hide while they are all dancing in the middle of the plaza.
+    if (state.party) state.toggleParty()
+    sfx.confirm()
+    const role = state.hide?.role ?? 'seeker'
+    openHide(role)
+    set((s) => ({
+      mode: 'hide',
+      dialogue: null,
+      panel: null,
+      nearby: null,
+      hide: {
+        status: 'briefing',
+        role,
+        found: 0,
+        seconds: 0,
+        won: false,
+        round: (s.hide?.round ?? 0) + 1,
+      },
+    }))
+  },
+
+  /** Swapping ends, on the briefing card. */
+  setRole: (role) => {
+    const game = get().hide
+    if (!game || game.status !== 'briefing' || game.role === role) return
+    sfx.blip()
+    openHide(role)
+    set({ hide: { ...game, role } })
+  },
+
+  beginHide: () => {
+    const game = get().hide
+    if (!game) return
+    openHide(game.role)
+    sfx.jingle()
+    set((s) => ({
+      mode: 'explore',
+      area: 'island',
+      nearby: null,
+      hide: { ...game, status: 'playing', found: 0, won: false },
+      spawn: {
+        area: 'island',
+        position: [0, 22] as Vec2,
+        token: s.spawn.token + 1,
+      },
+    }))
+  },
+
+  finishHide: (won) => {
+    const game = get().hide
+    if (!game || game.status !== 'playing') return
+    if (won) sfx.jingle()
+    else sfx.hurt()
+    set({
+      mode: 'hide',
+      hide: {
+        ...game,
+        status: 'done',
+        won,
+        found: Math.min(COUNT, HIDE.found),
+        seconds:
+          game.role === 'hider'
+            ? Math.max(0, HIDE.elapsed - HEAD_START)
+            : HIDE.elapsed,
+      },
+    })
+  },
+
+  exitHide: () => {
+    closeHide()
+    sfx.cancel()
+    set((s) => ({
+      mode: 'explore',
+      hide: null,
+      nearby: null,
+      spawn: {
+        area: 'island',
+        position: [0, 22] as Vec2,
+        token: s.spawn.token + 1,
+      },
+    }))
+  },
+
   /* ---------------------------- paintball --------------------------- */
 
   /** Draws the teams and shows the briefing. Always fought on the island. */
@@ -598,6 +847,41 @@ export const useGame = create<GameState>((set, get) => ({
         round: (s.paintball?.round ?? 0) + 1,
       },
     }))
+  },
+
+  /**
+   * The three ways the briefing lets you change the sides before the whistle:
+   * put somebody on your side or take them off it, set how many are against
+   * you, or throw the whole thing back in the hat.
+   */
+  toggleAlly: (id) => {
+    const game = get().paintball
+    if (!game || game.status !== 'briefing') return
+    const on = game.friends.includes(id)
+    const wanted = on
+      ? game.friends.filter((f) => f !== id)
+      : [...game.friends, id]
+    // Silently refuses a sixth: the card greys the rest out to say so.
+    if (!on && wanted.length > MAX_FRIENDS) {
+      sfx.cancel()
+      return
+    }
+    sfx.blip()
+    set({ paintball: { ...game, ...buildTeams(wanted, game.enemies.length) } })
+  },
+
+  setEnemyCount: (count) => {
+    const game = get().paintball
+    if (!game || game.status !== 'briefing') return
+    if (count === game.enemies.length) return
+    set({ paintball: { ...game, ...buildTeams(game.friends, count) } })
+  },
+
+  redrawTeams: () => {
+    const game = get().paintball
+    if (!game || game.status !== 'briefing') return
+    sfx.confirm()
+    set({ paintball: { ...game, ...pickTeams() } })
   },
 
   beginPaintball: () => {
@@ -657,7 +941,7 @@ export const useGame = create<GameState>((set, get) => ({
   splatCombatant: (id, team, by) => {
     const game = get().paintball
     if (!game || game.status !== 'playing' || game.out[id]) return
-    const name = NPC_BY_ID.get(id)?.name ?? 'Someone'
+    const name = combatantName(id)
     const out = { ...game.out, [id]: true as const }
     const mine = by === 'player'
     const friendly = team === 'friend'
@@ -710,6 +994,10 @@ export const useGame = create<GameState>((set, get) => ({
   /* ------------------------------ areas ----------------------------- */
 
   enterBuilding: (id) => {
+    // Every door on the island is locked while hide and seek is on. The game
+    // is played out in the dark between the buildings, and a room nobody can
+    // follow you into is not a hiding place.
+    if (get().hide) return
     const interior = INTERIOR_BY_ID.get(id)
     if (!interior) return
     get().discover(id)
@@ -729,7 +1017,10 @@ export const useGame = create<GameState>((set, get) => ({
 
   leaveBuilding: () => {
     const { area } = get()
-    const building = BUILDING_BY_ID.get(area)
+    // A room two floors down still belongs to a door on the island, and this
+    // is what puts the player back on the right doorstep rather than nowhere.
+    const interior = INTERIOR_BY_ID.get(area)
+    const building = BUILDING_BY_ID.get(interior?.building ?? area)
     if (!building) return
     set((s) => ({
       area: 'island',
@@ -742,6 +1033,37 @@ export const useGame = create<GameState>((set, get) => ({
         position: [...building.door] as Vec2,
         token: s.spawn.token + 1,
       },
+    }))
+  },
+
+  /**
+   * Through a door or down the stairs inside one building. Not the same as
+   * entering from outside: nothing is discovered, and the way out still knows
+   * which doorstep it belongs to.
+   */
+  goRoom: (to, arrive) => {
+    if (get().hide) return
+    if (!INTERIOR_BY_ID.has(to)) return
+    set((s) => ({
+      area: to,
+      mode: 'explore',
+      nearby: null,
+      panel: null,
+      dialogue: null,
+      spawn: {
+        area: to,
+        position: [...arrive] as Vec2,
+        token: s.spawn.token + 1,
+      },
+    }))
+  },
+
+  revealSecret: (id, found) => {
+    if (get().secrets[id]) return
+    sfx.jingle()
+    set((s) => ({
+      secrets: { ...s.secrets, [id]: true },
+      toast: found ? { ...found, kind: 'key' as const } : s.toast,
     }))
   },
 

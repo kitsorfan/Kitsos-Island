@@ -8,11 +8,12 @@ import type { Vec2 } from '../types'
  * first spot put it inside a lamp post. It is read from either side, so the
  * whole board is the thing you walk up to rather than one face of it.
  *
- * It was widened when the balloon was signed up: three notices side by side
- * need more panel than two did.
+ * It is small. A board that fitted every notice on one row was three times a
+ * person wide and stood over the whole square; the notices are stacked two
+ * deep instead and the pop-up does the explaining.
  */
-const PANEL_WIDTH = 5.6
-const PANEL_DEPTH = 0.9
+export const PANEL_WIDTH = 2.9
+const PANEL_DEPTH = 0.7
 const FACING = -0.62
 
 export const BOARD = {
@@ -30,19 +31,25 @@ export const BOARD = {
       (PANEL_DEPTH / 2) * Math.abs(Math.cos(FACING)),
   ] as Vec2,
   label: 'Games Board',
+  /** The panel the 3D board is built to, so the two never drift apart. */
+  width: PANEL_WIDTH,
 }
 
-export type MinigameId = 'paintball' | 'moto' | 'balloon'
+export type MinigameId = 'paintball' | 'moto' | 'balloon' | 'hide' | 'rescue'
 
 export interface MinigameEntry {
   id: MinigameId
   emoji: string
   title: string
-  kicker: string
-  /** One line for the board and the card. */
+  /** One line for the board. */
   blurb: string
+  /** Three short lines on how it is played, for the pop-up. */
   rules: string[]
   accent: string
+  /** Daylight game or a night one. Nothing is played at both hours. */
+  when: 'day' | 'night'
+  /** A building that has to be open before this is on the board at all. */
+  needs?: string
 }
 
 export const MINIGAMES: MinigameEntry[] = [
@@ -50,44 +57,71 @@ export const MINIGAMES: MinigameEntry[] = [
     id: 'paintball',
     emoji: '🎯',
     title: 'Paintball',
-    kicker: 'Two on your side',
     blurb:
       'The island splits in two for an afternoon. Two locals stand with you; everyone else wants you painted.',
     rules: [
       'Five rounds per hopper, then a six-second refill.',
       'Three lives — a ball to the chest costs one.',
-      'Get down and their paint sails over you.',
+      'Get down and their paint sails over you, but you cannot fire back.',
     ],
     accent: '#e63c58',
+    when: 'day',
+  },
+  {
+    id: 'rescue',
+    emoji: '🚤',
+    title: 'Sea Rescue',
+    blurb:
+      'A boat went down in the night. Find the flares and get her people out of the water before the flares burn out.',
+    rules: [
+      'Get alongside a raft and take the way off her — nobody climbs a net at speed.',
+      'Every flare burns down on its own clock, so the order you pick is the game.',
+      'Let one burn out and the run is over.',
+    ],
+    accent: '#2f6fa8',
+    when: 'day',
   },
   {
     id: 'moto',
     emoji: '🏍️',
-    title: 'Island ride',
-    kicker: 'Coins on every road',
+    title: 'Island Circuit',
     blurb:
-      'Take the bike out and ride the island. Coins are laid out along every road, from the plaza to the dock on the far shore.',
+      'Three laps of the ring road that circles the town, against three islanders who ride it every week.',
     rules: [
-      'Ride through a coin to pick it up.',
-      'An arrow over the bike points at the nearest one.',
-      'No clock and nothing to lose — the timer only counts how long you took.',
+      'You start at the back of a grid of four.',
+      'Tuck in behind somebody and the tow carries you past.',
+      'Every sector has to be passed, so cutting the middle gains nothing.',
     ],
     accent: '#f0a33c',
+    when: 'day',
   },
   {
     id: 'balloon',
     emoji: '🎈',
     title: 'Balloon drop',
-    kicker: 'The whole town, from above',
     blurb:
-      'Take the balloon up over the town on festival afternoon. Fourteen gatherings below are waiting on something — half of them a water bomb, half of them confetti.',
+      'Fourteen gatherings are waiting on something from the sky — half a water bomb, half confetti.',
     rules: [
-      'Drop the right one on each: water for the ones in the sun, confetti for the ones celebrating.',
-      'Confetti floats, so it lands further downwind than a bomb does. Two rings on the grass say where each would fall.',
-      'They scatter from a water bomb and cheer a faceful of confetti, so you can see from the basket what you hit.',
-      'The breeze pushes the whole time. The burner is the only thing holding you up.',
+      'Water for the ones out in the sun, confetti for the ones celebrating.',
+      'Confetti floats, so it lands further downwind than a bomb does.',
+      'The breeze pushes the whole time; the burner is all that holds you up.',
     ],
     accent: '#3fa9e8',
+    when: 'day',
+  },
+  {
+    id: 'hide',
+    emoji: '🔦',
+    title: 'Hide and seek',
+    blurb:
+      'Every light on the island goes out, and the only one left is the one somebody is carrying.',
+    rules: [
+      'Seeking: they hide in the dark, and only a hand on them counts as found.',
+      'Hiding: fifteen seconds, then all of them come looking with torches.',
+      'Crouch and you are hard to be sure of. Light your torch and you are the easiest thing on the island to find.',
+    ],
+    accent: '#8a9ad6',
+    when: 'night',
   },
 ]
 

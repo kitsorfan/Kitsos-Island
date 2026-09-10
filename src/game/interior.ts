@@ -33,10 +33,32 @@ export const PROP_FOOTPRINT: Record<PropKind, Vec2> = {
   chessTable: [0.95, 0.95],
   greekFlag: [0.42, 0.42],
   lectern: [0.85, 0.6],
+  car: [2.2, 0.95],
+  bicycle: [0.9, 0.3],
+  workbench: [1.9, 0.75],
+  pegboard: [1.8, 0.14],
+  toolChest: [0.8, 0.55],
+  shelfUnit: [1.6, 0.5],
+  boiler: [0.7, 0.7],
+  longTable: [4.2, 1.15],
+  photoWall: [2.6, 0.12],
+  armchair: [0.7, 0.7],
+  tv: [1.9, 0.5],
+  beanbag: [0.75, 0.75],
+  poster: [1.1, 0.1],
+  shutter: [2.6, 0.2],
 }
 
 /** Flat or wall-mounted pieces you should be able to walk past. */
-const PASSABLE = new Set<PropKind>(['rug', 'monitor', 'painting'])
+const PASSABLE = new Set<PropKind>([
+  'rug',
+  'monitor',
+  'painting',
+  'pegboard',
+  'poster',
+  'photoWall',
+  'shutter',
+])
 
 /** How far a wall-mounted exhibit sticks into the room. */
 const EXHIBIT_FOOTPRINT: Record<string, Vec2> = {

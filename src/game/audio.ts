@@ -128,6 +128,17 @@ export function whistle() {
   }
 }
 
+/**
+ * The hide-and-seek proximity thump. Low and soft, and it climbs a little as
+ * you close on somebody — but it is the same in every direction, which is
+ * the whole point of it.
+ */
+export function pulse(warmth: number) {
+  const base = 150 + warmth * 130
+  tone(base, 0.1, 'sine', 0.05)
+  tone(base * 0.5, 0.16, 'triangle', 0.03, 0.02)
+}
+
 /** Confetti going up: three bright notes, quick. */
 export function fizz() {
   tone(880, 0.05, 'triangle', 0.03)

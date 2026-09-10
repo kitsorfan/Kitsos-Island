@@ -1,5 +1,6 @@
 import { Suspense, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
+import { AdaptiveQuality } from './world/AdaptiveQuality'
 import { Scene } from './world/Scene'
 import { DialogueBox } from './ui/DialogueBox'
 import { Greeting } from './ui/Greeting'
@@ -8,7 +9,9 @@ import { Journal } from './ui/Journal'
 import { MapOverlay } from './ui/MapOverlay'
 import { ArcadeCard } from './ui/ArcadeCard'
 import { BalloonCard } from './ui/BalloonCard'
+import { HideCard } from './ui/HideCard'
 import { MotoCard } from './ui/MotoCard'
+import { RescueCard } from './ui/RescueCard'
 import { PaintballCard } from './ui/PaintballCard'
 import { Panel } from './ui/Panel'
 import { TitleScreen } from './ui/TitleScreen'
@@ -17,6 +20,7 @@ import { TouchControls } from './ui/TouchControls'
 import { useKeyboard } from './ui/useKeyboard'
 import { useGame } from './state/store'
 import { setMuted } from './game/audio'
+import type { Mood } from './game/music'
 import { setMood, setMusicEnabled } from './game/music'
 
 /** Covers the canvas while a new area builds its scene graph. */
@@ -34,6 +38,11 @@ export default function App() {
   const musicOn = useGame((s) => s.musicOn)
   const night = useGame((s) => s.night)
   const party = useGame((s) => s.party)
+  const paintball = useGame((s) => s.paintball?.status)
+  const moto = useGame((s) => s.moto?.status)
+  const balloon = useGame((s) => s.balloon?.status)
+  const hide = useGame((s) => s.hide?.status)
+  const rescue = useGame((s) => s.rescue?.status)
   useKeyboard()
 
   useEffect(() => {
@@ -59,19 +68,35 @@ export default function App() {
     }
   }, [musicOn, muted])
 
+  // A round in progress owns the soundtrack — each game has its own piece —
+  // and the island only gets it back once the results are in.
   useEffect(() => {
+    const playing: Mood | null =
+      paintball === 'briefing' || paintball === 'playing'
+        ? 'paintball'
+        : moto && moto !== 'done'
+          ? 'moto'
+          : balloon && balloon !== 'done'
+            ? 'balloon'
+            : hide && hide !== 'done'
+              ? 'hide'
+              : rescue && rescue !== 'done'
+                ? 'boat'
+                : null
+
     setMood(
-      area === 'island'
-        ? party
-          ? 'party'
-          : night
-            ? 'night'
-            : 'island'
-        : area === 'lighthouse'
-          ? 'lighthouse'
-          : 'indoor',
+      playing ??
+        (area === 'island'
+          ? party
+            ? 'party'
+            : night
+              ? 'night'
+              : 'island'
+          : area === 'lighthouse'
+            ? 'lighthouse'
+            : 'indoor'),
     )
-  }, [area, night, party])
+  }, [area, night, party, paintball, moto, balloon, hide, rescue])
 
   return (
     <div className="app">
@@ -81,6 +106,7 @@ export default function App() {
         gl={{ antialias: true, powerPreference: 'high-performance' }}
         camera={{ fov: 40, near: 2, far: 2200, position: [0, 60, 60] }}
       >
+        <AdaptiveQuality />
         <Suspense fallback={null}>
           <Scene />
         </Suspense>
@@ -101,6 +127,8 @@ export default function App() {
           {mode === 'arcade' && <ArcadeCard />}
           {mode === 'moto' && <MotoCard />}
           {mode === 'balloon' && <BalloonCard />}
+          {mode === 'hide' && <HideCard />}
+          {mode === 'rescue' && <RescueCard />}
           <TouchControls />
           <Toast />
         </>

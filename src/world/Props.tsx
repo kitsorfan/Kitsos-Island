@@ -198,7 +198,8 @@ function Planters() {
 /* ------------------------------- lamps ---------------------------- */
 
 function Lamps() {
-  const night = useGame((s) => s.night)
+  // Out entirely during hide and seek: the island is supposed to be dark.
+  const lit = useGame((s) => s.night && s.hide === null)
   const positions = useMemo(() => {
     const out: [number, number][] = []
     for (const [a, b] of PATHS) {
@@ -239,11 +240,11 @@ function Lamps() {
             <meshStandardMaterial
               color="#fff3c4"
               emissive="#ffd166"
-              emissiveIntensity={night ? 2.6 : 0.9}
+              emissiveIntensity={lit ? 2.6 : 0.9}
               flatShading
             />
           </mesh>
-          {night && (
+          {lit && (
             <>
               {/* Glow around the bulb, and the pool it throws on the road.
                   Both are flat meshes: a light per lamp would be dozens. */}

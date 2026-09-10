@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { BUILDING_BY_ID, KEYS } from '../data/world'
+import { INTERIOR_BY_ID } from '../data/interiors'
+import { KEYS } from '../data/world'
 import {
   TOTAL_ENTRIES,
   TOTAL_KEYS,
@@ -9,8 +10,10 @@ import {
 } from '../state/store'
 import * as sfx from '../game/audio'
 import { BalloonHud } from './BalloonHud'
+import { HideHud } from './HideHud'
 import { Minimap } from './Minimap'
 import { MotoHud } from './MotoHud'
+import { RescueHud } from './RescueHud'
 import { PaintballHud } from './PaintballHud'
 import { useCoarsePointer } from './useCoarsePointer'
 
@@ -39,11 +42,15 @@ export function Hud() {
   const fighting = useGame((s) => s.paintball?.status === 'playing')
   const riding = useGame((s) => s.moto?.status === 'riding')
   const flying = useGame((s) => s.balloon?.status === 'flying')
+  const hiding = useGame((s) => s.hide?.status === 'playing')
+  const sailing = useGame((s) => s.rescue?.status === 'sailing')
   const openArcade = useGame((s) => s.openArcade)
   const exitPaintball = useGame((s) => s.exitPaintball)
   const exitMoto = useGame((s) => s.exitMoto)
   const exitBalloon = useGame((s) => s.exitBalloon)
-  const playing = fighting || riding || flying
+  const exitHide = useGame((s) => s.exitHide)
+  const exitRescue = useGame((s) => s.exitRescue)
+  const playing = fighting || riding || flying || hiding || sailing
   const [help, setHelp] = useState(false)
   const coarse = useCoarsePointer()
 
@@ -51,7 +58,10 @@ export function Hud() {
   const have = keyCount(keys)
   const objective = nextObjective({ missions, keys, lighthouseOpen })
   const indoors = area !== 'island'
-  const room = indoors ? BUILDING_BY_ID.get(area) : undefined
+  // Off the interior rather than the building: a cellar has no front door of
+  // its own, so a building lookup comes back empty two floors down and the
+  // banner reads "Kitsos Island" while you are standing under the house.
+  const room = indoors ? INTERIOR_BY_ID.get(area) : undefined
 
   return (
     <div
@@ -69,9 +79,11 @@ export function Hud() {
           {fighting && <PaintballHud />}
           {riding && <MotoHud />}
           {flying && <BalloonHud />}
+          {hiding && <HideHud />}
+          {sailing && <RescueHud />}
           <div className="badge" hidden={playing}>
             <span className="badge__title">
-              {room ? room.name : 'Kitsos Island'}
+              {room ? `${room.name} · ${room.kicker}` : 'Kitsos Island'}
             </span>
             <div className="badge__meter">
               <div className="badge__fill" style={{ width: `${percent}%` }} />
@@ -152,7 +164,12 @@ export function Hud() {
                 sfx.confirm()
                 toggleNight()
               }}
-              title="Day or night (L)"
+              disabled={Boolean(hiding)}
+              title={
+                hiding
+                  ? 'The lights stay out until the game is over'
+                  : 'Day or night (L)'
+              }
             >
               {night ? '🌙' : '☀️'}
               <span>{night ? 'Night' : 'Day'}</span>
@@ -164,10 +181,20 @@ export function Hud() {
                   sfx.confirm()
                   toggleHandLight()
                 }}
-                title="Torch or flashlight (T)"
+                title="Flashlight, torch, or out (T)"
               >
-                {handLight === 'torch' ? '🔥' : '🔦'}
-                <span>{handLight === 'torch' ? 'Torch' : 'Light'}</span>
+                {handLight === 'torch'
+                  ? '🔥'
+                  : handLight === 'none'
+                    ? '🌑'
+                    : '🔦'}
+                <span>
+                  {handLight === 'torch'
+                    ? 'Torch'
+                    : handLight === 'none'
+                      ? 'Dark'
+                      : 'Light'}
+                </span>
               </button>
             )}
             <button
@@ -176,14 +203,11 @@ export function Hud() {
                 if (fighting) exitPaintball()
                 else if (riding) exitMoto()
                 else if (flying) exitBalloon()
+                else if (hiding) exitHide()
+                else if (sailing) exitRescue()
                 else openArcade()
               }}
-              disabled={Boolean(night) && !playing}
-              title={
-                night && !playing
-                  ? 'The games are played in daylight'
-                  : 'Island games (P)'
-              }
+              title="Island games (P)"
             >
               {playing ? '🚪' : '🕹️'}
               <span>{playing ? 'Quit game' : 'Games'}</span>
@@ -211,26 +235,94 @@ export function Hud() {
             <div className="help-card">
               <h3>Controls</h3>
               <dl>
-                <div><dt>Move</dt><dd>WASD / Arrows</dd></div>
-                <div><dt>Sprint</dt><dd>Shift</dd></div>
-                <div><dt>Interact</dt><dd>E / Enter</dd></div>
-                <div><dt>Jump</dt><dd>Space</dd></div>
-                <div><dt>Turn camera</dt><dd>Q and R</dd></div>
-                <div><dt>Map & travel</dt><dd>M</dd></div>
-                <div><dt>Journal</dt><dd>J</dd></div>
-                <div><dt>Sound</dt><dd>N</dd></div>
-                <div><dt>Music</dt><dd>B</dd></div>
-                <div><dt>Day / night</dt><dd>L</dd></div>
-                <div><dt>Torch / flashlight</dt><dd>T</dd></div>
-                <div><dt>Contact &amp; CV</dt><dd>C</dd></div>
-                <div><dt>Games board</dt><dd>P</dd></div>
-                <div><dt>Shoot paint</dt><dd>Space / click</dd></div>
-                <div><dt>Get down</dt><dd>Ctrl</dd></div>
-                <div><dt>Wheelie</dt><dd>Space</dd></div>
-                <div><dt>Burner / vent</dt><dd>Shift / Ctrl</dd></div>
-                <div><dt>Water bomb</dt><dd>Space</dd></div>
-                <div><dt>Confetti</dt><dd>F</dd></div>
-                <div><dt>Back / leave</dt><dd>Esc</dd></div>
+                <div>
+                  <dt>Move</dt>
+                  <dd>WASD / Arrows</dd>
+                </div>
+                <div>
+                  <dt>Sprint</dt>
+                  <dd>Shift</dd>
+                </div>
+                <div>
+                  <dt>Interact</dt>
+                  <dd>E / Enter</dd>
+                </div>
+                <div>
+                  <dt>Jump</dt>
+                  <dd>Space</dd>
+                </div>
+                <div>
+                  <dt>Turn camera</dt>
+                  <dd>Q and R</dd>
+                </div>
+                <div>
+                  <dt>Map & travel</dt>
+                  <dd>M</dd>
+                </div>
+                <div>
+                  <dt>Journal</dt>
+                  <dd>J</dd>
+                </div>
+                <div>
+                  <dt>Sound</dt>
+                  <dd>N</dd>
+                </div>
+                <div>
+                  <dt>Music</dt>
+                  <dd>B</dd>
+                </div>
+                <div>
+                  <dt>Day / night</dt>
+                  <dd>L</dd>
+                </div>
+                <div>
+                  <dt>Torch / flashlight</dt>
+                  <dd>T</dd>
+                </div>
+                <div>
+                  <dt>Contact &amp; CV</dt>
+                  <dd>C</dd>
+                </div>
+                <div>
+                  <dt>Games board</dt>
+                  <dd>P</dd>
+                </div>
+                <div>
+                  <dt>Shoot paint</dt>
+                  <dd>Space / click</dd>
+                </div>
+                <div>
+                  <dt>Get down</dt>
+                  <dd>Ctrl</dd>
+                </div>
+                <div>
+                  <dt>Wheelie</dt>
+                  <dd>Space</dd>
+                </div>
+                <div>
+                  <dt>Burner / vent</dt>
+                  <dd>Shift / Ctrl</dd>
+                </div>
+                <div>
+                  <dt>Water bomb</dt>
+                  <dd>Space</dd>
+                </div>
+                <div>
+                  <dt>Confetti</dt>
+                  <dd>F</dd>
+                </div>
+                <div>
+                  <dt>Swing the beam</dt>
+                  <dd>A and D</dd>
+                </div>
+                <div>
+                  <dt>Wide pulse</dt>
+                  <dd>Space</dd>
+                </div>
+                <div>
+                  <dt>Back / leave</dt>
+                  <dd>Esc</dd>
+                </div>
               </dl>
               <button className="button" onClick={() => setHelp(false)}>
                 Got it

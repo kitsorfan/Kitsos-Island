@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "start": "vite preview",
+    "preview": "vite preview",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",
@@ -24,6 +27,7 @@
     "@types/three": "^0.185.4",
     "@vitejs/plugin-react": "^6.1.0",
     "oxlint": "^1.79.0",
+    "prettier": "^3.9.6",
     "typescript": "~6.0.2",
     "vite": "^8.2.2"
   }

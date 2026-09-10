@@ -1,16 +1,112 @@
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import type { Mesh, MeshBasicMaterial } from 'three'
-import { ARENA, PAINT, aimAt, stepArena } from '../game/paintball'
+import type { Group, Mesh, MeshBasicMaterial } from 'three'
+import { ARENA, PAINT, RINGERS, aimAt, stepArena } from '../game/paintball'
 import { isCrouching } from '../game/input'
 import { groundHeight } from '../game/terrain'
 import { isInteractive, useGame } from '../state/store'
+import { Character, type CharacterMotion } from './Character'
 import { PLAYER_POS, PLAYER_VIEW } from './Player'
 import * as sfx from '../game/audio'
 
 /** Balls and marks in flight at once. Both pools are reused, never grown. */
 const BALLS = 56
 const MARKS = 32
+
+/* ------------------------------- the ringers ------------------------------ */
+
+/**
+ * The people on the field who are not islanders.
+ *
+ * A full side wants more bodies than the eleven the island has, so the rest
+ * come in from the next village along. <Npcs/> draws the locals off their own
+ * ids; these have no NPC behind them, so they are drawn here instead, off the
+ * same arena units.
+ */
+function Recruits() {
+  // Both lists are drawn once per round and never touched again, so their
+  // identity is exactly when this list changes.
+  const friends = useGame((s) => s.paintball?.friends)
+  const enemies = useGame((s) => s.paintball?.enemies)
+  const ids = useMemo(
+    () =>
+      [...(friends ?? []), ...(enemies ?? [])].filter((id) => RINGERS.has(id)),
+    [friends, enemies],
+  )
+
+  return (
+    <group>
+      {ids.map((id) => (
+        <Recruit key={id} id={id} />
+      ))}
+    </group>
+  )
+}
+
+function Recruit({ id }: { id: string }) {
+  const group = useRef<Group>(null)
+  const body = useRef<Group>(null)
+  const motion = useRef<CharacterMotion>({ moving: false, speed: 0 })
+  /** Eased fall, for someone who has just been painted out. */
+  const fall = useRef(0)
+  // The id says which side they came in on, which is all the kit needs.
+  const friendly = id.startsWith('ringer-f')
+  const out = useGame((s) => Boolean(s.paintball?.out[id]))
+
+  useFrame((_, rawDelta) => {
+    if (!group.current) return
+    const delta = Math.min(rawDelta, 0.05)
+    const unit = ARENA.units.get(id)
+    group.current.visible = Boolean(unit)
+    if (!unit) return
+
+    motion.current.moving = unit.moving
+    motion.current.speed = unit.speed
+    group.current.position.set(unit.x, groundHeight(unit.x, unit.z), unit.z)
+
+    let turn = unit.facing - group.current.rotation.y
+    while (turn > Math.PI) turn -= Math.PI * 2
+    while (turn < -Math.PI) turn += Math.PI * 2
+    group.current.rotation.y += turn * Math.min(1, delta * 7)
+
+    fall.current += ((unit.out ? 1 : 0) - fall.current) * Math.min(1, delta * 7)
+    if (body.current) {
+      body.current.rotation.x = -fall.current * 1.42
+      body.current.position.y = fall.current * 0.14
+    }
+  })
+
+  const ringer = RINGERS.get(id)
+  if (!ringer) return null
+  const paint = friendly ? PAINT.enemy : PAINT.player
+  const team = friendly ? PAINT.friend : PAINT.enemy
+
+  return (
+    <group ref={group} visible={false}>
+      <group ref={body}>
+        <Character
+          colors={ringer.colors}
+          motion={motion}
+          seed={id.length * 1.3 + id.charCodeAt(id.length - 1)}
+          gun={!out}
+          gunColor={team}
+          kit={team}
+          paint={out ? paint : undefined}
+        />
+      </group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
+        <circleGeometry args={[0.5, 12]} />
+        <meshBasicMaterial color="#2a4a22" transparent opacity={0.2} />
+      </mesh>
+      {!out && (
+        <mesh position={[0, 2.62, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.3, 0.46, 14]} />
+          <meshBasicMaterial color={team} transparent opacity={0.95} />
+        </mesh>
+      )}
+    </group>
+  )
+}
 
 /**
  * Steps the match and draws it: every ball in the air, the paint it leaves
@@ -102,6 +198,8 @@ export function Paintball() {
 
   return (
     <group>
+      <Recruits />
+
       {Array.from({ length: BALLS }, (_, i) => (
         <mesh
           key={i}

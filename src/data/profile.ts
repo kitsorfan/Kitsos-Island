@@ -72,27 +72,6 @@ export const HOUSE_SECTIONS: PanelSection[] = [
   },
 ]
 
-export const WORKSHOP_SECTIONS: PanelSection[] = [
-  {
-    heading: 'The workbench',
-    blocks: [
-      {
-        type: 'text',
-        text: 'Half the furniture in this house was built here. DIY is the same loop as engineering: measure, cut, discover the wall is not square, adapt.',
-      },
-      {
-        type: 'list',
-        items: [
-          'Running and cycling — the thinking happens somewhere around kilometre six',
-          'Hiking and camping, usually somewhere with no signal',
-          'Chess, badly but stubbornly',
-          'Theater, from the audience these days',
-        ],
-      },
-    ],
-  },
-]
-
 export const UNIVERSITY_SECTIONS: PanelSection[] = [
   {
     heading: 'Higher education',
@@ -804,4 +783,267 @@ export const FULL_CV_SECTIONS: PanelSection[] = [
   ...VOLUNTEER_SECTIONS,
   ...REFERENCES_SECTIONS,
   ...HOUSE_SECTIONS,
+]
+
+/* --------------------------- downstairs ---------------------------- */
+
+/**
+ * Downstairs. None of it is on a CV, which is rather the point of putting it
+ * under the floor: the house upstairs is who he is at work, and the basement
+ * is where that came from.
+ */
+export const FAMILY_SECTIONS: PanelSection[] = [
+  {
+    heading: 'The house I grew up in',
+    blocks: [
+      {
+        type: 'text',
+        text: 'Seven of us: my father, my mother, three brothers, my sister and me. One bathroom, one table, and never a quiet evening in the whole of it.',
+      },
+      {
+        type: 'text',
+        text: 'A big family is a small organisation. Nobody hands you a role — you find the thing that needs doing and you do it, because if you wait for somebody else the thing does not get done. That is the whole of it, and I have not found a team since where it was not also true.',
+      },
+      {
+        type: 'list',
+        items: [
+          'Responsibility, because with five children something is always somebody\u2019s job and often it was mine',
+          'Initiative, because asking permission for everything in a house that size means never doing anything',
+          'Patience, learned the hard way and mostly from my brothers',
+          'That being loved and being agreed with are completely different things',
+        ],
+      },
+      {
+        type: 'quote',
+        text: 'My siblings were my first friends, and they are still the ones who knew me before I had anything to show.',
+      },
+    ],
+  },
+]
+
+export const GARAGE_SECTIONS: PanelSection[] = [
+  {
+    heading: 'The garage',
+    blocks: [
+      {
+        type: 'text',
+        text: 'Tools on the board, bench along the back wall, car nosed at the shutter and the bicycle against the other. Half the furniture upstairs was built on this bench.',
+      },
+      {
+        type: 'text',
+        text: 'DIY is the same loop as engineering, with a shorter feedback cycle and worse consequences: measure, cut, discover the wall is not square, adapt. Nothing teaches you to respect a tolerance like a shelf that will not sit level.',
+      },
+      {
+        type: 'list',
+        items: [
+          'Wood, mostly — shelving, tables, whatever the flat needs',
+          'The bicycle gets stripped and rebuilt more often than it strictly needs',
+          'Every tool goes back on the board, which took years to become true',
+        ],
+      },
+      {
+        type: 'text',
+        text: 'The rest of the hobbies live somewhere between here and the front door: running and cycling, where the thinking happens somewhere around kilometre six; hiking and camping, usually somewhere with no signal; chess, badly but stubbornly; and theater, from the audience these days.',
+      },
+    ],
+  },
+]
+
+export const LAB_SECTIONS: PanelSection[] = [
+  {
+    heading: 'The home lab',
+    blocks: [
+      {
+        type: 'text',
+        text: 'A mini server in the corner running Linux, and enough electronics on the bench to make something blink by the end of an evening. It is not a showpiece — it is where I try the thing before I trust it at work.',
+      },
+      {
+        type: 'text',
+        text: 'Everything I know about operations I learned by breaking my own machine at eleven at night with nobody to escalate to. You read the logs because there is no one else to read them.',
+      },
+      {
+        type: 'list',
+        items: [
+          'One small Linux box, doing more jobs than it was ever sold to do',
+          'Microcontrollers, a soldering iron, and a drawer of components sorted with real optimism',
+          'The place where a bad idea gets to be a bad idea cheaply',
+        ],
+      },
+    ],
+  },
+]
+
+/**
+ * The bookshelf downstairs. Ordered as they sit on it rather than by any
+ * merit, and each with the reason it is still there.
+ */
+export const LIBRARY_SECTIONS: PanelSection[] = [
+  {
+    heading: 'The shelf downstairs',
+    blocks: [
+      {
+        type: 'text',
+        text: 'Not many books, and none of them here by accident. These are the ones I have gone back to — Verne is on the shelf across the room, where he has always been.',
+      },
+      {
+        type: 'timeline',
+        entries: [
+          {
+            title: 'The Gambler',
+            org: 'Fyodor Dostoevsky',
+            meta: 'On wanting the wrong thing, clearly',
+            bullets: [
+              'Written to pay off a gambling debt, about a man ruined by gambling. Nobody has ever been more honest about their own worst habit.',
+            ],
+          },
+          {
+            title: 'Les Misérables',
+            org: 'Victor Hugo',
+            meta: 'On mercy being a decision, not a feeling',
+            bullets: [
+              'A thousand pages to say that a man can be more than his record, and worth every one of them.',
+            ],
+          },
+          {
+            title: 'Surely You\u2019re Joking, Mr. Feynman!',
+            org: 'Richard Feynman',
+            meta: 'On refusing to be impressed',
+            bullets: [
+              'The engineer\u2019s book on this shelf. Take the thing apart, ask the stupid question out loud, and never mistake the jargon for the understanding.',
+            ],
+          },
+          {
+            title: '1984',
+            org: 'George Orwell',
+            meta: 'On what language is for',
+            bullets: [
+              'Read at the right age it is a thriller. Read again later it is a manual, and you start noticing the vocabulary.',
+            ],
+          },
+          {
+            title: 'All Quiet on the Western Front',
+            org: 'Erich Maria Remarque',
+            meta: 'On who is actually sent',
+            bullets: [
+              'I read this before my own service and again after it. It is a different book on the far side.',
+            ],
+          },
+          {
+            title: 'The Grapes of Wrath',
+            org: 'John Steinbeck',
+            meta: 'On a family holding together',
+            bullets: [
+              'A big family on a bad road, keeping each other alive. It landed somewhere personal and it has stayed there.',
+            ],
+          },
+        ],
+      },
+    ],
+  },
+]
+
+/**
+ * The other shelf downstairs, and the older one. Verne came first, and he is
+ * the reason a good deal of the rest of this island exists at all: most of
+ * these are about people somewhere impossible who have to build their way
+ * out of it, which turned out to be a career. The last one is not, and is
+ * left in the order he wrote them rather than tidied off the end.
+ */
+export const VERNE_SECTIONS: PanelSection[] = [
+  {
+    heading: 'The Verne shelf',
+    blocks: [
+      {
+        type: 'text',
+        text: 'These were first. Read as a boy in a house with five children in it, which meant reading in whatever chair was going and with the argument still running in the next room. I got very good at concentrating.',
+      },
+      {
+        type: 'timeline',
+        entries: [
+          {
+            title: 'Five Weeks in a Balloon',
+            org: 'Jules Verne, 1863',
+            meta: 'The first one he wrote, and the first one I read',
+            bullets: [
+              'Three men cross a continent in a balloon they cannot steer, on the theory that you can still choose your altitude. Which is most of engineering: you rarely get to pick the wind.',
+            ],
+          },
+          {
+            title: 'Journey to the Centre of the Earth',
+            org: 'Jules Verne, 1864',
+            meta: 'On going down to find out',
+            bullets: [
+              'A coded note, a volcano in Iceland, and an uncle who will not be argued out of it. The first book that made me want to know how something worked badly enough to climb into it.',
+            ],
+          },
+          {
+            title: 'Twenty Thousand Leagues Under the Sea',
+            org: 'Jules Verne, 1870',
+            meta: 'On building the thing nobody asked for',
+            bullets: [
+              'The twenty thousand leagues are how far the Nautilus travels, not how deep she goes \u2014 which everybody gets wrong, and which is the sort of detail I have never been able to leave alone.',
+              'Nemo is an engineer with a grievance and unlimited budget. I have met the type.',
+            ],
+          },
+          {
+            title: 'The Mysterious Island',
+            org: 'Jules Verne, 1875',
+            meta: 'The one that did the damage',
+            bullets: [
+              'Five men land on a rock with nothing and end up with brick, iron, glass, a telegraph and a boat. It is four hundred pages of working out what you can make from what is actually to hand.',
+              'If there is one book on either shelf that explains the workbench in this cellar, it is this one.',
+            ],
+          },
+          {
+            title: 'Dick Sand: A Captain at Fifteen',
+            org: 'Jules Verne, 1878',
+            meta: 'On being handed it early',
+            bullets: [
+              'A fifteen-year-old ends up in command because everybody senior is gone. He is not ready and he does it anyway.',
+              'Read at about that age, in a big family, where being handed something before you are ready is simply Tuesday.',
+            ],
+          },
+          {
+            title: 'A Drama in Livonia',
+            org: 'Jules Verne, 1904',
+            meta: 'The one with nothing to build',
+            bullets: [
+              'Late Verne, and the odd one out on this shelf: no balloon, no submarine, no island. A murder in the frozen Baltic, and a man convicted of it on circumstance while the reader knows perfectly well he did not do it.',
+              'A Slav schoolmaster against the German merchant families who own the province, and a verdict that arrives long before the evidence does. It is really about how fast everyone agrees on the wrong answer when they already wanted to.',
+              'The only one here where nobody can engineer their way out. That is why I remember it.',
+            ],
+          },
+        ],
+      },
+      {
+        type: 'quote',
+        text: 'Anything one man can imagine, other men can make real. He wrote that in 1873 and it has been quoted at every engineer since, and it is still true.',
+      },
+    ],
+  },
+]
+
+export const PLAYROOM_SECTIONS: PanelSection[] = [
+  {
+    heading: 'The room that is not on the plans',
+    blocks: [
+      {
+        type: 'text',
+        text: 'Behind a shelf in the library. A television, a Switch docked under it, two beanbags and the posters I have never grown out of.',
+      },
+      {
+        type: 'list',
+        items: [
+          'Mario, still, and no apology for it',
+          'Star Wars — the whole thing, arguments about the ordering included',
+          'The Marvel run, watched properly and in sequence like a serious person',
+          'And anything well made: give me a good film and I will give you the evening',
+        ],
+      },
+      {
+        type: 'quote',
+        text: 'Every house should have one room that is nobody\u2019s business.',
+      },
+    ],
+  },
 ]

@@ -8,12 +8,16 @@ import {
 import { HILLS } from '../game/terrain'
 import { ACTOR_POS } from '../game/actors'
 import { ARENA, PAINT } from '../game/paintball'
-import { COINS, MOTO } from '../game/moto'
+import { MOTO, pointAt } from '../game/moto'
 import { BALLOON, CALLS, PAYLOAD_COLOR } from '../game/balloon'
+import { BEACH, LAST_GASP, RESCUE } from '../game/rescue'
+import { HIDE } from '../game/hide'
 import { PLAYER_POS, PLAYER_VIEW } from '../world/Player'
 
 /** Half the world width the map shows, in world units. */
 export const MAP_RADIUS = 132
+
+const NPC_BY_ID = new Map(NPCS.map((n) => [n.id, n]))
 
 const SEA = '#3f93c4'
 const SHALLOW = '#63bcd8'
@@ -120,18 +124,44 @@ export function drawMap(
     }
   }
 
-  // Coins still out there, while a ride is on.
+  // The rest of the grid, and the line they are all racing back to.
   if (MOTO.active) {
-    ctx.fillStyle = '#f5c33b'
-    ctx.strokeStyle = '#7a5a10'
+    const line = pointAt(0)
+    ctx.fillStyle = '#f7f7f4'
+    ctx.strokeStyle = INK
     ctx.lineWidth = 1
-    COINS.forEach((c, i) => {
-      if (MOTO.taken[i]) return
+    ctx.beginPath()
+    ctx.arc(px(line.x), py(line.z), Math.max(3, 2.2 * k * 2), 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+
+    for (const rival of MOTO.rivals) {
+      ctx.fillStyle = rival.bike
       ctx.beginPath()
-      ctx.arc(px(c.x), py(c.z), Math.max(2, 1.6 * k * 2), 0, Math.PI * 2)
+      ctx.arc(px(rival.x), py(rival.z), Math.max(2.5, 2 * k * 2), 0, Math.PI * 2)
       ctx.fill()
       ctx.stroke()
-    })
+    }
+  }
+
+  // The rafts, while a rescue is on: the shoreline she has to stay off, and
+  // a mark for every flare still burning, reddening as it runs out.
+  if (RESCUE.active) {
+    ctx.strokeStyle = '#8fb8d0'
+    ctx.lineWidth = Math.max(1, 1.4 * k * 2)
+    ctx.beginPath()
+    ctx.arc(px(0), py(0), BEACH * k, 0, Math.PI * 2)
+    ctx.stroke()
+
+    ctx.strokeStyle = INK
+    ctx.lineWidth = 1
+    for (const soul of RESCUE.people) {
+      ctx.fillStyle = soul.burn < LAST_GASP ? '#e63c58' : '#f0a33c'
+      ctx.beginPath()
+      ctx.arc(px(soul.x), py(soul.z), Math.max(3, 2.4 * k * 2), 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke()
+    }
   }
 
   // Gatherings still waiting, while a flight is on: a ring in the colour of
@@ -149,8 +179,25 @@ export function drawMap(
     }
   }
 
-  // People — coloured by side once a paintball match is on.
-  if (opts.people) {
+  // Everybody on the field who is not an islander, while a match is on.
+  // With twenty of them out there the map is the only way to count.
+  if (ARENA.active) {
+    ctx.strokeStyle = INK
+    ctx.lineWidth = 1
+    for (const unit of ARENA.units.values()) {
+      if (unit.out || NPC_BY_ID.has(unit.id)) continue
+      ctx.fillStyle = unit.team === 'friend' ? PAINT.friend : PAINT.enemy
+      ctx.beginPath()
+      ctx.arc(px(unit.x), py(unit.z), Math.max(2.2, 1.4 * k * 2), 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke()
+    }
+  }
+
+  // People — coloured by side once a paintball match is on. Nobody is drawn
+  // at all during hide and seek: a map that says where everyone is standing
+  // is the one thing that game cannot survive.
+  if (opts.people && !HIDE.active) {
     ctx.strokeStyle = INK
     ctx.lineWidth = 1
     for (const npc of NPCS) {

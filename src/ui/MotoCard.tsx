@@ -1,4 +1,4 @@
-import { COIN_TOTAL } from '../game/moto'
+import { LAPS, LAP_LENGTH, RIVALS, racerName } from '../game/moto'
 import { useGame } from '../state/store'
 import * as sfx from '../game/audio'
 import { useCoarsePointer } from './useCoarsePointer'
@@ -6,10 +6,13 @@ import { useCoarsePointer } from './useCoarsePointer'
 const clock = (seconds: number) => {
   const m = Math.floor(seconds / 60)
   const s = Math.floor(seconds % 60)
-  return m > 0 ? `${m}m ${s}s` : `${s}s`
+  const t = Math.floor((seconds * 10) % 10)
+  return m > 0 ? `${m}:${s.toString().padStart(2, '0')}.${t}` : `${s}.${t}s`
 }
 
-/** The briefing before a ride, and the card at the end of one. */
+const ORDINAL = ['', 'First', 'Second', 'Third', 'Fourth']
+
+/** The briefing before a race, and the card at the end of one. */
 export function MotoCard() {
   const run = useGame((s) => s.moto)
   const begin = useGame((s) => s.beginMoto)
@@ -19,25 +22,45 @@ export function MotoCard() {
 
   if (!run) return null
   const briefing = run.status === 'briefing'
+  const won = run.place === 1
+  const podium = run.place > 0 && run.place <= 3
 
   return (
     <div className="overlay">
       <div className="moto-card">
         <span className="moto-card__kicker">
-          {briefing ? 'Island ride' : `Ride ${run.round}`}
+          {briefing ? 'Island Circuit' : `Race ${run.round}`}
         </span>
         <h2 className="moto-card__title">
-          {briefing ? 'Take the bike out' : 'Every coin in'}
+          {briefing
+            ? 'Three laps of the island'
+            : won
+              ? 'Won it'
+              : `${ORDINAL[run.place]} across the line`}
         </h2>
 
         {briefing ? (
           <>
             <p className="moto-card__lead">
-              There are <strong>{COIN_TOTAL} coins</strong> out on the island,
-              laid along the roads that leave the plaza — past the Academy, the
-              Work District, the camp, the school, the radio mast, and out to
-              the dock on the far shore. Ride through one to pick it up.
+              The ring road runs right round the town, through the woods and
+              across all seven district roads —{' '}
+              <strong>{Math.round(LAP_LENGTH)} metres</strong> of it, {LAPS}{' '}
+              times. Three of the islanders are on the grid ahead of you, and
+              you start at the back of it.
             </p>
+
+            <ul className="moto-grid">
+              {RIVALS.map((rival) => (
+                <li key={rival.id}>
+                  <span
+                    className="moto-grid__chip"
+                    style={{ background: rival.bike }}
+                    aria-hidden
+                  />
+                  <strong>{racerName(rival.id)}</strong>
+                </li>
+              ))}
+            </ul>
 
             <dl className="moto-keys">
               {coarse ? (
@@ -53,42 +76,53 @@ export function MotoCard() {
                   <div><dt>Steer</dt><dd>A and D</dd></div>
                   <div><dt>Wheelie</dt><dd>Hold Space</dd></div>
                   <div><dt>Map</dt><dd>M</dd></div>
-                  <div><dt>Off the bike</dt><dd>Esc</dd></div>
+                  <div><dt>Retire</dt><dd>Esc</dd></div>
                 </>
               )}
             </dl>
 
             <ul className="moto-card__rules">
               <li>
-                A gold arrow over the bike points at the nearest coin you have
-                not picked up, and the map marks all of them.
+                Stay on the tarmac. The grass will not hold a bike much above
+                half speed, and the forest between the roads is thick.
               </li>
               <li>
-                Stay on the roads. The forest between them is thick, and a tree
-                will take your speed off you.
+                Cutting the middle of the island does not shorten the lap —
+                you have to come past every sector of the circuit for it to
+                count.
               </li>
               <li>
-                Nothing is timed against you — the clock only counts how long
-                the round trip took.
+                Sit right behind one of them and the tow pulls you along
+                faster than the bike will go on its own. That is the way past
+                on a road this narrow.
+              </li>
+              <li>
+                A shoulder in the corners costs a little speed and no more.
+                They will give you room if you are quicker.
               </li>
             </ul>
           </>
         ) : (
           <>
             <p className="moto-card__lead">
-              All {COIN_TOTAL} of them, and a lap of the whole island to show
-              for it.
+              {won
+                ? 'Three laps of the ring road, and nobody came past you on the last one.'
+                : podium
+                  ? 'On the podium, and close enough to see the winner over the line.'
+                  : 'Round the back of the field for three laps. The line is there to be learned.'}
             </p>
             <div className="moto-card__score">
               <div>
-                <span>Coins</span>
-                <strong>
-                  {run.coins}/{COIN_TOTAL}
-                </strong>
+                <span>Finished</span>
+                <strong>{ORDINAL[run.place] || '—'}</strong>
               </div>
               <div>
-                <span>Time taken</span>
+                <span>Race time</span>
                 <strong>{clock(run.seconds)}</strong>
+              </div>
+              <div>
+                <span>Best lap</span>
+                <strong>{run.best > 0 ? clock(run.best) : '—'}</strong>
               </div>
             </div>
           </>
@@ -99,7 +133,7 @@ export function MotoCard() {
             className="button button--primary"
             onClick={() => (briefing ? begin() : again())}
           >
-            {briefing ? 'Kick it over' : 'Ride again'}
+            {briefing ? 'On the grid' : 'Race again'}
           </button>
           <button
             className="button"

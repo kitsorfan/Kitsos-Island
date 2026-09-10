@@ -33,8 +33,9 @@ import {
   readCameraTurn,
   readMove,
 } from '../game/input'
-import { ARENA, PAINT, aimAt, playerFire } from '../game/paintball'
-import { challenge, watchGates } from '../game/guard'
+import { ARENA, PAINT, aimAt, canFire, playerFire } from '../game/paintball'
+import { GUARD, challenge, holdTheLine } from '../game/guard'
+import { HIDE } from '../game/hide'
 import { PARTY, atCentre, onFloor } from '../game/party'
 import { isInteractive, keyCount, useGame } from '../state/store'
 import type { Nearby } from '../state/store'
@@ -91,6 +92,8 @@ export function Player() {
   /** Her prompt only exists once she is down there, so it is subscribed. */
   const amaliaHere = useGame((s) => s.amaliaHere)
   const outfit = useGame((s) => s.outfit)
+  /** A shelf that swings is furniture until it is not, so this is subscribed. */
+  const secrets = useGame((s) => s.secrets)
 
   const position = useRef<[number, number]>([...PLAYER_START])
   const facing = useRef(Math.PI)
@@ -140,6 +143,16 @@ export function Player() {
     [area],
   )
   const actorColliders = useRef<Collider[]>([])
+  /** Anyone on a night shift, who stops being solid while they square up. */
+  const onWatch = useMemo(
+    () =>
+      new Set(
+        NPCS.filter((n) => n.area === area && n.shift === 'night').map(
+          (n) => n.id,
+        ),
+      ),
+    [area],
+  )
 
   /* --------------------------- interactions --------------------------- */
 
@@ -158,14 +171,18 @@ export function Player() {
         x: npc.position[0],
         z: npc.position[1],
         live: npc.id,
-        range: 3.4,
+        // A sentry holds you at arm's length and then some, so they have to
+        // be worth talking to from where they put you.
+        range: npc.shift ? 4.8 : 3.4,
         trigger: () => {
           const state = useGame.getState()
           sfx.confirm()
           const mission = npc.gives ? MISSION_BY_ID.get(npc.gives) : undefined
           const started = mission && state.missions[mission.id] === 'idle'
           const ongoing =
-            mission && state.missions[mission.id] === 'active' && npc.missionLines
+            mission &&
+            state.missions[mission.id] === 'active' &&
+            npc.missionLines
 
           state.talk({
             speaker: npc.name,
@@ -194,7 +211,7 @@ export function Player() {
           verb: 'Enter',
           x: b.door[0],
           z: b.door[1],
-          range: 4.2,
+          range: b.sentries ? 7 : 4.2,
           trigger: () => {
             const state = useGame.getState()
             if (b.closesAtNight && state.night) {
@@ -254,22 +271,9 @@ export function Player() {
         x: BOARD.position[0],
         z: BOARD.position[1],
         range: 4.8,
-        trigger: () => {
-          const state = useGame.getState()
-          if (state.night) {
-            sfx.cancel()
-            state.talk({
-              speaker: BOARD.label,
-              role: 'Closed for the night',
-              lines: [
-                'All three games are played in daylight — nobody is going to find a paintball, a coin or a gathering in the dark.',
-                'There is a party button across the road, though, and that one only works after dark.',
-              ],
-            })
-            return
-          }
-          state.openArcade()
-        },
+        // Readable at any hour: three of the four want daylight and the
+        // fourth wants the dark, and the board says which is which.
+        trigger: () => useGame.getState().openArcade(),
       })
 
       // Only once she is actually down there, and tracked live: she does not
@@ -317,6 +321,18 @@ export function Player() {
             })
             return
           }
+          if (state.hide) {
+            sfx.cancel()
+            state.talk({
+              speaker: PARTY_BUTTON.label,
+              role: 'Not in the middle of a game',
+              lines: [
+                'Press it now and the whole island walks into the square to dance, which rather gives the game away.',
+                'Finish the hide and seek first.',
+              ],
+            })
+            return
+          }
           state.toggleParty()
         },
       })
@@ -343,8 +359,10 @@ export function Player() {
     }
 
     if (interior) {
-      const building = BUILDING_BY_ID.get(interior.id)
-      const accent = building?.accent ?? '#3f7bd6'
+      // A cellar has no front door of its own, so the accent comes off the
+      // building it sits under rather than off a lookup that misses.
+      const building = BUILDING_BY_ID.get(interior.building ?? interior.id)
+      const accent = building?.accent ?? interior.accent
 
       for (const exhibit of interior.exhibits) {
         if (exhibit.kind === 'key') {
@@ -358,7 +376,9 @@ export function Player() {
             range: 2.8,
             trigger: () => {
               const state = useGame.getState()
-              const key = exhibit.keyId ? KEY_BY_ID.get(exhibit.keyId) : undefined
+              const key = exhibit.keyId
+                ? KEY_BY_ID.get(exhibit.keyId)
+                : undefined
               if (!key) return
               if (state.keys[key.id]) {
                 sfx.cancel()
@@ -414,6 +434,50 @@ export function Player() {
                 source: interior.name,
               })
             }
+            if (exhibit.reveals) {
+              const { id, title, body } = exhibit.reveals
+              state.revealSecret(id, { title, body })
+            }
+          },
+        })
+      }
+
+      /* Stairs and doors to the other rooms of this building. */
+      for (const link of interior.links ?? []) {
+        // One that needs a secret is not there at all until the secret is
+        // out — no prompt, no halo, nothing to tip the player off.
+        if (link.needs && !secrets[link.needs]) continue
+
+        const shut = link.kind === 'locked'
+        list.push({
+          id: link.id,
+          kind: shut ? 'door' : 'exit',
+          label: link.label,
+          verb: shut ? 'Try' : 'Take',
+          x: link.position[0],
+          z: link.position[1],
+          range: 2.9,
+          trigger: () => {
+            const state = useGame.getState()
+            if (shut || !link.to || !link.arrive) {
+              sfx.cancel()
+              state.talk({
+                speaker: 'Locked',
+                role: interior.name,
+                lines: link.lines ?? ['It does not open.'],
+              })
+              return
+            }
+            sfx.confirm()
+            if (link.journal) {
+              state.record({
+                id: link.id,
+                title: link.journal.title,
+                body: link.journal.body,
+                source: interior.name,
+              })
+            }
+            state.goRoom(link.to, link.arrive)
           },
         })
       }
@@ -421,21 +485,26 @@ export function Player() {
       list.push({
         id: 'exit',
         kind: 'exit',
-        label: 'Step outside',
+        label: interior.exit?.label ?? 'Step outside',
         verb: '',
         x: 0,
         z: interior.half[1] - 1.8,
         range: 2.4,
         trigger: () => {
+          const state = useGame.getState()
           sfx.cancel()
-          useGame.getState().leaveBuilding()
+          // A room with no front door of its own leads back into the house
+          // rather than straight out onto the island.
+          if (interior.exit)
+            state.goRoom(interior.exit.to, interior.exit.arrive)
+          else state.leaveBuilding()
         },
       })
     }
 
     void store
     return list
-  }, [area, indoors, interior, amaliaHere, night])
+  }, [area, indoors, interior, amaliaHere, night, secrets])
 
   /* ------------------------------- frame ------------------------------ */
 
@@ -459,6 +528,8 @@ export function Player() {
 
     /** True only while a paintball match is actually being fought. */
     const fight = ARENA.active && store.paintball?.status === 'playing'
+    /** And while a game of hide and seek is out there in the dark. */
+    const hunting = HIDE.active && store.hide?.status === 'playing'
     const crouching = fight && active && isCrouching()
     motion.current.crouching = crouching
     dryGap.current = Math.max(0, dryGap.current - delta)
@@ -478,8 +549,12 @@ export function Player() {
           ? RUN_SPEED
           : WALK_SPEED
 
-    // Live colliders for anyone walking around this area.
+    // Live colliders for anyone walking around this area. A sentry stepping
+    // into your path is not a wall to be shoved along — the line they are
+    // holding does that, and two of them jostling would walk you backwards
+    // out of range of everything worth talking to.
     actorColliders.current = actorIds.flatMap((id) => {
+      if (GUARD.left > 0 && onWatch.has(id)) return []
       const p = ACTOR_POS.get(id)
       return p ? [{ x: p.x, z: p.z, hx: 0.7, hz: 0.7, circle: true }] : []
     })
@@ -511,6 +586,12 @@ export function Player() {
     } else {
       motion.current.moving = false
       motion.current.speed = 0
+    }
+
+    // A guarded gate is held whether you are moving or not — walk up on one
+    // after dark and they whistle; keep pushing and they keep pushing back.
+    if (!indoors && holdTheLine(position.current, delta, store.night)) {
+      sfx.whistle()
     }
 
     // Stand still on the floor with the music on and he joins in.
@@ -572,12 +653,14 @@ export function Player() {
         sfx.reload()
       }
 
-      if (active && consumeFire() && ARENA.fireGap <= 0) {
+      // Down behind cover you cannot shoot out of it, and nothing leaves a
+      // marker until the whistle goes.
+      if (active && consumeFire() && ARENA.fireGap <= 0 && canFire(crouching)) {
         if (game.ammo > 0 && game.reloadAt === null) {
           // The marker leads the nearest enemy inside the aim cone, so a
           // third-person camera does not need a mouse to aim.
           const shot = aimAt(px, pz, facing.current)
-          playerFire(px, pz, shot.angle, crouching)
+          playerFire(px, pz, shot.angle)
           facing.current = shot.angle
           store.fireRound()
           sfx.pop()
@@ -630,7 +713,8 @@ export function Player() {
           let swing = Math.atan2(ax / len, az / len) - yaw.current
           while (swing > Math.PI) swing -= Math.PI * 2
           while (swing < -Math.PI) swing += Math.PI * 2
-          yaw.current += Math.sign(swing) * Math.min(Math.abs(swing), delta * 2.6)
+          yaw.current +=
+            Math.sign(swing) * Math.min(Math.abs(swing), delta * 2.6)
         }
       }
     }
@@ -659,16 +743,14 @@ export function Player() {
 
     /* -------------------------- interaction ------------------------- */
 
-    // Nobody stops mid-match to read a signpost.
-    if (fight) {
+    // Nobody stops mid-match to read a signpost, and nobody ducks indoors
+    // in the middle of hide and seek — every door on the island is shut for
+    // the duration, and a face in a doorway would give the game away.
+    if (fight || hunting) {
       store.setNearby(null)
       consumeInteract()
       return
     }
-
-    // Walk up on a gate that has soldiers on it and they will let you know
-    // long before you reach the handle.
-    if (!indoors && watchGates(px, pz, delta, store.night)) sfx.whistle()
 
     let best: Target | null = null
     let bestDist = Infinity
@@ -708,16 +790,25 @@ export function Player() {
         motion={motion}
         gun={armed}
         gunColor={PAINT.player}
+        kit={armed ? PAINT.player : undefined}
         suit={outfit === 'tuxedo'}
         bouquet={outfit === 'tuxedo'}
         // Happy, from the moment she is called down.
         smile={amaliaHere}
         // Both hands are full at his own dance.
-        hand={night && outfit !== 'tuxedo' ? handLight : undefined}
+        hand={
+          night && outfit !== 'tuxedo' && handLight !== 'none'
+            ? handLight
+            : undefined
+        }
         danceStyle={amaliaHere ? 3 : undefined}
       />
       {/* Soft blob shadow so the player never looks like it floats. */}
-      <mesh ref={shadow} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
+      <mesh
+        ref={shadow}
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, 0.03, 0]}
+      >
         <circleGeometry args={[0.55, 16]} />
         <meshBasicMaterial color="#2a4a22" transparent opacity={0.22} />
       </mesh>

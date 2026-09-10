@@ -108,12 +108,30 @@ export function useKeyboard() {
           }
           return
 
+        case 'hide':
+          if (ADVANCE_KEYS.has(event.code)) {
+            if (state.hide?.status === 'briefing') state.beginHide()
+            else state.openHide()
+          } else if (event.code === 'Escape') {
+            state.exitHide()
+          }
+          return
+
         case 'balloon':
           if (ADVANCE_KEYS.has(event.code)) {
             if (state.balloon?.status === 'briefing') state.beginBalloon()
             else state.openBalloon()
           } else if (event.code === 'Escape') {
             state.exitBalloon()
+          }
+          return
+
+        case 'rescue':
+          if (ADVANCE_KEYS.has(event.code)) {
+            if (state.rescue?.status === 'briefing') state.beginRescue()
+            else state.openRescue()
+          } else if (event.code === 'Escape') {
+            state.exitRescue()
           }
           return
 
@@ -166,6 +184,16 @@ export function useKeyboard() {
             return
           }
 
+          // At the helm the throttle and the wheel are the boat's; only
+          // quitting and the chart are still ours to read here.
+          if (state.rescue?.status === 'sailing') {
+            if (event.code === 'Escape') state.exitRescue()
+            else if (event.code === 'KeyM') state.openMap()
+            else if (event.code === 'KeyN') state.toggleMute()
+            else if (event.code === 'KeyB') state.toggleMusic()
+            return
+          }
+
           if (event.code === 'KeyP') state.openArcade()
           else if (event.code === 'Space') queueJump()
           else if (INTERACT_KEYS.has(event.code)) queueInteract()
@@ -188,9 +216,12 @@ export function useKeyboard() {
           } else if (event.code === 'KeyT') {
             sfx.confirm()
             state.toggleHandLight()
-          } else if (event.code === 'Escape' && state.area !== 'island') {
-            sfx.cancel()
-            state.leaveBuilding()
+          } else if (event.code === 'Escape') {
+            if (state.hide?.status === 'playing') state.exitHide()
+            else if (state.area !== 'island') {
+              sfx.cancel()
+              state.leaveBuilding()
+            }
           }
       }
     }

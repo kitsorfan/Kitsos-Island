@@ -1,24 +1,131 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import type { Group, Mesh } from 'three'
+import type { Group, Mesh, Object3D, SpotLight } from 'three'
 import { BUILDINGS, BUILDING_BY_ID } from '../data/world'
 import { groundHeight } from '../game/terrain'
+import { useGame } from '../state/store'
+
 import type { Building } from '../types'
 
 const WINDOW_WARM = '#ffd487'
 const WINDOW_COLD = '#bcd8ff'
 
 /**
- * Everything that only exists after dark: lit windows on the buildings, and
- * the beam off the lighthouse.
+ * Everything that only exists after dark: lit windows on the buildings, the
+ * beam off the lighthouse, and the searchlight going round the camp.
  */
 export function NightLights() {
+  // Hide and seek is played with every light on the island put out — the lit
+  // windows, the lighthouse and the camp searchlight included. Somebody's
+  // torch is the only thing burning anywhere.
+  const dark = useGame((s) => s.hide !== null)
+  if (dark) return null
+
   return (
     <group>
       {BUILDINGS.map((building) => (
         <Windows key={building.id} building={building} />
       ))}
       <LighthouseBeam />
+      <CampSearchlight />
+    </group>
+  )
+}
+
+/* ----------------------------- camp searchlight --------------------------- */
+
+/**
+ * Where the lamp sits above the camp, and the radius the pool runs round at
+ * — far enough out to cross the perimeter, the gate and whoever is standing
+ * on the road in, and no further.
+ */
+const MAST = 14
+const SWEEP_RADIUS = 20
+const POOL = 5.5
+/** One turn every twenty-odd seconds — a patrol, not a disco. */
+const SWEEP_SPEED = 0.3
+
+/**
+ * The searchlight on the camp mast: one beam, turning all night, with a pool
+ * of light dragging round the perimeter under it. Anything it crosses — the
+ * sentries, the road in, you — is lit as it goes past.
+ */
+function CampSearchlight() {
+  const sweep = useRef<Group>(null)
+  const light = useRef<SpotLight>(null)
+  const aim = useRef<Object3D>(null)
+  const building = BUILDING_BY_ID.get('army')
+
+  useEffect(() => {
+    if (light.current && aim.current) light.current.target = aim.current
+  }, [])
+
+  useFrame((state) => {
+    if (sweep.current) sweep.current.rotation.y = state.clock.elapsedTime * SWEEP_SPEED
+  })
+
+  if (!building) return null
+  const [x, z] = building.position
+  const ground = groundHeight(x, z)
+  // Cone from the lamp down to where the pool sits, so the two line up.
+  const drop = MAST
+  const length = Math.hypot(SWEEP_RADIUS, drop)
+  const tilt = Math.atan2(drop, SWEEP_RADIUS)
+  const shaft = Math.max(2, MAST - building.height)
+
+  return (
+    <group position={[x, ground + MAST, z]}>
+      {/* Only the part of the mast that clears the roof is drawn; the rest
+          of it would be inside the barracks. */}
+      <mesh position={[0, -shaft / 2, 0]}>
+        <cylinderGeometry args={[0.22, 0.3, shaft, 8]} />
+        <meshStandardMaterial color="#3a3f33" flatShading roughness={0.9} />
+      </mesh>
+      <mesh>
+        <sphereGeometry args={[0.7, 10, 8]} />
+        <meshBasicMaterial color="#fff6d2" />
+      </mesh>
+      <pointLight intensity={70} distance={30} decay={1.6} color="#ffeec2" />
+
+      <group ref={sweep}>
+        {/* The beam, tipped down onto the ground it is searching. */}
+        <group rotation={[tilt, 0, 0]}>
+          <mesh position={[0, 0, length / 2]} rotation={[-Math.PI / 2, 0, 0]}>
+            <coneGeometry args={[POOL, length, 14, 1, true]} />
+            <meshBasicMaterial
+              color="#fff4cf"
+              transparent
+              opacity={0.09}
+              depthWrite={false}
+            />
+          </mesh>
+        </group>
+
+        {/* And the pool it drags round the perimeter. */}
+        <mesh
+          position={[0, -MAST + 0.08, SWEEP_RADIUS]}
+          rotation={[-Math.PI / 2, 0, 0]}
+        >
+          <circleGeometry args={[POOL, 22]} />
+          <meshBasicMaterial
+            color="#fff2c2"
+            transparent
+            opacity={0.3}
+            depthWrite={false}
+          />
+        </mesh>
+
+        <spotLight
+          ref={light}
+          angle={0.26}
+          penumbra={0.5}
+          intensity={700}
+          distance={44}
+          decay={1.3}
+          color="#fff3d0"
+        />
+        <object3D ref={aim} position={[0, -MAST, SWEEP_RADIUS]} />
+      </group>
     </group>
   )
 }

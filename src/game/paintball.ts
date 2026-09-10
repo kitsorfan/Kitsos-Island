@@ -6,6 +6,7 @@
  * crossing the plaza never costs a re-render.
  */
 import { ISLAND_WALK_RADIUS, NPCS, PLAZA_RADIUS } from '../data/world'
+import type { Npc } from '../types'
 import { resolveCollisions } from './collision'
 import { STATIC_COLLIDERS, TREE_COLLIDERS, groundHeight } from './terrain'
 import type { Collider } from './terrain'
@@ -14,7 +15,18 @@ import type { Collider } from './terrain'
 export const MAG_SIZE = 5
 export const RELOAD_MS = 6000
 export const START_LIVES = 3
-export const FRIEND_COUNT = 2
+
+/**
+ * How big the two sides get. Allies are a coin toss — some afternoons nobody
+ * picks up a marker for you — and the other lot can be anything from a
+ * handful to most of a village.
+ */
+export const MAX_FRIENDS = 5
+export const MIN_ENEMIES = 5
+export const MAX_ENEMIES = 20
+
+/** Seconds on the clock before anybody may fire. */
+export const COUNTDOWN = 5
 
 /** Where the match is fought, so nobody wanders off to the shore. */
 export const ARENA_CENTER = { x: 0, z: 4 }
@@ -30,13 +42,8 @@ export const AIM_CONE = 1.1
 
 const PELLET_SPEED = 46
 const PELLET_LIFE = 1.5
-/**
- * Where a ball leaves the marker, which is also the height it flies at. The
- * crouched figure holds it much lower — and well under the standing line,
- * which is the whole point of getting down.
- */
+/** Where a ball leaves the marker, which is also the height it flies at. */
 const MUZZLE = 1.36
-const MUZZLE_LOW = 0.63
 /** Anything on the standing line sails over a crouched player. */
 const CROUCH_TOP = 1.15
 const STAND_TOP = 1.95
@@ -102,6 +109,8 @@ export interface Splat {
 
 export const ARENA = {
   active: false,
+  /** Seconds left before the whistle. Nobody fires or moves until it is 0. */
+  countdown: 0,
   units: new Map<string, Combatant>(),
   pellets: [] as Pellet[],
   splats: [] as Splat[],
@@ -151,19 +160,108 @@ function blocked(ax: number, az: number, bx: number, bz: number): boolean {
 
 /* -------------------------------- the teams ------------------------------- */
 
-const ISLAND_IDS = NPCS.filter((n) => n.area === 'island').map((n) => n.id)
+/**
+ * Who is eligible. The night shift is not: a match is a daylight game, so
+ * they are not on the island to be drafted into one — and an enemy nobody
+ * can see is an enemy nobody can paint.
+ */
+const ISLAND_IDS = NPCS.filter(
+  (n) => n.area === 'island' && n.shift !== 'night',
+).map((n) => n.id)
+const NPC_BY_ID = new Map(NPCS.map((n) => [n.id, n]))
 
-/** Two of the islanders take your side; the rest of them want you painted. */
-export function pickTeams(): { friends: string[]; enemies: string[] } {
-  const pool = [...ISLAND_IDS]
-  for (let i = pool.length - 1; i > 0; i--) {
+/**
+ * The island only has eleven people on it, and a full field wants more than
+ * that. Anybody past the eleventh is a face from the next village along —
+ * they get a name so the feed can use it, and a look so the field is not a
+ * row of identical twins.
+ */
+export interface Ringer {
+  name: string
+  colors: Npc['colors']
+}
+
+const RINGER_NAMES = [
+  'Lefteris', 'Zoe', 'Tasos', 'Rania', 'Vasilis', 'Ioanna', 'Stavros',
+  'Christina', 'Panos', 'Katerina', 'Michalis', 'Angeliki', 'Spyros',
+  'Chryssa', 'Dinos', 'Vaso', 'Akis', 'Lena', 'Makis', 'Toula', 'Sotiris',
+  'Niki', 'Argyris', 'Fenia',
+]
+
+const SKINS = ['#f0c39a', '#d99e6f', '#a2683f', '#8a5a34']
+const HAIRS = ['#2b2b2b', '#4a3526', '#241d18', '#6b4a2a']
+const SHIRTS = ['#4a6f8a', '#8a5a6f', '#5c7a4a', '#7a6a4a', '#6a5a8a', '#8a6a4a']
+const PANTS = ['#3a3f4a', '#4c5238', '#2a3f78', '#4a4436']
+
+/** Everyone on the field who is not one of the eleven. */
+export const RINGERS = new Map<string, Ringer>()
+
+/** Whoever this id belongs to, islander or ringer. */
+export function combatantName(id: string): string {
+  return RINGERS.get(id)?.name ?? NPC_BY_ID.get(id)?.name ?? 'Someone'
+}
+
+function shuffled<T>(list: T[]): T[] {
+  const out = [...list]
+  for (let i = out.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
-    ;[pool[i], pool[j]] = [pool[j], pool[i]]
+    ;[out[i], out[j]] = [out[j], out[i]]
   }
+  return out
+}
+
+/** Everyone on the island who could pick up a marker, in a fixed order. */
+export const ROSTER = ISLAND_IDS
+
+export interface Teams {
+  friends: string[]
+  enemies: string[]
+}
+
+/**
+ * Fills out both sides from an explicit list of who is standing with you and
+ * a headcount for the other lot.
+ *
+ * Your side is always people you have met — there are only ever five of them
+ * at most and eleven to choose from. Locals you did not pick line up against
+ * you first, and anything past the eleventh face comes in from out of town.
+ */
+export function buildTeams(friendIds: string[], enemyCount: number): Teams {
+  RINGERS.clear()
+  const names = shuffled(RINGER_NAMES)
+  let extra = 0
+
+  const ringer = (i: number): string => {
+    const id = `ringer-e${i}`
+    RINGERS.set(id, {
+      name: names[extra % names.length],
+      colors: {
+        skin: SKINS[extra % SKINS.length],
+        hair: HAIRS[(extra * 3) % HAIRS.length],
+        shirt: SHIRTS[extra % SHIRTS.length],
+        pants: PANTS[(extra * 2) % PANTS.length],
+      },
+    })
+    extra++
+    return id
+  }
+
+  const friends = ROSTER.filter((id) => friendIds.includes(id)).slice(0, MAX_FRIENDS)
+  const spare = shuffled(ROSTER.filter((id) => !friends.includes(id)))
+  const count = Math.max(MIN_ENEMIES, Math.min(MAX_ENEMIES, Math.round(enemyCount)))
+
   return {
-    friends: pool.slice(0, FRIEND_COUNT),
-    enemies: pool.slice(FRIEND_COUNT),
+    friends,
+    enemies: Array.from({ length: count }, (_, i) => spare.shift() ?? ringer(i)),
   }
+}
+
+/** A draw of the hat, for the sides you get handed before you change them. */
+export function pickTeams(): Teams {
+  const friendCount = Math.floor(Math.random() * (MAX_FRIENDS + 1))
+  const enemyCount =
+    MIN_ENEMIES + Math.floor(Math.random() * (MAX_ENEMIES - MIN_ENEMIES + 1))
+  return buildTeams(shuffled(ROSTER).slice(0, friendCount), enemyCount)
 }
 
 /** Drops a combatant on clear ground near a wanted spot. */
@@ -205,6 +303,7 @@ export function openArena(friends: string[], enemies: string[]) {
   ARENA.fireGap = 0
   ARENA.grace = 0
   ARENA.crouched = false
+  ARENA.countdown = COUNTDOWN
 
   friends.forEach((id, i) => {
     const angle = Math.PI * (0.72 + i * 0.56)
@@ -216,8 +315,10 @@ export function openArena(friends: string[], enemies: string[]) {
   })
 
   enemies.forEach((id, i) => {
+    // Spread round the compass and out over three rings, so twenty of them
+    // arrive in waves rather than as one wall.
     const angle = (i / Math.max(1, enemies.length)) * Math.PI * 2 + 0.4
-    const radius = PLAZA_RADIUS + 12 + (i % 3) * 11
+    const radius = PLAZA_RADIUS + 10 + (i % 3) * 12
     const [x, z] = place(
       ARENA_CENTER.x + Math.sin(angle) * radius,
       ARENA_CENTER.z + Math.cos(angle) * radius,
@@ -230,6 +331,7 @@ export function openArena(friends: string[], enemies: string[]) {
 
 export function closeArena() {
   ARENA.active = false
+  ARENA.countdown = 0
   ARENA.units.clear()
   ARENA.pellets.length = 0
   ARENA.splats.length = 0
@@ -301,14 +403,18 @@ export function aimAt(
   }
 }
 
+/**
+ * True while your marker will actually go off: not during the countdown, and
+ * not while you are flat on the ground. Getting down is cover, and the price
+ * of cover is that you cannot shoot out of it.
+ */
+export function canFire(crouched: boolean): boolean {
+  return ARENA.countdown <= 0 && !crouched
+}
+
 /** Throws one of your rounds. The caller owns the ammo count. */
-export function playerFire(
-  px: number,
-  pz: number,
-  angle: number,
-  crouched = false,
-) {
-  spawn(px, pz, angle, 'player', PAINT.player, crouched ? MUZZLE_LOW : MUZZLE)
+export function playerFire(px: number, pz: number, angle: number) {
+  spawn(px, pz, angle, 'player', PAINT.player, MUZZLE)
   ARENA.fireGap = FIRE_GAP
 }
 
@@ -449,9 +555,23 @@ export function stepArena(
   const events: ArenaEvents = { playerHit: false, splatted: [] }
   if (!ARENA.active) return events
 
+  ARENA.crouched = player.crouched
+
+  // Five seconds on the clock before anybody may do anything about anybody.
+  // They stand where they were dropped; you get the time to find cover.
+  if (ARENA.countdown > 0) {
+    ARENA.countdown = Math.max(0, ARENA.countdown - delta)
+    for (const u of ARENA.units.values()) {
+      u.moving = false
+      u.speed = 0
+      u.vx = 0
+      u.vz = 0
+    }
+    return events
+  }
+
   ARENA.fireGap = Math.max(0, ARENA.fireGap - delta)
   ARENA.grace = Math.max(0, ARENA.grace - delta)
-  ARENA.crouched = player.crouched
 
   for (const u of ARENA.units.values()) stepUnit(u, player.x, player.z, delta)
 

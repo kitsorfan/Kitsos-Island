@@ -43,8 +43,9 @@ export function BalloonCard() {
         {briefing ? (
           <>
             <p className="bl-card__lead">
-              It is festival afternoon, and the balloon is tethered on the
-              south road. <strong>{CALL_TOTAL} gatherings</strong> are spread
+              It is festival afternoon, and the balloon is tethered on
+              Collaboration Road. <strong>{CALL_TOTAL} gatherings</strong> are
+              spread
               across the island below, and every one of them is waiting on
               something out of your basket.
             </p>

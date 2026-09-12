@@ -82,6 +82,14 @@ export interface Building {
 export type HandLight = 'torch' | 'flashlight'
 export type Carried = HandLight | 'none'
 
+/**
+ * How much the island is allowed to spend on a frame.
+ *
+ * 'auto' measures and steps down on hardware that cannot keep up; the other
+ * two are the visitor overriding that judgement in either direction.
+ */
+export type Quality = 'auto' | 'high' | 'low'
+
 /* ------------------------------ people ----------------------------- */
 
 export interface Npc {
@@ -115,6 +123,13 @@ export interface Npc {
   shift?: 'day' | 'night'
   /** Carried in the off hand, for anyone working in the dark. */
   hand?: HandLight
+  /** Worn down the back instead of the cropped default. */
+  hair?: 'short' | 'long'
+  /** A skirt in this colour over the legs, with a trim at the hem. */
+  dress?: string
+  dressTrim?: string
+  /** A mouth, turned up. Reserved for the people he is glad to see. */
+  smile?: boolean
 }
 
 export interface SignPost {
@@ -193,6 +208,7 @@ export type PropKind =
   | 'longTable'
   | 'photoWall'
   | 'shutter'
+  | 'stairwell'
   | 'armchair'
   | 'tv'
   | 'beanbag'

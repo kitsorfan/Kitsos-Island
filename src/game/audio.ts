@@ -4,9 +4,13 @@ let ctx: AudioContext | null = null
 export function audioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null
   if (!ctx) {
-    const Ctor = window.AudioContext ?? (window as unknown as {
-      webkitAudioContext?: typeof AudioContext
-    }).webkitAudioContext
+    const Ctor =
+      window.AudioContext ??
+      (
+        window as unknown as {
+          webkitAudioContext?: typeof AudioContext
+        }
+      ).webkitAudioContext
     if (!Ctor) return null
     ctx = new Ctor()
   }
@@ -18,9 +22,30 @@ let muted = false
 
 export function setMuted(value: boolean) {
   muted = value
+  refreshEngine()
 }
 
 export const isMuted = () => muted
+
+/** Loudest step. Levels run 0 (silent) to here. */
+export const LEVELS = 5
+
+let level = LEVELS
+
+/**
+ * Amplitude for a step. Loudness is not heard in proportion to amplitude —
+ * halving the number is nowhere near half as loud — so the steps are spaced
+ * on a curve. Linear spacing puts almost the whole audible range between the
+ * top two steps and leaves the bottom three sounding much the same.
+ */
+const scale = () => (level / LEVELS) ** 1.5
+
+export function setSfxLevel(next: number) {
+  level = Math.max(0, Math.min(LEVELS, Math.round(next)))
+  refreshEngine()
+}
+
+export const sfxLevel = () => level
 
 function tone(
   freq: number,
@@ -29,7 +54,7 @@ function tone(
   volume: number,
   delay = 0,
 ) {
-  if (muted) return
+  if (muted || level === 0) return
   const ac = audioContext()
   if (!ac) return
   const start = ac.currentTime + delay
@@ -38,7 +63,7 @@ function tone(
   osc.type = type
   osc.frequency.setValueAtTime(freq, start)
   gain.gain.setValueAtTime(0.0001, start)
-  gain.gain.exponentialRampToValueAtTime(volume, start + 0.01)
+  gain.gain.exponentialRampToValueAtTime(volume * scale(), start + 0.01)
   gain.gain.exponentialRampToValueAtTime(0.0001, start + duration)
   osc.connect(gain).connect(ac.destination)
   osc.start(start)
@@ -144,4 +169,138 @@ export function fizz() {
   tone(880, 0.05, 'triangle', 0.03)
   tone(1175, 0.05, 'triangle', 0.028, 0.04)
   tone(1568, 0.1, 'triangle', 0.026, 0.08)
+}
+
+/* -------------------------------- engine --------------------------------- */
+
+/**
+ * The motorcycle, which is the first thing on the island that is a note held
+ * for as long as you are on it rather than a sound that gets fired.
+ *
+ * Two sawtooths a hair apart through a lowpass. The beat between them is most
+ * of what makes a small engine sound like an engine; the filter opening as
+ * the revs climb is the rest of it. Off the tarmac both are dragged down and
+ * pulled further apart, which is as close to a tyre in the grass as two
+ * oscillators get.
+ *
+ * A third oscillator wobbles the pitch of the other two. It is barely there
+ * running straight and opens up as the bike leans, so the note flutters
+ * through a corner instead of holding flat — which at maximum speed, where
+ * the revs have nowhere left to climb, is the only thing left that moves.
+ */
+let engine: {
+  a: OscillatorNode
+  b: OscillatorNode
+  /** The wobble, and how far it swings the note. */
+  flutter: OscillatorNode
+  flutterDepth: GainNode
+  filter: BiquadFilterNode
+  gain: GainNode
+  /** Last values asked for, so a change of volume can be re-applied. */
+  revs: number
+  load: number
+} | null = null
+
+/** Fundamental at a standstill, and flat out. */
+const IDLE_HZ = 47
+const PEAK_HZ = 196
+
+function engineGain(revs: number, load: number) {
+  if (muted || level === 0) return 0.0001
+  return Math.max(0.0001, (0.04 + revs * 0.06 + load * 0.018) * scale())
+}
+
+/** Re-applies the volume after a mute or a level change, mid-race. */
+function refreshEngine() {
+  const e = engine
+  const ac = e && audioContext()
+  if (!e || !ac) return
+  e.gain.gain.setTargetAtTime(engineGain(e.revs, e.load), ac.currentTime, 0.05)
+}
+
+export function engineStart() {
+  if (engine) return
+  const ac = audioContext()
+  if (!ac) return
+  const now = ac.currentTime
+
+  const a = ac.createOscillator()
+  const b = ac.createOscillator()
+  a.type = 'sawtooth'
+  b.type = 'sawtooth'
+  a.frequency.setValueAtTime(IDLE_HZ, now)
+  b.frequency.setValueAtTime(IDLE_HZ * 1.012, now)
+
+  const filter = ac.createBiquadFilter()
+  filter.type = 'lowpass'
+  filter.frequency.setValueAtTime(420, now)
+  filter.Q.value = 5
+
+  const gain = ac.createGain()
+  gain.gain.setValueAtTime(0.0001, now)
+
+  // The wobble is wired into both frequencies rather than applied per frame,
+  // so it keeps its own steady rate however the game is running.
+  const flutter = ac.createOscillator()
+  flutter.type = 'sine'
+  flutter.frequency.setValueAtTime(9, now)
+  const flutterDepth = ac.createGain()
+  flutterDepth.gain.setValueAtTime(0, now)
+  flutter.connect(flutterDepth)
+  flutterDepth.connect(a.frequency)
+  flutterDepth.connect(b.frequency)
+
+  a.connect(filter)
+  b.connect(filter)
+  filter.connect(gain).connect(ac.destination)
+  a.start()
+  b.start()
+  flutter.start()
+
+  engine = { a, b, flutter, flutterDepth, filter, gain, revs: 0, load: 0 }
+  engineRevs(0, 0, false, 0)
+}
+
+/**
+ * `revs` 0 to 1 is how hard it is turning over, `load` how much throttle is
+ * behind it, `rough` whether the wheels are on grass, and `lean` how far over
+ * it is in a corner — which is what the note flutters with.
+ */
+export function engineRevs(revs: number, load: number, rough = false, lean = 0) {
+  const e = engine
+  const ac = e && audioContext()
+  if (!e || !ac) return
+  e.revs = revs
+  e.load = load
+
+  const now = ac.currentTime
+  const hz = IDLE_HZ + (PEAK_HZ - IDLE_HZ) * revs
+  const spread = rough ? 1.045 : 1.012
+  e.a.frequency.setTargetAtTime(hz, now, 0.05)
+  e.b.frequency.setTargetAtTime(hz * spread, now, 0.05)
+  e.filter.frequency.setTargetAtTime(
+    (360 + revs * 1850 + load * 620) * (rough ? 0.55 : 1),
+    now,
+    0.06,
+  )
+  e.gain.gain.setTargetAtTime(engineGain(revs, load), now, 0.05)
+
+  // Swing in Hz, as a share of the note, so it stays proportionate all the
+  // way up the range instead of turning into a warble at the bottom of it.
+  const swing = Math.max(0, Math.min(1, Math.abs(lean)))
+  e.flutterDepth.gain.setTargetAtTime(hz * 0.014 * (0.25 + swing), now, 0.08)
+  e.flutter.frequency.setTargetAtTime(8 + revs * 5 + swing * 4, now, 0.08)
+}
+
+export function engineStop() {
+  const e = engine
+  engine = null
+  const ac = e && audioContext()
+  if (!e || !ac) return
+  const now = ac.currentTime
+  e.gain.gain.cancelScheduledValues(now)
+  e.gain.gain.setTargetAtTime(0.0001, now, 0.07)
+  e.a.stop(now + 0.4)
+  e.b.stop(now + 0.4)
+  e.flutter.stop(now + 0.4)
 }

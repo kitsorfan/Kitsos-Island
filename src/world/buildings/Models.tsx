@@ -13,7 +13,16 @@ import { TextPlane } from '../TextSign'
 import { GreekFlag } from '../InteriorProps'
 import { IbmMark, NtuaSeal, VeltistonMark } from '../Emblems'
 
-/** Triangular prism used for gable roofs; the ridge runs along local Z. */
+/**
+ * Triangular prism used for gable roofs.
+ *
+ * It comes out of here already standing the right way up: the base spans X by
+ * width, the apex is at +Y by height, and the ridge runs along Z by depth. So
+ * it wants no rotation at all — every caller sits it on the wall top with a
+ * position and nothing else. Turning it a quarter turn about X, which is what
+ * every one of them used to do, swaps the vertical axis with the depth one and
+ * stands the whole roof on end as a slab through the middle of the building.
+ */
 function useGable(width: number, height: number, depth: number) {
   return useMemo(() => {
     const shape = new Shape()
@@ -102,7 +111,8 @@ function Door({
 /* Kitsos House — whitewashed Greek cube with a terracotta roof        */
 /* ------------------------------------------------------------------ */
 
-const HOUSE = { W: 8.8, D: 7.8, H: 4.2 }
+/** Two storeys over a basement, which is what is actually inside it. */
+const HOUSE = { W: 8.8, D: 7.8, H: 7.2 }
 
 /**
  * Louvered shutters, thrown back against the wall either side of a window.
@@ -174,7 +184,7 @@ function TiledRoof({
 
   return (
     <group>
-      <mesh geometry={gable} rotation={[Math.PI / 2, 0, 0]} castShadow>
+      <mesh geometry={gable} castShadow>
         <meshStandardMaterial color="#b04e35" flatShading roughness={0.9} />
       </mesh>
 
@@ -278,6 +288,50 @@ function HouseModel() {
         position={[W / 2 + 0.02, 2.9, 1.4]}
         rotation={[0, Math.PI / 2, 0]}
       />
+
+      {/* First floor: the landing window over the door, the lab lit at the
+          end of it, and shutters on all of them like the floor below. */}
+      {[-2.6, 2.6].map((x) => (
+        <group key={`up${x}`}>
+          <Win position={[x, 5.9, D / 2 + 0.02]} lit={x > 0} />
+          <Shutters position={[x, 5.9, D / 2 + 0.02]} />
+        </group>
+      ))}
+      <Win
+        position={[W / 2 + 0.02, 5.9, 1.4]}
+        rotation={[0, Math.PI / 2, 0]}
+        lit
+      />
+      <Shutters
+        position={[W / 2 + 0.02, 5.9, 1.4]}
+        rotation={[0, Math.PI / 2, 0]}
+      />
+      <Win position={[-2.6, 5.9, -D / 2 - 0.02]} rotation={[0, Math.PI, 0]} />
+
+      {/* The balcony off the landing, sitting over the pergola. */}
+      <group position={[0, 0, D / 2]}>
+        <Win position={[0, 5.7, 0.02]} size={[1.7, 2.5]} />
+        <mesh position={[0, 4.42, 0.78]} castShadow receiveShadow>
+          <boxGeometry args={[4.6, 0.18, 1.6]} />
+          <meshStandardMaterial color="#e6ddca" flatShading roughness={1} />
+        </mesh>
+        {[-2.24, 2.24].map((x) => (
+          <mesh key={x} position={[x, 4.95, 0.78]} castShadow>
+            <boxGeometry args={[0.14, 0.88, 1.6]} />
+            <meshStandardMaterial color="#f2ece0" flatShading roughness={0.9} />
+          </mesh>
+        ))}
+        <mesh position={[0, 5.35, 1.52]} castShadow>
+          <boxGeometry args={[4.6, 0.12, 0.14]} />
+          <meshStandardMaterial color="#f2ece0" flatShading roughness={0.9} />
+        </mesh>
+        {[-1.6, -0.8, 0, 0.8, 1.6].map((x) => (
+          <mesh key={`b${x}`} position={[x, 4.92, 1.52]}>
+            <boxGeometry args={[0.12, 0.86, 0.12]} />
+            <meshStandardMaterial color="#f2ece0" flatShading roughness={0.9} />
+          </mesh>
+        ))}
+      </group>
 
       {/* The basement, from outside: light wells along the plinth, because a
           cellar with a family in it should be visible from the road. */}
@@ -448,19 +502,100 @@ function HouseModel() {
 }
 
 /* ------------------------------------------------------------------ */
-/* NTUA Academy — neoclassical block with a colonnade                  */
+/* The Polytechnic — the Averof building, in so many words             */
 /* ------------------------------------------------------------------ */
+
+const MARBLE = '#faf3e4'
+const STONE = '#e6dbc3'
+
+/**
+ * An Ionic column: plinth, moulded base, a shaft with a slight entasis, and
+ * a capital with the two volutes that are the whole point of the order.
+ *
+ * The shaft is a sixteen-sided cylinder rather than a fluted one. Real flutes
+ * would be sixteen boxes a column and ninety-six across the portico, and at
+ * this distance flat shading on sixteen faces reads as fluting anyway.
+ */
+function IonicColumn({ x, height }: { x: number; height: number }) {
+  const shaft = height - 1.1
+
+  return (
+    <group position={[x, 0, 0]}>
+      <mesh position={[0, 0.2, 0]}>
+        <boxGeometry args={[1.15, 0.4, 1.15]} />
+        <meshStandardMaterial color={STONE} flatShading roughness={1} />
+      </mesh>
+      <mesh position={[0, 0.52, 0]}>
+        <cylinderGeometry args={[0.5, 0.56, 0.24, 16]} />
+        <meshStandardMaterial color={STONE} flatShading roughness={0.95} />
+      </mesh>
+
+      <mesh position={[0, 0.64 + shaft / 2, 0]} castShadow>
+        <cylinderGeometry args={[0.4, 0.48, shaft, 16]} />
+        <meshStandardMaterial color={MARBLE} flatShading roughness={0.9} />
+      </mesh>
+
+      {/* Capital: the echinus, the two scrolls, and the abacus over them. */}
+      <group position={[0, 0.64 + shaft, 0]}>
+        <mesh position={[0, 0.12, 0]}>
+          <cylinderGeometry args={[0.46, 0.4, 0.24, 16]} />
+          <meshStandardMaterial color={MARBLE} flatShading roughness={0.9} />
+        </mesh>
+        {[-1, 1].map((side) => (
+          <mesh
+            key={side}
+            position={[side * 0.44, 0.3, 0]}
+            rotation={[Math.PI / 2, 0, 0]}
+          >
+            <cylinderGeometry args={[0.2, 0.2, 1.02, 10]} />
+            <meshStandardMaterial color={MARBLE} flatShading roughness={0.9} />
+          </mesh>
+        ))}
+        <mesh position={[0, 0.3, 0]}>
+          <boxGeometry args={[0.88, 0.18, 1.02]} />
+          <meshStandardMaterial color={MARBLE} flatShading roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 0.48, 0]}>
+          <boxGeometry args={[1.16, 0.18, 1.16]} />
+          <meshStandardMaterial color={MARBLE} flatShading roughness={0.9} />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
+/** A cypress. Two cones and a trunk, and it says Athens on its own. */
+function Cypress({ x, z, h = 6.4 }: { x: number; z: number; h?: number }) {
+  return (
+    <group position={[x, 0, z]}>
+      <mesh position={[0, 0.4, 0]} castShadow>
+        <cylinderGeometry args={[0.16, 0.22, 0.8, 6]} />
+        <meshStandardMaterial color="#6b5236" flatShading roughness={1} />
+      </mesh>
+      <mesh position={[0, 0.7 + h * 0.38, 0]} castShadow>
+        <coneGeometry args={[0.95, h * 0.78, 7]} />
+        <meshStandardMaterial color="#2f5136" flatShading roughness={1} />
+      </mesh>
+      <mesh position={[0, 0.7 + h * 0.74, 0]} castShadow>
+        <coneGeometry args={[0.66, h * 0.44, 7]} />
+        <meshStandardMaterial color="#37603e" flatShading roughness={1} />
+      </mesh>
+    </group>
+  )
+}
 
 function UniversityModel() {
   const W = 20.8
   const D = 12.8
   const H = 7
-  const pediment = useGable(9.6, 2.2, 1.6)
+  const pediment = useGable(11.2, 2.4, 1.8)
   const columns = [-4, -2.4, -0.8, 0.8, 2.4, 4]
 
   return (
     <group>
-      {/* Steps */}
+      {/* Steps. These are load-bearing in more than one sense: the walkable
+          terrain has a ramp and a ledge pinned to exactly this geometry, so
+          the tread heights and the top landing do not move. */}
       {[0, 1, 2].map((i) => (
         <mesh
           key={i}
@@ -476,68 +611,144 @@ function UniversityModel() {
         <boxGeometry args={[W, H, D]} />
         <meshStandardMaterial color="#f2e9d6" flatShading roughness={0.95} />
       </mesh>
-      {/* Cornice */}
+
+      {/* End pavilions, stepped forward off the main block the way the
+          Patission front is. Without them it is a shed with a temple on it. */}
+      {[-1, 1].map((side) => (
+        <group key={side}>
+          <mesh
+            position={[side * (W / 2 - 2.4), H / 2 + 0.8, 0.5]}
+            castShadow
+            receiveShadow
+          >
+            <boxGeometry args={[4.8, H, D + 1]} />
+            <meshStandardMaterial
+              color="#efe4cd"
+              flatShading
+              roughness={0.95}
+            />
+          </mesh>
+          <mesh position={[side * (W / 2 - 2.4), H + 1.05, 0.5]} castShadow>
+            <boxGeometry args={[5.5, 0.6, D + 1.7]} />
+            <meshStandardMaterial color="#e0d3b6" flatShading roughness={1} />
+          </mesh>
+          {/* Pilasters on the corners of each pavilion. */}
+          {[-2.1, 2.1].map((dx) => (
+            <mesh
+              key={dx}
+              position={[side * (W / 2 - 2.4) + dx, H / 2 + 0.7, D / 2 + 1.1]}
+              castShadow
+            >
+              <boxGeometry args={[0.6, H - 0.2, 0.26]} />
+              <meshStandardMaterial
+                color={MARBLE}
+                flatShading
+                roughness={0.9}
+              />
+            </mesh>
+          ))}
+        </group>
+      ))}
+
+      {/* Cornice over the main block, and the set-back attic storey. */}
       <mesh position={[0, H + 1, 0]} castShadow>
         <boxGeometry args={[W + 0.7, 0.6, D + 0.7]} />
         <meshStandardMaterial color="#e0d3b6" flatShading roughness={1} />
       </mesh>
-      {/* Upper set-back storey */}
       <mesh position={[0, H + 2.1, 0]} castShadow>
         <boxGeometry args={[W - 5, 1.8, D - 3]} />
         <meshStandardMaterial color="#eee2c9" flatShading roughness={1} />
       </mesh>
+      {/* Antefixes, standing on the pavilion cornices. */}
+      {[-9.8, -6.2, 6.2, 9.8].map((x) => (
+        <mesh key={x} position={[x, H + 1.6, D / 2 + 0.9]} castShadow>
+          <coneGeometry args={[0.26, 0.5, 4]} />
+          <meshStandardMaterial color={STONE} flatShading roughness={1} />
+        </mesh>
+      ))}
 
-      {/* Portico */}
+      {/* The portico. */}
       <group position={[0, 0, D / 2 + 1.4]}>
         {columns.map((x) => (
-          <mesh key={x} position={[x, 3.2, 0]} castShadow>
-            <cylinderGeometry args={[0.42, 0.48, 6.4, 12]} />
-            <meshStandardMaterial color="#faf3e4" flatShading roughness={0.9} />
-          </mesh>
+          <IonicColumn key={x} x={x} height={6.4} />
         ))}
-        {columns.map((x) => (
-          <mesh key={`b${x}`} position={[x, 0.2, 0]}>
-            <boxGeometry args={[1.15, 0.4, 1.15]} />
-            <meshStandardMaterial color="#e6dbc3" flatShading roughness={1} />
-          </mesh>
-        ))}
-        <mesh position={[0, 6.7, 0]} castShadow>
-          <boxGeometry args={[10.4, 0.8, 2.6]} />
+
+        {/* Entablature: architrave, then the frieze that carries the name,
+            then a dentil course under the cornice. */}
+        <mesh position={[0, 6.65, 0]} castShadow>
+          <boxGeometry args={[10.8, 0.5, 2.6]} />
           <meshStandardMaterial color="#f7efdd" flatShading roughness={0.95} />
         </mesh>
-        <mesh
-          geometry={pediment}
-          position={[0, 7.1, 0]}
-          rotation={[Math.PI / 2, 0, 0]}
-          castShadow
-        >
+        <mesh position={[0, 7.3, 0]} castShadow>
+          <boxGeometry args={[10.6, 0.8, 2.5]} />
+          <meshStandardMaterial color="#fbf5e7" flatShading roughness={0.95} />
+        </mesh>
+        {Array.from({ length: 13 }, (_, i) => (
+          <mesh key={i} position={[-4.8 + i * 0.8, 7.82, 1.19]}>
+            <boxGeometry args={[0.34, 0.24, 0.2]} />
+            <meshStandardMaterial color="#efe6d2" flatShading roughness={1} />
+          </mesh>
+        ))}
+        <mesh position={[0, 8.06, 0]} castShadow>
+          <boxGeometry args={[11.6, 0.28, 2.78]} />
           <meshStandardMaterial color="#f0e6d0" flatShading roughness={0.95} />
         </mesh>
-        <NtuaSeal size={1.9} position={[0, 8.15, 0.86]} />
+
+        <mesh geometry={pediment} position={[0, 8.2, 0]} castShadow>
+          <meshStandardMaterial color="#f4ecd8" flatShading roughness={0.95} />
+        </mesh>
+        {/* Acroteria: one on the apex, one on each corner. */}
+        <mesh position={[0, 10.78, 0]} castShadow>
+          <coneGeometry args={[0.42, 0.9, 5]} />
+          <meshStandardMaterial color={STONE} flatShading roughness={1} />
+        </mesh>
+        {[-5.6, 5.6].map((x) => (
+          <mesh key={x} position={[x, 8.5, 0]} castShadow>
+            <coneGeometry args={[0.34, 0.7, 5]} />
+            <meshStandardMaterial color={STONE} flatShading roughness={1} />
+          </mesh>
+        ))}
+        <NtuaSeal size={1.8} position={[0, 9.1, 0.92]} />
+
+        {/* The name across the frieze, where it is on the real one.
+            It used to sit two centimetres off the stone, which at this
+            distance is a z-fight, and it sat under the cornice overhang on
+            top of that — between them you could not read a word of it. The
+            cornice is trimmed back above and the letters stand well clear. */}
         <TextPlane
-          text="ΕΘΝΙΚΟ ΜΕΤΣΟΒΙΟ ΠΟΛΥΤΕΧΝΕΙΟ"
-          width={9.4}
-          aspect={13}
+          text="NATIONAL TECHNICAL UNIVERSITY OF ATHENS"
+          width={10.2}
+          aspect={18}
           color="#2f5fa8"
-          outline="#f7efdd"
-          position={[0, 6.72, 1.33]}
+          outline="#fbf5e7"
+          position={[0, 7.3, 1.4]}
         />
       </group>
 
-      {/* Facade windows */}
+      {/* Facade windows, pedimented on the main floor the way they are on
+          the real front. */}
       {[-8.4, -6.6, 6.6, 8.4].map((x) => (
-        <Win
-          key={x}
-          position={[x, 3.4, D / 2 + 0.03]}
-          size={[1.2, 2]}
-          frame="#c3b394"
-          lit={x < 0}
-        />
+        <group key={x}>
+          <Win
+            position={[x, 3.4, D / 2 + 1.04]}
+            size={[1.2, 2]}
+            frame="#c3b394"
+            lit={x < 0}
+          />
+          <mesh position={[x, 4.66, D / 2 + 1.06]} castShadow>
+            <boxGeometry args={[1.9, 0.2, 0.34]} />
+            <meshStandardMaterial color={MARBLE} flatShading roughness={0.9} />
+          </mesh>
+          <mesh position={[x, 2.26, D / 2 + 1.06]}>
+            <boxGeometry args={[1.7, 0.16, 0.3]} />
+            <meshStandardMaterial color={MARBLE} flatShading roughness={0.9} />
+          </mesh>
+        </group>
       ))}
-      {[-8.4, -6.6, -2.6, 0, 2.6, 6.6, 8.4].map((x) => (
+      {[-8.4, -6.6, 8.4, 6.6].map((x) => (
         <Win
           key={`u${x}`}
-          position={[x, 7, D / 2 + 0.03]}
+          position={[x, 7, D / 2 + 1.04]}
           size={[1.1, 1.4]}
           frame="#c3b394"
         />
@@ -552,6 +763,11 @@ function UniversityModel() {
         />
       ))}
 
+      {/* Two cypresses on the forecourt, which do as much for the address as
+          the columns do. */}
+      <Cypress x={-7.6} z={D / 2 + 5.2} />
+      <Cypress x={7.6} z={D / 2 + 5.2} h={5.6} />
+
       {/* Foundation stone carrying the school's seal */}
       <group position={[-9.4, 0, 9.6]}>
         <mesh position={[0, 0.16, 0]} receiveShadow>
@@ -560,7 +776,7 @@ function UniversityModel() {
         </mesh>
         <mesh position={[0, 1.7, 0]} castShadow receiveShadow>
           <boxGeometry args={[2.8, 2.8, 0.55]} />
-          <meshStandardMaterial color="#e6dbc3" flatShading roughness={1} />
+          <meshStandardMaterial color={STONE} flatShading roughness={1} />
         </mesh>
         <mesh position={[0, 3.16, 0]} castShadow>
           <boxGeometry args={[3.1, 0.22, 0.75]} />
@@ -569,7 +785,8 @@ function UniversityModel() {
         <NtuaSeal size={2.1} position={[0, 1.78, 0.29]} />
       </group>
 
-      {/* Flagpole, kept clear of the foundation stone */}
+      {/* Flagpole, kept clear of the foundation stone. Patission flies the
+          Greek flag, not a blue rectangle. */}
       <group position={[9.4, 0, D / 2 + 4]}>
         <mesh position={[0, 3.4, 0]} castShadow>
           <cylinderGeometry args={[0.09, 0.11, 6.8, 8]} />
@@ -579,7 +796,17 @@ function UniversityModel() {
             roughness={0.4}
           />
         </mesh>
-        <Flag y={5.9} />
+        <mesh position={[0, 6.9, 0]}>
+          <sphereGeometry args={[0.13, 8, 6]} />
+          <meshStandardMaterial
+            color="#f0c14b"
+            metalness={0.6}
+            roughness={0.3}
+          />
+        </mesh>
+        <WavingFlag y={5.8}>
+          <GreekFlag width={2.6} />
+        </WavingFlag>
       </group>
     </group>
   )
@@ -597,23 +824,6 @@ function WavingFlag({ y, children }: { y: number; children: React.ReactNode }) {
     <group ref={group} position={[0.06, y, 0]}>
       {children}
     </group>
-  )
-}
-
-/** Banner hung just below the top of its pole. */
-function Flag({ y, color = '#2f6bb3' }: { y: number; color?: string }) {
-  const mesh = useRef<Mesh>(null)
-  useFrame((state) => {
-    if (mesh.current) {
-      mesh.current.rotation.y = Math.sin(state.clock.elapsedTime * 2.2) * 0.16
-      mesh.current.position.z = Math.sin(state.clock.elapsedTime * 2.6) * 0.08
-    }
-  })
-  return (
-    <mesh ref={mesh} position={[0.95, y, 0]}>
-      <boxGeometry args={[1.9, 1.2, 0.05]} />
-      <meshStandardMaterial color={color} flatShading roughness={0.8} />
-    </mesh>
   )
 }
 
@@ -789,12 +999,7 @@ function ArmyModel() {
           <boxGeometry args={[8.2, 3.4, 7.2]} />
           <meshStandardMaterial color="#7d8560" flatShading roughness={1} />
         </mesh>
-        <mesh
-          geometry={barracksRoof}
-          position={[0, 3.4, 0]}
-          rotation={[Math.PI / 2, 0, 0]}
-          castShadow
-        >
+        <mesh geometry={barracksRoof} position={[0, 3.4, 0]} castShadow>
           <meshStandardMaterial color="#4f5a3a" flatShading roughness={1} />
         </mesh>
         <Door
@@ -938,12 +1143,7 @@ function SchoolModel() {
         <boxGeometry args={[W, 1, 0.14]} />
         <meshStandardMaterial color="#c98f4f" flatShading roughness={1} />
       </mesh>
-      <mesh
-        geometry={roof}
-        position={[0, H, 0]}
-        rotation={[Math.PI / 2, 0, 0]}
-        castShadow
-      >
+      <mesh geometry={roof} position={[0, H, 0]} castShadow>
         <meshStandardMaterial color="#a8452f" flatShading roughness={0.95} />
       </mesh>
 

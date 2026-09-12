@@ -51,11 +51,12 @@ export const INTERIORS: Interior[] = [
       { kind: 'sofa', position: [-7.5, 5.2], rotation: Math.PI },
       { kind: 'armchair', position: [-3.6, 3.4], rotation: -Math.PI / 2 },
       { kind: 'table', position: [-7, 1.6] },
-      { kind: 'bookshelf', position: [-12.7, -5], rotation: Math.PI / 2 },
-      { kind: 'bookshelf', position: [-12.7, -1.5], rotation: Math.PI / 2 },
+      { kind: 'bookshelf', position: [-12.7, -6.4], rotation: Math.PI / 2 },
       { kind: 'lamp', position: [-12.4, 7.4] },
       { kind: 'plant', position: [-12.8, 9] },
-      { kind: 'painting', position: [-7, -10.2] },
+      /* Clear of the stair soffit, which is a dark box the painting was
+         sitting inside. */
+      { kind: 'painting', position: [-10.4, -10.2] },
 
       /* The kitchen, and the table they actually eat at. */
       { kind: 'stove', position: [2.6, 9.6], rotation: Math.PI },
@@ -77,26 +78,35 @@ export const INTERIORS: Interior[] = [
       {
         id: 'house-down',
         kind: 'stairsDown',
-        label: 'the stairs to the cellar',
-        position: [3.4, -7.6],
+        label: 'the stairs to the basement',
+        position: [4.8, -7.6],
         to: 'house-basement',
         arrive: [0, 5.4],
         journal: {
           title: 'The basement stairs',
-          body: 'Under Kitsos House: the basement where the family he grew up in still sits round the table, and the garage, the library and the lab off it.',
+          body: 'Under Kitsos House: the basement where the family he grew up in still sits round the table, and the garage off it.',
         },
       },
       {
-        id: 'house-hall',
-        kind: 'locked',
-        label: 'the door down the hall',
-        position: [-2.6, -10.3],
-        lines: [
-          'Locked. Behind it, according to the plans, is the rest of the house.',
-          'The bedrooms are down there. So is a room that has been "the office" for two years, and a cupboard nobody has opened since the survey.',
-          'The handle turns about a centimetre and stops. Whatever is on the other side of it, it is not finished yet.',
-          'Come back in a later commit.',
-        ],
+        id: 'house-up',
+        kind: 'stairsUp',
+        label: 'the stairs to the landing',
+        position: [-5.8, -7.6],
+        to: 'house-upstairs',
+        arrive: [0, 3.4],
+        journal: {
+          title: 'Upstairs',
+          body: 'The first floor of Kitsos House: the landing, the lab at the end of it, and a door that does not open yet.',
+        },
+      },
+      {
+        id: 'house-library',
+        kind: 'door',
+        label: 'the door to the library',
+        position: [-13.3, -2],
+        rotation: Math.PI / 2,
+        to: 'house-library',
+        arrive: [0, 3.4],
       },
     ],
     exhibits: [
@@ -147,7 +157,7 @@ export const INTERIORS: Interior[] = [
     underground: true,
     exit: { to: 'house', arrive: [3.4, -5.4], label: 'Back up the stairs' },
     props: [
-      { kind: 'stairs', position: [0, 9.4], rotation: Math.PI, solid: false },
+      { kind: 'stairs', position: [0, 7.6], rotation: Math.PI, solid: false },
 
       /* The table, laid for all seven of them. */
       { kind: 'rug', position: [0, -5], scale: 1.5, solid: false },
@@ -166,6 +176,9 @@ export const INTERIORS: Interior[] = [
       { kind: 'plant', position: [12.8, -9.2] },
       { kind: 'shelfUnit', position: [11.8, 9.6] },
       { kind: 'boiler', position: [-13.4, 9.6] },
+      { kind: 'crate', position: [13.2, 6.6] },
+      { kind: 'crate', position: [13.4, 4.6] },
+      { kind: 'plant', position: [-12.8, 6.4] },
     ],
     links: [
       {
@@ -176,24 +189,6 @@ export const INTERIORS: Interior[] = [
         rotation: Math.PI / 2,
         to: 'house-garage',
         arrive: [0, 4.4],
-      },
-      {
-        id: 'basement-library',
-        kind: 'door',
-        label: 'the door to the library',
-        position: [-14.8, 7.5],
-        rotation: Math.PI / 2,
-        to: 'house-library',
-        arrive: [0, 3.4],
-      },
-      {
-        id: 'basement-lab',
-        kind: 'door',
-        label: 'the door to the lab',
-        position: [14.8, 5],
-        rotation: -Math.PI / 2,
-        to: 'house-lab',
-        arrive: [0, 3.4],
       },
     ],
     exhibits: [
@@ -277,11 +272,11 @@ export const INTERIORS: Interior[] = [
     wall: '#c9cdd4',
     accent: '#3fa9d4',
     spawn: [0, 3.4],
-    underground: true,
+    windows: [{ side: 'east', at: 0.5 }],
     exit: {
-      to: 'house-basement',
-      arrive: [13, 5],
-      label: 'Back to the basement',
+      to: 'house-upstairs',
+      arrive: [8.8, 1],
+      label: 'Back to the landing',
     },
     props: [
       /* One small server doing far more jobs than it was ever sold for. */
@@ -293,11 +288,11 @@ export const INTERIORS: Interior[] = [
       { kind: 'chair', position: [4, -4.6], rotation: Math.PI },
 
       /* And the bench where things get soldered until they blink. */
-      { kind: 'desk', position: [9.4, -1.6], rotation: -Math.PI / 2 },
-      { kind: 'chair', position: [7.4, -1.6], rotation: -Math.PI / 2 },
+      { kind: 'desk', position: [9.4, -4.6], rotation: -Math.PI / 2 },
+      { kind: 'chair', position: [7.4, -4.6], rotation: -Math.PI / 2 },
       {
         kind: 'monitor',
-        position: [10, -2.4],
+        position: [10, -5.4],
         rotation: -Math.PI / 2,
         solid: false,
       },
@@ -337,17 +332,16 @@ export const INTERIORS: Interior[] = [
     wall: '#e8dcc2',
     accent: '#8a7233',
     spawn: [0, 3.4],
-    underground: true,
+    windows: [{ side: 'west', at: -0.55 }],
     exit: {
-      to: 'house-basement',
-      arrive: [-13, 7.5],
-      label: 'Back to the basement',
+      to: 'house',
+      arrive: [-11.4, -2],
+      label: 'Back to the living room',
     },
     props: [
       { kind: 'rug', position: [0, 0], solid: false },
 
-      /* The ones he goes back to, west wall. */
-      { kind: 'bookshelf', position: [-10.2, -4.4], rotation: Math.PI / 2 },
+      /* The ones he goes back to, west wall, clear of the window. */
       { kind: 'bookshelf', position: [-10.2, -1], rotation: Math.PI / 2 },
       { kind: 'bookshelf', position: [-10.2, 2.4], rotation: Math.PI / 2 },
 
@@ -421,6 +415,57 @@ export const INTERIORS: Interior[] = [
   },
 
   {
+    id: 'house-upstairs',
+    name: 'Kitsos House',
+    kicker: 'The landing',
+    building: 'house',
+    half: [11, 8],
+    floor: '#bda276',
+    rug: '#4a6b8a',
+    wall: '#f4ecdc',
+    accent: '#2f6fa8',
+    spawn: [0, 3.4],
+    windows: [{ side: 'north', at: 0.55 }],
+    exit: { to: 'house', arrive: [-5.8, -5.2], label: 'Back down the stairs' },
+    props: [
+      /* The flight you came up, going back down through the floor. */
+      { kind: 'stairwell', position: [0, 6.2], solid: false },
+      { kind: 'rug', position: [-1, -0.6], scale: 1.1, solid: false },
+      { kind: 'table', position: [-9.2, -3.4], rotation: Math.PI / 2 },
+      { kind: 'plant', position: [-9.4, -6] },
+      { kind: 'armchair', position: [-6.2, 1.6], rotation: -Math.PI / 2 },
+      { kind: 'lamp', position: [-9.2, 0.6] },
+      { kind: 'bookshelf', position: [3.4, -7.6] },
+      { kind: 'painting', position: [-4.6, -7.8], solid: false },
+      { kind: 'chair', position: [6.4, 4.4], rotation: Math.PI },
+    ],
+    links: [
+      {
+        id: 'upstairs-lab',
+        kind: 'door',
+        label: 'the door to the lab',
+        position: [10.8, 1],
+        rotation: -Math.PI / 2,
+        to: 'house-lab',
+        arrive: [0, 3.4],
+      },
+      {
+        id: 'upstairs-hall',
+        kind: 'locked',
+        label: 'the door at the end of the landing',
+        position: [-1.4, -7.9],
+        lines: [
+          'Locked. Behind it, according to the plans, is the rest of the first floor.',
+          'The bedrooms are down there. So is a room that has been "the office" for two years, and a cupboard nobody has opened since the survey.',
+          'The handle turns about a centimetre and stops. Whatever is on the other side of it, it is not finished yet.',
+          'Come back in a later commit.',
+        ],
+      },
+    ],
+    exhibits: [],
+  },
+
+  {
     id: 'house-playroom',
     name: 'Kitsos House',
     kicker: 'The room that is not on the plans',
@@ -488,7 +533,7 @@ export const INTERIORS: Interior[] = [
 
   {
     id: 'university',
-    name: 'NTUA Academy',
+    name: 'NTUA',
     kicker: 'Lecture hall',
     half: [17, 13],
     floor: '#d3c7ab',
@@ -525,12 +570,12 @@ export const INTERIORS: Interior[] = [
         label: 'the degree notice',
         position: [-7, -12.3],
         panel: {
-          kicker: 'NTUA Academy',
+          kicker: 'NTUA',
           title: 'Education',
           sections: UNIVERSITY_SECTIONS,
         },
         journal: {
-          title: 'NTUA Academy',
+          title: 'The Polytechnic',
           body: 'MEng in Electrical & Computer Engineering, NTUA, 2017–2022, GPA 8.4.',
         },
       },
@@ -540,7 +585,7 @@ export const INTERIORS: Interior[] = [
         label: 'the thesis display',
         position: [7, -12.3],
         panel: {
-          kicker: 'NTUA Academy',
+          kicker: 'NTUA',
           title: 'Thesis & contests',
           sections: THESIS_SECTIONS,
         },
@@ -552,7 +597,7 @@ export const INTERIORS: Interior[] = [
         position: [-15.8, 2],
         rotation: Math.PI / 2,
         panel: {
-          kicker: 'NTUA Academy',
+          kicker: 'NTUA',
           title: 'Campus life',
           sections: STUDENT_LIFE_SECTIONS,
         },
@@ -564,7 +609,7 @@ export const INTERIORS: Interior[] = [
         position: [15.7, -2],
         rotation: -Math.PI / 2,
         panel: {
-          kicker: 'NTUA Academy',
+          kicker: 'NTUA',
           title: 'Published research',
           sections: PUBLICATION_SECTIONS,
         },
@@ -580,7 +625,7 @@ export const INTERIORS: Interior[] = [
         position: [15.8, 6.5],
         rotation: -Math.PI / 2,
         panel: {
-          kicker: 'NTUA Academy',
+          kicker: 'NTUA',
           title: 'Certifications',
           sections: CERTIFICATIONS_SECTIONS,
         },
@@ -596,7 +641,7 @@ export const INTERIORS: Interior[] = [
         position: [-15.8, 8],
         rotation: Math.PI / 2,
         panel: {
-          kicker: 'NTUA Academy',
+          kicker: 'NTUA',
           title: 'References',
           sections: REFERENCE_ACADEMY_SECTIONS,
         },

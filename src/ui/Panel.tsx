@@ -4,9 +4,11 @@ import { useGame } from '../state/store'
 import * as sfx from '../game/audio'
 import { RadioConsole } from './RadioConsole'
 import type { Letter, PanelBlock } from '../types'
+import { useT } from '../i18n/useT'
 
 export function Panel() {
-  const panel = useGame((s) => s.panel)
+  const t = useT()
+  const panel = t(useGame((s) => s.panel))
   const closePanel = useGame((s) => s.closePanel)
   const body = useRef<HTMLDivElement>(null)
   // Tracked by panel title so a new panel starts unsaved without a reset render.
@@ -44,7 +46,11 @@ export function Panel() {
             <p className="panel__kicker">{panel.kicker}</p>
             <h2 className="panel__title">{panel.title}</h2>
           </div>
-          <button className="panel__close" onClick={close} aria-label="Close">
+          <button
+            className="panel__close"
+            onClick={close}
+            aria-label={t('Close')}
+          >
             ✕<kbd>Esc</kbd>
           </button>
         </header>
@@ -64,12 +70,14 @@ export function Panel() {
           {panel.kind === 'cv' && (
             <div className="panel__cta">
               <button className="button button--primary" onClick={save}>
-                ⬇ Take a copy of the CV
+                ⬇ {t('Take a copy of the CV')}
               </button>
               <p className="panel__note">
-                {saved
-                  ? 'Saved as Markdown — the same content you have been walking through.'
-                  : 'Written out as Markdown, generated from everything on this island.'}
+                {t(
+                  saved
+                    ? 'Saved as Markdown — the same content you have been walking through.'
+                    : 'Written out as Markdown, generated from everything on this island.',
+                )}
               </p>
             </div>
           )}
@@ -81,6 +89,7 @@ export function Panel() {
 
 /** One reference, collapsed until you click the name. */
 function LetterEntry({ letter }: { letter: Letter }) {
+  const t = useT()
   const [failed, setFailed] = useState<Record<string, true>>({})
   const scans = (letter.scans ?? []).filter((name) => !failed[name])
 
@@ -90,7 +99,7 @@ function LetterEntry({ letter }: { letter: Letter }) {
         <span className="letter__from">{letter.from}</span>
         <span className="letter__role">{letter.role}</span>
         <span className="letter__more" aria-hidden>
-          Read
+          {t('Read')}
         </span>
       </summary>
       <div className="letter__body">
@@ -103,7 +112,11 @@ function LetterEntry({ letter }: { letter: Letter }) {
         {scans.length > 0 && (
           <>
             <p className="letter__scans-label">
-              {scans.length > 1 ? 'The original, page by page' : 'The original'}
+              {t(
+                scans.length > 1
+                  ? 'The original, page by page'
+                  : 'The original',
+              )}
             </p>
             <div className="letter__scans">
               {scans.map((name) => (
@@ -132,12 +145,13 @@ function Scan({
   from: string
   onMissing: () => void
 }) {
+  const t = useT()
   const href = `${import.meta.env.BASE_URL}letters/${name}`
 
   if (name.toLowerCase().endsWith('.pdf')) {
     return (
       <a className="letter__pdf" href={href} target="_blank" rel="noreferrer">
-        📄 Open the signed letter
+        📄 {t('Open the signed letter')}
       </a>
     )
   }
@@ -146,7 +160,7 @@ function Scan({
     <a className="letter__scan" href={href} target="_blank" rel="noreferrer">
       <img
         src={href}
-        alt={`Letter of reference from ${from}`}
+        alt={`${t('Letter of reference from')} ${from}`}
         loading="lazy"
         onError={onMissing}
       />
@@ -155,6 +169,7 @@ function Scan({
 }
 
 function Block({ block }: { block: PanelBlock }) {
+  const t = useT()
   switch (block.type) {
     case 'text':
       return <p className="panel__text">{block.text}</p>
@@ -164,8 +179,8 @@ function Block({ block }: { block: PanelBlock }) {
         <div className="letters">
           <p className="letters__hint">
             {block.letters.length === 1
-              ? 'Click to read the letter.'
-              : `Click a name to read the letter. ${block.letters.length} in total.`}
+              ? t('Click to read the letter.')
+              : `${t('Click a name to read the letter.')} ${block.letters.length} ${t('in total.')}`}
           </p>
           {block.letters.map((letter) => (
             <LetterEntry key={letter.id} letter={letter} />

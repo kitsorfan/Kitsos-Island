@@ -165,10 +165,19 @@ export const HOME_FAMILY: Npc[] = [
     facing: Math.PI,
     colors: {
       skin: '#f2c49b',
+      /** Long, and brown — the same as she wears on the dancefloor. */
       hair: '#5b3a20',
-      shirt: '#e8d6c0',
-      pants: '#5a4736',
+      /** The bodice of the dress; the skirt below it matches. */
+      shirt: '#7e9bb3',
+      /** Her legs, under the hem. */
+      pants: '#f2c49b',
     },
+    /* A plain house dress, one colour and no hem. The white and gold is the
+       one she wears on the dancefloor, and it would be odd in her own
+       kitchen. */
+    hair: 'long',
+    dress: '#7e9bb3',
+    smile: true,
     lines: [
       'You built an island. A whole island, with a lighthouse on it.',
       'There is a door down the hall you have not finished yet. I am not going to mention it again after this.',

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { LAPS, MOTO, racerName, standings } from '../game/moto'
+import { MOTO, racerName, standings } from '../game/moto'
 import { useGame } from '../state/store'
 import { useCoarsePointer } from './useCoarsePointer'
+import { useT } from '../i18n/useT'
 
 interface Board {
   id: string
@@ -14,6 +15,8 @@ interface Board {
 interface Readout {
   place: number
   lap: number
+  /** How many there are, which the briefing lets you choose. */
+  laps: number
   elapsed: number
   best: number
   speed: number
@@ -28,6 +31,7 @@ interface Readout {
 const EMPTY: Readout = {
   place: 4,
   lap: 1,
+  laps: 1,
   elapsed: 0,
   best: 0,
   speed: 0,
@@ -56,6 +60,7 @@ function useReadout(active: boolean): Readout {
         setState({
           place: MOTO.place,
           lap: MOTO.lap,
+          laps: MOTO.laps,
           elapsed: MOTO.elapsed,
           best: MOTO.best,
           speed: Math.abs(MOTO.speed),
@@ -90,6 +95,7 @@ const clock = (seconds: number) => {
 const ORDINAL = ['', '1st', '2nd', '3rd', '4th']
 
 export function MotoHud() {
+  const t = useT()
   const riding = useGame((s) => s.moto?.status === 'riding')
   const readout = useReadout(Boolean(riding))
   const coarse = useCoarsePointer()
@@ -102,18 +108,18 @@ export function MotoHud() {
       {counting > 0 && (
         <div className="moto-lights" aria-live="polite">
           <strong key={counting}>{counting}</strong>
-          <em>Hold it</em>
+          <em>{t('Hold it')}</em>
         </div>
       )}
 
       <div className="moto__panel">
-        <span className="moto__label">Island Circuit</span>
+        <span className="moto__label">{t('Island Circuit')}</span>
 
         <div className="moto__place">
           <strong key={readout.place}>{ORDINAL[readout.place]}</strong>
-          <em>of 4</em>
+          <em>{t('of 4')}</em>
           <span className="moto__lap">
-            Lap {readout.lap}/{LAPS}
+            Lap {readout.lap}/{readout.laps}
           </span>
         </div>
 
@@ -121,7 +127,11 @@ export function MotoHud() {
           {readout.board.map((entry, i) => (
             <li
               key={entry.id}
-              className={entry.you ? 'moto-board__row moto-board__row--you' : 'moto-board__row'}
+              className={
+                entry.you
+                  ? 'moto-board__row moto-board__row--you'
+                  : 'moto-board__row'
+              }
             >
               <span className="moto-board__pos">{i + 1}</span>
               <span className="moto-board__name">{entry.name}</span>
@@ -134,7 +144,7 @@ export function MotoHud() {
 
         <div className="moto__row">
           <span className="moto__speed">
-            {Math.round(readout.speed * 3)} <em>km/h</em>
+            {Math.round(readout.speed * 3)} <em>{t('km/h')}</em>
           </span>
           <span className="moto__time">{clock(readout.elapsed)}</span>
         </div>
@@ -146,14 +156,18 @@ export function MotoHud() {
             </span>
           )}
           {readout.offRoad ? (
-            <span className="moto__flag moto__flag--off">Off the circuit</span>
+            <span className="moto__flag moto__flag--off">
+              {t('Off the circuit')}
+            </span>
           ) : (
             readout.tow > 0.3 && (
-              <span className="moto__flag moto__flag--tow">Tow</span>
+              <span className="moto__flag moto__flag--tow">{t('Tow')}</span>
             )
           )}
           {readout.wheelie && (
-            <span className="moto__flag moto__flag--wheelie">Wheelie</span>
+            <span className="moto__flag moto__flag--wheelie">
+              {t('Wheelie')}
+            </span>
           )}
         </div>
       </div>

@@ -32,6 +32,34 @@ export function clearKeys() {
   pressed.clear()
 }
 
+/**
+ * Sprint held down by the shoe button rather than by a finger on Shift.
+ * It lives here rather than in the key set because clearKeys() runs every
+ * time the window loses focus, and a latch the visitor set on purpose
+ * should survive alt-tabbing away and back.
+ */
+export const sprintLock = { on: false }
+
+/**
+ * How far back the camera sits, as a multiple of each area’s own framing.
+ * A multiplier rather than a distance so indoors, outdoors and the arena —
+ * which are framed quite differently — all zoom by the same feel.
+ */
+export const cameraZoom = { level: 1 }
+
+/** One wheel notch, one key press, or one tap of a zoom button. */
+export const ZOOM_STEP = 1.12
+
+export const ZOOM_MIN = 0.55
+export const ZOOM_MAX = 2
+
+export function zoomBy(factor: number) {
+  cameraZoom.level = Math.max(
+    ZOOM_MIN,
+    Math.min(ZOOM_MAX, cameraZoom.level * factor),
+  )
+}
+
 export function isDown(code: string) {
   return pressed.has(code)
 }
@@ -80,12 +108,7 @@ export function queueFire() {
 export function consumeFire() {
   const q = fireQueued
   fireQueued = false
-  return (
-    q ||
-    firePointer.held ||
-    pressed.has('Space') ||
-    pressed.has('KeyF')
-  )
+  return q || firePointer.held || pressed.has('Space') || pressed.has('KeyF')
 }
 
 export function isCrouching() {
@@ -117,7 +140,8 @@ export function readMove(): MoveAxis {
     x /= len
     y /= len
   }
-  const run = pressed.has('ShiftLeft') || pressed.has('ShiftRight')
+  const run =
+    sprintLock.on || pressed.has('ShiftLeft') || pressed.has('ShiftRight')
   return { x, y, run }
 }
 

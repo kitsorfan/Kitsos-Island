@@ -10,8 +10,20 @@ import {
   PLAYER_START,
 } from '../data/world'
 import { FULL_CV_SECTIONS, PROFILE, RADIO_SECTIONS } from '../data/profile'
-import type { AreaId, Carried, ExhibitKind, PanelSection, Vec2 } from '../types'
+import type {
+  AreaId,
+  Carried,
+  ExhibitKind,
+  PanelSection,
+  Quality,
+  Vec2,
+} from '../types'
 import * as sfx from '../game/audio'
+import { LEVELS, setSfxLevel as applySfxLevel } from '../game/audio'
+import type { Locale } from '../i18n'
+import { forgetProgress, isEmpty, loadProgress, saveProgress } from './save'
+import type { SavedProgress } from './save'
+import { setMusicLevel as applyMusicLevel } from '../game/music'
 import { callAmalia, startParty, stopParty } from '../game/party'
 import {
   ARENA_CENTER,
@@ -26,7 +38,8 @@ import {
   pickTeams,
 } from '../game/paintball'
 import type { Side, Team } from '../game/paintball'
-import { MOTO, MOTO_START, closeRide, openRide } from '../game/moto'
+import { LAPS, MOTO, MOTO_START, closeRide, openRide } from '../game/moto'
+import type { Difficulty } from '../game/moto'
 import {
   BOAT_START,
   RESCUE,
@@ -44,6 +57,70 @@ import {
   landingSpot,
   openFlight,
 } from '../game/balloon'
+
+/**
+ * The settings worth remembering between visits. Someone who had to turn
+ * the island down to make it playable, or the music down to take a call,
+ * should not have to find the control again every time they open the page.
+ *
+ * Private windows and blocked site data throw rather than return null, and
+ * neither is a reason not to draw the island — so every access is guarded
+ * and simply falls back to the default.
+ */
+const KEY = 'island.settings'
+
+interface Settings {
+  quality: Quality
+  musicLevel: number
+  sfxLevel: number
+  locale: Locale
+}
+
+const DEFAULTS: Settings = {
+  quality: 'auto',
+  musicLevel: LEVELS,
+  sfxLevel: LEVELS,
+  // English first for everyone. The island is a CV before it is a game, and
+  // its audience is not only in Greece — so Greek is a choice, never a guess
+  // made from the browser’s language.
+  locale: 'en',
+}
+
+function clampLevel(value: unknown, fallback: number): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return fallback
+  return Math.max(0, Math.min(LEVELS, Math.round(value)))
+}
+
+function storedSettings(): Settings {
+  try {
+    const raw = localStorage.getItem(KEY)
+    if (!raw) return DEFAULTS
+    const saved = JSON.parse(raw) as Partial<Settings>
+    return {
+      quality:
+        saved.quality === 'high' ||
+        saved.quality === 'low' ||
+        saved.quality === 'auto'
+          ? saved.quality
+          : DEFAULTS.quality,
+      musicLevel: clampLevel(saved.musicLevel, DEFAULTS.musicLevel),
+      sfxLevel: clampLevel(saved.sfxLevel, DEFAULTS.sfxLevel),
+      locale: saved.locale === 'el' ? 'el' : DEFAULTS.locale,
+    }
+  } catch {
+    return DEFAULTS
+  }
+}
+
+function remember(settings: Settings) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(settings))
+  } catch {
+    // Not being able to remember the choice is no reason to refuse it.
+  }
+}
+
+const SAVED = storedSettings()
 
 export type Mode =
   | 'title'
@@ -106,8 +183,17 @@ export interface PaintballGame {
   round: number
 }
 
+/** How long the next race is and how hard, kept between races. */
+export interface MotoSetup {
+  laps: number
+  difficulty: Difficulty
+}
+
 export interface MotoRun {
   status: 'briefing' | 'riding' | 'done'
+  /** The setup it was actually run with, for the card at the end. */
+  laps: number
+  difficulty: Difficulty
   /** Where you came of the four, and the race and best-lap times with it. */
   place: number
   seconds: number
@@ -186,7 +272,7 @@ interface GameState {
   toast: {
     title: string
     body: string
-    kind: 'journal' | 'key' | 'mission'
+    kind: 'journal' | 'key' | 'mission' | 'quality' | 'progress'
   } | null
 
   keys: Record<string, true>
@@ -200,12 +286,23 @@ interface GameState {
 
   paintball: PaintballGame | null
   moto: MotoRun | null
+  motoSetup: MotoSetup
   balloon: BalloonFlight | null
   hide: HideGame | null
   rescue: RescueRun | null
 
   muted: boolean
   musicOn: boolean
+  /** What the visitor has asked the renderer to spend on a frame. */
+  quality: Quality
+  /** Whether 'auto' has measured a machine that cannot keep up. */
+  autoDropped: boolean
+  /** Which language the island reads in. */
+  locale: Locale
+  /** Soundtrack loudness, 0 (off) to LEVELS. */
+  musicLevel: number
+  /** Sound-effect loudness, 0 (off) to LEVELS. */
+  sfxLevel: number
   /** Lights out: the island after dark. */
   night: boolean
   /** What he carries after dark. */
@@ -237,6 +334,11 @@ interface GameState {
   dismissToast: () => void
   toggleMute: () => void
   toggleMusic: () => void
+  setQuality: (quality: Quality) => void
+  reportSlow: () => void
+  setMusicLevel: (level: number) => void
+  setSfxLevel: (level: number) => void
+  setLocale: (locale: Locale) => void
   toggleNight: () => void
   toggleHandLight: () => void
   toggleParty: () => void
@@ -247,6 +349,7 @@ interface GameState {
   closeArcade: () => void
   openMoto: () => void
   beginMoto: () => void
+  setMotoSetup: (next: Partial<MotoSetup>) => void
   finishMoto: () => void
   exitMoto: () => void
 
@@ -292,27 +395,99 @@ interface GameState {
   activateMission: (id: string) => void
   takeKey: (keyId: string) => void
   unlockLighthouse: () => void
+  /** Forgets the visit: the journal, the keyring, and the doors opened. */
+  clearProgress: () => void
 }
-
-const JOURNAL_NPCS = NPCS.filter((n) => n.journal)
-const JOURNAL_EXHIBITS = INTERIORS.flatMap((i) =>
-  i.exhibits.filter((e) => e.journal),
-)
-/**
- * Stairs and doors file entries too, and leaving them out of the total is how
- * the counter ended up able to read 40 of 38.
- */
-const JOURNAL_LINKS = INTERIORS.flatMap((i) =>
-  (i.links ?? []).filter((l) => l.journal),
-)
 
 /**
  * Everything the journal can hold: people worth remembering, the exhibits,
  * and the ways through that are worth remembering having found.
+ *
+ * Stairs and doors file entries too, and leaving them out of the total is how
+ * the counter ended up able to read 40 of 38.
+ *
+ * Written out in full here, in English, because this is also what a restored
+ * save is rebuilt from: the file on disk holds ids and nothing else.
  */
-export const TOTAL_ENTRIES =
-  JOURNAL_NPCS.length + JOURNAL_EXHIBITS.length + JOURNAL_LINKS.length
+const CATALOGUE: JournalEntry[] = [
+  ...NPCS.filter((n) => n.journal).map((n) => ({
+    id: n.id,
+    title: n.journal!.title,
+    body: n.journal!.body,
+    source: n.name,
+  })),
+  ...INTERIORS.flatMap((i) =>
+    i.exhibits
+      .filter((e) => e.journal)
+      .map((e) => ({
+        id: e.id,
+        title: e.journal!.title,
+        body: e.journal!.body,
+        source: i.name,
+      })),
+  ),
+  ...INTERIORS.flatMap((i) =>
+    (i.links ?? [])
+      .filter((l) => l.journal)
+      .map((l) => ({
+        id: l.id,
+        title: l.journal!.title,
+        body: l.journal!.body,
+        source: i.name,
+      })),
+  ),
+]
+
+const ENTRY_BY_ID = new Map(CATALOGUE.map((entry) => [entry.id, entry]))
+
+export const TOTAL_ENTRIES = CATALOGUE.length
 export const TOTAL_KEYS = KEYS.length
+
+const IDLE_MISSIONS: Record<string, MissionState> = Object.fromEntries(
+  MISSIONS.map((m) => [m.id, 'idle' as MissionState]),
+)
+
+/**
+ * A saved visit read back into the shapes the store keeps things in.
+ *
+ * Every id is checked against what the island actually holds today. A save
+ * written before an exhibit was renamed, or before a building was pulled, is
+ * still worth restoring — it just comes back without the parts that no longer
+ * exist, rather than leaving the journal counting to a total it cannot reach.
+ */
+const SAVED_PROGRESS = loadProgress()
+
+function found(ids: string[] | undefined, known?: Set<string>) {
+  const out: Record<string, true> = {}
+  for (const id of ids ?? []) {
+    if (!known || known.has(id)) out[id] = true
+  }
+  return out
+}
+
+const KEY_IDS = new Set(KEYS.map((k) => k.id))
+const BUILDING_IDS = new Set(BUILDING_BY_ID.keys())
+
+const RESTORED = {
+  entries: (SAVED_PROGRESS?.entries ?? [])
+    .map((id) => ENTRY_BY_ID.get(id))
+    .filter((entry): entry is JournalEntry => entry !== undefined),
+  keys: found(SAVED_PROGRESS?.keys, KEY_IDS),
+  missions: {
+    ...IDLE_MISSIONS,
+    ...Object.fromEntries(
+      Object.entries(SAVED_PROGRESS?.missions ?? {}).filter(
+        ([id]) => id in IDLE_MISSIONS,
+      ),
+    ),
+  } as Record<string, MissionState>,
+  discovered: found(SAVED_PROGRESS?.discovered, BUILDING_IDS),
+  // Secrets are ids invented wherever they are revealed, with no table to
+  // check them against; an unknown one simply never unlocks anything.
+  secrets: found(SAVED_PROGRESS?.secrets),
+  lighthouseOpen: SAVED_PROGRESS?.lighthouseOpen ?? false,
+  cvUnlocked: SAVED_PROGRESS?.cvUnlocked ?? false,
+}
 
 export const useGame = create<GameState>((set, get) => ({
   mode: 'title',
@@ -322,27 +497,31 @@ export const useGame = create<GameState>((set, get) => ({
   nearby: null,
   spawn: { area: 'island', position: [...PLAYER_START] as Vec2, token: 0 },
 
-  visited: {},
-  entries: [],
+  visited: Object.fromEntries(RESTORED.entries.map((e) => [e.id, true])),
+  entries: RESTORED.entries,
   toast: null,
 
-  keys: {},
-  missions: Object.fromEntries(
-    MISSIONS.map((m) => [m.id, 'idle' as MissionState]),
-  ),
-  discovered: {},
-  secrets: {},
-  lighthouseOpen: false,
-  cvUnlocked: false,
+  keys: RESTORED.keys,
+  missions: RESTORED.missions,
+  discovered: RESTORED.discovered,
+  secrets: RESTORED.secrets,
+  lighthouseOpen: RESTORED.lighthouseOpen,
+  cvUnlocked: RESTORED.cvUnlocked,
   greetingReturn: 'explore',
   paintball: null,
   moto: null,
+  motoSetup: { laps: LAPS, difficulty: 'normal' },
   balloon: null,
   hide: null,
   rescue: null,
 
   muted: false,
   musicOn: true,
+  quality: SAVED.quality,
+  autoDropped: false,
+  musicLevel: SAVED.musicLevel,
+  sfxLevel: SAVED.sfxLevel,
+  locale: SAVED.locale,
   night: false,
   handLight: 'flashlight',
   party: false,
@@ -422,6 +601,62 @@ export const useGame = create<GameState>((set, get) => ({
   dismissToast: () => set({ toast: null }),
   toggleMute: () => set((s) => ({ muted: !s.muted })),
   toggleMusic: () => set((s) => ({ musicOn: !s.musicOn })),
+
+  /**
+   * Choosing anything by hand clears what 'auto' decided earlier, so picking
+   * 'auto' a second time is a way to ask for a fresh verdict rather than a
+   * no-op that leaves the island stuck where one bad patch left it.
+   */
+  setQuality: (quality) => {
+    const { musicLevel, sfxLevel, locale } = get()
+    remember({ quality, musicLevel, sfxLevel, locale })
+    set({ quality, autoDropped: false })
+  },
+
+  /**
+   * Both levels drive the audio graph directly rather than through an effect,
+   * so a drag across the steps is heard as it happens instead of one step
+   * behind.
+   */
+  setMusicLevel: (level) => {
+    const musicLevel = Math.max(0, Math.min(LEVELS, Math.round(level)))
+    const { quality, sfxLevel, locale } = get()
+    remember({ quality, musicLevel, sfxLevel, locale })
+    applyMusicLevel(musicLevel)
+    set({ musicLevel })
+  },
+
+  setSfxLevel: (level) => {
+    const sfxLevel = Math.max(0, Math.min(LEVELS, Math.round(level)))
+    const { quality, musicLevel, locale } = get()
+    remember({ quality, musicLevel, sfxLevel, locale })
+    applySfxLevel(sfxLevel)
+    set({ sfxLevel })
+    // Let them hear what they just chose.
+    if (sfxLevel > 0) sfx.confirm()
+  },
+
+  /**
+   * What the frame-time watcher calls once it has seen enough. Advisory: it
+   * only marks the verdict, and a visitor who disagrees can overrule it.
+   */
+  setLocale: (locale) => {
+    const { quality, musicLevel, sfxLevel } = get()
+    remember({ quality, musicLevel, sfxLevel, locale })
+    set({ locale })
+  },
+
+  reportSlow: () => {
+    if (get().quality !== 'auto') return
+    set({
+      autoDropped: true,
+      toast: {
+        title: 'Shadows off',
+        body: 'The island was running slow, so it stepped itself down. The Quality button puts it back.',
+        kind: 'quality',
+      },
+    })
+  },
   /**
    * Turning the lights back on ends the party, which needs the dark — and is
    * refused outright mid hide-and-seek, which needs the dark rather more.
@@ -505,7 +740,8 @@ export const useGame = create<GameState>((set, get) => ({
     sfx.confirm()
     // Puts all four bikes back on the grid, so the briefing shows the island
     // exactly as the race will start it.
-    openRide()
+    const setup = state.motoSetup
+    openRide(setup.laps, setup.difficulty)
     set((s) => ({
       mode: 'moto',
       dialogue: null,
@@ -513,6 +749,8 @@ export const useGame = create<GameState>((set, get) => ({
       nearby: null,
       moto: {
         status: 'briefing',
+        laps: setup.laps,
+        difficulty: setup.difficulty,
         place: 0,
         seconds: 0,
         best: 0,
@@ -521,10 +759,28 @@ export const useGame = create<GameState>((set, get) => ({
     }))
   },
 
+  /**
+   * Changes the board at the briefing. The grid is laid out again as well,
+   * so the island behind the card is always showing the race you picked.
+   */
+  setMotoSetup: (next: Partial<MotoSetup>) => {
+    const state = get()
+    const setup = { ...state.motoSetup, ...next }
+    sfx.blip()
+    openRide(setup.laps, setup.difficulty)
+    set((s) => ({
+      motoSetup: setup,
+      moto: s.moto
+        ? { ...s.moto, laps: setup.laps, difficulty: setup.difficulty }
+        : s.moto,
+    }))
+  },
+
   beginMoto: () => {
-    const run = get().moto
+    const state = get()
+    const run = state.moto
     if (!run) return
-    openRide()
+    openRide(state.motoSetup.laps, state.motoSetup.difficulty)
     sfx.jingle()
     set((s) => ({
       mode: 'explore',
@@ -1120,7 +1376,87 @@ export const useGame = create<GameState>((set, get) => ({
     if (get().lighthouseOpen) return
     set({ lighthouseOpen: true })
   },
+
+  /**
+   * Everything found, put back. The saved blob goes with it — the watcher
+   * below sees an empty island and takes the row out of site data rather than
+   * leaving an encoded nothing behind.
+   *
+   * The settings are deliberately untouched: someone clearing the island they
+   * walked is not asking to have the volume turned back up.
+   */
+  clearProgress: () => {
+    forgetProgress()
+    set({
+      visited: {},
+      entries: [],
+      keys: {},
+      missions: { ...IDLE_MISSIONS },
+      discovered: {},
+      secrets: {},
+      lighthouseOpen: false,
+      cvUnlocked: false,
+      toast: {
+        title: 'Starting over',
+        body: 'The journal, the keyring and everything found have been forgotten.',
+        kind: 'progress',
+      },
+    })
+  },
 }))
+
+/** Everything a save holds, and nothing else the store happens to keep. */
+type Progressed = Pick<
+  GameState,
+  | 'entries'
+  | 'keys'
+  | 'missions'
+  | 'discovered'
+  | 'secrets'
+  | 'lighthouseOpen'
+  | 'cvUnlocked'
+>
+
+/** The store's progress in the shape the save file keeps it in. */
+function snapshot(s: Progressed): SavedProgress {
+  const missions: Record<string, 'active' | 'done'> = {}
+  for (const [id, state] of Object.entries(s.missions)) {
+    if (state !== 'idle') missions[id] = state
+  }
+  return {
+    entries: s.entries.map((e) => e.id),
+    keys: Object.keys(s.keys),
+    missions,
+    discovered: Object.keys(s.discovered),
+    secrets: Object.keys(s.secrets),
+    lighthouseOpen: s.lighthouseOpen,
+    cvUnlocked: s.cvUnlocked,
+  }
+}
+
+/**
+ * One watcher rather than a save call in every action that moves the game on.
+ * Each of these fields is replaced wholesale when it changes, so comparing the
+ * references is enough to tell a step forward from a camera turn — and the
+ * island turns the camera rather a lot more often than it hands out a key.
+ */
+useGame.subscribe((state, previous) => {
+  if (
+    state.entries === previous.entries &&
+    state.keys === previous.keys &&
+    state.missions === previous.missions &&
+    state.discovered === previous.discovered &&
+    state.secrets === previous.secrets &&
+    state.lighthouseOpen === previous.lighthouseOpen &&
+    state.cvUnlocked === previous.cvUnlocked
+  ) {
+    return
+  }
+  saveProgress(snapshot(state))
+})
+
+/** Whether this visit has anything in it worth clearing. */
+export const hasProgress = (s: Progressed) => !isEmpty(snapshot(s))
 
 /** True while the 3D world should accept movement input. */
 export const isInteractive = (mode: Mode) => mode === 'explore'

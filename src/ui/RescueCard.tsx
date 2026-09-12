@@ -2,6 +2,7 @@ import { SOULS } from '../game/rescue'
 import { useGame } from '../state/store'
 import * as sfx from '../game/audio'
 import { useCoarsePointer } from './useCoarsePointer'
+import { useT } from '../i18n/useT'
 
 const clock = (seconds: number) => {
   const m = Math.floor(seconds / 60)
@@ -11,6 +12,7 @@ const clock = (seconds: number) => {
 
 /** The briefing before a run, and the card at the end of one. */
 export function RescueCard() {
+  const t = useT()
   const run = useGame((s) => s.rescue)
   const begin = useGame((s) => s.beginRescue)
   const exit = useGame((s) => s.exitRescue)
@@ -48,39 +50,39 @@ export function RescueCard() {
               {coarse ? (
                 <>
                   <div>
-                    <dt>Throttle</dt>
-                    <dd>Stick</dd>
+                    <dt>{t('Throttle')}</dt>
+                    <dd>{t('Stick')}</dd>
                   </div>
                   <div>
-                    <dt>Astern</dt>
-                    <dd>Pull the stick back</dd>
+                    <dt>{t('Astern')}</dt>
+                    <dd>{t('Pull the stick back')}</dd>
                   </div>
                   <div>
-                    <dt>Helm</dt>
-                    <dd>Stick left and right</dd>
+                    <dt>{t('Helm')}</dt>
+                    <dd>{t('Stick left and right')}</dd>
                   </div>
                 </>
               ) : (
                 <>
                   <div>
-                    <dt>Throttle</dt>
+                    <dt>{t('Throttle')}</dt>
                     <dd>W</dd>
                   </div>
                   <div>
-                    <dt>Astern</dt>
+                    <dt>{t('Astern')}</dt>
                     <dd>S</dd>
                   </div>
                   <div>
-                    <dt>Helm</dt>
-                    <dd>A and D</dd>
+                    <dt>{t('Helm')}</dt>
+                    <dd>{t('A and D')}</dd>
                   </div>
                   <div>
-                    <dt>Chart</dt>
+                    <dt>{t('Chart')}</dt>
                     <dd>M</dd>
                   </div>
                   <div>
-                    <dt>Put in</dt>
-                    <dd>Esc</dd>
+                    <dt>{t('Put in')}</dt>
+                    <dd>{t('Esc')}</dd>
                   </div>
                 </>
               )}
@@ -88,19 +90,20 @@ export function RescueCard() {
 
             <ul className="rescue-card__rules">
               <li>
-                Get alongside a raft and <strong>take the way off her</strong>.
-                Nobody can climb a net at speed, so the last twenty metres are
-                done on nothing but what she is already carrying.
+                Get alongside a raft and{' '}
+                <strong>{t('take the way off her')}</strong>. Nobody can climb a
+                net at speed, so the last twenty metres are done on nothing but
+                what she is already carrying.
               </li>
               <li>
-                The ring on the water round the boat goes green the moment she
-                is slow enough, and the ring round the raft fills as they come
-                over. Open the throttle and it empties again.
+                {t(
+                  'The ring on the water round the boat goes green the moment she is slow enough, and the ring round the raft fills as they come over. Open the throttle and it empties again.',
+                )}
               </li>
               <li>
-                The panel lists every flare in the water, shortest first — and
-                that order is the only real decision in the game. Let one burn
-                out and the run is over.
+                {t(
+                  'The panel lists every flare in the water, shortest first — and that order is the only real decision in the game. Let one burn out and the run is over.',
+                )}
               </li>
             </ul>
           </>
@@ -113,13 +116,13 @@ export function RescueCard() {
             </p>
             <div className="rescue-card__score">
               <div>
-                <span>Taken aboard</span>
+                <span>{t('Taken aboard')}</span>
                 <strong>
                   {run.saved}/{SOULS}
                 </strong>
               </div>
               <div>
-                <span>Time at sea</span>
+                <span>{t('Time at sea')}</span>
                 <strong>{clock(run.seconds)}</strong>
               </div>
             </div>

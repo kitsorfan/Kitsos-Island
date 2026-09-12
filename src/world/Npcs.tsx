@@ -3,10 +3,9 @@ import { useFrame } from '@react-three/fiber'
 import { Billboard } from '@react-three/drei'
 import type { Group } from 'three'
 import { NPCS } from '../data/world'
-import { ACTOR_POS } from '../game/actors'
+import { ACTOR_POS, REACTIONS } from '../game/actors'
 import { groundHeight } from '../game/terrain'
 import { ARENA, PAINT } from '../game/paintball'
-import { REACTIONS } from '../game/balloon'
 import { PARTY, danceSpot } from '../game/party'
 import { CHALLENGE_EARSHOT, GUARD } from '../game/guard'
 import { HIDE } from '../game/hide'
@@ -392,6 +391,10 @@ function NpcActor({
           prop={npc.prop}
           seed={seed}
           motion={motion}
+          hair={npc.hair}
+          dress={npc.dress}
+          dressTrim={npc.dressTrim}
+          smile={npc.smile}
           hand={searching ? 'flashlight' : npc.hand}
           gun={Boolean(team) && !painted}
           gunColor={team === 'friend' ? PAINT.friend : PAINT.enemy}

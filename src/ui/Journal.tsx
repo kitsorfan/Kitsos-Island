@@ -2,14 +2,18 @@ import { INTERIORS } from '../data/interiors'
 import { KEYS, MISSIONS, NPCS } from '../data/world'
 import { TOTAL_ENTRIES, TOTAL_KEYS, keyCount, useGame } from '../state/store'
 import * as sfx from '../game/audio'
+import { useT } from '../i18n/useT'
 
 const ORDER = [
   ...NPCS.filter((n) => n.journal).map((n) => n.id),
-  ...INTERIORS.flatMap((i) => i.exhibits.filter((e) => e.journal).map((e) => e.id)),
+  ...INTERIORS.flatMap((i) =>
+    i.exhibits.filter((e) => e.journal).map((e) => e.id),
+  ),
 ]
 
 export function Journal() {
-  const entries = useGame((s) => s.entries)
+  const t = useT()
+  const entries = t(useGame((s) => s.entries))
   const keys = useGame((s) => s.keys)
   const missions = useGame((s) => s.missions)
   const close = useGame((s) => s.closeJournal)
@@ -27,16 +31,20 @@ export function Journal() {
       <section
         className="panel panel--journal"
         onPointerDown={(e) => e.stopPropagation()}
-        aria-label="Journal"
+        aria-label={t('Journal')}
       >
         <header className="panel__head">
           <div>
-            <p className="panel__kicker">Field journal</p>
+            <p className="panel__kicker">{t('Field journal')}</p>
             <h2 className="panel__title">
-              {found} of {TOTAL_ENTRIES} discovered
+              {found} {t('of')} {TOTAL_ENTRIES} {t('discovered')}
             </h2>
           </div>
-          <button className="panel__close" onClick={dismiss} aria-label="Close">
+          <button
+            className="panel__close"
+            onClick={dismiss}
+            aria-label={t('Close')}
+          >
             ✕<kbd>Esc</kbd>
           </button>
         </header>
@@ -48,7 +56,7 @@ export function Journal() {
         <div className="panel__body">
           <section className="panel__section">
             <h3 className="panel__heading">
-              Keyring — {keyCount(keys)} of {TOTAL_KEYS}
+              {t('Keyring')} — {keyCount(keys)} {t('of')} {TOTAL_KEYS}
             </h3>
             <div className="keycard-row">
               {KEYS.map((key) => {
@@ -64,11 +72,11 @@ export function Journal() {
                     <strong>{held ? key.name : '???'}</strong>
                     <p>
                       {held
-                        ? (mission?.done ?? 'Taken.')
+                        ? t(mission?.done ?? 'Taken.')
                         : mission
                           ? missions[mission.id] === 'active'
-                            ? mission.hint
-                            : mission.brief
+                            ? t(mission.hint)
+                            : t(mission.brief)
                           : ''}
                     </p>
                   </div>
@@ -78,11 +86,12 @@ export function Journal() {
           </section>
 
           <section className="panel__section">
-            <h3 className="panel__heading">What you have learned</h3>
+            <h3 className="panel__heading">{t('What you have learned')}</h3>
             {found === 0 && (
               <p className="panel__text">
-                Nothing yet. Talk to the townspeople and step into the buildings —
-                everything you learn is filed here.
+                {t(
+                  'Nothing yet. Talk to the townspeople and step into the buildings — everything you learn is filed here.',
+                )}
               </p>
             )}
             <div className="journal__grid">
@@ -90,9 +99,12 @@ export function Journal() {
                 const entry = byId.get(id)
                 if (!entry) {
                   return (
-                    <article key={id} className="journal-card journal-card--locked">
+                    <article
+                      key={id}
+                      className="journal-card journal-card--locked"
+                    >
                       <h4>???</h4>
-                      <p>Not discovered yet</p>
+                      <p>{t('Not discovered yet')}</p>
                     </article>
                   )
                 }
@@ -109,8 +121,9 @@ export function Journal() {
 
           {found === TOTAL_ENTRIES && (
             <p className="journal__complete">
-              Island complete. You now know the whole CV — the Radio Center is
-              waiting.
+              {t(
+                'Island complete. You now know the whole CV — the Radio Center is waiting.',
+              )}
             </p>
           )}
         </div>

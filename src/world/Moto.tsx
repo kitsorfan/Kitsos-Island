@@ -3,6 +3,10 @@ import { useFrame, useThree } from '@react-three/fiber'
 import type { Group, Mesh } from 'three'
 import { CIRCUIT, PLAYER_COLORS } from '../data/world'
 import {
+  BARRIERS,
+  CROWD,
+  MAX_ROLL,
+  MAX_SPEED,
   MOTO,
   RIVALS,
   ROAD_HALF,
@@ -100,6 +104,149 @@ function Markers() {
                 roughness={0.7}
               />
             </mesh>
+          </group>
+        )
+      })}
+    </group>
+  )
+}
+
+/* --------------------------------- crowd ---------------------------------- */
+
+/**
+ * One islander on the verge. Deliberately cruder than the people you meet on
+ * foot: there are forty of them, you pass at thirty metres a second, and a
+ * full rig apiece would cost more than the race is worth. Both arms hang off
+ * one pivot, which is all a cheer needs.
+ */
+function Watcher({
+  shirt,
+  body,
+  arms,
+}: {
+  shirt: string
+  body: (g: Group | null) => void
+  arms: (g: Group | null) => void
+}) {
+  return (
+    <group ref={body}>
+      <mesh position={[0, 0.34, 0]} castShadow>
+        <boxGeometry args={[0.34, 0.68, 0.26]} />
+        <meshStandardMaterial color="#3f4654" flatShading roughness={1} />
+      </mesh>
+      <mesh position={[0, 1.02, 0]} castShadow>
+        <boxGeometry args={[0.5, 0.68, 0.3]} />
+        <meshStandardMaterial color={shirt} flatShading roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 1.54, 0]} castShadow>
+        <boxGeometry args={[0.34, 0.36, 0.32]} />
+        <meshStandardMaterial color="#f0c39a" flatShading roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 1.75, -0.02]}>
+        <boxGeometry args={[0.38, 0.14, 0.36]} />
+        <meshStandardMaterial color="#3a2a1d" flatShading roughness={0.95} />
+      </mesh>
+      <group ref={arms} position={[0, 1.28, 0]}>
+        {[-0.33, 0.33].map((x) => (
+          <mesh key={x} position={[x, -0.26, 0]} castShadow>
+            <boxGeometry args={[0.14, 0.6, 0.16]} />
+            <meshStandardMaterial color={shirt} flatShading roughness={0.95} />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  )
+}
+
+/**
+ * The crowd. Nobody here moves off their spot — they are behind the steel,
+ * and the whole point of the steel is that they do not have to — so the only
+ * thing driven per frame is the bounce and the arms over their heads.
+ */
+function Crowd() {
+  const bodies = useRef<(Group | null)[]>([])
+  const arms = useRef<(Group | null)[]>([])
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime
+    for (let i = 0; i < CROWD.length; i++) {
+      const one = CROWD[i]
+      const body = bodies.current[i]
+      if (body) {
+        body.position.y = Math.abs(Math.sin(t * 6 + one.seed)) * 0.09
+      }
+      const arm = arms.current[i]
+      if (arm) {
+        arm.rotation.x = -(1.9 + Math.sin(t * 6 + one.seed) * 0.8)
+      }
+    }
+  })
+
+  return (
+    <group>
+      {CROWD.map((one, i) => (
+        <group
+          key={i}
+          position={[one.x, groundHeight(one.x, one.z), one.z]}
+          rotation={[0, one.facing, 0]}
+        >
+          <Watcher
+            shirt={one.shirt}
+            body={(g) => {
+              bodies.current[i] = g
+            }}
+            arms={(g) => {
+              arms.current[i] = g
+            }}
+          />
+        </group>
+      ))}
+    </group>
+  )
+}
+
+/** The crash barrier the crowd stands behind: a rail, posts, and nothing else. */
+function Barriers() {
+  return (
+    <group>
+      {BARRIERS.map((rail, i) => {
+        const posts = Math.max(2, Math.round(rail.length / 2.2) + 1)
+        return (
+          <group
+            key={i}
+            position={[rail.x, groundHeight(rail.x, rail.z), rail.z]}
+            rotation={[0, rail.heading, 0]}
+          >
+            {/* Two rails, face on to the road. */}
+            {[0.92, 0.56].map((y) => (
+              <mesh key={y} position={[0, y, 0]} castShadow>
+                <boxGeometry args={[0.1, 0.22, rail.length]} />
+                <meshStandardMaterial
+                  color="#e4e8ec"
+                  flatShading
+                  roughness={0.55}
+                  metalness={0.25}
+                />
+              </mesh>
+            ))}
+            {Array.from({ length: posts }, (_, p) => (
+              <mesh
+                key={p}
+                position={[
+                  0,
+                  0.52,
+                  -rail.length / 2 + (rail.length * p) / (posts - 1),
+                ]}
+                castShadow
+              >
+                <boxGeometry args={[0.14, 1.04, 0.14]} />
+                <meshStandardMaterial
+                  color="#9aa3ad"
+                  flatShading
+                  roughness={0.7}
+                />
+              </mesh>
+            ))}
           </group>
         )
       })}
@@ -335,6 +482,9 @@ export function MotoGame() {
     // Yaw, then pitch, then roll — the order a bike actually moves in.
     if (body.current) body.current.rotation.order = 'YXZ'
     camReady.current = false
+    // The engine runs for exactly as long as you are on the bike.
+    sfx.engineStart()
+    return () => sfx.engineStop()
   }, [])
 
   useFrame((state, rawDelta) => {
@@ -376,6 +526,20 @@ export function MotoGame() {
     // The rider bobs a little with the engine.
     rider.current.moving = Math.abs(MOTO.speed) > 1
     rider.current.speed = Math.abs(MOTO.speed) * 0.15
+
+    // And the engine itself. It idles rather than dying when the race is not
+    // live, so opening the settings mid-lap does not switch the bike off.
+    // The lean comes off the roll rather than off the stick: keys give a
+    // steering axis that snaps between 0 and 1, and the note would snap with
+    // it, where the roll is already eased into the corner.
+    const revving = Math.min(1, Math.abs(MOTO.speed) / MAX_SPEED)
+    const throttle = live ? Math.max(0, move.y) : 0
+    sfx.engineRevs(
+      live ? 0.08 + revving * 0.92 : 0.08,
+      throttle,
+      live && MOTO.offRoad,
+      live ? Math.abs(MOTO.roll) / MAX_ROLL : 0,
+    )
 
     // An arrow over the bike pointing the way round. A ring road looks the
     // same in both directions from the saddle, and it is the wrong one that
@@ -422,6 +586,8 @@ export function MotoGame() {
     <group>
       <StartLine />
       <Markers />
+      <Barriers />
+      <Crowd />
       {RIVALS.map((kit, i) => (
         <RivalBike key={kit.id} index={i} night={night} />
       ))}

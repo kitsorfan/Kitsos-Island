@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { LAST_GASP, RESCUE, SLOW, SOULS } from '../game/rescue'
 import { useGame } from '../state/store'
 import { useCoarsePointer } from './useCoarsePointer'
+import { useT } from '../i18n/useT'
 
 interface Light {
   id: number
@@ -83,6 +84,7 @@ const clock = (seconds: number) => {
 }
 
 export function RescueHud() {
+  const t = useT()
   const sailing = useGame((s) => s.rescue?.status === 'sailing')
   const readout = useReadout(Boolean(sailing))
   const coarse = useCoarsePointer()
@@ -97,7 +99,7 @@ export function RescueHud() {
       {close && <div className="rescue__alarm" aria-hidden />}
 
       <div className="rescue__panel">
-        <span className="rescue__label">Sea rescue</span>
+        <span className="rescue__label">{t('Sea rescue')}</span>
 
         <div className="rescue__saved">
           <span className="rescue__buoy" aria-hidden />
@@ -113,7 +115,7 @@ export function RescueHud() {
         </div>
 
         {readout.lights.length === 0 ? (
-          <p className="rescue__none">No flares in the water</p>
+          <p className="rescue__none">{t('No flares in the water')}</p>
         ) : (
           <div className="rescue__flares">
             {readout.lights.map((light) => {
@@ -145,7 +147,7 @@ export function RescueHud() {
 
         <div className="rescue__row">
           <span className="rescue__way">
-            {Math.round(readout.way * 0.6)} <em>kn</em>
+            {Math.round(readout.way * 0.6)} <em>{t('kn')}</em>
           </span>
           <span className="rescue__time">{clock(readout.elapsed)}</span>
         </div>
@@ -157,13 +159,19 @@ export function RescueHud() {
               : `${readout.lights.length} rafts out there`}
           </span>
           {readout.aground ? (
-            <span className="rescue__flag rescue__flag--bad">Aground</span>
+            <span className="rescue__flag rescue__flag--bad">
+              {t('Aground')}
+            </span>
           ) : (
             readout.alongside &&
             (readout.slow ? (
-              <span className="rescue__flag rescue__flag--work">Hold her</span>
+              <span className="rescue__flag rescue__flag--work">
+                {t('Hold her')}
+              </span>
             ) : (
-              <span className="rescue__flag rescue__flag--bad">Too fast</span>
+              <span className="rescue__flag rescue__flag--bad">
+                {t('Too fast')}
+              </span>
             ))
           )}
         </div>

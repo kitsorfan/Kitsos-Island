@@ -2,6 +2,7 @@ import { MINIGAMES } from '../data/minigames'
 import type { MinigameEntry } from '../data/minigames'
 import { useGame } from '../state/store'
 import * as sfx from '../game/audio'
+import { useT } from '../i18n/useT'
 
 /**
  * What the board in the plaza opens: the island's games, a line apiece.
@@ -12,6 +13,7 @@ import * as sfx from '../game/audio'
  * window it opens in.
  */
 export function ArcadeCard() {
+  const t = useT()
   const close = useGame((s) => s.closeArcade)
   const night = useGame((s) => s.night)
   const lighthouseOpen = useGame((s) => s.lighthouseOpen)
@@ -45,8 +47,10 @@ export function ArcadeCard() {
       <div className="arcade">
         <div className="arcade__head">
           <div>
-            <span className="arcade__kicker">Games board · Town Plaza</span>
-            <h2 className="arcade__title">Island Games</h2>
+            <span className="arcade__kicker">
+              {t('Games board · Town Plaza')}
+            </span>
+            <h2 className="arcade__title">{t('Island Games')}</h2>
           </div>
           <button
             className="panel__close"
@@ -58,8 +62,9 @@ export function ArcadeCard() {
         </div>
 
         <p className="arcade__lead">
-          Four in daylight, one after the lamps go out. Leave any of them with
-          Esc.
+          {t(
+            'Four in daylight, one after the lamps go out. Leave any of them with Esc.',
+          )}
         </p>
 
         <div className="arcade__grid">

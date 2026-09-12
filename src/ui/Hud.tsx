@@ -9,7 +9,10 @@ import {
   useGame,
 } from '../state/store'
 import * as sfx from '../game/audio'
+import { ZOOM_STEP, sprintLock, zoomBy } from '../game/input'
 import { BalloonHud } from './BalloonHud'
+import { SettingsCard } from './SettingsCard'
+import { useT } from '../i18n/useT'
 import { HideHud } from './HideHud'
 import { Minimap } from './Minimap'
 import { MotoHud } from './MotoHud'
@@ -18,21 +21,18 @@ import { PaintballHud } from './PaintballHud'
 import { useCoarsePointer } from './useCoarsePointer'
 
 export function Hud() {
-  const nearby = useGame((s) => s.nearby)
+  const t = useT()
+  const nearby = t(useGame((s) => s.nearby))
   const mode = useGame((s) => s.mode)
   const area = useGame((s) => s.area)
   const found = useGame((s) => s.entries.length)
   const keys = useGame((s) => s.keys)
   const missions = useGame((s) => s.missions)
   const lighthouseOpen = useGame((s) => s.lighthouseOpen)
-  const muted = useGame((s) => s.muted)
   const hasMoved = useGame((s) => s.hasMoved)
   const openJournal = useGame((s) => s.openJournal)
   const openMap = useGame((s) => s.openMap)
   const openGreeting = useGame((s) => s.openGreeting)
-  const toggleMute = useGame((s) => s.toggleMute)
-  const musicOn = useGame((s) => s.musicOn)
-  const toggleMusic = useGame((s) => s.toggleMusic)
   const night = useGame((s) => s.night)
   const toggleNight = useGame((s) => s.toggleNight)
   const handLight = useGame((s) => s.handLight)
@@ -51,17 +51,18 @@ export function Hud() {
   const exitHide = useGame((s) => s.exitHide)
   const exitRescue = useGame((s) => s.exitRescue)
   const playing = fighting || riding || flying || hiding || sailing
-  const [help, setHelp] = useState(false)
+  const [settings, setSettings] = useState(false)
+  const [sprint, setSprint] = useState(sprintLock.on)
   const coarse = useCoarsePointer()
 
   const percent = Math.round((found / TOTAL_ENTRIES) * 100)
   const have = keyCount(keys)
-  const objective = nextObjective({ missions, keys, lighthouseOpen })
+  const objective = t(nextObjective({ missions, keys, lighthouseOpen }))
   const indoors = area !== 'island'
   // Off the interior rather than the building: a cellar has no front door of
   // its own, so a building lookup comes back empty two floors down and the
   // banner reads "Kitsos Island" while you are standing under the house.
-  const room = indoors ? INTERIOR_BY_ID.get(area) : undefined
+  const room = t(indoors ? INTERIOR_BY_ID.get(area) : undefined)
 
   return (
     <div
@@ -83,13 +84,13 @@ export function Hud() {
           {sailing && <RescueHud />}
           <div className="badge" hidden={playing}>
             <span className="badge__title">
-              {room ? `${room.name} · ${room.kicker}` : 'Kitsos Island'}
+              {room ? `${room.name} · ${room.kicker}` : t('Kitsos Island')}
             </span>
             <div className="badge__meter">
               <div className="badge__fill" style={{ width: `${percent}%` }} />
             </div>
             <span className="badge__count">
-              {found}/{TOTAL_ENTRIES} discovered
+              {found}/{TOTAL_ENTRIES} {t('discovered')}
             </span>
             <div className="keyring" title={`${have} of ${TOTAL_KEYS} keys`}>
               {KEYS.map((key) => (
@@ -97,7 +98,7 @@ export function Hud() {
                   key={key.id}
                   className={`keyring__key${keys[key.id] ? ' keyring__key--held' : ''}`}
                   style={{ '--key': key.color } as React.CSSProperties}
-                  title={keys[key.id] ? key.name : 'Not found yet'}
+                  title={keys[key.id] ? t(key.name) : t('Not found yet')}
                 >
                   🔑
                 </span>
@@ -107,7 +108,7 @@ export function Hud() {
 
           {objective && mode === 'explore' && !playing && (
             <div className="objective">
-              <span className="objective__label">Next</span>
+              <span className="objective__label">{t('Next')}</span>
               <strong>{objective.title}</strong>
               <p>{objective.detail}</p>
             </div>
@@ -122,9 +123,9 @@ export function Hud() {
                 sfx.confirm()
                 openMap()
               }}
-              title="Map (M)"
+              title={t('Map (M)')}
             >
-              🗺️<span>Map</span>
+              🗺️<span>{t('Map')}</span>
             </button>
             <button
               className="icon-button"
@@ -132,71 +133,21 @@ export function Hud() {
                 sfx.confirm()
                 openJournal()
               }}
-              title="Journal (J)"
+              title={t('Journal (J)')}
             >
-              📓<span>Journal</span>
+              📓<span>{t('Journal')}</span>
             </button>
+
             <button
-              className="icon-button"
-              onClick={() => {
-                toggleMute()
-                if (muted) sfx.confirm()
-              }}
-              title="Sound (N)"
-            >
-              {muted ? '🔇' : '🔊'}
-              <span>{muted ? 'Muted' : 'Sound'}</span>
-            </button>
-            <button
-              className="icon-button"
-              onClick={() => {
-                toggleMusic()
-                if (!musicOn) sfx.confirm()
-              }}
-              title="Music (B)"
-            >
-              {musicOn ? '🎵' : '🎼'}
-              <span>{musicOn ? 'Music' : 'No music'}</span>
-            </button>
-            <button
-              className="icon-button"
+              className={`icon-button${settings ? ' icon-button--live' : ''}`}
               onClick={() => {
                 sfx.confirm()
-                toggleNight()
+                setSettings((v) => !v)
               }}
-              disabled={Boolean(hiding)}
-              title={
-                hiding
-                  ? 'The lights stay out until the game is over'
-                  : 'Day or night (L)'
-              }
+              title={t('Sound, music, quality, and the controls')}
             >
-              {night ? '🌙' : '☀️'}
-              <span>{night ? 'Night' : 'Day'}</span>
+              ⚙️<span>{t('Settings')}</span>
             </button>
-            {night && (
-              <button
-                className="icon-button"
-                onClick={() => {
-                  sfx.confirm()
-                  toggleHandLight()
-                }}
-                title="Flashlight, torch, or out (T)"
-              >
-                {handLight === 'torch'
-                  ? '🔥'
-                  : handLight === 'none'
-                    ? '🌑'
-                    : '🔦'}
-                <span>
-                  {handLight === 'torch'
-                    ? 'Torch'
-                    : handLight === 'none'
-                      ? 'Dark'
-                      : 'Light'}
-                </span>
-              </button>
-            )}
             <button
               className={`icon-button${playing ? ' icon-button--live' : ''}`}
               onClick={() => {
@@ -207,10 +158,10 @@ export function Hud() {
                 else if (sailing) exitRescue()
                 else openArcade()
               }}
-              title="Island games (P)"
+              title={t('Island games (P)')}
             >
               {playing ? '🚪' : '🕹️'}
-              <span>{playing ? 'Quit game' : 'Games'}</span>
+              <span>{t(playing ? 'Quit game' : 'Games')}</span>
             </button>
             <button
               className="icon-button icon-button--cta"
@@ -218,137 +169,113 @@ export function Hud() {
                 sfx.confirm()
                 openGreeting()
               }}
-              title="Contact & full CV (C)"
+              title={t('Contact & full CV (C)')}
             >
-              👋<span>Say hi</span>
-            </button>
-            <button
-              className="icon-button"
-              onClick={() => setHelp((v) => !v)}
-              title="Controls"
-            >
-              ❔<span>Controls</span>
+              👋<span>{t('Say hi')}</span>
             </button>
           </div>
 
-          {help && (
-            <div className="help-card">
-              <h3>Controls</h3>
-              <dl>
-                <div>
-                  <dt>Move</dt>
-                  <dd>WASD / Arrows</dd>
-                </div>
-                <div>
-                  <dt>Sprint</dt>
-                  <dd>Shift</dd>
-                </div>
-                <div>
-                  <dt>Interact</dt>
-                  <dd>E / Enter</dd>
-                </div>
-                <div>
-                  <dt>Jump</dt>
-                  <dd>Space</dd>
-                </div>
-                <div>
-                  <dt>Turn camera</dt>
-                  <dd>Q and R</dd>
-                </div>
-                <div>
-                  <dt>Map & travel</dt>
-                  <dd>M</dd>
-                </div>
-                <div>
-                  <dt>Journal</dt>
-                  <dd>J</dd>
-                </div>
-                <div>
-                  <dt>Sound</dt>
-                  <dd>N</dd>
-                </div>
-                <div>
-                  <dt>Music</dt>
-                  <dd>B</dd>
-                </div>
-                <div>
-                  <dt>Day / night</dt>
-                  <dd>L</dd>
-                </div>
-                <div>
-                  <dt>Torch / flashlight</dt>
-                  <dd>T</dd>
-                </div>
-                <div>
-                  <dt>Contact &amp; CV</dt>
-                  <dd>C</dd>
-                </div>
-                <div>
-                  <dt>Games board</dt>
-                  <dd>P</dd>
-                </div>
-                <div>
-                  <dt>Shoot paint</dt>
-                  <dd>Space / click</dd>
-                </div>
-                <div>
-                  <dt>Get down</dt>
-                  <dd>Ctrl</dd>
-                </div>
-                <div>
-                  <dt>Wheelie</dt>
-                  <dd>Space</dd>
-                </div>
-                <div>
-                  <dt>Burner / vent</dt>
-                  <dd>Shift / Ctrl</dd>
-                </div>
-                <div>
-                  <dt>Water bomb</dt>
-                  <dd>Space</dd>
-                </div>
-                <div>
-                  <dt>Confetti</dt>
-                  <dd>F</dd>
-                </div>
-                <div>
-                  <dt>Swing the beam</dt>
-                  <dd>A and D</dd>
-                </div>
-                <div>
-                  <dt>Wide pulse</dt>
-                  <dd>Space</dd>
-                </div>
-                <div>
-                  <dt>Back / leave</dt>
-                  <dd>Esc</dd>
-                </div>
-              </dl>
-              <button className="button" onClick={() => setHelp(false)}>
-                Got it
-              </button>
-            </div>
-          )}
+          {settings && <SettingsCard />}
 
           {!indoors && !coarse && <Minimap />}
         </div>
       </div>
 
+      {/* Day or night sits bottom left, out from under the badge and
+          opposite the rest of the walking controls. */}
+      <div className="hud__bottom">
+        <div className="hud__buttons">
+          <button
+            className="icon-button"
+            onClick={() => {
+              sfx.confirm()
+              toggleNight()
+            }}
+            disabled={Boolean(hiding)}
+            title={
+              hiding
+                ? t('The lights stay out until the game is over')
+                : t('Day or night (L)')
+            }
+          >
+            {night ? '🌙' : '☀️'}
+            <span>{t(night ? 'Night' : 'Day')}</span>
+          </button>
+        </div>
+
+        {mode === 'explore' && !playing && (
+          <div className="hud__buttons">
+            {night && (
+              <button
+                className="icon-button"
+                onClick={() => {
+                  sfx.confirm()
+                  toggleHandLight()
+                }}
+                title={t('Flashlight, torch, or out (T)')}
+              >
+                {handLight === 'torch'
+                  ? '🔥'
+                  : handLight === 'none'
+                    ? '🌑'
+                    : '🔦'}
+                <span>
+                  {t(
+                    handLight === 'torch'
+                      ? 'Torch'
+                      : handLight === 'none'
+                        ? 'Dark'
+                        : 'Light',
+                  )}
+                </span>
+              </button>
+            )}
+            <button
+              className={`icon-button${sprint ? ' icon-button--live' : ''}`}
+              aria-pressed={sprint}
+              onClick={() => {
+                sfx.confirm()
+                const next = !sprint
+                sprintLock.on = next
+                setSprint(next)
+              }}
+              title={t('Keep running — the same as holding Shift')}
+            >
+              👟<span>{t(sprint ? 'Running' : 'Walk')}</span>
+            </button>
+            <button
+              className="icon-button"
+              onClick={() => zoomBy(1 / ZOOM_STEP)}
+              title={t('Zoom in (= or the wheel)')}
+            >
+              🔍<span>{t('In')}</span>
+            </button>
+            <button
+              className="icon-button"
+              onClick={() => zoomBy(ZOOM_STEP)}
+              title={t('Zoom out (- or the wheel)')}
+            >
+              🔭<span>{t('Out')}</span>
+            </button>
+          </div>
+        )}
+      </div>
+
       {mode === 'explore' && !hasMoved && !playing && (
         <p className="nudge">
           {coarse
-            ? 'Drag the stick to walk, tap A to interact'
-            : 'WASD to walk · Shift to sprint · M for the map'}
+            ? t('Drag the stick to walk, tap A to interact')
+            : t('WASD to walk · Shift to sprint · M for the map')}
         </p>
       )}
 
       {party && (
         <p className="party-banner">
-          <span>Party in the plaza</span>
+          <span>{t('Party in the plaza')}</span>
           <em>
             {amaliaHere
-              ? 'Press the button again to call it a night'
-              : 'Walk into the middle of the floor'}
+              ? t('Press the button again to call it a night')
+              : t('Walk into the middle of the floor')}
           </em>
         </p>
       )}
@@ -359,7 +286,7 @@ export function Hud() {
           <span>
             {nearby.verb ? `${nearby.verb} ` : ''}
             <strong>{nearby.label}</strong>
-            {nearby.blocked ? ' — locked' : ''}
+            {nearby.blocked ? ` — ${t('locked')}` : ''}
           </span>
         </div>
       )}

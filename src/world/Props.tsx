@@ -1,8 +1,15 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import type { Group, Mesh } from 'three'
-import { FOUNTAIN, PATHS, PLAZA_RADIUS, SIGNS } from '../data/world'
-import { groundHeight } from '../game/terrain'
+import { FOUNTAIN, SIGNS } from '../data/world'
+import {
+  BENCHES,
+  FENCE_SPACING,
+  HOUSE_FENCE,
+  LAMPS,
+  PLANTERS,
+  groundHeight,
+} from '../game/terrain'
 import { useGame } from '../state/store'
 import { TextPlane } from './TextSign'
 
@@ -120,18 +127,14 @@ function CompassRose() {
 }
 
 function Benches() {
-  const spots: [number, number, number][] = [
-    [14, -3, -Math.PI * 0.72],
-    [-13.5, -8, Math.PI * 0.42],
-    [3, -15.5, -Math.PI * 0.08],
-    [-8, 14.5, Math.PI * 0.98],
-    [15.5, 8, -Math.PI * 0.4],
-    [30, 18, -Math.PI * 0.7],
-  ]
   return (
     <group>
-      {spots.map(([x, z, rot], i) => (
-        <group key={i} position={[x, groundHeight(x, z), z]} rotation={[0, rot, 0]}>
+      {BENCHES.map(({ position: [x, z], rotation }, i) => (
+        <group
+          key={i}
+          position={[x, groundHeight(x, z), z]}
+          rotation={[0, rotation, 0]}
+        >
           <mesh position={[0, 0.52, 0]} castShadow>
             <boxGeometry args={[2.4, 0.14, 0.75]} />
             <meshStandardMaterial color="#a97c4e" flatShading roughness={1} />
@@ -154,15 +157,9 @@ function Benches() {
 
 /** Stone planters that keep the big square from reading as empty. */
 function Planters() {
-  const spots: [number, number][] = [
-    [-15, 4],
-    [10, 15],
-    [-6, -15],
-    [16.5, -14],
-  ]
   return (
     <group>
-      {spots.map(([x, z], i) => (
+      {PLANTERS.map(([x, z], i) => (
         <group key={i} position={[x, groundHeight(x, z), z]}>
           <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
             <cylinderGeometry args={[1.5, 1.7, 0.9, 10]} />
@@ -200,32 +197,10 @@ function Planters() {
 function Lamps() {
   // Out entirely during hide and seek: the island is supposed to be dark.
   const lit = useGame((s) => s.night && s.hide === null)
-  const positions = useMemo(() => {
-    const out: [number, number][] = []
-    for (const [a, b] of PATHS) {
-      const dx = b[0] - a[0]
-      const dz = b[1] - a[1]
-      const length = Math.hypot(dx, dz)
-      const nx = -dz / length
-      const nz = dx / length
-      const step = 17
-      for (let d = step; d < length - 4; d += step) {
-        const t = d / length
-        const side = out.length % 2 === 0 ? 1 : -1
-        out.push([a[0] + dx * t + nx * side * 4, a[1] + dz * t + nz * side * 4])
-      }
-    }
-    // A ring of lamps around the square itself.
-    for (let i = 0; i < 8; i++) {
-      const a = (i / 8) * Math.PI * 2 + 0.4
-      out.push([Math.cos(a) * (PLAZA_RADIUS - 2), Math.sin(a) * (PLAZA_RADIUS - 2)])
-    }
-    return out
-  }, [])
 
   return (
     <group>
-      {positions.map(([x, z], i) => (
+      {LAMPS.map(([x, z], i) => (
         <group key={i} position={[x, groundHeight(x, z), z]}>
           <mesh position={[0, 0.15, 0]}>
             <cylinderGeometry args={[0.3, 0.36, 0.3, 8]} />
@@ -484,28 +459,35 @@ function Dock() {
   )
 }
 
+/**
+ * The garden fence, drawn from the same runs the player collides with, so the
+ * rails and the thing that stops you are never in two different places.
+ */
 function HouseFence() {
-  const segments = useMemo(() => {
-    const out: { x: number; z: number; rot: number }[] = []
-    const cx = -62
-    const cz = 56
-    const hw = 12
-    const hd = 11
-    for (let x = -hw; x <= hw; x += 2) {
-      out.push({ x: cx + x, z: cz + hd, rot: 0 })
-      out.push({ x: cx + x, z: cz - hd, rot: 0 })
-    }
-    for (let z = -hd + 2; z <= hd - 2; z += 2) {
-      out.push({ x: cx - hw, z: cz + z, rot: Math.PI / 2 })
-      out.push({ x: cx + hw, z: cz + z, rot: Math.PI / 2 })
-    }
-    // Leave a gap for the front path.
-    return out.filter((p) => !(Math.abs(p.x - cx) < 2.6 && p.z < cz))
-  }, [])
+  const bays = useMemo(
+    () =>
+      HOUSE_FENCE.flatMap((run) => {
+        const dx = run.to[0] - run.from[0]
+        const dz = run.to[1] - run.from[1]
+        const length = Math.hypot(dx, dz)
+        const count = Math.max(1, Math.round(length / FENCE_SPACING))
+        const span = length / count
+        const rot = Math.atan2(-dz, dx)
+        // One post per division plus the one that closes the run, and a pair
+        // of rails spanning every gap between them.
+        return Array.from({ length: count + 1 }, (_, i) => ({
+          x: run.from[0] + (dx * i) / count,
+          z: run.from[1] + (dz * i) / count,
+          rot,
+          span: i < count ? span : 0,
+        }))
+      }),
+    [],
+  )
 
   return (
     <group>
-      {segments.map((p, i) => (
+      {bays.map((p, i) => (
         <group
           key={i}
           position={[p.x, groundHeight(p.x, p.z), p.z]}
@@ -515,14 +497,13 @@ function HouseFence() {
             <boxGeometry args={[0.14, 1.2, 0.14]} />
             <meshStandardMaterial color="#e8e2d2" flatShading roughness={1} />
           </mesh>
-          <mesh position={[1, 0.82, 0]}>
-            <boxGeometry args={[2, 0.13, 0.07]} />
-            <meshStandardMaterial color="#e8e2d2" flatShading roughness={1} />
-          </mesh>
-          <mesh position={[1, 0.44, 0]}>
-            <boxGeometry args={[2, 0.13, 0.07]} />
-            <meshStandardMaterial color="#e8e2d2" flatShading roughness={1} />
-          </mesh>
+          {p.span > 0 &&
+            [0.82, 0.44].map((y) => (
+              <mesh key={y} position={[p.span / 2, y, 0]}>
+                <boxGeometry args={[p.span, 0.13, 0.07]} />
+                <meshStandardMaterial color="#e8e2d2" flatShading roughness={1} />
+              </mesh>
+            ))}
         </group>
       ))}
     </group>

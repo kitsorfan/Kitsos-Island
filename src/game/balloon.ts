@@ -11,7 +11,8 @@
  * HUD polls this file on its own clock.
  */
 import { ISLAND_SHORE_RADIUS, ISLAND_WALK_RADIUS } from '../data/world'
-import { ACTOR_POS } from './actors'
+import { ACTOR_POS, REACTIONS, ageReactions } from './actors'
+import type { Mood } from './actors'
 import { groundHeight, OCCLUDERS } from './terrain'
 
 export type Payload = 'water' | 'confetti'
@@ -181,28 +182,6 @@ export interface Burst {
 const BURST_LIFE = 1.5
 
 /* ------------------------------- the reaction ----------------------------- */
-
-/**
- * What lands on you decides what you do about it. A water bomb going off at
- * your feet is a thing to get away from; a cloud of confetti is not.
- */
-export type Mood = 'cheer' | 'fright'
-
-export interface Reaction {
-  kind: Mood
-  /** Seconds of it left. */
-  left: number
-  /** Where the parcel burst — a fright needs something to run from. */
-  x: number
-  z: number
-}
-
-/**
- * Who is reacting to what, keyed by gathering id and by islander id. The two
- * sets of ids are hand-written and do not overlap. Read every frame by the
- * crowds and by <Npcs/>, which is why it lives out here rather than in React.
- */
-export const REACTIONS = new Map<string, Reaction>()
 
 /** How long each lasts, and how far past the wet patch it is felt. */
 const FRIGHT_TIME = 3.6
@@ -572,10 +551,7 @@ export function stepBalloon(delta: number, input: BalloonInput): BalloonEvents {
     if (BALLOON.bursts[i].life <= 0) BALLOON.bursts.splice(i, 1)
   }
 
-  for (const [id, r] of REACTIONS) {
-    r.left -= delta
-    if (r.left <= 0) REACTIONS.delete(id)
-  }
+  ageReactions(delta)
 
   if (events.served.length > 0) {
     const last = events.served[events.served.length - 1]

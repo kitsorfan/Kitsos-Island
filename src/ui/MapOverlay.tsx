@@ -3,11 +3,13 @@ import { BUILDINGS, MISSIONS } from '../data/world'
 import { TOTAL_KEYS, keyCount, nextObjective, useGame } from '../state/store'
 import * as sfx from '../game/audio'
 import { drawMap, worldToMap } from './mapDraw'
+import { useT } from '../i18n/useT'
 
 export function MapOverlay() {
   const canvas = useRef<HTMLCanvasElement>(null)
   const [size, setSize] = useState(520)
 
+  const t = useT()
   const area = useGame((s) => s.area)
   const discovered = useGame((s) => s.discovered)
   const missions = useGame((s) => s.missions)
@@ -24,7 +26,10 @@ export function MapOverlay() {
       setSize(
         Math.max(
           260,
-          Math.min(560, Math.min(window.innerWidth - 80, window.innerHeight - 260)),
+          Math.min(
+            560,
+            Math.min(window.innerWidth - 80, window.innerHeight - 260),
+          ),
         ),
       )
     fit()
@@ -75,17 +80,22 @@ export function MapOverlay() {
         className="panel panel--map"
         onPointerDown={(e) => e.stopPropagation()}
         style={{ '--accent': '#3f7bd6' } as React.CSSProperties}
-        aria-label="Island map"
+        aria-label={t('Island map')}
       >
         <header className="panel__head">
           <div>
-            <p className="panel__kicker">Kitsos Island</p>
+            <p className="panel__kicker">{t('Kitsos Island')}</p>
             <h2 className="panel__title">
-              {keyCount(keys)} / {TOTAL_KEYS} keys ·{' '}
-              {Object.keys(discovered).length} / {BUILDINGS.length} places found
+              {keyCount(keys)} / {TOTAL_KEYS} {t('keys')} ·{' '}
+              {Object.keys(discovered).length} / {BUILDINGS.length}{' '}
+              {t('places found')}
             </h2>
           </div>
-          <button className="panel__close" onClick={dismiss} aria-label="Close">
+          <button
+            className="panel__close"
+            onClick={dismiss}
+            aria-label={t('Close')}
+          >
             ✕<kbd>Esc</kbd>
           </button>
         </header>
@@ -102,15 +112,21 @@ export function MapOverlay() {
                   className={`map__pin${found ? '' : ' map__pin--unknown'}${
                     objective?.buildingId === b.id ? ' map__pin--target' : ''
                   }`}
-                  style={{ left: x, top: y, '--accent': b.accent } as React.CSSProperties}
+                  style={
+                    {
+                      left: x,
+                      top: y,
+                      '--accent': b.accent,
+                    } as React.CSSProperties
+                  }
                   disabled={!found || indoors}
                   onClick={() => travel(b.id)}
                   title={
                     !found
-                      ? 'Not found yet'
+                      ? t('Not found yet')
                       : indoors
-                        ? 'Step outside first'
-                        : `Travel to ${b.name}`
+                        ? t('Step outside first')
+                        : `${t('Travel to')} ${t(b.name)}`
                   }
                 >
                   {found ? b.short : '?'}
@@ -120,7 +136,7 @@ export function MapOverlay() {
           </div>
 
           <aside className="map__side">
-            <h3 className="panel__heading">Missions</h3>
+            <h3 className="panel__heading">{t('Missions')}</h3>
             <ul className="quest-list">
               {MISSIONS.map((m) => {
                 const state = missions[m.id]
@@ -130,37 +146,43 @@ export function MapOverlay() {
                       {state === 'done' ? '✓' : state === 'active' ? '◆' : '○'}
                     </span>
                     <div>
-                      <strong>{m.title}</strong>
+                      <strong>{t(m.title)}</strong>
                       <p>
-                        {state === 'done'
-                          ? m.done
-                          : state === 'active'
-                            ? m.hint
-                            : m.brief}
+                        {t(
+                          state === 'done'
+                            ? m.done
+                            : state === 'active'
+                              ? m.hint
+                              : m.brief,
+                        )}
                       </p>
                     </div>
                   </li>
                 )
               })}
-              <li className={`quest quest--${lighthouseOpen ? 'done' : 'idle'}`}>
+              <li
+                className={`quest quest--${lighthouseOpen ? 'done' : 'idle'}`}
+              >
                 <span className="quest__mark" aria-hidden>
                   {lighthouseOpen ? '✓' : '★'}
                 </span>
                 <div>
-                  <strong>The Old Lighthouse</strong>
+                  <strong>{t('The Old Lighthouse')}</strong>
                   <p>
                     {lighthouseOpen
-                      ? 'Open. The keeper’s logbook is at the top.'
-                      : `Sealed with five locks — ${keyCount(keys)} of ${TOTAL_KEYS} turned.`}
+                      ? t('Open. The keeper’s logbook is at the top.')
+                      : `${t('Sealed with five locks —')} ${keyCount(keys)} ${t('of')} ${TOTAL_KEYS} ${t('turned.')}`}
                   </p>
                 </div>
               </li>
             </ul>
 
             <p className="map__note">
-              {indoors
-                ? 'Step outside to travel.'
-                : 'Click a place you have found to travel there.'}
+              {t(
+                indoors
+                  ? 'Step outside to travel.'
+                  : 'Click a place you have found to travel there.',
+              )}
             </p>
           </aside>
         </div>

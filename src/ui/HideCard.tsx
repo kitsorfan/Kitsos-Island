@@ -3,6 +3,7 @@ import type { Role } from '../game/hide'
 import { useGame } from '../state/store'
 import * as sfx from '../game/audio'
 import { useCoarsePointer } from './useCoarsePointer'
+import { useT } from '../i18n/useT'
 
 const clock = (seconds: number) => {
   const m = Math.floor(seconds / 60)
@@ -12,6 +13,7 @@ const clock = (seconds: number) => {
 
 /** The briefing before a game of hide and seek, and the card after one. */
 export function HideCard() {
+  const t = useT()
   const game = useGame((s) => s.hide)
   const setRole = useGame((s) => s.setRole)
   const begin = useGame((s) => s.beginHide)
@@ -54,9 +56,9 @@ export function HideCard() {
         {briefing ? (
           <>
             <p className="hd-card__lead">
-              Every lamp on the island goes out — the windows, the lighthouse,
-              the searchlight over the camp. The only light left anywhere is
-              whatever somebody is carrying.
+              {t(
+                'Every lamp on the island goes out — the windows, the lighthouse, the searchlight over the camp. The only light left anywhere is whatever somebody is carrying.',
+              )}
             </p>
 
             <div className="hd-sides">
@@ -76,12 +78,12 @@ export function HideCard() {
               {seeking ? (
                 <>
                   <li>
-                    Shining a light on somebody is not finding them. You have
-                    to <strong>walk up and touch them</strong>.
+                    Shining a light on somebody is not finding them. You have to{' '}
+                    <strong>{t('walk up and touch them')}</strong>.
                   </li>
                   <li>
-                    Keep the torch <strong>lit</strong>, or you will walk past
-                    every one of them in the dark. Nothing tells you where
+                    Keep the torch <strong>{t('lit')}</strong>, or you will walk
+                    past every one of them in the dark. Nothing tells you where
                     they are — they are behind things.
                   </li>
                   <li>
@@ -102,22 +104,21 @@ export function HideCard() {
                     reach you, the same rule you play by the other way round.
                   </li>
                   <li>
-                    <strong>They run when they see you</strong>, and a shade
-                    faster than you can. Speed is no way out of it. Get
-                    something solid between you and them and they will lose
-                    you.
+                    <strong>{t('They run when they see you')}</strong>, and a
+                    shade faster than you can. Speed is no way out of it. Get
+                    something solid between you and them and they will lose you.
                   </li>
                   <li>
-                    <strong>Anything you do draws them.</strong> Walking is
-                    heard from a good way off, crouch-walking from barely any,
-                    and a lit torch is seen right across the town — everyone
-                    inside that range stops looking where they were and comes
-                    to look at you.
+                    <strong>{t('Anything you do draws them.')}</strong> Walking
+                    is heard from a good way off, crouch-walking from barely
+                    any, and a lit torch is seen right across the town —
+                    everyone inside that range stops looking where they were and
+                    comes to look at you.
                   </li>
                   <li>
-                    <strong>Still and dark is safe</strong>, up to a point.
-                    Every so often one of them takes it into their head to
-                    come and look exactly where you are anyway.
+                    <strong>{t('Still and dark is safe')}</strong>, up to a
+                    point. Every so often one of them takes it into their head
+                    to come and look exactly where you are anyway.
                   </li>
                 </>
               )}
@@ -126,15 +127,33 @@ export function HideCard() {
             <dl className="hd-keys">
               {coarse ? (
                 <>
-                  <div><dt>Move</dt><dd>Stick</dd></div>
-                  <div><dt>Keep low</dt><dd>DUCK</dd></div>
+                  <div>
+                    <dt>{t('Move')}</dt>
+                    <dd>{t('Stick')}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Keep low')}</dt>
+                    <dd>{t('DUCK')}</dd>
+                  </div>
                 </>
               ) : (
                 <>
-                  <div><dt>Walk</dt><dd>WASD</dd></div>
-                  <div><dt>Keep low</dt><dd>Ctrl</dd></div>
-                  <div><dt>Torch out</dt><dd>T</dd></div>
-                  <div><dt>Give up</dt><dd>Esc</dd></div>
+                  <div>
+                    <dt>{t('Walk')}</dt>
+                    <dd>{t('WASD')}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Keep low')}</dt>
+                    <dd>{t('Ctrl')}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Torch out')}</dt>
+                    <dd>T</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Give up')}</dt>
+                    <dd>{t('Esc')}</dd>
+                  </div>
                 </>
               )}
             </dl>
@@ -151,14 +170,14 @@ export function HideCard() {
             <div className="hd-card__score">
               {seeking ? (
                 <div>
-                  <span>Found</span>
+                  <span>{t('Found')}</span>
                   <strong>
                     {game.found}/{COUNT}
                   </strong>
                 </div>
               ) : (
                 <div>
-                  <span>Held out</span>
+                  <span>{t('Held out')}</span>
                   <strong>{clock(game.seconds)}</strong>
                 </div>
               )}

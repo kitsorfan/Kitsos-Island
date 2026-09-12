@@ -3,6 +3,7 @@ import { ARENA, MAG_SIZE, RELOAD_MS, START_LIVES } from '../game/paintball'
 import { isCrouching } from '../game/input'
 import { useGame } from '../state/store'
 import { useCoarsePointer } from './useCoarsePointer'
+import { useT } from '../i18n/useT'
 
 /**
  * The clock before the whistle, and whether he is flat on the ground. Both
@@ -50,6 +51,7 @@ function useReload(reloadAt: number | null) {
 }
 
 export function PaintballHud() {
+  const t = useT()
   const game = useGame((s) => s.paintball)
   const coarse = useCoarsePointer()
   const left = useReload(game?.reloadAt ?? null)
@@ -65,7 +67,7 @@ export function PaintballHud() {
       {field.countdown > 0 && (
         <div className="pb-count" aria-live="polite">
           <strong key={field.countdown}>{field.countdown}</strong>
-          <em>Markers down until the whistle</em>
+          <em>{t('Markers down until the whistle')}</em>
         </div>
       )}
 
@@ -74,10 +76,10 @@ export function PaintballHud() {
       )}
 
       <div className="pb__panel">
-        <span className="pb__label">Paintball</span>
+        <span className="pb__label">{t('Paintball')}</span>
 
         <div className="pb__row">
-          <span className="pb__row-label">Lives</span>
+          <span className="pb__row-label">{t('Lives')}</span>
           <span className="pb__hearts">
             {Array.from({ length: START_LIVES }, (_, i) => (
               <span
@@ -91,7 +93,7 @@ export function PaintballHud() {
         </div>
 
         <div className="pb__row">
-          <span className="pb__row-label">Hopper</span>
+          <span className="pb__row-label">{t('Hopper')}</span>
           <span className="pb__ammo">
             {Array.from({ length: MAG_SIZE }, (_, i) => (
               <span
@@ -103,7 +105,7 @@ export function PaintballHud() {
         </div>
 
         {field.down && (
-          <p className="pb__down">Down — you cannot shoot from here</p>
+          <p className="pb__down">{t('Down — you cannot shoot from here')}</p>
         )}
 
         <div className={`pb__reload${reloading ? ' pb__reload--on' : ''}`}>
@@ -129,7 +131,10 @@ export function PaintballHud() {
       </div>
 
       {game.feed && (
-        <p key={game.feed.at} className={`pb__feed pb__feed--${game.feed.kind}`}>
+        <p
+          key={game.feed.at}
+          className={`pb__feed pb__feed--${game.feed.kind}`}
+        >
           {game.feed.text}
         </p>
       )}

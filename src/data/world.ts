@@ -72,14 +72,16 @@ export const BUILDINGS: Building[] = [
     half: [7.2, 6.5],
     rotation: Math.PI,
     scale: 1.5,
-    height: 8,
+    /* Two storeys and a pitched roof now, which the camera has to know about
+       or it will happily sit inside the first floor. */
+    height: 15,
     accent: '#e0574a',
   },
   {
     id: 'university',
     kind: 'university',
-    name: 'NTUA Academy',
-    short: 'Academy',
+    name: 'National Technical University of Athens',
+    short: 'NTUA',
     subtitle: 'School of Electrical & Computer Engineering',
     position: [0, -80],
     door: [0, -68.6],
@@ -579,7 +581,7 @@ export const NPCS: Npc[] = [
   {
     id: 'professor',
     name: 'Prof. Nikolaos',
-    role: 'NTUA Academy',
+    role: 'NTUA',
     area: 'university',
     position: [-6, 2],
     facing: Math.PI * 0.85,
@@ -879,7 +881,7 @@ export const SIGNS: SignPost[] = [
     label: 'Town Plaza',
     lines: [
       'KITSOS TOWN — Town Plaza. Seven roads leave this square, and not one of them is named after where it goes.',
-      'North, Motivation Road, to the NTUA Academy. East, Discipline Road, to the Work District. West, Curiosity Road, to the Town School.',
+      'North, Motivation Road, to the Polytechnic. East, Discipline Road, to the Work District. West, Curiosity Road, to the Town School.',
       'South-west, Caring Road, to Kitsos House. South-east, Leadership Road, to the Army Camp. Due south, Collaboration Road, to the Radio Center.',
       'And north-west out to the cape: Freedom Road, and the Old Lighthouse at the end of it. Locked.',
       'They are named for what he carried out of each of them. Press M for the map, J for the journal.',
@@ -891,7 +893,7 @@ export const SIGNS: SignPost[] = [
     facing: 0,
     label: 'Motivation Road',
     lines: [
-      'MOTIVATION ROAD — the NTUA Academy, straight on. Mind the bicycles.',
+      'MOTIVATION ROAD — the Polytechnic, straight on. Mind the bicycles.',
       'Electrical & Computer Engineering, and the lecture hall behind it.',
       'Five years of it. Nobody made him finish; that is rather the point of the name.',
     ],

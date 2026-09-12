@@ -7,14 +7,21 @@ export type Bounds =
 /**
  * Pushes a circle of `radius` out of every collider it overlaps and keeps it
  * inside `bounds`. Mutates and returns the given tuple.
+ *
+ * `feetY` is how far the mover is off the ground. Anything with a `height`
+ * shorter than that is cleared rather than bumped into, which is what makes a
+ * garden fence something you hop over instead of something you walk round.
  */
 export function resolveCollisions(
   out: [number, number],
   radius: number,
   colliders: Collider[],
   bounds: Bounds,
+  feetY = 0,
 ): [number, number] {
   for (const c of colliders) {
+    if (c.height !== undefined && feetY >= c.height) continue
+
     const dx = out[0] - c.x
     const dz = out[1] - c.z
 
@@ -28,6 +35,25 @@ export function resolveCollisions(
           out[0] = c.x + (dx / dist) * min
           out[1] = c.z + (dz / dist) * min
         }
+      }
+      continue
+    }
+
+    if (c.rotation) {
+      // Into the box's own frame, resolve there, and back out again.
+      const cos = Math.cos(c.rotation)
+      const sin = Math.sin(c.rotation)
+      const lx = dx * cos - dz * sin
+      const lz = dx * sin + dz * cos
+      const overlapX = c.hx + radius - Math.abs(lx)
+      const overlapZ = c.hz + radius - Math.abs(lz)
+      if (overlapX > 0 && overlapZ > 0) {
+        let px = 0
+        let pz = 0
+        if (overlapX < overlapZ) px = lx >= 0 ? overlapX : -overlapX
+        else pz = lz >= 0 ? overlapZ : -overlapZ
+        out[0] += px * cos + pz * sin
+        out[1] += -px * sin + pz * cos
       }
       continue
     }

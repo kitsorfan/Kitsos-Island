@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { PROFILE } from '../data/profile'
 import * as sfx from '../game/audio'
+import { useT } from '../i18n/useT'
 
 const SUBJECTS = [
   'A role I think you would fit',
@@ -12,6 +13,7 @@ const SUBJECTS = [
 type CopyKey = 'email' | 'link' | 'message' | null
 
 export function RadioConsole() {
+  const t = useT()
   const [name, setName] = useState('')
   const [from, setFrom] = useState('')
   const [subject, setSubject] = useState(SUBJECTS[0])
@@ -59,14 +61,14 @@ export function RadioConsole() {
           href={`mailto:${PROFILE.email}`}
           onClick={() => sfx.confirm()}
         >
-          <span className="channel__band">Channel 1 · Email</span>
+          <span className="channel__band">{t('Channel 1 · Email')}</span>
           <strong>{PROFILE.email}</strong>
         </a>
         <button
           className="channel channel--button"
           onClick={() => copy('email', PROFILE.email)}
         >
-          <span className="channel__band">Clipboard</span>
+          <span className="channel__band">{t('Clipboard')}</span>
           <strong>{copied === 'email' ? 'Copied ✓' : 'Copy address'}</strong>
         </button>
 
@@ -77,28 +79,29 @@ export function RadioConsole() {
           rel="noreferrer"
           onClick={() => sfx.confirm()}
         >
-          <span className="channel__band">Channel 2 · LinkedIn</span>
+          <span className="channel__band">{t('Channel 2 · LinkedIn')}</span>
           <strong>{PROFILE.linkedinLabel}</strong>
         </a>
         <button
           className="channel channel--button"
           onClick={() => copy('link', PROFILE.linkedin)}
         >
-          <span className="channel__band">Clipboard</span>
+          <span className="channel__band">{t('Clipboard')}</span>
           <strong>{copied === 'link' ? 'Copied ✓' : 'Copy profile'}</strong>
         </button>
       </div>
 
       <div className="radio__desk">
-        <h3 className="panel__heading">Channel 3 · Message desk</h3>
+        <h3 className="panel__heading">{t('Channel 3 · Message desk')}</h3>
         <p className="panel__text">
-          This island has no backend — the desk hands your message to your own mail
-          client, already addressed and written.
+          {t(
+            'This island has no backend — the desk hands your message to your own mail client, already addressed and written.',
+          )}
         </p>
 
         <div className="field-row">
           <label className="field">
-            <span>Your name</span>
+            <span>{t('Your name')}</span>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -106,7 +109,7 @@ export function RadioConsole() {
             />
           </label>
           <label className="field">
-            <span>Your email</span>
+            <span>{t('Your email')}</span>
             <input
               value={from}
               onChange={(e) => setFrom(e.target.value)}
@@ -117,7 +120,7 @@ export function RadioConsole() {
         </div>
 
         <label className="field">
-          <span>Subject</span>
+          <span>{t('Subject')}</span>
           <select value={subject} onChange={(e) => setSubject(e.target.value)}>
             {SUBJECTS.map((s) => (
               <option key={s}>{s}</option>
@@ -126,7 +129,7 @@ export function RadioConsole() {
         </label>
 
         <label className="field">
-          <span>Message</span>
+          <span>{t('Message')}</span>
           <textarea
             rows={5}
             value={message}
@@ -141,7 +144,7 @@ export function RadioConsole() {
             onClick={transmit}
             disabled={!message.trim()}
           >
-            📡 Transmit
+            {t('📡 Transmit')}
           </button>
           <button
             className="button"

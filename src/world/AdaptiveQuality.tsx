@@ -4,16 +4,19 @@ import type { Mesh } from 'three'
 import { useGame } from '../state/store'
 
 /**
- * Drops the shadow pass on a machine that cannot keep up.
+ * Decides whether the island draws its shadow pass.
  *
  * The island is bound by draw calls rather than by pixels — it costs the same
  * at 1080p as at a quarter of it — and shadows are about half of those, since
  * every caster is drawn a second time into the shadow map. So shadows are the
  * one lever worth pulling, and pulling it buys back most of the frame.
  *
- * The switch is one-way. A visitor who dips below the threshold once is on
- * hardware that will dip again, and a setting that flickers on and off is
- * worse to look at than either state.
+ * The visitor has the last word. 'auto' measures and steps down on hardware
+ * that cannot keep up, but the verdict is advisory: it can be overruled in
+ * either direction, and asking for 'auto' again asks for a fresh one. What it
+ * is not is a hidden one-way trapdoor, where a single bad three seconds —
+ * a tab coming back to the front, a laptop dropping to its battery profile —
+ * costs a visitor their shadows for the rest of the session with no way back.
  */
 
 /**
@@ -41,13 +44,45 @@ const WARMUP_MS = 6000
  */
 const STALL = 200
 
+/**
+ * How often to actually take the median. Sorting the window on every frame
+ * spent real time — about 18µs of it, forever, on exactly the fast machines
+ * that were never going to trip the threshold — to answer a question whose
+ * answer cannot meaningfully change in a single millisecond.
+ */
+const JUDGE_EVERY_MS = 500
+
 export function AdaptiveQuality() {
   const gl = useThree((s) => s.gl)
   const scene = useThree((s) => s.scene)
+
+  const quality = useGame((s) => s.quality)
+  const autoDropped = useGame((s) => s.autoDropped)
+  const reportSlow = useGame((s) => s.reportSlow)
+
+  const shadows =
+    quality === 'high' ? true : quality === 'low' ? false : !autoDropped
+
+  // Shadow support is compiled into each material's shader, so every one of
+  // them has to be rebuilt before the scene stops asking for a shadow map —
+  // or starts again. Materials built after this point compile against the
+  // flag as it stands, so a new area needs no sweep of its own.
+  useEffect(() => {
+    if (gl.shadowMap.enabled === shadows) return
+    gl.shadowMap.enabled = shadows
+    scene.traverse((object) => {
+      const material = (object as Mesh).material
+      if (!material) return
+      for (const m of Array.isArray(material) ? material : [material]) {
+        m.needsUpdate = true
+      }
+    })
+  }, [gl, scene, shadows])
+
   const age = useRef(0)
   const times = useRef<number[]>([])
   const span = useRef(0)
-  const dropped = useRef(false)
+  const sinceJudged = useRef(0)
 
   // Walking into a building builds a whole new scene and compiles whatever
   // materials it brought with it, so the clock starts again on the far side
@@ -57,10 +92,12 @@ export function AdaptiveQuality() {
     age.current = 0
     times.current.length = 0
     span.current = 0
+    sinceJudged.current = 0
   }, [token])
 
   useFrame((_, delta) => {
-    if (dropped.current) return
+    // Nothing to measure once the visitor has chosen, or once auto has.
+    if (quality !== 'auto' || autoDropped) return
 
     const ms = delta * 1000
     if (ms <= 0) return
@@ -83,21 +120,15 @@ export function AdaptiveQuality() {
     }
     if (span.current < WINDOW_MS) return
 
+    sinceJudged.current += ms
+    if (sinceJudged.current < JUDGE_EVERY_MS) return
+    sinceJudged.current = 0
+
     const sorted = [...window].sort((a, b) => a - b)
     const median = sorted[sorted.length >> 1]
     if (median <= TOO_SLOW) return
 
-    // Shadow support is compiled into each material's shader, so every one of
-    // them has to be rebuilt before the scene stops asking for a shadow map.
-    dropped.current = true
-    gl.shadowMap.enabled = false
-    scene.traverse((object) => {
-      const material = (object as Mesh).material
-      if (!material) return
-      for (const m of Array.isArray(material) ? material : [material]) {
-        m.needsUpdate = true
-      }
-    })
+    reportSlow()
   })
 
   return null

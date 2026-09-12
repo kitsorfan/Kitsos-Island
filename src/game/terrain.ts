@@ -6,6 +6,7 @@ import {
   ISLAND_EDGE,
   ISLAND_FLAT_RADIUS,
   ISLAND_SHORE_RADIUS,
+  ISLAND_WALK_RADIUS,
   LEDGES,
   NPCS,
   PATHS,
@@ -120,6 +121,103 @@ export const HILLS: { position: Vec2; radius: number; height: number }[] = [
   { position: [-88, -52], radius: 10, height: 12 },
 ]
 
+/* -------------------------- street furniture -------------------------- */
+
+/*
+ * Where the island's smaller scenery stands. It lives here rather than in the
+ * components that draw it because the player has to bump into all of it, and
+ * a bench you can walk through is a bench in the wrong place twice.
+ */
+
+export interface Bench {
+  position: Vec2
+  rotation: number
+}
+
+export const BENCHES: Bench[] = [
+  { position: [14, -3], rotation: -Math.PI * 0.72 },
+  { position: [-13.5, -8], rotation: Math.PI * 0.42 },
+  { position: [3, -15.5], rotation: -Math.PI * 0.08 },
+  { position: [-8, 14.5], rotation: Math.PI * 0.98 },
+  { position: [15.5, 8], rotation: -Math.PI * 0.4 },
+  { position: [30, 18], rotation: -Math.PI * 0.7 },
+]
+
+/** Seat, back and all — low enough to clear with a running jump. */
+export const BENCH_HEIGHT = 1.3
+const BENCH_HALF: Vec2 = [1.2, 0.38]
+
+/** Stone tubs of shrubs, too tall to see over and far too tall to jump. */
+export const PLANTERS: Vec2[] = [
+  [-15, 4],
+  [10, 15],
+  [-6, -15],
+  [16.5, -14],
+]
+
+export const PLANTER_RADIUS = 1.7
+
+/** Lamp posts: down both sides of every road, then a ring round the square. */
+export const LAMPS: Vec2[] = (() => {
+  const out: Vec2[] = []
+  for (const [a, b] of PATHS) {
+    const dx = b[0] - a[0]
+    const dz = b[1] - a[1]
+    const length = Math.hypot(dx, dz)
+    const nx = -dz / length
+    const nz = dx / length
+    const step = 17
+    for (let d = step; d < length - 4; d += step) {
+      const t = d / length
+      const side = out.length % 2 === 0 ? 1 : -1
+      out.push([a[0] + dx * t + nx * side * 4, a[1] + dz * t + nz * side * 4])
+    }
+  }
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2 + 0.4
+    out.push([
+      Math.cos(a) * (PLAZA_RADIUS - 2),
+      Math.sin(a) * (PLAZA_RADIUS - 2),
+    ])
+  }
+  return out
+})()
+
+/** Base plate of a lamp post. Four metres of it stand above this, so no. */
+export const LAMP_RADIUS = 0.42
+
+/** A straight run of picket fence, post to post. */
+export interface FenceRun {
+  from: Vec2
+  to: Vec2
+}
+
+export const FENCE_HEIGHT = 1.2
+/** Spacing of the posts along a run; the rails span the gaps between them. */
+export const FENCE_SPACING = 2
+
+/**
+ * The garden fence round the house, as four closed sides with a gate left in
+ * the front one for the path to the door.
+ */
+export const HOUSE_FENCE: FenceRun[] = (() => {
+  const cx = -62
+  const cz = 56
+  const hw = 12
+  const hd = 11
+  /** Half-width of the gap the front path comes through. */
+  const gate = 2.6
+  const front = cz - hd
+  const back = cz + hd
+  return [
+    { from: [cx - hw, back], to: [cx + hw, back] },
+    { from: [cx - hw, front], to: [cx - hw, back] },
+    { from: [cx + hw, front], to: [cx + hw, back] },
+    { from: [cx - hw, front], to: [cx - gate, front] },
+    { from: [cx + gate, front], to: [cx + hw, front] },
+  ]
+})()
+
 export interface Collider {
   x: number
   z: number
@@ -127,6 +225,19 @@ export interface Collider {
   hx: number
   hz: number
   circle?: boolean
+  /**
+   * How tall it is. Left off it is a wall — solid however high you get. Given,
+   * anyone whose feet are above it passes straight over the top, which is the
+   * difference between a fence you have to walk round and one you can hop.
+   */
+  height?: number
+  /**
+   * Y-rotation of a box, for anything that does not lie along an axis. Left
+   * off, the box is axis-aligned and the cheaper path is taken. Snapping a
+   * diagonal thing to the nearest axis instead is not an approximation — it
+   * is a different object in a different place.
+   */
+  rotation?: number
 }
 
 export const STATIC_COLLIDERS: Collider[] = [
@@ -389,5 +500,79 @@ export const TREE_COLLIDERS: Collider[] = TREES.map((t) => ({
   hz: 0.7,
   circle: true,
 }))
+
+/**
+ * Boulders worth walking round. Pebbles are left out on purpose — having to
+ * hop over every stone on the island would be a worse game than clipping
+ * through them — as is anything out past the water line, which nobody reaches.
+ */
+export const ROCK_COLLIDERS: Collider[] = ROCKS.filter(
+  (r) =>
+    r.scale >= 1 &&
+    Math.hypot(r.position[0], r.position[1]) < ISLAND_WALK_RADIUS,
+).map((r) => ({
+  x: r.position[0],
+  z: r.position[1],
+  hx: r.scale * 0.62,
+  hz: r.scale * 0.62,
+  circle: true,
+  /** Matches the squashed dodecahedron Foliage draws. */
+  height: r.scale * 0.64,
+}))
+
+/**
+ * The garden fence. Kept separate from the rest because the race wants it
+ * too: the south-east corner of the garden stands in the ring road, and a
+ * motorcycle going through it rather than round it looked like a bug.
+ */
+export const FENCE_COLLIDERS: Collider[] = HOUSE_FENCE.map((run) => ({
+  x: (run.from[0] + run.to[0]) / 2,
+  z: (run.from[1] + run.to[1]) / 2,
+  hx: Math.abs(run.to[0] - run.from[0]) / 2 + 0.1,
+  hz: Math.abs(run.to[1] - run.from[1]) / 2 + 0.1,
+  height: FENCE_HEIGHT,
+}))
+
+/** Axis-aligned box round a rectangle that has been turned on the spot. */
+function turnedBox(half: Vec2, rotation: number): Vec2 {
+  const c = Math.abs(Math.cos(rotation))
+  const s = Math.abs(Math.sin(rotation))
+  return [half[0] * c + half[1] * s, half[0] * s + half[1] * c]
+}
+
+/**
+ * Everything smaller than a building that still stops you: the street
+ * furniture, the garden fence and the bigger rocks. The player walks against
+ * this; the minigames deliberately do not, so a race or a paintball match is
+ * not fought against the scenery.
+ */
+export const PROP_COLLIDERS: Collider[] = [
+  ...BENCHES.map((b) => {
+    const [hx, hz] = turnedBox(BENCH_HALF, b.rotation)
+    return {
+      x: b.position[0],
+      z: b.position[1],
+      hx,
+      hz,
+      height: BENCH_HEIGHT,
+    }
+  }),
+  ...PLANTERS.map(([x, z]) => ({
+    x,
+    z,
+    hx: PLANTER_RADIUS,
+    hz: PLANTER_RADIUS,
+    circle: true,
+  })),
+  ...LAMPS.map(([x, z]) => ({
+    x,
+    z,
+    hx: LAMP_RADIUS,
+    hz: LAMP_RADIUS,
+    circle: true,
+  })),
+  ...FENCE_COLLIDERS,
+  ...ROCK_COLLIDERS,
+]
 
 export { ISLAND_EDGE }

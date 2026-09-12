@@ -7,6 +7,7 @@ import {
 import { useGame } from '../state/store'
 import * as sfx from '../game/audio'
 import { useCoarsePointer } from './useCoarsePointer'
+import { useT } from '../i18n/useT'
 
 const clock = (seconds: number) => {
   const m = Math.floor(seconds / 60)
@@ -16,6 +17,7 @@ const clock = (seconds: number) => {
 
 /** The briefing before a flight, and the card at the end of one. */
 export function BalloonCard() {
+  const t = useT()
   const flight = useGame((s) => s.balloon)
   const begin = useGame((s) => s.beginBalloon)
   const exit = useGame((s) => s.exitBalloon)
@@ -45,9 +47,8 @@ export function BalloonCard() {
             <p className="bl-card__lead">
               It is festival afternoon, and the balloon is tethered on
               Collaboration Road. <strong>{CALL_TOTAL} gatherings</strong> are
-              spread
-              across the island below, and every one of them is waiting on
-              something out of your basket.
+              spread across the island below, and every one of them is waiting
+              on something out of your basket.
             </p>
 
             <div className="bl-wants">
@@ -57,9 +58,9 @@ export function BalloonCard() {
                 </span>
                 <strong>{WATER_CALLS} want a water bomb</strong>
                 <p>
-                  Out in the sun on the roads and the parade ground. A bomb
-                  drops like a stone, so it lands close to under you — and
-                  everyone it catches scatters, hands over their heads.
+                  {t(
+                    'Out in the sun on the roads and the parade ground. A bomb drops like a stone, so it lands close to under you — and everyone it catches scatters, hands over their heads.',
+                  )}
                 </p>
               </div>
               <div className="bl-want bl-want--confetti">
@@ -68,9 +69,9 @@ export function BalloonCard() {
                 </span>
                 <strong>{CONFETTI_CALLS} want confetti</strong>
                 <p>
-                  Something to celebrate, at the doors and in the gardens.
-                  Confetti floats down, so it drifts a long way past the bomb,
-                  and everyone under it cheers.
+                  {t(
+                    'Something to celebrate, at the doors and in the gardens. Confetti floats down, so it drifts a long way past the bomb, and everyone under it cheers.',
+                  )}
                 </p>
               </div>
             </div>
@@ -78,30 +79,66 @@ export function BalloonCard() {
             <dl className="bl-keys">
               {coarse ? (
                 <>
-                  <div><dt>Drift</dt><dd>Stick</dd></div>
-                  <div><dt>Climb</dt><dd>Hold BURN</dd></div>
-                  <div><dt>Water bomb</dt><dd>💧 button</dd></div>
-                  <div><dt>Confetti</dt><dd>🎉 button</dd></div>
+                  <div>
+                    <dt>{t('Drift')}</dt>
+                    <dd>{t('Stick')}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Climb')}</dt>
+                    <dd>{t('Hold BURN')}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Water bomb')}</dt>
+                    <dd>{t('💧 button')}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Confetti')}</dt>
+                    <dd>{t('🎉 button')}</dd>
+                  </div>
                 </>
               ) : (
                 <>
-                  <div><dt>Lean into the drift</dt><dd>W and S</dd></div>
-                  <div><dt>Swing the basket</dt><dd>A and D</dd></div>
-                  <div><dt>Burner — climb</dt><dd>Hold Shift</dd></div>
-                  <div><dt>Vent — drop</dt><dd>Hold Ctrl</dd></div>
-                  <div><dt>Water bomb</dt><dd>Space</dd></div>
-                  <div><dt>Confetti</dt><dd>F</dd></div>
-                  <div><dt>Map</dt><dd>M</dd></div>
-                  <div><dt>Come down</dt><dd>Esc</dd></div>
+                  <div>
+                    <dt>{t('Lean into the drift')}</dt>
+                    <dd>{t('W and S')}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Swing the basket')}</dt>
+                    <dd>{t('A and D')}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Burner — climb')}</dt>
+                    <dd>{t('Hold Shift')}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Vent — drop')}</dt>
+                    <dd>{t('Hold Ctrl')}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Water bomb')}</dt>
+                    <dd>{t('Space')}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Confetti')}</dt>
+                    <dd>F</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Map')}</dt>
+                    <dd>M</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Come down')}</dt>
+                    <dd>{t('Esc')}</dd>
+                  </div>
                 </>
               )}
             </dl>
 
             <ul className="bl-card__rules">
               <li>
-                Two rings follow you across the grass — the blue one is where a
-                bomb would land, the pink one where confetti would. Line the
-                right ring up with the right gathering.
+                {t(
+                  'Two rings follow you across the grass — the blue one is where a bomb would land, the pink one where confetti would. Line the right ring up with the right gathering.',
+                )}
               </li>
               <li>
                 The basket holds {STOCK_MAX} of each and a fresh one comes up
@@ -109,8 +146,9 @@ export function BalloonCard() {
                 waiting.
               </li>
               <li>
-                Drop the wrong thing on somebody and they stay on the list.
-                Nothing is timed against you; the clock only counts the flight.
+                {t(
+                  'Drop the wrong thing on somebody and they stay on the list. Nothing is timed against you; the clock only counts the flight.',
+                )}
               </li>
             </ul>
           </>
@@ -122,25 +160,25 @@ export function BalloonCard() {
             </p>
             <div className="bl-card__score">
               <div>
-                <span>Served</span>
+                <span>{t('Served')}</span>
                 <strong>
                   {flight.served}/{CALL_TOTAL}
                 </strong>
               </div>
               <div>
-                <span>Parcels dropped</span>
+                <span>{t('Parcels dropped')}</span>
                 <strong>{flight.dropped}</strong>
               </div>
               <div>
-                <span>On the mark</span>
+                <span>{t('On the mark')}</span>
                 <strong>{aim}%</strong>
               </div>
               <div>
-                <span>Wrong parcel</span>
+                <span>{t('Wrong parcel')}</span>
                 <strong>{flight.wrong}</strong>
               </div>
               <div>
-                <span>Time aloft</span>
+                <span>{t('Time aloft')}</span>
                 <strong>{clock(flight.seconds)}</strong>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { audioContext, isMuted } from './audio'
+import { LEVELS, audioContext, isMuted } from './audio'
 
 /**
  * The island's soundtrack, written here rather than shipped as a file: it is
@@ -84,7 +84,10 @@ function tone(
   osc.type = opts.type
   osc.frequency.setValueAtTime(opts.freq, opts.at)
   if (opts.glide) {
-    osc.frequency.exponentialRampToValueAtTime(opts.glide, opts.at + opts.duration)
+    osc.frequency.exponentialRampToValueAtTime(
+      opts.glide,
+      opts.at + opts.duration,
+    )
   }
   if (opts.detune) osc.detune.setValueAtTime(opts.detune, opts.at)
 
@@ -115,7 +118,13 @@ function tone(
   }
 }
 
-function thump(ac: AudioContext, at: number, level: number, from = 120, to = 46) {
+function thump(
+  ac: AudioContext,
+  at: number,
+  level: number,
+  from = 120,
+  to = 46,
+) {
   if (!filter) return
   const osc = ac.createOscillator()
   const gain = ac.createGain()
@@ -259,7 +268,13 @@ function scheduleIsland(
   }
 
   // Bass: root on one and three, fifth on four.
-  tone(ac, { freq: midi(chord.bass), at, duration: BEAT * 0.9, type: 'triangle', level: 0.34 })
+  tone(ac, {
+    freq: midi(chord.bass),
+    at,
+    duration: BEAT * 0.9,
+    type: 'triangle',
+    level: 0.34,
+  })
   tone(ac, {
     freq: midi(chord.bass),
     at: at + BEAT * 2,
@@ -673,7 +688,14 @@ function scheduleBalloon(ac: AudioContext, index: number, at: number) {
   })
 
   // Bass on the one and the three, long and round.
-  tone(ac, { freq: midi(chord.bass), at, duration: BEAT * 1.7, type: 'triangle', level: 0.3, attack: 0.03 })
+  tone(ac, {
+    freq: midi(chord.bass),
+    at,
+    duration: BEAT * 1.7,
+    type: 'triangle',
+    level: 0.3,
+    attack: 0.03,
+  })
   tone(ac, {
     freq: midi(chord.bass + 7),
     at: at + BEAT * 2,
@@ -791,7 +813,8 @@ function scheduleMoto(ac: AudioContext, index: number, at: number) {
   // A crash to open, and a fill to close the phrase.
   if (index % 4 === 0) hit(ac, at, 0.09, 5200, 0.4, 0.5)
   if (index % 8 === 7) {
-    for (let i = 0; i < 6; i++) snare(ac, at + BEAT * 3 + i * (BEAT / 6), 0.04 + i * 0.016)
+    for (let i = 0; i < 6; i++)
+      snare(ac, at + BEAT * 3 + i * (BEAT / 6), 0.04 + i * 0.016)
   }
 }
 
@@ -936,8 +959,34 @@ function pump() {
 
 /* -------------------------------- control ----------------------------- */
 
+let level = LEVELS
+
+/** Same curve as the effects: see the note on theirs. */
+const scale = () => (level / LEVELS) ** 1.5
+
+/** Where the bus should sit for the current mood at the current level. */
+const target = () => Math.max(0.0001, TRACKS[mood].gain * scale())
+
+/**
+ * Nothing to fade to at zero — an exponential ramp cannot reach silence, so
+ * the track stops outright and starts again when a level comes back.
+ */
+export function setMusicLevel(next: number) {
+  level = Math.max(0, Math.min(LEVELS, Math.round(next)))
+  if (level === 0) {
+    stopMusic()
+    return
+  }
+  const ac = audioContext()
+  if (!ac || !bus) return
+  bus.gain.cancelScheduledValues(ac.currentTime)
+  bus.gain.setTargetAtTime(target(), ac.currentTime, 0.12)
+}
+
+export const musicLevel = () => level
+
 export function startMusic() {
-  if (running || isMuted()) return
+  if (running || isMuted() || level === 0) return
   const ac = audioContext()
   if (!ac) return
 
@@ -959,7 +1008,7 @@ export function startMusic() {
   filter.connect(bus).connect(limiter).connect(ac.destination)
 
   bus.gain.setValueAtTime(0.0001, ac.currentTime)
-  bus.gain.exponentialRampToValueAtTime(TRACKS[mood].gain, ac.currentTime + 2.5)
+  bus.gain.exponentialRampToValueAtTime(target(), ac.currentTime + 2.5)
 
   running = true
   bar = 0
@@ -1021,6 +1070,6 @@ export function setMood(next: Mood) {
   const ac = audioContext()
   if (!ac || !bus || !filter) return
   bus.gain.cancelScheduledValues(ac.currentTime)
-  bus.gain.setTargetAtTime(TRACKS[next].gain, ac.currentTime, 0.5)
+  bus.gain.setTargetAtTime(target(), ac.currentTime, 0.5)
   filter.frequency.setTargetAtTime(TRACKS[next].cutoff, ac.currentTime, 0.5)
 }

@@ -1,8 +1,9 @@
 import { useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
+import { BackSide } from 'three'
 import type { Group, Mesh } from 'three'
 import { INTERIOR_BY_ID } from '../data/interiors'
-import { WALL_HEIGHT } from '../game/interior'
+import { FLIGHT, FLIGHT_RISE, FLIGHT_RUN, WALL_HEIGHT } from '../game/interior'
 import { useGame } from '../state/store'
 import { InteriorFurniture } from './InteriorProps'
 import { Npcs } from './Npcs'
@@ -592,7 +593,7 @@ function Window({
         <boxGeometry args={[3.4, 2.6, 0.3]} />
         <meshStandardMaterial color="#f7f2e6" flatShading roughness={0.9} />
       </mesh>
-      <mesh position={[0, 0, 0.14]}>
+      <mesh position={[0, 0, 0.17]}>
         <planeGeometry args={[2.9, 2.1]} />
         <meshStandardMaterial
           color={glass}
@@ -601,12 +602,14 @@ function Window({
           toneMapped={false}
         />
       </mesh>
-      {/* Glazing bars, which is most of what makes a window read as one. */}
-      <mesh position={[0, 0, 0.16]}>
+      {/* Glazing bars, which is most of what makes a window read as one.
+          These and the pane have to clear the frame box, which reaches to
+          0.15: inside it, the frame was drawing over its own glass. */}
+      <mesh position={[0, 0, 0.2]}>
         <boxGeometry args={[0.12, 2.1, 0.06]} />
         <meshStandardMaterial color="#f7f2e6" flatShading />
       </mesh>
-      <mesh position={[0, 0, 0.16]}>
+      <mesh position={[0, 0, 0.2]}>
         <boxGeometry args={[2.9, 0.12, 0.06]} />
         <meshStandardMaterial color="#f7f2e6" flatShading />
       </mesh>
@@ -644,6 +647,8 @@ function LinkPiece({
     >
       {link.kind === 'stairsDown' ? (
         <Stairwell active={active} />
+      ) : link.kind === 'stairsUp' ? (
+        <UpFlight />
       ) : link.kind === 'locked' ? (
         <ShutDoor accent={accent} />
       ) : link.kind === 'door' ? (
@@ -651,10 +656,28 @@ function LinkPiece({
       ) : (
         <SwungShelf />
       )}
-      {active && <Halo accent={accent} />}
+      {/* The ring marks the spot you take it from, which for a staircase is
+          the head of the flight rather than the floor at the bottom of it. */}
+      {active && (
+        <group
+          position={
+            link.kind === 'stairsUp'
+              ? [0, FLIGHT_RISE, FLIGHT.foot - FLIGHT_RUN]
+              : [0, 0, 0]
+          }
+        >
+          <Halo accent={accent} />
+        </group>
+      )}
       {link.kind !== 'locked' && (
         <TextPlane
-          text={link.kind === 'stairsDown' ? 'Down' : 'Through'}
+          text={
+            link.kind === 'stairsDown'
+              ? 'Down'
+              : link.kind === 'stairsUp'
+                ? 'Up'
+                : 'Through'
+          }
           width={2.2}
           aspect={3.4}
           color="#ffe9c4"
@@ -683,10 +706,18 @@ function Stairwell({ active }: { active: boolean }) {
 
   return (
     <group>
-      {/* The shaft. */}
+      {/* The shaft, drawn inside out. A normal box has a lid on it, and
+          that lid sat flush over the opening hiding every tread below it, so
+          the stairs read as a dark rug on the floor. Back faces only culls
+          the top as you look down and leaves you looking into the hole. */}
       <mesh position={[0, -1.4, 0]}>
         <boxGeometry args={[3, 2.9, 3.4]} />
-        <meshStandardMaterial color="#231d29" flatShading roughness={1} />
+        <meshStandardMaterial
+          color="#231d29"
+          flatShading
+          roughness={1}
+          side={BackSide}
+        />
       </mesh>
       {/* Treads down the near half, so it reads as descending and not as a pit. */}
       {Array.from({ length: 5 }, (_, i) => (
@@ -834,7 +865,7 @@ function OpenDoor({ accent }: { accent: string }) {
         <boxGeometry args={[2.2, 3.4, 0.12]} />
         <meshStandardMaterial color="#1d1822" flatShading roughness={1} />
       </mesh>
-      <mesh position={[0, 1.5, 0.02]}>
+      <mesh position={[0, 1.5, 0.05]}>
         <planeGeometry args={[2, 3]} />
         <meshBasicMaterial color="#ffca7a" transparent opacity={0.16} />
       </mesh>
@@ -879,6 +910,75 @@ function OpenDoor({ accent }: { accent: string }) {
         intensity={6}
         distance={7}
         color="#ffca7a"
+      />
+    </group>
+  )
+}
+
+/**
+ * A flight going up through the ceiling. There is no ceiling mesh to cut a
+ * hole in, so the top of it simply runs into a dark soffit and stops, which
+ * is all the eye needs from a camera that never gets above the wall line.
+ */
+function UpFlight() {
+  const { treads, rise, going } = FLIGHT
+
+  return (
+    <group>
+      {Array.from({ length: treads }, (_, i) => (
+        <mesh
+          key={i}
+          position={[0, 0.22 + i * rise, 1.6 - i * going]}
+          castShadow
+          receiveShadow
+        >
+          <boxGeometry args={[2.8, rise, going + 0.06]} />
+          <meshStandardMaterial color="#c3b393" flatShading roughness={0.95} />
+        </mesh>
+      ))}
+
+      {/* Closed strings either side, with a rail along the top of each. */}
+      {[-1.5, 1.5].map((x) => {
+        const pitch = Math.atan2(FLIGHT_RISE, FLIGHT_RUN)
+        const run = Math.hypot(FLIGHT_RISE, FLIGHT_RUN)
+        const midZ = 1.6 - FLIGHT_RUN / 2
+        return (
+          <group key={x}>
+            <mesh position={[x, 1.9, midZ]} rotation={[pitch, 0, 0]} castShadow>
+              <boxGeometry args={[0.18, 0.6, run]} />
+              <meshStandardMaterial
+                color="#8f6a45"
+                flatShading
+                roughness={0.9}
+              />
+            </mesh>
+            <mesh
+              position={[x, 2.72, midZ]}
+              rotation={[pitch, 0, 0]}
+              castShadow
+            >
+              <boxGeometry args={[0.12, 0.12, run]} />
+              <meshStandardMaterial color="#7d5a3a" flatShading />
+            </mesh>
+          </group>
+        )
+      })}
+
+      {/* The soffit it disappears into. */}
+      <mesh position={[0, 3.9, 1.6 - FLIGHT_RUN - 0.3]}>
+        <boxGeometry args={[3.1, 1.2, 1.6]} />
+        <meshStandardMaterial
+          color="#241e2a"
+          flatShading
+          roughness={1}
+          side={BackSide}
+        />
+      </mesh>
+      <pointLight
+        position={[0, 3.4, 1.6 - FLIGHT_RUN]}
+        intensity={7}
+        distance={7}
+        color="#ffe6b8"
       />
     </group>
   )

@@ -5,12 +5,14 @@ import { PROFILE } from '../data/profile'
 import { useGame } from '../state/store'
 import { Character } from '../world/Character'
 import * as sfx from '../game/audio'
+import { useT } from '../i18n/useT'
 
 /**
  * The shortcut out of the game. Always reachable, so nobody who just wants the
  * CV or a way to get in touch has to hunt for five keys first.
  */
 export function Greeting() {
+  const t = useT()
   const closeGreeting = useGame((s) => s.closeGreeting)
   const unlockCv = useGame((s) => s.unlockCv)
   const openContact = useGame((s) => s.openContact)
@@ -48,7 +50,7 @@ export function Greeting() {
         className="greeting"
         onPointerDown={(e) => e.stopPropagation()}
         style={{ '--accent': '#f0a33c' } as React.CSSProperties}
-        aria-label="A word from Kitsos"
+        aria-label={t('A word from Kitsos')}
       >
         <div className="greeting__portrait" ref={portrait}>
           <Canvas
@@ -58,8 +60,16 @@ export function Greeting() {
           >
             <ambientLight intensity={1.1} />
             <hemisphereLight args={['#fff4e2', '#8a7f9a', 0.8]} />
-            <directionalLight position={[3, 5, 4]} intensity={1.7} color="#fff4dd" />
-            <directionalLight position={[-4, 2, 2]} intensity={0.5} color="#bcd4ff" />
+            <directionalLight
+              position={[3, 5, 4]}
+              intensity={1.7}
+              color="#fff4dd"
+            />
+            <directionalLight
+              position={[-4, 2, 2]}
+              intensity={0.5}
+              color="#bcd4ff"
+            />
             <group position={[0, -1.15, 0]}>
               <Character colors={PLAYER_COLORS} wave look={look} />
             </group>
@@ -73,28 +83,32 @@ export function Greeting() {
           <button
             className="greeting__close"
             onClick={dismiss}
-            aria-label="Close"
+            aria-label={t('Close')}
           >
             ✕<kbd>Esc</kbd>
           </button>
 
-          <p className="greeting__kicker">A word from the island’s owner</p>
-          <h2 className="greeting__title">Hey — nice to meet you!</h2>
+          <p className="greeting__kicker">
+            {t('A word from the island’s owner')}
+          </p>
+          <h2 className="greeting__title">{t('Hey — nice to meet you!')}</h2>
 
           <div className="greeting__speech">
             <p>
-              <strong>Fair warning: you’ll miss all the fun.</strong> The island
-              is the good part — the people, the buildings, the five keys and the
-              lighthouse at the end of it.
+              <strong>{t('Fair warning: you’ll miss all the fun.')}</strong>{' '}
+              {t(
+                'The island is the good part — the people, the buildings, the five keys and the lighthouse at the end of it.',
+              )}
             </p>
             <p>
-              But I genuinely appreciate the time you spend on my island, and I
-              know a CV is sometimes just a thing you need right now. So here it
-              is, no keys required.
+              {t(
+                'But I genuinely appreciate the time you spend on my island, and I know a CV is sometimes just a thing you need right now. So here it is, no keys required.',
+              )}
             </p>
             <p>
-              Either way, I would be very happy to connect. Say hello and I will
-              answer — there is no one else on the other end.
+              {t(
+                'Either way, I would be very happy to connect. Say hello and I will answer — there is no one else on the other end.',
+              )}
             </p>
           </div>
 
@@ -106,7 +120,8 @@ export function Greeting() {
                 unlockCv()
               }}
             >
-              🔓 {cvUnlocked ? 'Open the full CV again' : 'Unlock the full CV'}
+              🔓{' '}
+              {t(cvUnlocked ? 'Open the full CV again' : 'Unlock the full CV')}
             </button>
             <button
               className="button"
@@ -115,7 +130,7 @@ export function Greeting() {
                 openContact()
               }}
             >
-              📡 Send me a message
+              📡 {t('Send me a message')}
             </button>
           </div>
 
@@ -134,7 +149,7 @@ export function Greeting() {
           </div>
 
           <button className="greeting__back" onClick={dismiss}>
-            …actually, let me explore the island
+            {t('…actually, let me explore the island')}
           </button>
         </div>
       </section>

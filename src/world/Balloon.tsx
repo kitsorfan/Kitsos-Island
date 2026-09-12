@@ -8,11 +8,11 @@ import {
   BURST_RADIUS,
   CALLS,
   PAYLOAD_COLOR,
-  REACTIONS,
   aimPoint,
   nearestCall,
   stepBalloon,
 } from '../game/balloon'
+import { REACTIONS } from '../game/actors'
 import type { Bystander, Call, Payload } from '../game/balloon'
 import { consumeDrop, isCrouching, readMove } from '../game/input'
 import { groundHeight } from '../game/terrain'

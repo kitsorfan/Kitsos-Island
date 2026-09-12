@@ -3,6 +3,7 @@ import { COUNT, HEAD_START, HIDE, HOLD_OUT } from '../game/hide'
 import { isCrouching } from '../game/input'
 import { useGame } from '../state/store'
 import { useCoarsePointer } from './useCoarsePointer'
+import { useT } from '../i18n/useT'
 
 interface Readout {
   found: number
@@ -72,6 +73,7 @@ function useReadout(active: boolean): Readout {
 }
 
 export function HideHud() {
+  const t = useT()
   const playing = useGame((s) => s.hide?.status === 'playing')
   const role = useGame((s) => s.hide?.role)
   const handLight = useGame((s) => s.handLight)
@@ -90,9 +92,7 @@ export function HideHud() {
         <div
           key={readout.pulse}
           className="hd__pulse"
-          style={
-            { '--warmth': readout.warmth } as React.CSSProperties
-          }
+          style={{ '--warmth': readout.warmth } as React.CSSProperties}
           aria-hidden
         />
       )}
@@ -102,7 +102,7 @@ export function HideHud() {
           <strong key={Math.ceil(readout.counting)}>
             {Math.ceil(readout.counting)}
           </strong>
-          <em>They are still counting. Get out of sight.</em>
+          <em>{t('They are still counting. Get out of sight.')}</em>
         </div>
       )}
 
@@ -139,7 +139,9 @@ export function HideHud() {
             </p>
             {!lit && (
               <p className="hd__warn">
-                Your torch is out — press T or you will never see them at all
+                {t(
+                  'Your torch is out — press T or you will never see them at all',
+                )}
               </p>
             )}
           </>
@@ -150,12 +152,14 @@ export function HideHud() {
                 🌒
               </span>
               <strong>{Math.ceil(readout.left)}</strong>
-              <em>seconds to hold out</em>
+              <em>{t('seconds to hold out')}</em>
             </div>
             <div className="hd__bar">
               <div
                 className="hd__bar-fill"
-                style={{ width: `${((HOLD_OUT - readout.left) / HOLD_OUT) * 100}%` }}
+                style={{
+                  width: `${((HOLD_OUT - readout.left) / HOLD_OUT) * 100}%`,
+                }}
               />
             </div>
             <div
@@ -185,7 +189,7 @@ export function HideHud() {
               <span
                 className={`hd__state${readout.crouched ? ' hd__state--on' : ''}`}
               >
-                Low
+                {t('Low')}
               </span>
               <span
                 className={`hd__state${lit ? ' hd__state--bad' : ' hd__state--on'}`}
@@ -206,7 +210,10 @@ export function HideHud() {
       </div>
 
       {readout.feed && (
-        <p key={readout.feed.at} className={`hd__feed hd__feed--${readout.feed.kind}`}>
+        <p
+          key={readout.feed.at}
+          className={`hd__feed hd__feed--${readout.feed.kind}`}
+        >
           {readout.feed.text}
         </p>
       )}
@@ -218,8 +225,8 @@ export function HideHud() {
           </>
         ) : (
           <>
-            <kbd>WASD</kbd> walk · <kbd>Ctrl</kbd> keep low · <kbd>T</kbd> torch ·{' '}
-            <kbd>Esc</kbd> give up
+            <kbd>WASD</kbd> walk · <kbd>Ctrl</kbd> keep low · <kbd>T</kbd> torch
+            · <kbd>Esc</kbd> give up
           </>
         )}
       </p>

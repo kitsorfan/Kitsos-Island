@@ -1,4 +1,4 @@
-import type { Interior, PropKind, Vec2 } from '../types'
+import type { Interior, InteriorLink, PropKind, Vec2 } from '../types'
 import type { Collider } from './terrain'
 
 /** Half-extents each furniture kind occupies on the floor, before rotation. */
@@ -47,6 +47,7 @@ export const PROP_FOOTPRINT: Record<PropKind, Vec2> = {
   beanbag: [0.75, 0.75],
   poster: [1.1, 0.1],
   shutter: [2.6, 0.2],
+  stairwell: [1.6, 1.8],
 }
 
 /** Flat or wall-mounted pieces you should be able to walk past. */
@@ -58,6 +59,8 @@ const PASSABLE = new Set<PropKind>([
   'poster',
   'photoWall',
   'shutter',
+  /* You walk onto it to go down it. */
+  'stairwell',
 ])
 
 /** How far a wall-mounted exhibit sticks into the room. */
@@ -72,6 +75,67 @@ const EXHIBIT_FOOTPRINT: Record<string, Vec2> = {
 
 function rotated(half: Vec2, rotation = 0): Vec2 {
   return Math.abs(Math.sin(rotation)) > 0.7 ? [half[1], half[0]] : half
+}
+
+/* ------------------------------ staircases ----------------------------- */
+
+/**
+ * The flight `UpFlight` draws, measured in the link's own frame: it starts at
+ * `foot` and climbs towards -z. The mesh, the walker and the handrails all
+ * read these numbers, so a step you can see is a step you can stand on.
+ */
+export const FLIGHT = {
+  treads: 8,
+  rise: 0.44,
+  going: 0.46,
+  /** Half the clear width between the strings. */
+  halfWidth: 1.4,
+  /** Local z of the front edge of the bottom tread. */
+  foot: 1.86,
+}
+
+export const FLIGHT_RUN = FLIGHT.treads * FLIGHT.going
+export const FLIGHT_RISE = FLIGHT.treads * FLIGHT.rise
+
+/** Turns a point in the flight's own frame into one in the room's. */
+function fromFlight(link: InteriorLink, lx: number, lz: number): Vec2 {
+  const c = Math.cos(link.rotation ?? 0)
+  const s = Math.sin(link.rotation ?? 0)
+  return [
+    link.position[0] + lx * c + lz * s,
+    link.position[1] - lx * s + lz * c,
+  ]
+}
+
+/** Where a flight lands. This is the point you take the stairs from. */
+export function flightTop(link: InteriorLink): Vec2 {
+  return fromFlight(link, 0, FLIGHT.foot - FLIGHT_RUN)
+}
+
+/**
+ * Floor height at a point in a room. Rooms are flat apart from the staircase,
+ * which is a ramp you walk up rather than a prop you stand beside.
+ */
+export function interiorFloor(
+  interior: Interior,
+  x: number,
+  z: number,
+): number {
+  let y = 0
+  for (const link of interior.links ?? []) {
+    if (link.kind !== 'stairsUp') continue
+    const c = Math.cos(link.rotation ?? 0)
+    const s = Math.sin(link.rotation ?? 0)
+    const dx = x - link.position[0]
+    const dz = z - link.position[1]
+    const lx = dx * c - dz * s
+    const lz = dx * s + dz * c
+    if (Math.abs(lx) > FLIGHT.halfWidth) continue
+    const climbed = (FLIGHT.foot - lz) / FLIGHT_RUN
+    if (climbed <= 0) continue
+    y = Math.max(y, Math.min(1, climbed) * FLIGHT_RISE)
+  }
+  return y
 }
 
 /** Everything solid in a room: furniture, exhibits and the four walls. */
@@ -97,6 +161,22 @@ export function interiorColliders(interior: Interior): Collider[] {
     if (!base || (base[0] === 0 && base[1] === 0)) continue
     const [hx, hz] = rotated(base, exhibit.rotation)
     out.push({ x: exhibit.position[0], z: exhibit.position[1], hx, hz })
+  }
+
+  // The strings either side of a staircase. Without them you can step onto
+  // the middle of the flight from the side and arrive halfway up in one
+  // stride; with them the only way up is up.
+  for (const link of interior.links ?? []) {
+    if (link.kind !== 'stairsUp') continue
+    const [hx, hz] = rotated([0.12, FLIGHT_RUN / 2 + 0.2], link.rotation)
+    for (const side of [-1, 1]) {
+      const [x, z] = fromFlight(
+        link,
+        side * (FLIGHT.halfWidth + 0.1),
+        FLIGHT.foot - FLIGHT_RUN / 2,
+      )
+      out.push({ x, z, hx, hz })
+    }
   }
 
   return out

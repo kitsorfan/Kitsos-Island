@@ -11,6 +11,7 @@ import type { Payload } from '../game/balloon'
 import { groundHeight } from '../game/terrain'
 import { useGame } from '../state/store'
 import { useCoarsePointer } from './useCoarsePointer'
+import { useT } from '../i18n/useT'
 
 interface Readout {
   served: number
@@ -104,6 +105,7 @@ function Rack({
 }
 
 export function BalloonHud() {
+  const t = useT()
   const flying = useGame((s) => s.balloon?.status === 'flying')
   const readout = useReadout(Boolean(flying))
   const coarse = useCoarsePointer()
@@ -119,7 +121,7 @@ export function BalloonHud() {
   return (
     <div className="bl">
       <div className="bl__panel">
-        <span className="bl__label">Balloon drop</span>
+        <span className="bl__label">{t('Balloon drop')}</span>
 
         <div className="bl__served">
           <span className="bl__balloon" aria-hidden>
@@ -143,20 +145,25 @@ export function BalloonHud() {
 
         <div className="bl__row">
           <span className="bl__alt">
-            {Math.round(readout.altitude)} <em>m up</em>
+            {Math.round(readout.altitude)} <em>{t('m up')}</em>
           </span>
           <span className="bl__gauge" aria-hidden>
-            <span className="bl__gauge-mark" style={{ left: `${band * 100}%` }} />
+            <span
+              className="bl__gauge-mark"
+              style={{ left: `${band * 100}%` }}
+            />
           </span>
           <span className="bl__drift">
-            {Math.round(readout.drift * 3)} <em>km/h</em>
+            {Math.round(readout.drift * 3)} <em>{t('km/h')}</em>
           </span>
-          {readout.burning && <span className="bl__flag">Burner</span>}
+          {readout.burning && <span className="bl__flag">{t('Burner')}</span>}
         </div>
 
         <div className="bl__row bl__row--next">
           {readout.next === null ? (
-            <span className="bl__flag bl__flag--done">Everyone served</span>
+            <span className="bl__flag bl__flag--done">
+              {t('Everyone served')}
+            </span>
           ) : (
             <span className="bl__next">
               <span
@@ -165,7 +172,8 @@ export function BalloonHud() {
               >
                 {readout.next.want === 'water' ? '💧' : '🎉'}
               </span>
-              {readout.next.label} — <strong>{Math.round(readout.next.distance)}m</strong>
+              {readout.next.label} —{' '}
+              <strong>{Math.round(readout.next.distance)}m</strong>
             </span>
           )}
         </div>

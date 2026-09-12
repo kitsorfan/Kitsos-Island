@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
+import { BackSide } from 'three'
 import type { Group } from 'three'
 import type { InteriorProp, PropKind } from '../types'
 
@@ -992,6 +993,9 @@ function Piece({ kind, color }: { kind: PropKind; color?: string }) {
         </group>
       )
 
+    case 'stairwell':
+      return <Stairwell />
+
     case 'shutter':
       return (
         <group>
@@ -1164,6 +1168,10 @@ export function GreekFlagStand() {
 /**
  * Nine stripes, blue and white, with a white cross on the blue canton.
  * Anchored at its left edge so it hangs off a pole at x = 0.
+ *
+ * The white is laid on both faces of the blue field: a flag on a pole gets
+ * looked at from behind as often as from in front, and one plain blue side
+ * was the half of it nobody had noticed.
  */
 export function GreekFlag({ width = 1.9 }: { width?: number }) {
   const height = (width * 2) / 3
@@ -1174,6 +1182,8 @@ export function GreekFlag({ width = 1.9 }: { width?: number }) {
 
   const rowY = (row: number) => height / 2 - stripe * (row - 0.5)
   const restW = width - cantonW
+  const cantonX = -width / 2 + cantonW / 2
+  const cantonY = height / 2 - cantonH / 2
 
   return (
     <group position={[width / 2, 0, 0]}>
@@ -1182,36 +1192,40 @@ export function GreekFlag({ width = 1.9 }: { width?: number }) {
         <boxGeometry args={[width, height, 0.05]} />
         <meshStandardMaterial color="#0d5eaf" flatShading roughness={0.85} />
       </mesh>
-      {/* White stripes beside the canton */}
-      {[2, 4].map((row) => (
-        <mesh
-          key={row}
-          position={[-width / 2 + cantonW + restW / 2, rowY(row), 0.03]}
-        >
-          <boxGeometry args={[restW, stripe, 0.02]} />
-          <meshStandardMaterial color="#ffffff" roughness={0.85} />
-        </mesh>
+      {[1, -1].map((face) => (
+        <group key={face}>
+          {/* White stripes beside the canton */}
+          {[2, 4].map((row) => (
+            <mesh
+              key={row}
+              position={[
+                -width / 2 + cantonW + restW / 2,
+                rowY(row),
+                face * 0.03,
+              ]}
+            >
+              <boxGeometry args={[restW, stripe, 0.02]} />
+              <meshStandardMaterial color="#ffffff" roughness={0.85} />
+            </mesh>
+          ))}
+          {/* Full-width white stripes below the canton */}
+          {[6, 8].map((row) => (
+            <mesh key={row} position={[0, rowY(row), face * 0.03]}>
+              <boxGeometry args={[width, stripe, 0.02]} />
+              <meshStandardMaterial color="#ffffff" roughness={0.85} />
+            </mesh>
+          ))}
+          {/* Cross in the canton */}
+          <mesh position={[cantonX, cantonY, face * 0.04]}>
+            <boxGeometry args={[arm, cantonH, 0.02]} />
+            <meshStandardMaterial color="#ffffff" roughness={0.85} />
+          </mesh>
+          <mesh position={[cantonX, cantonY, face * 0.04]}>
+            <boxGeometry args={[cantonW, arm, 0.02]} />
+            <meshStandardMaterial color="#ffffff" roughness={0.85} />
+          </mesh>
+        </group>
       ))}
-      {/* Full-width white stripes below the canton */}
-      {[6, 8].map((row) => (
-        <mesh key={row} position={[0, rowY(row), 0.03]}>
-          <boxGeometry args={[width, stripe, 0.02]} />
-          <meshStandardMaterial color="#ffffff" roughness={0.85} />
-        </mesh>
-      ))}
-      {/* Cross in the canton */}
-      <mesh
-        position={[-width / 2 + cantonW / 2, height / 2 - cantonH / 2, 0.04]}
-      >
-        <boxGeometry args={[arm, cantonH, 0.02]} />
-        <meshStandardMaterial color="#ffffff" roughness={0.85} />
-      </mesh>
-      <mesh
-        position={[-width / 2 + cantonW / 2, height / 2 - cantonH / 2, 0.04]}
-      >
-        <boxGeometry args={[cantonW, arm, 0.02]} />
-        <meshStandardMaterial color="#ffffff" roughness={0.85} />
-      </mesh>
     </group>
   )
 }
@@ -1481,7 +1495,7 @@ function Television({ color }: { color?: string }) {
         <boxGeometry args={[4.2, 2.4, 0.14]} />
         <meshStandardMaterial color="#14161c" flatShading roughness={0.6} />
       </mesh>
-      <group ref={glow} position={[0, 1.9, -0.02]}>
+      <group ref={glow} position={[0, 1.9, 0.01]}>
         <mesh>
           <planeGeometry args={[3.9, 2.1]} />
           <meshStandardMaterial
@@ -1531,6 +1545,59 @@ function Television({ color }: { color?: string }) {
         intensity={9}
         distance={11}
         color={color ?? '#6f9ee8'}
+      />
+    </group>
+  )
+}
+
+/**
+ * A flight going down through the floor, for the landing at the top of it.
+ *
+ * The shaft is drawn inside out. A plain box has a lid, and a lid sitting
+ * flush over the opening hides every tread underneath it — which is exactly
+ * how the first one of these ended up looking like a dark rug.
+ */
+function Stairwell() {
+  return (
+    <group>
+      <mesh position={[0, -1.5, 0]}>
+        <boxGeometry args={[3.2, 3, 3.6]} />
+        <meshStandardMaterial
+          color="#241e2a"
+          flatShading
+          roughness={1}
+          side={BackSide}
+        />
+      </mesh>
+      {Array.from({ length: 5 }, (_, i) => (
+        <mesh key={i} position={[0, -0.26 - i * 0.36, 1.4 - i * 0.56]}>
+          <boxGeometry args={[3.1, 0.22, 0.6]} />
+          <meshStandardMaterial color="#c3b393" flatShading roughness={0.95} />
+        </mesh>
+      ))}
+      {/* The newels and the rail round the opening, so nobody walks into it
+          by accident and it reads as a stairwell rather than a trapdoor. */}
+      {[-1.7, 1.7].map((x) => (
+        <group key={x}>
+          <mesh position={[x, 0.55, 1.75]} castShadow>
+            <boxGeometry args={[0.16, 1.1, 0.16]} />
+            <meshStandardMaterial color={DARK_WOOD} flatShading />
+          </mesh>
+          <mesh position={[x, 0.55, -1.75]} castShadow>
+            <boxGeometry args={[0.16, 1.1, 0.16]} />
+            <meshStandardMaterial color={DARK_WOOD} flatShading />
+          </mesh>
+          <mesh position={[x, 1.02, 0]}>
+            <boxGeometry args={[0.12, 0.12, 3.5]} />
+            <meshStandardMaterial color={DARK_WOOD} flatShading />
+          </mesh>
+        </group>
+      ))}
+      <pointLight
+        position={[0, -1, 0]}
+        intensity={7}
+        distance={7}
+        color="#ffca7a"
       />
     </group>
   )

@@ -310,11 +310,15 @@ canvas {
   box-shadow: 0 1px 0 rgba(42, 32, 51, 0.3);
 }
 
-.help-card {
+/* Shares the help card's frame — same corner, same paper, same pop. */
+.settings-card {
   pointer-events: auto;
   align-self: flex-end;
   margin-top: 0.6rem;
   width: min(280px, 90vw);
+  max-height: min(70vh, 34rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 0.9rem 1rem;
   border-radius: 14px;
   border: 3px solid var(--line);
@@ -323,32 +327,162 @@ canvas {
   animation: pop-in 0.18s ease both;
 }
 
-.help-card h3 {
-  margin: 0 0 0.6rem;
+.settings-card h3 {
+  margin: 0 0 0.7rem;
   font-family: var(--font-display);
   font-size: 0.68rem;
   color: #2f6bb3;
 }
 
-.help-card dl {
-  margin: 0 0 0.8rem;
-  display: grid;
-  gap: 0.35rem;
-  font-size: 0.88rem;
+.setting {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
 }
 
-.help-card dl > div {
+.setting--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+}
+
+.setting__name {
+  flex: 0 0 3.1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.setting__slider {
+  flex: 1 1 auto;
+  min-width: 0;
+  accent-color: #2f6bb3;
+  cursor: pointer;
+}
+
+/* Monospace so the bars do not shuffle sideways as the level changes. */
+.setting__value {
+  flex: 0 0 3.4rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.62rem;
+  letter-spacing: -0.04em;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+.setting__choices {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.chip {
+  flex: 1 1 0;
+  padding: 0.3rem 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 9px;
+  border: 2px solid var(--line);
+  background: rgba(253, 247, 233, 0.94);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.chip--on {
+  background: #2f6bb3;
+  color: #fdf7e9;
+}
+
+.chip:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* The one destructive control on the card, kept red and asked for twice. */
+.chip--warn {
+  border-color: #b3402f;
+  background: #b3402f;
+  color: #fdf7e9;
+}
+
+.settings-card__progress,
+.settings-card__controls {
+  margin-top: 0.9rem;
+  padding-top: 0.7rem;
+  border-top: 2px dashed var(--paper-edge);
+}
+
+.settings-card__progress p {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+/* The lone button before the question; the pair after it share the row. */
+.settings-card__progress > .chip {
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+.settings-card__warn {
+  color: #b3402f;
+  font-weight: 700;
+}
+
+.settings-card__progress h4,
+.settings-card__controls h4 {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  color: #2f6bb3;
+}
+
+.settings-card__controls dl {
+  margin: 0;
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+}
+
+.settings-card__controls dl > div {
   display: flex;
   justify-content: space-between;
   gap: 0.6rem;
 }
 
-.help-card dt {
+.settings-card__controls dt {
   font-weight: 700;
 }
 
-.help-card dd {
+.settings-card__controls dd {
   margin: 0;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+/* Torch, shoes and the zoom pair, held against the bottom right. */
+.hud__bottom {
+  margin-top: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* On a touch screen the stick and its action buttons own the very bottom, so
+   this row steps up above them rather than sitting on top. The stick is the
+   taller of the two, and it is on the left, so both ends clear it. */
+@media (pointer: coarse) {
+  .hud__bottom {
+    padding-bottom: 9.75rem;
+  }
+}
+
+.settings-card__hint {
+  margin: 0.6rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
   color: var(--ink-soft);
 }
 
@@ -2819,6 +2953,166 @@ canvas {
 .moto-keys dd {
   margin: 0;
   color: var(--ink-soft);
+}
+
+/* The board before a race: how many laps, and how hard. */
+.race-board {
+  margin: 0.9rem 0 0.2rem;
+  padding: 0.8rem 0.9rem 0.85rem;
+  border: 3px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+  box-shadow: inset 0 -3px 0 rgba(42, 32, 51, 0.08);
+}
+
+.race-board__field + .race-board__field {
+  margin-top: 0.85rem;
+  padding-top: 0.8rem;
+  border-top: 2px dashed var(--paper-edge);
+}
+
+.race-board__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.race-board__label {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.race-board__note {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- laps --- */
+
+.race-board__laps {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.lap-chip {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.5rem 0.2rem;
+  border: 3px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  box-shadow: 0 3px 0 rgba(42, 32, 51, 0.22);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    transform 0.08s,
+    box-shadow 0.08s;
+}
+
+.lap-chip:hover {
+  background: var(--paper-2);
+}
+
+.lap-chip--on {
+  background: var(--ink);
+  color: var(--paper);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(42, 32, 51, 0.3);
+}
+
+/* --- grade --- */
+
+.race-board__grades {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.grade {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 0.3rem 0.5rem;
+  border: 3px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  box-shadow: 0 3px 0 rgba(42, 32, 51, 0.22);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    transform 0.08s,
+    box-shadow 0.08s;
+}
+
+.grade:hover {
+  background: var(--paper-2);
+}
+
+.grade--on {
+  background: var(--tint);
+  border-color: var(--line);
+  color: #fff;
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(42, 32, 51, 0.3);
+}
+
+.grade__meter {
+  width: 34px;
+  height: 21px;
+  flex: none;
+}
+
+.grade__bar {
+  fill: rgba(42, 32, 51, 0.16);
+}
+
+.grade__bar--on {
+  fill: var(--tint);
+}
+
+/* Picked out, the tile is the tint, so the meter inverts to sit on it. */
+.grade--on .grade__bar {
+  fill: rgba(255, 255, 255, 0.32);
+}
+
+.grade--on .grade__bar--on {
+  fill: #fff;
+}
+
+.grade__name {
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.race-board__blurb {
+  margin: 0.6rem 0 0;
+  min-height: 2.2em;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 420px) {
+  .grade__name {
+    font-size: 0.68rem;
+  }
+
+  .grade {
+    padding: 0.45rem 0.2rem;
+  }
 }
 
 .moto-card__rules {

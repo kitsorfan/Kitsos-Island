@@ -16,6 +16,7 @@ import {
   SIGNS,
 } from '../data/world'
 import {
+  PROP_COLLIDERS,
   STATIC_COLLIDERS,
   TREE_COLLIDERS,
   groundHeight,
@@ -23,9 +24,15 @@ import {
 } from '../game/terrain'
 import type { Collider } from '../game/terrain'
 import { resolveCollisions, type Bounds } from '../game/collision'
-import { INTERIOR_MARGIN, interiorColliders } from '../game/interior'
+import {
+  INTERIOR_MARGIN,
+  flightTop,
+  interiorColliders,
+  interiorFloor,
+} from '../game/interior'
 import { ACTOR_POS } from '../game/actors'
 import {
+  cameraZoom,
   consumeFire,
   consumeInteract,
   consumeJump,
@@ -122,7 +129,7 @@ export function Player() {
 
   const staticColliders = useMemo<Collider[]>(() => {
     if (interior) return interiorColliders(interior)
-    return [...STATIC_COLLIDERS, ...TREE_COLLIDERS]
+    return [...STATIC_COLLIDERS, ...PROP_COLLIDERS, ...TREE_COLLIDERS]
   }, [interior])
 
   const bounds = useMemo<Bounds>(
@@ -449,14 +456,19 @@ export function Player() {
         if (link.needs && !secrets[link.needs]) continue
 
         const shut = link.kind === 'locked'
+        // A staircase is walked up, not pressed from the bottom: its prompt
+        // waits at the head of the flight, so you take the stairs by taking
+        // the stairs.
+        const climb = link.kind === 'stairsUp'
+        const [ax, az] = climb ? flightTop(link) : link.position
         list.push({
           id: link.id,
           kind: shut ? 'door' : 'exit',
           label: link.label,
           verb: shut ? 'Try' : 'Take',
-          x: link.position[0],
-          z: link.position[1],
-          range: 2.9,
+          x: ax,
+          z: az,
+          range: climb ? 1.8 : 2.9,
           trigger: () => {
             const state = useGame.getState()
             if (shut || !link.to || !link.arrive) {
@@ -572,6 +584,7 @@ export function Player() {
         PLAYER_RADIUS,
         [...staticColliders, ...actorColliders.current],
         bounds,
+        hop.current.y,
       )
 
       const desired = Math.atan2(dx, dz)
@@ -630,7 +643,10 @@ export function Player() {
     motion.current.airborne = hop.current.y > 0.02
 
     const [px, pz] = position.current
-    const py = (indoors ? 0 : groundHeight(px, pz)) + hop.current.y
+    const floor = interior
+      ? interiorFloor(interior, px, pz)
+      : groundHeight(px, pz)
+    const py = floor + hop.current.y
     PLAYER_POS.set(px, py, pz)
     PLAYER_VIEW.yaw = yaw.current
     PLAYER_VIEW.facing = facing.current
@@ -694,15 +710,21 @@ export function Player() {
 
     /* ---------------------------- camera ---------------------------- */
 
+    // The visitor’s own zoom, folded in before anything is measured so the
+    // occlusion probe looks down the boom the camera will actually use.
+    const zoom = cameraZoom.level
+    const dolly = cam.distance * zoom
+    const rise = cam.height * zoom
+
     let span = 1
     if (!indoors) {
       const probe = probeCamera(
         px,
         py + 1.5,
         pz,
-        Math.sin(yaw.current) * cam.distance,
-        cam.height - 1.5,
-        Math.cos(yaw.current) * cam.distance,
+        Math.sin(yaw.current) * dolly,
+        rise - 1.5,
+        Math.cos(yaw.current) * dolly,
       )
       span = probe.span
       if (probe.blocker && turn === 0) {
@@ -724,12 +746,12 @@ export function Player() {
     const aspect = viewport.width / Math.max(1, viewport.height)
     const framing = Math.min(1.32, Math.max(1, 1 + (1.15 - aspect) * 0.42))
 
-    const reach = cam.distance * framing * boom.current
+    const reach = dolly * framing * boom.current
     const targetX = px + Math.sin(yaw.current) * reach
     const targetZ = pz + Math.cos(yaw.current) * reach
     // Track the ground, not the hop, so the camera does not bounce.
     const targetY =
-      py - hop.current.y + cam.height * framing * (0.72 + 0.28 * boom.current)
+      py - hop.current.y + rise * framing * (0.72 + 0.28 * boom.current)
 
     if (!camReady.current) {
       camera.position.set(targetX, targetY, targetZ)

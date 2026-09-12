@@ -29,15 +29,18 @@ export function TouchControls() {
   const knob = useRef<HTMLDivElement>(null)
   const pointerId = useRef<number | null>(null)
 
-  useEffect(() => () => {
-    touchStick.active = false
-    touchStick.x = 0
-    touchStick.y = 0
-    touchCrouch.on = false
-    firePointer.held = false
-    dropHeld.water = false
-    dropHeld.confetti = false
-  }, [])
+  useEffect(
+    () => () => {
+      touchStick.active = false
+      touchStick.x = 0
+      touchStick.y = 0
+      touchCrouch.on = false
+      firePointer.held = false
+      dropHeld.water = false
+      dropHeld.confetti = false
+    },
+    [],
+  )
 
   if (!coarse || (mode !== 'explore' && mode !== 'dialogue')) return null
 

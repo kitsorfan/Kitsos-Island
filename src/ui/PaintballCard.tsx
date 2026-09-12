@@ -12,11 +12,13 @@ import {
 } from '../game/paintball'
 import { useGame } from '../state/store'
 import * as sfx from '../game/audio'
+import { useT } from '../i18n/useT'
 
 const NPC_BY_ID = new Map(NPCS.map((n) => [n.id, n]))
 
 /** The briefing before a match, and the scoreline after one. */
 export function PaintballCard() {
+  const t = useT()
   const game = useGame((s) => s.paintball)
   const begin = useGame((s) => s.beginPaintball)
   const exit = useGame((s) => s.exitPaintball)
@@ -38,15 +40,19 @@ export function PaintballCard() {
           {briefing ? 'Paintball mode' : `Round ${game.round}`}
         </span>
         <h2 className="pb-card__title">
-          {briefing ? 'Pick up the marker' : won ? 'Field cleared' : 'Painted out'}
+          {briefing
+            ? 'Pick up the marker'
+            : won
+              ? 'Field cleared'
+              : 'Painted out'}
         </h2>
 
         {briefing ? (
           <>
             <p className="pb-card__lead">
-              The island splits in two for an afternoon, and the sides are
-              never the same twice. Whoever picked up a marker for you is
-              standing in the plaza; everyone else is out in the fields.
+              {t(
+                'The island splits in two for an afternoon, and the sides are never the same twice. Whoever picked up a marker for you is standing in the plaza; everyone else is out in the fields.',
+              )}
             </p>
 
             <div className="pb-card__teams">
@@ -125,8 +131,8 @@ export function PaintballCard() {
                 one.
               </li>
               <li>
-                <strong>Get down</strong> (Ctrl, or the DUCK button) and their
-                paint sails over you — but you cannot shoot back from down
+                <strong>{t('Get down')}</strong> (Ctrl, or the DUCK button) and
+                their paint sails over you — but you cannot shoot back from down
                 there. Cover costs you the shot.
               </li>
               <li>
@@ -134,8 +140,9 @@ export function PaintballCard() {
                 may fire. Use them to get behind something.
               </li>
               <li>
-                Your marker leads whichever enemy you are facing — a ring marks
-                them. Paint a friend and you lose them.
+                {t(
+                  'Your marker leads whichever enemy you are facing — a ring marks them. Paint a friend and you lose them.',
+                )}
               </li>
             </ul>
           </>
@@ -148,21 +155,21 @@ export function PaintballCard() {
             </p>
             <div className="pb-card__score">
               <div>
-                <span>Painted by you</span>
+                <span>{t('Painted by you')}</span>
                 <strong>{game.hits}</strong>
               </div>
               <div>
-                <span>Team total</span>
+                <span>{t('Team total')}</span>
                 <strong>
                   {painted}/{game.enemies.length}
                 </strong>
               </div>
               <div>
-                <span>Lives left</span>
+                <span>{t('Lives left')}</span>
                 <strong>{game.lives}</strong>
               </div>
               <div>
-                <span>Friendly fire</span>
+                <span>{t('Friendly fire')}</span>
                 <strong>{game.friendlyFire}</strong>
               </div>
             </div>

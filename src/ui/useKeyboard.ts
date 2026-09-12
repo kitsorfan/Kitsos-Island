@@ -14,6 +14,8 @@ import {
   queueInteract,
   queueJump,
   setKey,
+  ZOOM_STEP,
+  zoomBy,
 } from '../game/input'
 import { useGame } from '../state/store'
 import * as sfx from '../game/audio'
@@ -43,7 +45,8 @@ export function useKeyboard() {
       const state = useGame.getState()
       const { mode } = state
 
-      if (SCROLL_KEYS.has(event.code) && mode !== 'panel') event.preventDefault()
+      if (SCROLL_KEYS.has(event.code) && mode !== 'panel')
+        event.preventDefault()
       if (event.code in MOVE_KEYS || event.code.startsWith('Shift')) {
         setKey(event.code, true)
       }
@@ -216,6 +219,10 @@ export function useKeyboard() {
           } else if (event.code === 'KeyT') {
             sfx.confirm()
             state.toggleHandLight()
+          } else if (event.code === 'Minus') {
+            zoomBy(ZOOM_STEP)
+          } else if (event.code === 'Equal') {
+            zoomBy(1 / ZOOM_STEP)
           } else if (event.code === 'Escape') {
             if (state.hide?.status === 'playing') state.exitHide()
             else if (state.area !== 'island') {
@@ -224,6 +231,20 @@ export function useKeyboard() {
             }
           }
       }
+    }
+
+    /**
+     * The wheel pulls the camera in and out. Notches vary wildly between a
+     * mouse and a trackpad, so the size of the delta is thrown away and only
+     * its direction is kept — otherwise one flick of a trackpad crosses the
+     * whole range.
+     */
+    const onWheel = (event: WheelEvent) => {
+      const target = event.target as HTMLElement | null
+      if (target?.tagName !== 'CANVAS') return
+      const state = useGame.getState()
+      if (state.mode !== 'explore' && state.mode !== 'dialogue') return
+      zoomBy(event.deltaY > 0 ? ZOOM_STEP : 1 / ZOOM_STEP)
     }
 
     const onKeyUp = (event: KeyboardEvent) => setKey(event.code, false)
@@ -248,6 +269,7 @@ export function useKeyboard() {
     }
 
     window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('wheel', onWheel, { passive: true })
     window.addEventListener('keyup', onKeyUp)
     window.addEventListener('blur', onBlur)
     window.addEventListener('pointerdown', onPointerDown)
@@ -255,6 +277,7 @@ export function useKeyboard() {
     window.addEventListener('pointercancel', onPointerUp)
     return () => {
       window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('wheel', onWheel)
       window.removeEventListener('keyup', onKeyUp)
       window.removeEventListener('blur', onBlur)
       window.removeEventListener('pointerdown', onPointerDown)

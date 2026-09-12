@@ -19,9 +19,9 @@ import { Toast } from './ui/Toast'
 import { TouchControls } from './ui/TouchControls'
 import { useKeyboard } from './ui/useKeyboard'
 import { useGame } from './state/store'
-import { setMuted } from './game/audio'
+import { setMuted, setSfxLevel } from './game/audio'
 import type { Mood } from './game/music'
-import { setMood, setMusicEnabled } from './game/music'
+import { setMood, setMusicEnabled, setMusicLevel } from './game/music'
 
 /** Covers the canvas while a new area builds its scene graph. */
 function Curtain() {
@@ -36,6 +36,8 @@ export default function App() {
   const greetingReturn = useGame((s) => s.greetingReturn)
   const muted = useGame((s) => s.muted)
   const musicOn = useGame((s) => s.musicOn)
+  const musicLevel = useGame((s) => s.musicLevel)
+  const sfxLevel = useGame((s) => s.sfxLevel)
   const night = useGame((s) => s.night)
   const party = useGame((s) => s.party)
   const paintball = useGame((s) => s.paintball?.status)
@@ -49,10 +51,20 @@ export default function App() {
     setMuted(muted)
   }, [muted])
 
+  // Levels restored from a previous visit have to reach the audio graph,
+  // which starts every session at full.
+  useEffect(() => {
+    setSfxLevel(sfxLevel)
+  }, [sfxLevel])
+
+  useEffect(() => {
+    setMusicLevel(musicLevel)
+  }, [musicLevel])
+
   // Browsers will not start audio before a gesture, so the soundtrack waits
   // for the first click or key press and then follows the toggles.
   useEffect(() => {
-    const wanted = musicOn && !muted
+    const wanted = musicOn && !muted && musicLevel > 0
     if (!wanted) {
       setMusicEnabled(false)
       return
@@ -66,7 +78,7 @@ export default function App() {
       window.removeEventListener('pointerdown', begin)
       window.removeEventListener('keydown', begin)
     }
-  }, [musicOn, muted])
+  }, [musicOn, muted, musicLevel])
 
   // A round in progress owns the soundtrack — each game has its own piece —
   // and the island only gets it back once the results are in.
@@ -114,7 +126,8 @@ export default function App() {
 
       <Curtain />
 
-      {mode === 'title' || (mode === 'greeting' && greetingReturn === 'title') ? (
+      {mode === 'title' ||
+      (mode === 'greeting' && greetingReturn === 'title') ? (
         <TitleScreen />
       ) : (
         <>

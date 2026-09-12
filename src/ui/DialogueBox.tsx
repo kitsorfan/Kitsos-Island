@@ -2,11 +2,13 @@ import { useCallback, useEffect, useState } from 'react'
 import { useGame } from '../state/store'
 import * as sfx from '../game/audio'
 import { dialogueBridge } from './useKeyboard'
+import { useT } from '../i18n/useT'
 
 const CHARS_PER_SECOND = 120
 
 export function DialogueBox() {
-  const dialogue = useGame((s) => s.dialogue)
+  const t = useT()
+  const dialogue = t(useGame((s) => s.dialogue))
   const advance = useGame((s) => s.advance)
   const [typed, setTyped] = useState({ line: '', shown: 0 })
 
@@ -74,7 +76,7 @@ export function DialogueBox() {
             {dialogue.page + 1} / {dialogue.lines.length}
           </span>
           <span className="dialogue__hint">
-            {done ? (isLast ? 'Close' : 'Next') : 'Skip'}
+            {t(done ? (isLast ? 'Close' : 'Next') : 'Skip')}
             <kbd>E</kbd>
           </span>
           {done && (

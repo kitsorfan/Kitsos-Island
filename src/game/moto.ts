@@ -8,14 +8,20 @@
  * line by arc length, which keeps them on the tarmac and out of the ditch
  * without a physics solver apiece.
  */
-import { CIRCUIT, ISLAND_WALK_RADIUS, NPCS } from '../data/world'
+import { BUILDINGS, CIRCUIT, ISLAND_WALK_RADIUS, NPCS } from '../data/world'
+import { ACTOR_POS, REACTIONS, ageReactions } from './actors'
 import { resolveCollisions } from './collision'
-import { STATIC_COLLIDERS, TREE_COLLIDERS } from './terrain'
+import {
+  FENCE_COLLIDERS,
+  LAMPS,
+  STATIC_COLLIDERS,
+  TREE_COLLIDERS,
+} from './terrain'
 import type { Collider } from './terrain'
 
 /* -------------------------------- handling -------------------------------- */
 
-const MAX_SPEED = 36
+export const MAX_SPEED = 36
 const REVERSE_SPEED = 8
 const ACCEL = 17
 const BRAKE = 30
@@ -24,6 +30,8 @@ const DRAG = 0.55
 const TURN = 2.1
 /** Nose-up limit of a wheelie. It scores nothing; it just looks good. */
 const WHEELIE_MAX = 0.8
+/** How far the bike lays over in a full-lock corner, in radians. */
+export const MAX_ROLL = 0.5
 const BIKE_RADIUS = 0.9
 
 /** Half the width of the tarmac, plus the bit of verge you can get away with. */
@@ -40,9 +48,85 @@ const TOW_GAIN = 0.24
 
 /* -------------------------------- the track ------------------------------- */
 
+/** Lap counts you can put on the board, and the one it opens on. */
+export const LAP_CHOICES = [1, 3, 5]
 export const LAPS = 3
 /** Seconds on the lights before the flag drops. */
 export const COUNTDOWN = 3
+
+/* ------------------------------- difficulty ------------------------------- */
+
+export type Difficulty = 'easy' | 'normal' | 'hard'
+
+export interface Grade {
+  id: Difficulty
+  label: string
+  blurb: string
+  /** One, two or three: what the meter on the briefing card fills in to. */
+  rank: 1 | 2 | 3
+  /** The colour it is picked out in, the way each rival has a bike colour. */
+  tint: string
+  /** Scales every rival's top speed and their share of a corner's limit. */
+  pace: number
+  nerve: number
+  /**
+   * How far up the road they read when deciding what to brake for, as a
+   * multiple of a second's travel. This is the knob that actually decides
+   * whether a rival is quick: pace and nerve both cap at the tarmac's own
+   * limit, and no amount of either gets a bike round the island quickly if
+   * it starts shedding speed fifty metres before the corner.
+   */
+  brake: number
+  /** How hard the field elastics back towards you. Nothing waits on hard. */
+  elastic: number
+}
+
+export const GRADES: Grade[] = [
+  {
+    id: 'easy',
+    rank: 1,
+    tint: '#2f9e5f',
+    label: 'Sunday ride',
+    blurb: 'They are out for the air, and they will wait for you.',
+    pace: 0.82,
+    nerve: 0.88,
+    brake: 1.5,
+    elastic: 1.3,
+  },
+  {
+    id: 'normal',
+    rank: 2,
+    tint: '#3f7bd6',
+    label: 'Club race',
+    blurb: 'A real race, and a mistake still costs you a place.',
+    pace: 1,
+    nerve: 1,
+    brake: 1.1,
+    elastic: 1,
+  },
+  {
+    id: 'hard',
+    rank: 3,
+    tint: '#e8442f',
+    label: 'Island Trophy',
+    blurb: 'They brake where you would have crashed. Nobody waits.',
+    pace: 1.1,
+    /**
+     * Over 1, which means the leader carries about a sixth more through a
+     * corner than the line nominally allows. That is the whole reason this
+     * grade is quick: pace saturates once nerve is high, and the braking
+     * distance is worth barely a second over its entire useful range.
+     * Calibrated so Nikos takes the standard three laps in 43.0s.
+     */
+    nerve: 1.22,
+    brake: 0.38,
+    elastic: 0,
+  },
+]
+
+export const GRADE_BY_ID = new Map(GRADES.map((g) => [g.id, g]))
+export const gradeOf = (id: Difficulty) =>
+  GRADE_BY_ID.get(id) ?? GRADES[1]
 
 /**
  * The circuit is cut into sectors and you have to pass through them in order,
@@ -168,6 +252,142 @@ function limitAhead(from: number, reach: number): number {
   return limit
 }
 
+/* ------------------------------- the crowd -------------------------------- */
+
+/**
+ * Islanders out to watch, and the steel that lets them. They stand off the
+ * inside verge — the outside of the loop is marker boards and then the sea —
+ * behind a run of barrier, which is why they can stand there and cheer at a
+ * bike doing thirty-six metres a second instead of running for their lives.
+ */
+
+export interface Spectator {
+  x: number
+  z: number
+  facing: number
+  /** Phase offset, so a crowd does not wave in time with itself. */
+  seed: number
+  shirt: string
+}
+
+/** A run of crash barrier along the verge, in front of a knot of them. */
+export interface Barrier {
+  x: number
+  z: number
+  /** Along the road, so the rail lies parallel to it. */
+  heading: number
+  length: number
+}
+
+/** How far off the middle of the road the steel stands. */
+const BARRIER_OFF = ROAD_HALF + 2.1
+/** Length of one panel of it. */
+const PANEL = 3.6
+export const BARRIER_HEIGHT = 1.05
+
+const SHIRTS = [
+  '#e8442f',
+  '#3f7bd6',
+  '#2fb59a',
+  '#e5b32b',
+  '#c2566f',
+  '#7a5bb5',
+]
+
+/** Somewhere nobody could actually be standing. */
+const occupied = (x: number, z: number) =>
+  BUILDINGS.some(
+    (b) =>
+      Math.abs(x - b.position[0]) < b.half[0] + 2 &&
+      Math.abs(z - b.position[1]) < b.half[1] + 2,
+  ) ||
+  LAMPS.some(([lx, lz]) => Math.hypot(x - lx, z - lz) < 1.2) ||
+  TREE_COLLIDERS.some((t) => Math.hypot(x - t.x, z - t.z) < 1.4)
+
+const CROWD_BUILD = (() => {
+  const people: Spectator[] = []
+  const rails: Barrier[] = []
+  /** Metres of track between one knot of people and the next. */
+  const step = 34
+  let n = 0
+  for (let d = 0; d < LAP_LENGTH; d += step) {
+    // A proper crowd on the start line, knots of three everywhere else.
+    const size = d < step ? 6 : 3
+    const before = people.length
+    for (let i = 0; i < size; i++) {
+      const here = pointAt(d + (i - (size - 1) / 2) * 2.4)
+      const r = Math.hypot(here.x, here.z) || 1
+      // Towards the middle of the island is the inside of the loop.
+      const inX = -here.x / r
+      const inZ = -here.z / r
+      // Their spot is however far back off the verge they have to stand to
+      // be out of a lamp post or a tree; a few of them have no room at all,
+      // and those simply did not come.
+      const first = BARRIER_OFF + 1.6 + (n % 3) * 1.1
+      let x = 0
+      let z = 0
+      let room = false
+      for (let back = first; back < ROAD_HALF + 11; back += 1.1) {
+        x = here.x + inX * back
+        z = here.z + inZ * back
+        if (!occupied(x, z)) {
+          room = true
+          break
+        }
+      }
+      n++
+      if (!room) continue
+      people.push({
+        x,
+        z,
+        facing: Math.atan2(-inX, -inZ),
+        seed: n * 1.7,
+        shirt: SHIRTS[n % SHIRTS.length],
+      })
+    }
+
+    // Steel in front of whoever turned up, and none where nobody did.
+    //
+    // Short panels laid end to end round the curve rather than one long
+    // straight run: a ten-metre chord on the inside of a corner bows its ends
+    // into the road, and the ends were the only part anybody ever hit.
+    if (people.length > before) {
+      const span = size * 2.4 + 3.4
+      const panels = Math.max(1, Math.round(span / PANEL))
+      const each = span / panels
+      for (let k = 0; k < panels; k++) {
+        const p = pointAt(d + (k - (panels - 1) / 2) * each)
+        const r = Math.hypot(p.x, p.z) || 1
+        rails.push({
+          x: p.x - (p.x / r) * BARRIER_OFF,
+          z: p.z - (p.z / r) * BARRIER_OFF,
+          heading: p.heading,
+          // A shade of overlap, so the run reads as one rail and not as
+          // a dotted line with gaps to fall through.
+          length: each + 0.3,
+        })
+      }
+    }
+  }
+  return { people, rails }
+})()
+
+export const CROWD: Spectator[] = CROWD_BUILD.people
+export const BARRIERS: Barrier[] = CROWD_BUILD.rails
+
+/**
+ * The steel, as things to hit — turned to lie along the road exactly as the
+ * rail you can see does. Snapping these to the nearest axis put three of the
+ * thirteen flat across the racing line as ten-metre invisible walls.
+ */
+const BARRIER_COLLIDERS: Collider[] = BARRIERS.map((rail) => ({
+  x: rail.x,
+  z: rail.z,
+  hx: 0.16,
+  hz: rail.length / 2,
+  rotation: rail.heading,
+}))
+
 /* -------------------------------- the grid -------------------------------- */
 
 const NPC_BY_ID = new Map(NPCS.map((n) => [n.id, n]))
@@ -185,15 +405,26 @@ export interface RivalKit {
 }
 
 /**
- * Nikos runs this loop most mornings and cycles it on Sundays, so he is quick
- * everywhere and untidy nowhere; the Sergeant has the fastest bike of the
- * three and brakes for everything; Marina has the slowest and does not brake
- * at all, which on a road of this shape is very nearly the same thing.
+ * One of each, so the race has a shape: somebody to beat, somebody to have a
+ * fight with, and somebody to get past on the first lap.
+ *
+ * Nikos runs this loop most mornings and cycles it on Sundays — quick
+ * everywhere and untidy nowhere, and the one you have to ride properly to
+ * take. The Sergeant has a fast bike and brakes earlier than he needs to, so
+ * he is the fight. Marina has the slowest of the three and rides it within
+ * herself: the pass you make on the first lap.
+ *
+ * `pace` caps the top speed and `nerve` is how much of a corner's limit they
+ * will use, and BOTH have to fall together for a rival to actually be slower.
+ * Marina used to be the one who never braked — a slow bike ridden bravely —
+ * and her nerve bought back every metre her pace gave away: she and the
+ * Sergeant finished a three-lap race two metres apart. A rider is only as
+ * easy as their weaker number.
  */
 export const RIVALS: RivalKit[] = [
-  { id: 'runner', bike: '#2f9e5f', pace: 0.8, nerve: 0.9, line: -1.5 },
-  { id: 'sergeant', bike: '#3f7bd6', pace: 0.86, nerve: 0.83, line: 1.5 },
-  { id: 'studentrep', bike: '#e5b32b', pace: 0.78, nerve: 0.97, line: 0 },
+  { id: 'runner', bike: '#2f9e5f', pace: 0.94, nerve: 0.95, line: -1.5 },
+  { id: 'sergeant', bike: '#3f7bd6', pace: 0.86, nerve: 0.85, line: 1.5 },
+  { id: 'studentrep', bike: '#e5b32b', pace: 0.7, nerve: 0.74, line: 0 },
 ]
 
 export const racerName = (id: string) =>
@@ -282,13 +513,20 @@ export const MOTO = {
   lapTime: 0,
   best: 0,
   rivals: [] as Rival[],
+  /** Up against something and still leaning on it, as opposed to hitting it. */
+  scraping: false,
+  /** How long this race is, and how hard, chosen at the briefing. */
+  laps: LAPS,
+  grade: GRADES[1],
   /** Set when your last lap is in. */
   done: false,
   /** Where you came, once it is. */
   finish: 0,
 }
 
-export function openRide() {
+export function openRide(laps: number = LAPS, difficulty: Difficulty = 'normal') {
+  MOTO.laps = Math.max(1, Math.round(laps))
+  MOTO.grade = gradeOf(difficulty)
   MOTO.x = MOTO_START.x
   MOTO.z = MOTO_START.z
   MOTO.heading = MOTO_START.heading
@@ -306,6 +544,7 @@ export function openRide() {
   MOTO.offRoad = false
   MOTO.tow = 0
   MOTO.touching = false
+  MOTO.scraping = false
   MOTO.place = GRID.length
   MOTO.elapsed = 0
   MOTO.lapTime = 0
@@ -317,6 +556,8 @@ export function openRide() {
     const spot = pointAt(slot.at)
     return {
       ...kit,
+      pace: kit.pace * MOTO.grade.pace,
+      nerve: kit.nerve * MOTO.grade.nerve,
       x: spot.x + Math.cos(spot.heading) * slot.side,
       z: spot.z - Math.sin(spot.heading) * slot.side,
       heading: spot.heading,
@@ -331,10 +572,12 @@ export function openRide() {
     }
   })
   MOTO.active = true
+  REACTIONS.clear()
 }
 
 export function closeRide() {
   MOTO.active = false
+  REACTIONS.clear()
 }
 
 /** Everybody in the race, in the order they are running. */
@@ -379,9 +622,71 @@ export interface MotoEvents {
   bumped: boolean
 }
 
-/** Colliders near the bike; the tree list is far too long to walk in full. */
+/* ----------------------------- the bystanders ----------------------------- */
+
+/**
+ * Everyone who is not behind a barrier. An islander going about their day
+ * with a motorcycle coming at them gets out of the way, using the same
+ * fright the water bombs use — <Npcs/> already knows how to run from a point,
+ * and a bike is only a point that moves.
+ */
+
+/** How close a bike gets before somebody standing in the open takes fright. */
+const STARTLE = 9
+/** Seconds they stay startled, so they keep running as the bike goes past. */
+const STARTLE_TIME = 1.6
+
+/**
+ * Everyone on the island who is not on the grid. The three rivals are still
+ * drawn standing at their posts while their bikes are out on the lap, and
+ * frightening a man with his own motorcycle would be one oddity too many.
+ */
+const IN_THE_OPEN = NPCS.filter(
+  (n) => n.area === 'island' && !RIVALS.some((r) => r.id === n.id),
+).map((n) => n.id)
+
+function scareBystanders() {
+  for (const id of IN_THE_OPEN) {
+    const at = ACTOR_POS.get(id)
+    if (!at) continue
+
+    let close = Math.hypot(MOTO.x - at.x, MOTO.z - at.z)
+    let fromX = MOTO.x
+    let fromZ = MOTO.z
+    for (const rival of MOTO.rivals) {
+      const d = Math.hypot(rival.x - at.x, rival.z - at.z)
+      if (d < close) {
+        close = d
+        fromX = rival.x
+        fromZ = rival.z
+      }
+    }
+    if (close > STARTLE) continue
+
+    // Cheering wins if a balloon has just showered them; nothing else does.
+    const already = REACTIONS.get(id)
+    if (already && already.kind === 'cheer') continue
+    REACTIONS.set(id, {
+      kind: 'fright',
+      left: STARTLE_TIME,
+      x: fromX,
+      z: fromZ,
+    })
+  }
+}
+
+/**
+ * Colliders near the bike; the tree list is far too long to walk in full.
+ *
+ * The garden fence is in here whole — it is five boxes, and the corner of it
+ * that stands in the road is on the fastest part of the lap, so a bike has to
+ * go round it the way everything else on the island does.
+ */
 function nearby(x: number, z: number): Collider[] {
-  const out: Collider[] = [...STATIC_COLLIDERS]
+  const out: Collider[] = [...STATIC_COLLIDERS, ...FENCE_COLLIDERS]
+  for (const b of BARRIER_COLLIDERS) {
+    if (Math.abs(b.x - x) < 6 && Math.abs(b.z - z) < 6) out.push(b)
+  }
   for (const t of TREE_COLLIDERS) {
     if (Math.abs(t.x - x) < 4 && Math.abs(t.z - z) < 4) out.push(t)
   }
@@ -474,7 +779,11 @@ function trafficAhead(rival: Rival): { gap: number; speed: number; side: number 
 function stepRival(rival: Rival, delta: number, playerAt: number) {
   if (MOTO.countdown > 0) return
 
-  const reach = 10 + rival.speed * 1.1 * rival.nerve
+  // How far up the road they read. Reading further is braking earlier, so
+  // this runs the other way from bravery: it used to be scaled by nerve,
+  // which had the quickest rider looking the furthest ahead and lifting
+  // soonest — the opposite of what nerve is documented to mean.
+  const reach = 10 + rival.speed * 1.1 * MOTO.grade.brake
   let target = Math.min(
     MAX_SPEED * rival.pace,
     limitAhead(rival.progress, reach) * rival.nerve,
@@ -482,8 +791,14 @@ function stepRival(rival: Rival, delta: number, playerAt: number) {
 
   // Elastic, and it pulls harder towards you than away: dropping the race on
   // one bad corner is no fun, and neither is a procession once you are past.
-  const gap = playerAt - (rival.lap * LAP_LENGTH + rival.progress)
-  target *= 1 + Math.max(-0.12, Math.min(0.08, gap / 200))
+  // Turned off entirely at the top grade, where the point is the clock.
+  const stretch = MOTO.grade.elastic
+  if (stretch > 0) {
+    const gap = playerAt - (rival.lap * LAP_LENGTH + rival.progress)
+    target *=
+      1 +
+      Math.max(-0.12 * stretch, Math.min(0.08 * stretch, (gap / 200) * stretch))
+  }
 
   // Somebody quicker on the back wheel: move over. These are islanders on a
   // Sunday, not a field that blocks — the pass has to be there to be taken.
@@ -520,7 +835,7 @@ function stepRival(rival: Rival, delta: number, playerAt: number) {
   if (rival.progress >= LAP_LENGTH) {
     rival.progress -= LAP_LENGTH
     rival.lap++
-    if (rival.lap > LAPS && !rival.finished) {
+    if (rival.lap > MOTO.laps && !rival.finished) {
       rival.finished = true
       rival.time = MOTO.elapsed
     }
@@ -552,6 +867,11 @@ export function stepMoto(delta: number, input: MotoInput): MotoEvents {
     bumped: false,
   }
   if (!MOTO.active || MOTO.done) return events
+
+  // Anybody out in the open gets out of the way; the crowd is behind steel
+  // and stays where it is.
+  scareBystanders()
+  ageReactions(delta)
 
   /* ------------------------------- lights ------------------------------- */
 
@@ -587,7 +907,7 @@ export function stepMoto(delta: number, input: MotoInput): MotoEvents {
   // Below walking pace the bars do very little, as on a real bike.
   const grip = Math.min(1, Math.abs(MOTO.speed) / 12)
   MOTO.heading -= input.steer * TURN * delta * grip * Math.sign(MOTO.speed || 1)
-  MOTO.roll += (input.steer * 0.5 * grip - MOTO.roll) * Math.min(1, delta * 6)
+  MOTO.roll += (input.steer * MAX_ROLL * grip - MOTO.roll) * Math.min(1, delta * 6)
 
   if (input.wheelie && MOTO.speed > 7) {
     MOTO.wheelie = Math.min(1, MOTO.wheelie + delta * 3)
@@ -610,12 +930,28 @@ export function stepMoto(delta: number, input: MotoInput): MotoEvents {
   MOTO.x = at[0]
   MOTO.z = at[1]
 
-  // Clipping a tree costs you your speed, and nothing worse than that.
+  // Clipping something costs you speed, and nothing worse than that — but
+  // how much depends on how badly you met it. `square` is 1 for a hit
+  // straight into the face of a thing and 0 for sliding along it, so a
+  // barrier brushed at a shallow angle scrubs a little and one ridden into
+  // takes most of what you had. Flat 0.6 a frame meant a long lean down a
+  // rail compounded into a standstill in a third of a second.
   const shoved = Math.hypot(at[0] - wanted[0], at[1] - wanted[1])
   if (shoved > 0.02) {
-    if (Math.abs(MOTO.speed) > 14) events.bumped = true
-    MOTO.speed *= 0.6
-    MOTO.wheelie = 0
+    const square = Math.abs(
+      ((at[0] - wanted[0]) / shoved) * Math.sin(MOTO.heading) +
+        ((at[1] - wanted[1]) / shoved) * Math.cos(MOTO.heading),
+    )
+    if (!MOTO.scraping) {
+      if (square > 0.45 && Math.abs(MOTO.speed) > 14) events.bumped = true
+      MOTO.speed *= 1 - 0.62 * square
+      if (square > 0.45) MOTO.wheelie = 0
+    }
+    // Staying against it drags rather than stopping you dead.
+    MOTO.speed -= MOTO.speed * (0.3 + 2.6 * square) * delta
+    MOTO.scraping = true
+  } else {
+    MOTO.scraping = false
   }
 
   // Leaning on one of the others, which is a different thing entirely. Only
@@ -643,7 +979,7 @@ export function stepMoto(delta: number, input: MotoInput): MotoEvents {
     if (MOTO.gate === 1) {
       MOTO.best = MOTO.best === 0 ? MOTO.lapTime : Math.min(MOTO.best, MOTO.lapTime)
       MOTO.lapTime = 0
-      if (MOTO.lap >= LAPS) {
+      if (MOTO.lap >= MOTO.laps) {
         MOTO.done = true
         MOTO.finish = 1 + MOTO.rivals.filter((r) => r.finished).length
         events.finished = true

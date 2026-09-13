@@ -8,14 +8,14 @@ import { groundHeight } from '../game/terrain'
 import { ARENA, PAINT } from '../game/paintball'
 import { PARTY, danceSpot } from '../game/party'
 import { CHALLENGE_EARSHOT, GUARD } from '../game/guard'
-import { HIDE } from '../game/hide'
+import { HIDE, PLAYERS } from '../game/hide'
 import { resolveCollisions } from '../game/collision'
 import { ISLAND_WALK_RADIUS } from '../data/world'
 import { STATIC_COLLIDERS } from '../game/terrain'
 import type { Collider } from '../game/terrain'
 import { useGame } from '../state/store'
 import { Character, type CharacterMotion } from './Character'
-import { PLAYER_POS } from './Player'
+import { PLAYER_POS } from '../game/player'
 import type { Npc } from '../types'
 
 /** How close you have to be before someone stops walking to greet you. */
@@ -40,11 +40,25 @@ function others(self: string) {
   return out
 }
 
+/** Everyone hide and seek puts on the island, whatever hours they keep. */
+const PLAYING = new Set(PLAYERS)
+
 export function Npcs({ area }: { area: string }) {
   const night = useGame((s) => s.night)
+  /**
+   * A game of hide and seek is played at night by everyone who is not on a
+   * night shift — which is to say, by people this filter would otherwise have
+   * sent home. Sergeant Petros keeps day hours and so hid, was found, and had
+   * his ring drawn on an empty patch of grass, because nothing ever drew him.
+   */
+  const playing = useGame((s) => s.hide !== null)
   // The night shift is only out there once the lamps are on.
   const here = NPCS.filter(
-    (n) => n.area === area && (!n.shift || n.shift === (night ? 'night' : 'day')),
+    (n) =>
+      n.area === area &&
+      (!n.shift ||
+        n.shift === (night ? 'night' : 'day') ||
+        (playing && PLAYING.has(n.id))),
   )
   return (
     <group>
@@ -133,7 +147,8 @@ function NpcActor({
       group.current.rotation.y += turn * Math.min(1, delta * 7)
 
       // Whoever is out goes flat on their back until the round is over.
-      fall.current += ((unit.out ? 1 : 0) - fall.current) * Math.min(1, delta * 7)
+      fall.current +=
+        ((unit.out ? 1 : 0) - fall.current) * Math.min(1, delta * 7)
       if (body.current) {
         body.current.rotation.x = -fall.current * 1.42
         body.current.position.y = fall.current * 0.14
@@ -188,12 +203,14 @@ function NpcActor({
     // Hide and seek takes the wheel: hide.ts owns where everybody is and
     // which way they are pointing their torch, because that beam is the
     // whole of what the game is read off.
-    const play = HIDE.active ? HIDE.folk.find((f) => f.id === npc.id) : undefined
+    const play = HIDE.active
+      ? HIDE.folk.find((f) => f.id === npc.id)
+      : undefined
     if (play) {
       at.current[0] = play.x
       at.current[1] = play.z
       motion.current.moving = play.moving
-      motion.current.speed = play.moving ? 3.6 : 0
+      motion.current.speed = play.speed
       motion.current.halt = 0
       motion.current.crouching = HIDE.role === 'seeker' && !play.found
       group.current.position.set(play.x, groundHeight(play.x, play.z), play.z)
@@ -252,7 +269,8 @@ function NpcActor({
       const [gx, gz] = at.current
       group.current.position.set(gx, groundHeight(gx, gz), gz)
       ACTOR_POS.set(npc.id, { x: gx, z: gz })
-      let square = Math.atan2(GUARD.x - gx, GUARD.z - gz) - group.current.rotation.y
+      let square =
+        Math.atan2(GUARD.x - gx, GUARD.z - gz) - group.current.rotation.y
       while (square > Math.PI) square -= Math.PI * 2
       while (square < -Math.PI) square += Math.PI * 2
       group.current.rotation.y += square * Math.min(1, delta * 9)
@@ -365,9 +383,7 @@ function NpcActor({
     ACTOR_POS.set(npc.id, { x, z })
 
     // Face the player when close, otherwise face the way they are walking.
-    const desired = greeting
-      ? Math.atan2(dx, dz)
-      : (heading ?? npc.facing)
+    const desired = greeting ? Math.atan2(dx, dz) : (heading ?? npc.facing)
     let diff = desired - group.current.rotation.y
     while (diff > Math.PI) diff -= Math.PI * 2
     while (diff < -Math.PI) diff += Math.PI * 2
@@ -382,7 +398,11 @@ function NpcActor({
   return (
     <group
       ref={group}
-      position={[npc.position[0], indoors ? 0 : groundHeight(...npc.position), npc.position[1]]}
+      position={[
+        npc.position[0],
+        indoors ? 0 : groundHeight(...npc.position),
+        npc.position[1],
+      ]}
       rotation={[0, npc.facing, 0]}
     >
       <group ref={body}>
@@ -398,8 +418,16 @@ function NpcActor({
           hand={searching ? 'flashlight' : npc.hand}
           gun={Boolean(team) && !painted}
           gunColor={team === 'friend' ? PAINT.friend : PAINT.enemy}
-          kit={team ? (team === 'friend' ? PAINT.friend : PAINT.enemy) : undefined}
-          paint={painted ? (team === 'enemy' ? PAINT.player : PAINT.enemy) : undefined}
+          kit={
+            team ? (team === 'friend' ? PAINT.friend : PAINT.enemy) : undefined
+          }
+          paint={
+            painted
+              ? team === 'enemy'
+                ? PAINT.player
+                : PAINT.enemy
+              : undefined
+          }
         />
       </group>
       {team && !painted && (

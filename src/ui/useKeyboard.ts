@@ -9,6 +9,8 @@ import {
   clearKeys,
   dropHeld,
   firePointer,
+  forgetLongSpace,
+  longSpace,
   queueDrop,
   queueFire,
   queueInteract,
@@ -18,6 +20,7 @@ import {
   zoomBy,
 } from '../game/input'
 import { useGame } from '../state/store'
+import { PLAYER_POS, PLAYER_VIEW } from '../game/player'
 import * as sfx from '../game/audio'
 
 /** Advance handler owned by the dialogue box, so typing can be skipped. */
@@ -57,7 +60,7 @@ export function useKeyboard() {
       switch (mode) {
         case 'title':
           if (ADVANCE_KEYS.has(event.code)) state.start()
-          else if (event.code === 'KeyC') {
+          else if (event.code === 'KeyG') {
             sfx.confirm()
             state.openGreeting()
           }
@@ -69,35 +72,35 @@ export function useKeyboard() {
           return
 
         case 'panel':
-          if (event.code === 'Escape' || event.code === 'KeyX') {
+          if (event.code === 'Escape') {
             sfx.cancel()
             state.closePanel()
           }
           return
 
         case 'journal':
-          if (['Escape', 'KeyJ', 'KeyX'].includes(event.code)) {
+          if (['Escape', 'KeyJ'].includes(event.code)) {
             sfx.cancel()
             state.closeJournal()
           }
           return
 
         case 'map':
-          if (['Escape', 'KeyM', 'KeyX'].includes(event.code)) {
+          if (['Escape', 'KeyM'].includes(event.code)) {
             sfx.cancel()
             state.closeMap()
           }
           return
 
         case 'greeting':
-          if (['Escape', 'KeyC', 'KeyX'].includes(event.code)) {
+          if (['Escape', 'KeyG'].includes(event.code)) {
             sfx.cancel()
             state.closeGreeting()
           }
           return
 
         case 'arcade':
-          if (['Escape', 'KeyP', 'KeyX'].includes(event.code)) {
+          if (['Escape', 'KeyP'].includes(event.code)) {
             state.closeArcade()
           }
           return
@@ -206,25 +209,45 @@ export function useKeyboard() {
           } else if (event.code === 'KeyM') {
             sfx.confirm()
             state.openMap()
-          } else if (event.code === 'KeyC') {
+          } else if (event.code === 'KeyG') {
             sfx.confirm()
             state.openGreeting()
+          } else if (event.code === 'KeyX') {
+            state.toggleFirstPerson()
           } else if (event.code === 'KeyN') {
             state.toggleMute()
           } else if (event.code === 'KeyB') {
             state.toggleMusic()
           } else if (event.code === 'KeyL') {
-            sfx.confirm()
             state.toggleNight()
           } else if (event.code === 'KeyT') {
-            sfx.confirm()
             state.toggleHandLight()
-          } else if (event.code === 'Minus') {
+          } else if (
+            (event.code === 'Minus' || event.code === 'KeyC') &&
+            !state.firstPerson
+          ) {
             zoomBy(ZOOM_STEP)
-          } else if (event.code === 'Equal') {
+          } else if (
+            (event.code === 'Equal' || event.code === 'KeyZ') &&
+            !state.firstPerson
+          ) {
             zoomBy(1 / ZOOM_STEP)
+          } else if (event.code === 'Digit3' || event.code === 'Numpad3') {
+            // The back half of the one gesture nobody is ever told about:
+            // five seconds leaning on the jump key, and then this. Out on
+            // the sand after dark it lights the candles. Anywhere else, or
+            // without the hold, it is a key that does nothing.
+            if (longSpace()) {
+              forgetLongSpace()
+              state.proposeToAmalia(
+                PLAYER_POS.x,
+                PLAYER_POS.z,
+                PLAYER_VIEW.facing,
+              )
+            }
           } else if (event.code === 'Escape') {
             if (state.hide?.status === 'playing') state.exitHide()
+            else if (state.proposal) state.clearProposal()
             else if (state.area !== 'island') {
               sfx.cancel()
               state.leaveBuilding()
@@ -244,6 +267,8 @@ export function useKeyboard() {
       if (target?.tagName !== 'CANVAS') return
       const state = useGame.getState()
       if (state.mode !== 'explore' && state.mode !== 'dialogue') return
+      // There is no boom to run in and out from inside his head.
+      if (state.firstPerson) return
       zoomBy(event.deltaY > 0 ? ZOOM_STEP : 1 / ZOOM_STEP)
     }
 

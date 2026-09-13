@@ -26,6 +26,14 @@ import type { SavedProgress } from './save'
 import { setMusicLevel as applyMusicLevel } from '../game/music'
 import { callAmalia, startParty, stopParty } from '../game/party'
 import {
+  begin as beginProposal,
+  end as endProposal,
+  settle as settleProposal,
+  beachAt,
+} from '../game/propose'
+import type { Phase as ProposalPhase } from '../game/propose'
+import { AMALIA } from '../data/party'
+import {
   ARENA_CENTER,
   MAG_SIZE,
   MAX_FRIENDS,
@@ -305,14 +313,33 @@ interface GameState {
   sfxLevel: number
   /** Lights out: the island after dark. */
   night: boolean
+  /** Behind his eyes rather than over his shoulder. */
+  firstPerson: boolean
   /** What he carries after dark. */
   handLight: Carried
+  /**
+   * Out of his depth. Only the hand light cares — you do not swim the coast
+   * of an island holding a lit torch over your head — but it is a render
+   * either way, so it lives here rather than in the swim.
+   */
+  swimming: boolean
   /** The square, dancing. Only after dark. */
   party: boolean
   /** True once he has walked into the middle and she has been called down. */
   amaliaHere: boolean
   /** What he is wearing. The tuxedo is for her arrival and nothing else. */
   outfit: 'islander' | 'tuxedo'
+  /**
+   * The beach proposal, and how far through it he is. Null almost always:
+   * there is one way to start it and it is not written down anywhere.
+   */
+  proposal: ProposalPhase | null
+  /**
+   * Which proposal this is. It only ever goes up, and it is what the scene
+   * is keyed on: asking her again lays a fresh heart of candles wherever he
+   * is standing now, rather than relighting the one he walked away from.
+   */
+  proposalRound: number
   hasMoved: boolean
 
   start: () => void
@@ -340,9 +367,26 @@ interface GameState {
   setSfxLevel: (level: number) => void
   setLocale: (locale: Locale) => void
   toggleNight: () => void
+  toggleFirstPerson: () => void
   toggleHandLight: () => void
+  setSwimming: (value: boolean) => void
   toggleParty: () => void
   callAmalia: () => void
+  /**
+   * Whether the gesture would do anything from here, which is a question
+   * the HUD asks as well: it is what decides whether leaning on the key
+   * shows you anything at all.
+   */
+  canPropose: (x: number, z: number) => boolean
+  /** The gesture, made on the sand after dark. */
+  proposeToAmalia: (x: number, z: number, facing: number) => boolean
+  /** She has walked up the beach and he is on one knee. */
+  askAmalia: () => void
+  /** Her answer, and then the two of them and the candles. */
+  answerAmalia: () => void
+  finishProposal: () => void
+  /** Escape: the candles out, her away, and back to an ordinary night. */
+  clearProposal: () => void
   markMoved: () => void
 
   openArcade: () => void
@@ -523,10 +567,14 @@ export const useGame = create<GameState>((set, get) => ({
   sfxLevel: SAVED.sfxLevel,
   locale: SAVED.locale,
   night: false,
+  firstPerson: false,
   handLight: 'flashlight',
+  swimming: false,
   party: false,
   amaliaHere: false,
   outfit: 'islander',
+  proposal: null,
+  proposalRound: 0,
   hasMoved: false,
 
   start: () => set({ mode: 'explore' }),
@@ -661,13 +709,35 @@ export const useGame = create<GameState>((set, get) => ({
    * Turning the lights back on ends the party, which needs the dark — and is
    * refused outright mid hide-and-seek, which needs the dark rather more.
    */
+  toggleFirstPerson: () => {
+    sfx.blip()
+    set((s) => ({ firstPerson: !s.firstPerson }))
+  },
+
   toggleNight: () => {
-    if (get().hide) return
+    const game = get()
+    // The dark is the whole point of one of these games and the ruin of the
+    // rest: hide-and-seek is played in it, and a race, a flight, a match or
+    // a rescue lit differently halfway through is a different one. The
+    // switch is out of bounds while any of them is on.
+    if (game.hide || game.paintball || game.moto) return
+    if (game.balloon || game.rescue) return
+    sfx.confirm()
+    // The candles and the party both belong to the dark. Putting the sun
+    // back up ends whichever of them is going on.
     set((s) => {
       const night = !s.night
-      if (!night && s.party) stopParty()
-      if (night || !s.party) return { night }
-      return { night, party: false, amaliaHere: false, outfit: 'islander' }
+      if (night) return { night }
+      if (s.party) stopParty()
+      if (s.proposal) endProposal()
+      if (!s.party && !s.proposal) return { night }
+      return {
+        night,
+        party: false,
+        proposal: null,
+        amaliaHere: false,
+        outfit: 'islander',
+      }
     })
   },
 
@@ -683,9 +753,17 @@ export const useGame = create<GameState>((set, get) => ({
       set({ party: false, amaliaHere: false, outfit: 'islander' })
       return
     }
+    // She cannot be in two places at once, and a square full of speakers is
+    // not where the candles are.
+    endProposal()
     startParty()
     sfx.jingle()
-    set({ party: true, amaliaHere: false, outfit: 'islander' })
+    set({
+      party: true,
+      proposal: null,
+      amaliaHere: false,
+      outfit: 'islander',
+    })
   },
 
   /**
@@ -698,8 +776,98 @@ export const useGame = create<GameState>((set, get) => ({
     sfx.jingle()
     set({ amaliaHere: true, outfit: 'tuxedo' })
   },
+
+  /**
+   * The gesture, made on the sand after dark, and she comes up the beach to
+   * him. Refused anywhere but on the sand, in the dark, on his own — and it
+   * answers so the keyboard knows whether anything came of it.
+   */
+  canPropose: (x, z) => {
+    const s = get()
+    if (s.mode !== 'explore' || !s.night || s.area !== 'island') return false
+    // Nothing doing in the middle of a game, or a party.
+    if (s.party || s.hide || s.paintball || s.moto) return false
+    if (s.balloon || s.rescue) return false
+    // Not in the middle of a proposal either — but once one has played out
+    // he can ask her again, anywhere on the sand, as often as he likes.
+    if (s.proposal !== null && s.proposal !== 'done') return false
+    // And she cannot be called down to the beach while she is already here
+    // for the dancing, which is the other way she turns up.
+    if (s.amaliaHere && s.proposal === null) return false
+    return beachAt(x, z)
+  },
+
+  proposeToAmalia: (x, z, facing) => {
+    if (!get().canPropose(x, z)) return false
+    // The candles he lit last time go out as the new ones catch.
+    endProposal()
+    beginProposal(x, z, facing)
+    sfx.jingle()
+    set((was) => ({
+      proposal: 'arriving',
+      proposalRound: was.proposalRound + 1,
+      amaliaHere: true,
+      outfit: 'tuxedo',
+    }))
+    return true
+  },
+
+  /** She has walked up out of the dark and he is down on one knee. */
+  askAmalia: () => {
+    if (get().proposal !== 'arriving') return
+    set({ proposal: 'asking' })
+    get().talk({
+      speaker: 'Kitsos',
+      role: 'On one knee',
+      lines: AMALIA.question,
+    })
+  },
+
+  /** Her answer. The ring changes hands on the same beat. */
+  answerAmalia: () => {
+    if (get().proposal !== 'asking') return
+    sfx.jingle()
+    set({ proposal: 'yes' })
+    get().talk({
+      speaker: AMALIA.name,
+      role: 'Already nodding',
+      lines: AMALIA.answer,
+    })
+  },
+
+  /** And afterwards: the two of them, and the candles, and all night. */
+  finishProposal: () => {
+    if (get().proposal !== 'yes') return
+    settleProposal()
+    set({ proposal: 'done' })
+    get().record({
+      id: 'beach-ring',
+      title: 'A ring, on the beach',
+      body: 'Candles in a heart in the sand, her walking up out of the dark, and a yes before the question was properly out. The island has had a lot of firsts on it. This is the one that counts.',
+      source: 'The west beach',
+    })
+  },
+  /**
+   * Enough. The candles go out, she goes home, and he is back in his own
+   * clothes — which is all Escape has ever meant on this island.
+   */
+  clearProposal: () => {
+    if (!get().proposal) return
+    endProposal()
+    sfx.cancel()
+    set({ proposal: null, amaliaHere: false, outfit: 'islander' })
+  },
+
   /** Flashlight, torch, then nothing at all — which the camp run needs. */
-  toggleHandLight: () =>
+  /**
+   * Flashlight, torch, then nothing at all — which the camp run needs.
+   *
+   * Refused in the water. Both hands are busy out there and neither of them
+   * is holding anything that would still be alight.
+   */
+  toggleHandLight: () => {
+    if (get().swimming) return
+    sfx.confirm()
     set((s) => ({
       handLight:
         s.handLight === 'flashlight'
@@ -707,7 +875,13 @@ export const useGame = create<GameState>((set, get) => ({
           : s.handLight === 'torch'
             ? 'none'
             : 'flashlight',
-    })),
+    }))
+  },
+
+  setSwimming: (value) => {
+    if (get().swimming === value) return
+    set({ swimming: value })
+  },
   markMoved: () => {
     if (!get().hasMoved) set({ hasMoved: true })
   },

@@ -182,15 +182,42 @@ export interface Ringer {
 }
 
 const RINGER_NAMES = [
-  'Lefteris', 'Zoe', 'Tasos', 'Rania', 'Vasilis', 'Ioanna', 'Stavros',
-  'Christina', 'Panos', 'Katerina', 'Michalis', 'Angeliki', 'Spyros',
-  'Chryssa', 'Dinos', 'Vaso', 'Akis', 'Lena', 'Makis', 'Toula', 'Sotiris',
-  'Niki', 'Argyris', 'Fenia',
+  'Lefteris',
+  'Zoe',
+  'Tasos',
+  'Rania',
+  'Vasilis',
+  'Ioanna',
+  'Stavros',
+  'Christina',
+  'Panos',
+  'Katerina',
+  'Michalis',
+  'Angeliki',
+  'Spyros',
+  'Chryssa',
+  'Dinos',
+  'Vaso',
+  'Akis',
+  'Lena',
+  'Makis',
+  'Toula',
+  'Sotiris',
+  'Niki',
+  'Argyris',
+  'Fenia',
 ]
 
 const SKINS = ['#f0c39a', '#d99e6f', '#a2683f', '#8a5a34']
 const HAIRS = ['#2b2b2b', '#4a3526', '#241d18', '#6b4a2a']
-const SHIRTS = ['#4a6f8a', '#8a5a6f', '#5c7a4a', '#7a6a4a', '#6a5a8a', '#8a6a4a']
+const SHIRTS = [
+  '#4a6f8a',
+  '#8a5a6f',
+  '#5c7a4a',
+  '#7a6a4a',
+  '#6a5a8a',
+  '#8a6a4a',
+]
 const PANTS = ['#3a3f4a', '#4c5238', '#2a3f78', '#4a4436']
 
 /** Everyone on the field who is not one of the eleven. */
@@ -246,13 +273,22 @@ export function buildTeams(friendIds: string[], enemyCount: number): Teams {
     return id
   }
 
-  const friends = ROSTER.filter((id) => friendIds.includes(id)).slice(0, MAX_FRIENDS)
+  const friends = ROSTER.filter((id) => friendIds.includes(id)).slice(
+    0,
+    MAX_FRIENDS,
+  )
   const spare = shuffled(ROSTER.filter((id) => !friends.includes(id)))
-  const count = Math.max(MIN_ENEMIES, Math.min(MAX_ENEMIES, Math.round(enemyCount)))
+  const count = Math.max(
+    MIN_ENEMIES,
+    Math.min(MAX_ENEMIES, Math.round(enemyCount)),
+  )
 
   return {
     friends,
-    enemies: Array.from({ length: count }, (_, i) => spare.shift() ?? ringer(i)),
+    enemies: Array.from(
+      { length: count },
+      (_, i) => spare.shift() ?? ringer(i),
+    ),
   }
 }
 
@@ -352,11 +388,14 @@ function spawn(
   side: Side,
   color: string,
   y = MUZZLE,
+  /** How far down the line of the shot it leaves, and how far right of it. */
+  ahead = 0.7,
+  lateral = 0,
 ) {
   ARENA.pellets.push({
-    x: fromX + Math.sin(angle) * 0.7,
+    x: fromX + Math.sin(angle) * ahead + Math.cos(angle) * lateral,
     y,
-    z: fromZ + Math.cos(angle) * 0.7,
+    z: fromZ + Math.cos(angle) * ahead - Math.sin(angle) * lateral,
     vx: Math.sin(angle) * PELLET_SPEED,
     vz: Math.cos(angle) * PELLET_SPEED,
     life: PELLET_LIFE,
@@ -413,8 +452,28 @@ export function canFire(crouched: boolean): boolean {
 }
 
 /** Throws one of your rounds. The caller owns the ammo count. */
-export function playerFire(px: number, pz: number, angle: number) {
-  spawn(px, pz, angle, 'player', PAINT.player, MUZZLE)
+/**
+ * Where a shot leaves the marker. Over his shoulder it comes off the gun as
+ * drawn on the body; behind his eyes the gun is drawn to the camera instead,
+ * and a pellet still leaving his chest reads as coming from nowhere.
+ */
+export interface Muzzle {
+  /** World height it leaves at. */
+  y: number
+  /** How far down the line of the shot, and how far right of that line. */
+  ahead: number
+  lateral: number
+}
+
+export const HIP_MUZZLE: Muzzle = { y: MUZZLE, ahead: 0.7, lateral: 0 }
+
+export function playerFire(
+  px: number,
+  pz: number,
+  angle: number,
+  from: Muzzle = HIP_MUZZLE,
+) {
+  spawn(px, pz, angle, 'player', PAINT.player, from.y, from.ahead, from.lateral)
   ARENA.fireGap = FIRE_GAP
 }
 
@@ -430,13 +489,22 @@ function nearbyCover(x: number, z: number): Collider[] {
   return out
 }
 
-function walk(u: Combatant, tx: number, tz: number, speed: number, delta: number) {
+function walk(
+  u: Combatant,
+  tx: number,
+  tz: number,
+  speed: number,
+  delta: number,
+) {
   const dx = tx - u.x
   const dz = tz - u.z
   const dist = Math.hypot(dx, dz)
   if (dist < 0.001) return
   const step = Math.min(dist, speed * delta)
-  const at: [number, number] = [u.x + (dx / dist) * step, u.z + (dz / dist) * step]
+  const at: [number, number] = [
+    u.x + (dx / dist) * step,
+    u.z + (dz / dist) * step,
+  ]
   resolveCollisions(at, 0.55, nearbyCover(u.x, u.z), {
     kind: 'circle',
     radius: ISLAND_WALK_RADIUS - 2,

@@ -55,7 +55,30 @@ export const AMALIA = {
     'You built a whole island, and put a dancefloor in the middle of it.',
     'Come on, Kitso. Dance with me.',
   ],
+  /**
+   * And what she says afterwards, on the beach, with the candles still going
+   * and something new on her hand.
+   */
+  engaged: [
+    'I am going to be looking at this every five minutes for the rest of my life.',
+    'The whole island knew before I did, did it not. Every one of them knew.',
+    'Come and sit with me. The candles have hours in them yet.',
+  ],
+  /** What he asks her, down on one knee with the sea behind her. */
+  question: [
+    'The candles were the easy part. This next bit I have gone over on every road on this island.',
+    'Amalia. You have put up with the late commits, the louder ideas, and every version of me there has ever been.',
+    'So: will you marry me?',
+  ],
+  /** And what she says back, before he is even properly finished. */
+  answer: [
+    'You built a whole island to ask me that.',
+    'Yes. Of course it is yes. Get up here.',
+  ],
 }
+
+/** The ring: a plain gold band and one stone, which is all it needs to be. */
+export const RING = { band: '#f0c04a', stone: '#eaf6ff' } as const
 
 /**
  * What he changes into when she comes down: a dinner jacket, and flowers in

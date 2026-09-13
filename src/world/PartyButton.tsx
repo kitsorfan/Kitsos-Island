@@ -30,7 +30,8 @@ export function PartyButton() {
       dome.current.position.y = 1.06
       material.emissiveIntensity = 0.9 + beat * 1.9
     } else {
-      dome.current.position.y = 1.18 + Math.sin(state.clock.elapsedTime * 2) * 0.012
+      dome.current.position.y =
+        1.18 + Math.sin(state.clock.elapsedTime * 2) * 0.012
       material.emissiveIntensity = night ? 0.75 : 0.06
     }
   })
@@ -50,7 +51,11 @@ export function PartyButton() {
       {/* Chrome ring the dome sits in */}
       <mesh position={[0, 1.06, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.6, 0.07, 8, 18]} />
-        <meshStandardMaterial color="#b9c2cf" roughness={0.35} metalness={0.6} />
+        <meshStandardMaterial
+          color="#b9c2cf"
+          roughness={0.35}
+          metalness={0.6}
+        />
       </mesh>
 
       {/* The button itself */}

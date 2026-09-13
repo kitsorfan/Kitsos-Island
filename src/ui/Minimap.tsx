@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { nextObjective, useGame } from '../state/store'
 import { drawMap } from './mapDraw'
+import { useT } from '../i18n/useT'
 
 const SIZE = 168
 
 export function Minimap() {
+  const t = useT()
   const canvas = useRef<HTMLCanvasElement>(null)
   const discovered = useGame((s) => s.discovered)
   const missions = useGame((s) => s.missions)
@@ -47,8 +49,8 @@ export function Minimap() {
     <button
       className="minimap"
       onClick={openMap}
-      title="Open the map (M)"
-      aria-label="Open the map"
+      title={t('Open the map (M)')}
+      aria-label={t('Open the map')}
     >
       <canvas ref={canvas} style={{ width: SIZE, height: SIZE }} />
       <span className="minimap__north">N</span>

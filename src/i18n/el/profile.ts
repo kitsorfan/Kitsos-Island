@@ -570,6 +570,11 @@ export const PROFILE: Record<string, string> = {
     'Star Wars — όλο, μαζί με τους καβγάδες για τη σειρά',
   'The Marvel run, watched properly and in sequence like a serious person':
     'Όλο το Marvel, δει σωστά και με τη σειρά σαν σοβαρός άνθρωπος',
+  'Ranked 1st in the admission exam (2014).':
+    'Πρώτος στις εισαγωγικές εξετάσεις (2014).',
+  'Clinical Research': 'Κλινική έρευνα',
+  'Healthcare platforms': 'Πλατφόρμες υγείας',
+  'Artificial Neural Networks': 'Τεχνητά νευρωνικά δίκτυα',
   'And anything well made: give me a good film and I will give you the evening':
     'Και οτιδήποτε καλοφτιαγμένο: δώσε μου μια καλή ταινία και σου δίνω το βράδυ',
 }

@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import type { Group, Mesh } from 'three'
-import { FOUNTAIN, SIGNS } from '../data/world'
+import { DOCK, DOCK_EDGE, DOCK_PLANKS, FOUNTAIN, SIGNS } from '../data/world'
 import {
   BENCHES,
   FENCE_SPACING,
@@ -9,6 +9,7 @@ import {
   LAMPS,
   PLANTERS,
   groundHeight,
+  terrainHeight,
 } from '../game/terrain'
 import { useGame } from '../state/store'
 import { TextPlane } from './TextSign'
@@ -40,7 +41,8 @@ function Fountain() {
 
   useFrame((state) => {
     const t = state.clock.elapsedTime
-    if (water.current) water.current.position.y = 1.24 + Math.sin(t * 1.6) * 0.03
+    if (water.current)
+      water.current.position.y = 1.24 + Math.sin(t * 1.6) * 0.03
     if (jets.current) {
       jets.current.children.forEach((drop, i) => {
         const phase = (t * 0.9 + i * 0.17) % 1
@@ -82,7 +84,10 @@ function Fountain() {
         {Array.from({ length: 10 }, (_, i) => {
           const a = (i / 10) * Math.PI * 2
           return (
-            <mesh key={i} position={[Math.cos(a) * 1.1, 3.3, Math.sin(a) * 1.1]}>
+            <mesh
+              key={i}
+              position={[Math.cos(a) * 1.1, 3.3, Math.sin(a) * 1.1]}
+            >
               <sphereGeometry args={[0.17, 6, 5]} />
               <meshStandardMaterial
                 color="#9fe4f5"
@@ -104,21 +109,41 @@ function CompassRose() {
     <group position={[0, 0.03, 0]}>
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[4.4, 5, 48]} />
-        <meshStandardMaterial color="#c2a878" roughness={1} polygonOffset polygonOffsetFactor={-2} />
+        <meshStandardMaterial
+          color="#c2a878"
+          roughness={1}
+          polygonOffset
+          polygonOffsetFactor={-2}
+        />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[0.9, 20]} />
-        <meshStandardMaterial color="#c2a878" roughness={1} polygonOffset polygonOffsetFactor={-2} />
+        <meshStandardMaterial
+          color="#c2a878"
+          roughness={1}
+          polygonOffset
+          polygonOffsetFactor={-2}
+        />
       </mesh>
       {[0, 1, 2, 3].map((i) => (
         <group key={i} rotation={[0, (i * Math.PI) / 2, 0]}>
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.001, 2.7]}>
             <planeGeometry args={[1, 3.2]} />
-            <meshStandardMaterial color="#b39a6a" roughness={1} polygonOffset polygonOffsetFactor={-3} />
+            <meshStandardMaterial
+              color="#b39a6a"
+              roughness={1}
+              polygonOffset
+              polygonOffsetFactor={-3}
+            />
           </mesh>
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.001, 4.5]}>
             <circleGeometry args={[0.62, 3]} />
-            <meshStandardMaterial color="#9c8354" roughness={1} polygonOffset polygonOffsetFactor={-4} />
+            <meshStandardMaterial
+              color="#9c8354"
+              roughness={1}
+              polygonOffset
+              polygonOffsetFactor={-4}
+            />
           </mesh>
         </group>
       ))}
@@ -146,7 +171,11 @@ function Benches() {
           {[-1, 1].map((lx) => (
             <mesh key={lx} position={[lx, 0.25, 0]}>
               <boxGeometry args={[0.14, 0.5, 0.66]} />
-              <meshStandardMaterial color="#6f7377" flatShading roughness={0.9} />
+              <meshStandardMaterial
+                color="#6f7377"
+                flatShading
+                roughness={0.9}
+              />
             </mesh>
           ))}
         </group>
@@ -232,10 +261,7 @@ function Lamps() {
                   depthWrite={false}
                 />
               </mesh>
-              <mesh
-                position={[0, 0.06, 0]}
-                rotation={[-Math.PI / 2, 0, 0]}
-              >
+              <mesh position={[0, 0.06, 0]} rotation={[-Math.PI / 2, 0, 0]}>
                 <circleGeometry args={[3.6, 18]} />
                 <meshBasicMaterial
                   color="#ffc978"
@@ -298,7 +324,11 @@ function SignpostMesh({
 
   const [x, z] = pos
   return (
-    <group position={[x, groundHeight(x, z), z]} rotation={[0, facing, 0]} scale={1.4}>
+    <group
+      position={[x, groundHeight(x, z), z]}
+      rotation={[0, facing, 0]}
+      scale={1.4}
+    >
       <mesh position={[0, 0.85, 0]} castShadow>
         <boxGeometry args={[0.16, 1.7, 0.16]} />
         <meshStandardMaterial color="#8a6642" flatShading roughness={1} />
@@ -358,7 +388,11 @@ function ChessCorner() {
       ].map(([px, pz, color], i) => (
         <mesh key={i} position={[px as number, 1.05, pz as number]} castShadow>
           <cylinderGeometry args={[0.07, 0.11, 0.28, 8]} />
-          <meshStandardMaterial color={color as string} flatShading roughness={0.8} />
+          <meshStandardMaterial
+            color={color as string}
+            flatShading
+            roughness={0.8}
+          />
         </mesh>
       ))}
       {[-1.2, 1.2].map((sx) => (
@@ -375,7 +409,11 @@ function VolunteerTent() {
   const x = -27
   const z = 23.5
   return (
-    <group position={[x, groundHeight(x, z), z]} rotation={[0, 0.4, 0]} scale={1.3}>
+    <group
+      position={[x, groundHeight(x, z), z]}
+      rotation={[0, 0.4, 0]}
+      scale={1.3}
+    >
       <mesh position={[0, 2.5, 0]} castShadow>
         <boxGeometry args={[4.6, 0.16, 4]} />
         <meshStandardMaterial color="#e05a6f" flatShading roughness={0.9} />
@@ -392,7 +430,11 @@ function VolunteerTent() {
       ].map(([px, pz], i) => (
         <mesh key={i} position={[px, 1.25, pz]} castShadow>
           <cylinderGeometry args={[0.07, 0.07, 2.5, 6]} />
-          <meshStandardMaterial color="#c9cdd2" metalness={0.4} roughness={0.5} />
+          <meshStandardMaterial
+            color="#c9cdd2"
+            metalness={0.4}
+            roughness={0.5}
+          />
         </mesh>
       ))}
       <mesh position={[0, 0.95, -1.5]} castShadow>
@@ -417,27 +459,74 @@ function VolunteerTent() {
   )
 }
 
+/**
+ * The jetty: a level deck standing on its piles, a gangway board where it
+ * comes down on to the sand, and the run of planks carrying on out until
+ * there is nothing but sea underneath.
+ *
+ * Every plank stands clear of the ground it is over, at the beach end as
+ * much as at the sea end. A deck laid at the height of the water would have
+ * its first few planks buried in the sand — a walkway you can feel underfoot
+ * and cannot see — and the gangway is what lets the rest of it stand up.
+ */
+const RAMP_THICK = 0.14
+
 function Dock() {
-  const DECK_Y = -0.55
-  const Z = 20
-  const planks = Array.from({ length: 10 }, (_, i) => -116 - i * 2)
+  const Z = DOCK.z
+  /** Centre of a plank: the walking surface is the top of it. */
+  const DECK_Y = DOCK.deck - DOCK.thickness / 2
 
   return (
     <group>
-      {planks.map((x, i) => (
+      {/* The gangway, laid on the sand at one end and on the deck at the
+          other. Barely a slope — it is the join that matters, not the
+          climb. */}
+      <mesh
+        position={[
+          DOCK_EDGE + DOCK.ramp / 2,
+          DOCK.deck / 2 - RAMP_THICK / 2,
+          Z,
+        ]}
+        rotation={[0, 0, -Math.atan2(DOCK.deck, DOCK.ramp)]}
+        castShadow
+        receiveShadow
+      >
+        <boxGeometry
+          args={[
+            Math.hypot(DOCK.ramp, DOCK.deck),
+            RAMP_THICK,
+            DOCK.halfWidth * 2,
+          ]}
+        />
+        <meshStandardMaterial color="#a8835a" flatShading roughness={1} />
+      </mesh>
+
+      {DOCK_PLANKS.map((x, i) => (
         <group key={i}>
           <mesh position={[x, DECK_Y, Z]} castShadow receiveShadow>
-            <boxGeometry args={[1.9, 0.2, 4.4]} />
+            <boxGeometry
+              args={[DOCK.step - 0.1, DOCK.thickness, DOCK.halfWidth * 2]}
+            />
             <meshStandardMaterial color="#b08a5c" flatShading roughness={1} />
           </mesh>
           {i % 3 === 0 &&
             [-2, 2].map((dz) => {
-              const ground = groundHeight(x, Z + dz)
+              // Down to the sea bed, which is what the piles are driven into
+              // — not to the decking, which by now is one of them.
+              const ground = terrainHeight(x, Z + dz)
               const height = DECK_Y - ground + 0.6
               return (
-                <mesh key={dz} position={[x, DECK_Y - height / 2, Z + dz]} castShadow>
+                <mesh
+                  key={dz}
+                  position={[x, DECK_Y - height / 2, Z + dz]}
+                  castShadow
+                >
                   <cylinderGeometry args={[0.16, 0.16, height, 6]} />
-                  <meshStandardMaterial color="#7d6242" flatShading roughness={1} />
+                  <meshStandardMaterial
+                    color="#7d6242"
+                    flatShading
+                    roughness={1}
+                  />
                 </mesh>
               )
             })}
@@ -501,7 +590,11 @@ function HouseFence() {
             [0.82, 0.44].map((y) => (
               <mesh key={y} position={[p.span / 2, y, 0]}>
                 <boxGeometry args={[p.span, 0.13, 0.07]} />
-                <meshStandardMaterial color="#e8e2d2" flatShading roughness={1} />
+                <meshStandardMaterial
+                  color="#e8e2d2"
+                  flatShading
+                  roughness={1}
+                />
               </mesh>
             ))}
         </group>
@@ -563,7 +656,8 @@ function Birds() {
     flock.current.children.forEach((bird, i) => {
       bird.position.y = 34 + Math.sin(t * 0.8 + i) * 3
       bird.children.forEach((wing, w) => {
-        wing.rotation.z = (w === 0 ? 1 : -1) * (0.3 + Math.sin(t * 7 + i) * 0.45)
+        wing.rotation.z =
+          (w === 0 ? 1 : -1) * (0.3 + Math.sin(t * 7 + i) * 0.45)
       })
     })
   })

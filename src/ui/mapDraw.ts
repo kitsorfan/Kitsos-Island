@@ -12,7 +12,7 @@ import { MOTO, pointAt } from '../game/moto'
 import { BALLOON, CALLS, PAYLOAD_COLOR } from '../game/balloon'
 import { BEACH, LAST_GASP, RESCUE } from '../game/rescue'
 import { HIDE } from '../game/hide'
-import { PLAYER_POS, PLAYER_VIEW } from '../world/Player'
+import { PLAYER_POS, PLAYER_VIEW } from '../game/player'
 
 /** Half the world width the map shows, in world units. */
 export const MAP_RADIUS = 132
@@ -42,10 +42,7 @@ export function worldToMap(x: number, z: number, size: number) {
   return [size / 2 + x * k, size / 2 + z * k] as const
 }
 
-export function drawMap(
-  ctx: CanvasRenderingContext2D,
-  opts: MapOptions,
-): void {
+export function drawMap(ctx: CanvasRenderingContext2D, opts: MapOptions): void {
   const { size } = opts
   const k = size / 2 / MAP_RADIUS
   const cx = size / 2
@@ -78,7 +75,13 @@ export function drawMap(
   ctx.fillStyle = GRASS_DARK
   for (const hill of HILLS) {
     ctx.beginPath()
-    ctx.arc(px(hill.position[0]), py(hill.position[1]), hill.radius * k, 0, Math.PI * 2)
+    ctx.arc(
+      px(hill.position[0]),
+      py(hill.position[1]),
+      hill.radius * k,
+      0,
+      Math.PI * 2,
+    )
     ctx.fill()
   }
 
@@ -119,7 +122,13 @@ export function drawMap(
       ctx.strokeStyle = '#ffd166'
       ctx.lineWidth = Math.max(2, 3 * k * 3)
       ctx.beginPath()
-      ctx.arc(px(b.position[0]), py(b.position[1]), Math.max(w, h) * 0.9, 0, Math.PI * 2)
+      ctx.arc(
+        px(b.position[0]),
+        py(b.position[1]),
+        Math.max(w, h) * 0.9,
+        0,
+        Math.PI * 2,
+      )
       ctx.stroke()
     }
   }
@@ -138,7 +147,13 @@ export function drawMap(
     for (const rival of MOTO.rivals) {
       ctx.fillStyle = rival.bike
       ctx.beginPath()
-      ctx.arc(px(rival.x), py(rival.z), Math.max(2.5, 2 * k * 2), 0, Math.PI * 2)
+      ctx.arc(
+        px(rival.x),
+        py(rival.z),
+        Math.max(2.5, 2 * k * 2),
+        0,
+        Math.PI * 2,
+      )
       ctx.fill()
       ctx.stroke()
     }
@@ -188,7 +203,13 @@ export function drawMap(
       if (unit.out || NPC_BY_ID.has(unit.id)) continue
       ctx.fillStyle = unit.team === 'friend' ? PAINT.friend : PAINT.enemy
       ctx.beginPath()
-      ctx.arc(px(unit.x), py(unit.z), Math.max(2.2, 1.4 * k * 2), 0, Math.PI * 2)
+      ctx.arc(
+        px(unit.x),
+        py(unit.z),
+        Math.max(2.2, 1.4 * k * 2),
+        0,
+        Math.PI * 2,
+      )
       ctx.fill()
       ctx.stroke()
     }

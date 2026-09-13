@@ -1,12 +1,15 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
+import type { RefObject } from 'react'
+import type { HandLight } from '../types'
 import { useFrame, useThree } from '@react-three/fiber'
-import { Vector3, type Group, type Mesh } from 'three'
+import { type Group, type Mesh } from 'three'
 import { INTERIOR_BY_ID } from '../data/interiors'
 import { BOARD } from '../data/minigames'
 import { AMALIA, PARTY_BUTTON, TUXEDO } from '../data/party'
 import {
   BUILDINGS,
   BUILDING_BY_ID,
+  DOCK_WALK,
   ISLAND_WALK_RADIUS,
   KEY_BY_ID,
   MISSION_BY_ID,
@@ -31,22 +34,52 @@ import {
   interiorFloor,
 } from '../game/interior'
 import { ACTOR_POS } from '../game/actors'
+import { PLAYER_POS, PLAYER_VIEW } from '../game/player'
 import {
   cameraZoom,
   consumeFire,
   consumeInteract,
   consumeJump,
+  consumeTripleJump,
   isCrouching,
   readCameraTurn,
   readMove,
+  readZoomHold,
+  zoomBy,
 } from '../game/input'
-import { ARENA, PAINT, aimAt, canFire, playerFire } from '../game/paintball'
+import {
+  ARENA,
+  HIP_MUZZLE,
+  PAINT,
+  aimAt,
+  canFire,
+  playerFire,
+} from '../game/paintball'
 import { GUARD, challenge, holdTheLine } from '../game/guard'
 import { HIDE } from '../game/hide'
 import { PARTY, atCentre, onFloor } from '../game/party'
+import { PROPOSE, together } from '../game/propose'
+import {
+  ASHORE,
+  DIVE_SPRING,
+  SWIM,
+  SWIM_BOUNDS,
+  SWIM_SPEED,
+  SWIM_SPRINT,
+  deepEnough,
+  diveIn,
+  dryOff,
+  overWater,
+  waterFloor,
+} from '../game/swim'
 import { isInteractive, keyCount, useGame } from '../state/store'
 import type { Nearby } from '../state/store'
-import { Character, type CharacterMotion } from './Character'
+import {
+  Character,
+  HandLightRig,
+  Marker,
+  type CharacterMotion,
+} from './Character'
 import * as sfx from '../game/audio'
 
 const WALK_SPEED = 10
@@ -55,17 +88,71 @@ const INDOOR_SPEED = 6.5
 /** Ducked under fire you barely move, which is the trade for not being hit. */
 const CROUCH_SPEED = 3.4
 const PLAYER_RADIUS = 0.5
+/**
+ * Where his eyes are above his feet, for the view out of them. The head box
+ * the third-person rig draws is centred at 1.72, and this is a shade over it
+ * so you are looking out of the top of the face rather than the middle.
+ */
+const EYE_HEIGHT = 1.78
+/**
+ * And where they are when he is lying in the water rather than standing in
+ * it. His feet ride well under the surface out there, so the standing figure
+ * would put his eyes a good half metre above his own head.
+ */
+const SWIM_EYE = 1.4
+
+/**
+ * The lens, per view.
+ *
+ * The canvas is set up for the third-person camera, which sits twenty-odd
+ * metres back: a two-metre near plane costs it nothing and buys depth
+ * precision. Out of his own eyes it is ruinous — it clips away everything
+ * inside arm's reach, which is exactly what you have come close to look at.
+ * Amalia dances at 1.45m and was never drawn at all; anybody who walked up to
+ * you disappeared at two paces and tagged you from inside the clip plane.
+ *
+ * The far plane comes in with it, so the depth buffer is not asked to span
+ * four orders of magnitude to pay for it.
+ */
+/**
+ * Where the marker's muzzle ends up once it is drawn to the camera, relative
+ * to the eye. The view model and the shot both measure off these, so paint
+ * leaves the barrel you can see rather than his chest.
+ */
+const FP_GUN = { right: 0.16, drop: 0.22, ahead: 1.1 }
+
+const LENS = {
+  third: { fov: 40, near: 2, far: 2200 },
+  first: { fov: 68, near: 0.12, far: 1500 },
+}
+/**
+ * How far the head rises and falls on each footfall, and how far it rolls
+ * from side to side over the whole step.
+ *
+ * Both are deliberately small. A head bob is read out of the corner of the
+ * eye rather than looked at, and anything you can actually see yourself is
+ * already enough to make somebody queasy — the roll especially, which at a
+ * couple of degrees tips the horizon far more than it sounds like it would.
+ */
+const BOB = 0.016
+const SWAY = 0.012
+
+/**
+ * How far what he is carrying swings with each stride, in radians.
+ *
+ * A light gets its own, much smaller: the marker only moves itself, but a
+ * flashlight aims a beam, and every degree the thing turns drags the whole
+ * lit patch of the island across your view with it. The two were sharing a
+ * twenty-degree swing, which is fine on a gun and seasickness on a torch.
+ */
+const HELD_SWING = { x: 0.14, z: 0.05 }
+const LIGHT_SWING = { x: 0.05, z: 0.02 }
 const JUMP_SPEED = 9.2
 const GRAVITY = 26
 
 const OUTDOOR_CAM = { distance: 22, height: 15.5 }
 /** A match needs to see further out than a stroll does. */
 const FIGHT_CAM = { distance: 27, height: 18 }
-
-/** Live player position, read by NPCs and the minimap. */
-export const PLAYER_POS = new Vector3(PLAYER_START[0], 0, PLAYER_START[1])
-/** Live camera yaw, so the minimap can show which way you are facing. */
-export const PLAYER_VIEW = { yaw: 0, facing: Math.PI }
 
 /** True while a door will turn you away: locked, or shut for the night. */
 function doorShut(
@@ -95,12 +182,17 @@ export function Player() {
   /** Only a re-render can put the marker in his hand, so subscribe to it. */
   const armed = useGame((s) => s.paintball !== null)
   const night = useGame((s) => s.night)
+  const firstPerson = useGame((s) => s.firstPerson)
   const handLight = useGame((s) => s.handLight)
   /** Her prompt only exists once she is down there, so it is subscribed. */
   const amaliaHere = useGame((s) => s.amaliaHere)
+  /** The knee he is on and the ring in his hand are both renders, not frames. */
+  const proposal = useGame((s) => s.proposal)
   const outfit = useGame((s) => s.outfit)
   /** A shelf that swings is furniture until it is not, so this is subscribed. */
   const secrets = useGame((s) => s.secrets)
+  /** Nothing stays alight out there, so the hand it was in is a render. */
+  const swimming = useGame((s) => s.swimming)
 
   const position = useRef<[number, number]>([...PLAYER_START])
   const facing = useRef(Math.PI)
@@ -111,9 +203,24 @@ export function Player() {
   const spawnToken = useRef(-1)
   /** Height above the ground, and its rate of change. */
   const hop = useRef({ y: 0, vy: 0 })
+  /** Where his feet ride while he is in the water, eased as he wades out. */
+  const swimFloor = useRef(0)
+  /** The walk cycle the first-person head and hand ride on. */
+  const stride = useRef(0)
+  /** Eased 0 to 1: how much of a walk is in the view at this instant. */
+  const gait = useRef(0)
+  const hand = useRef<Group>(null)
+  const handSwing = useRef<Group>(null)
+  const lightSwing = useRef<Group>(null)
   /** Keeps the empty-hopper click from firing every frame. */
   const dryGap = useRef(0)
   const shadow = useRef<Mesh>(null)
+
+  /** What he is carrying to see by, if anything. Both views read this. */
+  const carrying =
+    night && outfit !== 'tuxedo' && !swimming && handLight !== 'none'
+      ? handLight
+      : undefined
 
   const indoors = area !== 'island'
   const interior = indoors ? INTERIOR_BY_ID.get(area) : undefined
@@ -124,6 +231,20 @@ export function Player() {
     const reach = Math.max(interior.half[0], interior.half[1])
     return { distance: 12 + reach * 0.5, height: 11 + reach * 0.42 }
   }, [interior])
+
+  // The bike, the basket and the boat all take the camera off us and none of
+  // them knows about the first-person lens, so it goes back the way it was
+  // found on the way out. Coming back remounts this and re-applies it.
+  useEffect(
+    () => () => {
+      if (!('isPerspectiveCamera' in camera)) return
+      camera.fov = LENS.third.fov
+      camera.near = LENS.third.near
+      camera.far = LENS.third.far
+      camera.updateProjectionMatrix()
+    },
+    [camera],
+  )
 
   /* ----------------------------- colliders ---------------------------- */
 
@@ -140,7 +261,12 @@ export function Player() {
             hx: interior.half[0] - INTERIOR_MARGIN,
             hz: interior.half[1] - INTERIOR_MARGIN,
           }
-        : { kind: 'circle', radius: ISLAND_WALK_RADIUS },
+        : {
+            kind: 'circle',
+            radius: ISLAND_WALK_RADIUS,
+            // The one place the island lets him walk off the end of itself.
+            jetty: DOCK_WALK,
+          },
     [interior],
   )
 
@@ -296,11 +422,15 @@ export function Player() {
           live: AMALIA.id,
           range: 2.6,
           trigger: () => {
+            const state = useGame.getState()
             sfx.confirm()
-            useGame.getState().talk({
+            // She has something else on her mind once there is a ring on
+            // her hand, and it is not the dancefloor.
+            const engaged = state.proposal === 'done'
+            state.talk({
               speaker: AMALIA.name,
-              role: AMALIA.role,
-              lines: AMALIA.lines,
+              role: engaged ? 'Engaged' : AMALIA.role,
+              lines: engaged ? AMALIA.engaged : AMALIA.lines,
             })
           },
         })
@@ -520,8 +650,11 @@ export function Player() {
 
   /* ------------------------------- frame ------------------------------ */
 
-  useFrame((_, rawDelta) => {
+  useFrame((frame, rawDelta) => {
     const delta = Math.min(rawDelta, 0.05)
+    // The clock the water is drawn off, so the swell he floats on and the
+    // swell you can see him floating on are the same swell.
+    const clock = frame.clock.elapsedTime
     const store = useGame.getState()
     const active = isInteractive(store.mode)
 
@@ -532,6 +665,8 @@ export function Player() {
       position.current[1] = store.spawn.position[1]
       camReady.current = false
       boom.current = 1
+      // However he got somewhere else — a door, the map — he arrives dry.
+      dryOff()
       if (store.area !== 'island') {
         yaw.current = 0
         facing.current = Math.PI
@@ -555,11 +690,15 @@ export function Player() {
     const magnitude = Math.hypot(move.x, move.y)
     const speed = crouching
       ? CROUCH_SPEED
-      : indoors
-        ? INDOOR_SPEED
-        : move.run
-          ? RUN_SPEED
-          : WALK_SPEED
+      : SWIM.afloat
+        ? move.run
+          ? SWIM_SPRINT
+          : SWIM_SPEED
+        : indoors
+          ? INDOOR_SPEED
+          : move.run
+            ? RUN_SPEED
+            : WALK_SPEED
 
     // Live colliders for anyone walking around this area. A sentry stepping
     // into your path is not a wall to be shoved along — the line they are
@@ -583,7 +722,8 @@ export function Player() {
         position.current,
         PLAYER_RADIUS,
         [...staticColliders, ...actorColliders.current],
-        bounds,
+        // In the water the island's edge is not his edge any more.
+        SWIM.active ? SWIM_BOUNDS : bounds,
         hop.current.y,
       )
 
@@ -599,6 +739,25 @@ export function Player() {
     } else {
       motion.current.moving = false
       motion.current.speed = 0
+    }
+
+    // In the candles he is looking at her: he turns to watch her come up
+    // the beach, stays facing her on one knee, and keeps facing her while
+    // the two of them stand in the ring afterwards.
+    //
+    // Out of the candles he stops, and this is why: out there her station is
+    // his own shoulder, so turning to face her moves it, which turns him
+    // again. A man who keeps facing the woman at his shoulder is a man
+    // walking in circles with her going round him.
+    if (PROPOSE.active && !together() && !motion.current.moving) {
+      const look = Math.atan2(
+        PROPOSE.her.x - position.current[0],
+        PROPOSE.her.z - position.current[1],
+      )
+      let turn = look - facing.current
+      while (turn > Math.PI) turn -= Math.PI * 2
+      while (turn < -Math.PI) turn += Math.PI * 2
+      facing.current += turn * Math.min(1, delta * 3)
     }
 
     // A guarded gate is held whether you are moving or not — walk up on one
@@ -626,9 +785,46 @@ export function Player() {
       store.callAmalia()
     }
 
-    // --- Jump ---------------------------------------------------------
-    // Space throws paint during a match, so hopping sits it out.
-    if (active && !fight && consumeJump() && hop.current.y <= 0.001) {
+    const [px, pz] = position.current
+
+    // --- Jump, and the one way off the end of the jetty ----------------
+    // Three quick taps of it while he is stood over water and the third one
+    // goes over the side instead of straight back up. Not mid-match, and
+    // not mid-game of hide and seek: the sea is not a hiding place.
+    if (
+      active &&
+      !fight &&
+      !hunting &&
+      !SWIM.active &&
+      consumeTripleJump() &&
+      overWater(px, pz)
+    ) {
+      // That third tap is the dive, not another hop.
+      consumeJump()
+      // And the dive is handed to the hop: his feet are already a way above
+      // the water, so it only has to be told how far above, and gravity
+      // does the rest of the arc for nothing.
+      const landing = waterFloor(px, pz, clock)
+      hop.current.y = groundHeight(px, pz) + hop.current.y - landing
+      hop.current.vy = DIVE_SPRING
+      swimFloor.current = landing
+      diveIn()
+      store.record({
+        id: 'dock-swim',
+        title: 'Off the end of the jetty',
+        body: 'Two hops on the planks and the third one over the side. The water is colder than it looks, the whole coast is yours to swim, and any beach will take you back.',
+        source: 'The dock',
+      })
+    }
+    // Space throws paint during a match, so hopping sits it out. So does
+    // being out of your depth, where there is nothing to jump off.
+    if (
+      active &&
+      !fight &&
+      !SWIM.afloat &&
+      consumeJump() &&
+      hop.current.y <= 0.001
+    ) {
       hop.current.vy = JUMP_SPEED
       sfx.hop()
     }
@@ -638,14 +834,40 @@ export function Player() {
       if (hop.current.y <= 0) {
         hop.current.y = 0
         hop.current.vy = 0
+        // The end of a dive is the only landing that is not on something.
+        if (SWIM.falling) {
+          SWIM.falling = false
+          sfx.splash()
+        }
       }
     }
-    motion.current.airborne = hop.current.y > 0.02
 
-    const [px, pz] = position.current
-    const floor = interior
-      ? interiorFloor(interior, px, pz)
-      : groundHeight(px, pz)
+    /* ---------------------- where his feet are ---------------------- */
+
+    let floor: number
+    if (interior) {
+      floor = interiorFloor(interior, px, pz)
+    } else if (SWIM.active) {
+      // The sea bed rather than the ground, so the jetty overhead is not a
+      // floor he can surface through — the way out of the water is a beach.
+      SWIM.afloat = deepEnough(px, pz) && !SWIM.falling
+      // Standing up out of the shallows takes a moment rather than a frame,
+      // which is the whole of wading ashore.
+      const wanted = waterFloor(px, pz, clock)
+      swimFloor.current += SWIM.falling
+        ? wanted - swimFloor.current
+        : (wanted - swimFloor.current) * Math.min(1, delta * 5)
+      floor = swimFloor.current
+      if (!SWIM.afloat && Math.hypot(px, pz) <= ASHORE) dryOff()
+    } else {
+      floor = groundHeight(px, pz)
+    }
+    motion.current.airborne = hop.current.y > 0.02 && !SWIM.afloat
+    motion.current.swimming = SWIM.afloat ? 1 : 0
+    // Twice a swim, so what is in his hand can be a render rather than a
+    // frame: there is nothing in it out here.
+    if (store.swimming !== SWIM.afloat) store.setSwimming(SWIM.afloat)
+
     const py = floor + hop.current.y
     PLAYER_POS.set(px, py, pz)
     PLAYER_VIEW.yaw = yaw.current
@@ -676,7 +898,18 @@ export function Player() {
           // The marker leads the nearest enemy inside the aim cone, so a
           // third-person camera does not need a mouse to aim.
           const shot = aimAt(px, pz, facing.current)
-          playerFire(px, pz, shot.angle)
+          playerFire(
+            px,
+            pz,
+            shot.angle,
+            firstPerson
+              ? {
+                  y: py + EYE_HEIGHT - FP_GUN.drop,
+                  ahead: FP_GUN.ahead,
+                  lateral: FP_GUN.right,
+                }
+              : HIP_MUZZLE,
+          )
           facing.current = shot.angle
           store.fireRound()
           sfx.pop()
@@ -692,8 +925,10 @@ export function Player() {
       group.current.position.set(px, py, pz)
       group.current.rotation.y = facing.current
     }
-    // The blob shadow stays on the ground and shrinks as he rises.
+    // The blob shadow stays on the ground and shrinks as he rises. In the
+    // water there is nothing under him for it to fall on.
     if (shadow.current) {
+      shadow.current.visible = !SWIM.afloat
       shadow.current.position.y = 0.03 - hop.current.y
       const shrink = Math.max(0.45, 1 - hop.current.y * 0.28)
       shadow.current.scale.setScalar(shrink)
@@ -710,58 +945,128 @@ export function Player() {
 
     /* ---------------------------- camera ---------------------------- */
 
-    // The visitor’s own zoom, folded in before anything is measured so the
-    // occlusion probe looks down the boom the camera will actually use.
-    const zoom = cameraZoom.level
-    const dolly = cam.distance * zoom
-    const rise = cam.height * zoom
+    // Out of his eyes. The boom, the occlusion probe and the framing are all
+    // answers to "where do I stand to see him", and none of them apply when
+    // the answer is "inside his head" — so this takes the whole block.
+    if (group.current) group.current.visible = !firstPerson
+    if (hand.current) hand.current.visible = firstPerson
 
-    let span = 1
-    if (!indoors) {
-      const probe = probeCamera(
-        px,
-        py + 1.5,
-        pz,
-        Math.sin(yaw.current) * dolly,
-        rise - 1.5,
-        Math.cos(yaw.current) * dolly,
-      )
-      span = probe.span
-      if (probe.blocker && turn === 0) {
-        const ax = px - probe.blocker.x
-        const az = pz - probe.blocker.z
-        const len = Math.hypot(ax, az)
-        if (len > 0.05) {
-          let swing = Math.atan2(ax / len, az / len) - yaw.current
-          while (swing > Math.PI) swing -= Math.PI * 2
-          while (swing < -Math.PI) swing += Math.PI * 2
-          yaw.current +=
-            Math.sign(swing) * Math.min(Math.abs(swing), delta * 2.6)
+    const lens = firstPerson ? LENS.first : LENS.third
+    if (
+      'isPerspectiveCamera' in camera &&
+      (camera.fov !== lens.fov || camera.near !== lens.near)
+    ) {
+      camera.fov = lens.fov
+      camera.near = lens.near
+      camera.far = lens.far
+      camera.updateProjectionMatrix()
+    }
+
+    if (firstPerson) {
+      // The walk cycle. Two footfalls to a stride, so the head rises and
+      // falls at twice the rate it swings side to side, which is what stops
+      // a bob reading as a bounce on a pogo stick.
+      const pace = motion.current.moving ? motion.current.speed : 0
+      stride.current += delta * pace * 0.62
+      // Eased, and slower settling than starting. Reading the speed straight
+      // off meant that stopping stopped the swing dead in whatever position
+      // the stride happened to have reached, which is the one moment you are
+      // standing still enough to notice it.
+      const want = Math.min(1, pace / WALK_SPEED)
+      gait.current +=
+        (want - gait.current) *
+        Math.min(1, delta * (want > gait.current ? 7 : 3.2))
+      const walk = gait.current
+      const heave = Math.sin(stride.current * 2) * BOB * walk
+      const roll = Math.sin(stride.current) * SWAY * walk
+
+      const eye = py + (SWIM.afloat ? SWIM_EYE : EYE_HEIGHT) + heave
+      // The third-person camera sits behind him at +yaw and looks back, so
+      // his own view runs the other way down the same axis.
+      const look = yaw.current
+      camera.position.set(px, eye, pz)
+      // Level, and only the eye height moves. Pitching the aim as well as
+      // lifting the head doubled the same motion up and read as swimming.
+      camera.lookAt(px - Math.sin(look) * 12, eye, pz - Math.cos(look) * 12)
+      // A step lands and the horizon tips a little with it.
+      camera.rotateZ(roll)
+
+      // What he is carrying, held where you would hold it: out of the way of
+      // the middle of the screen, and riding the same stride.
+      if (hand.current) {
+        hand.current.position.copy(camera.position)
+        hand.current.quaternion.copy(camera.quaternion)
+      }
+      const swing = Math.sin(stride.current) * walk
+      const lean = Math.cos(stride.current) * walk
+      if (handSwing.current) {
+        handSwing.current.rotation.x = swing * HELD_SWING.x
+        handSwing.current.rotation.z = lean * HELD_SWING.z
+      }
+      if (lightSwing.current) {
+        lightSwing.current.rotation.x = swing * LIGHT_SWING.x
+        lightSwing.current.rotation.z = lean * LIGHT_SWING.z
+      }
+
+      // So that stepping back out of his eyes cuts rather than sweeps.
+      camReady.current = false
+    } else {
+      // A zoom key or button being leaned on runs the boom in or out. The
+      // tap that starts it has already moved one notch on the way down.
+      if (active) zoomBy(readZoomHold(delta))
+
+      const zoom = cameraZoom.level
+      const dolly = cam.distance * zoom
+      const rise = cam.height * zoom
+
+      let span = 1
+      if (!indoors) {
+        const probe = probeCamera(
+          px,
+          py + 1.5,
+          pz,
+          Math.sin(yaw.current) * dolly,
+          rise - 1.5,
+          Math.cos(yaw.current) * dolly,
+        )
+        span = probe.span
+        if (probe.blocker && turn === 0) {
+          const ax = px - probe.blocker.x
+          const az = pz - probe.blocker.z
+          const len = Math.hypot(ax, az)
+          if (len > 0.05) {
+            let swing = Math.atan2(ax / len, az / len) - yaw.current
+            while (swing > Math.PI) swing -= Math.PI * 2
+            while (swing < -Math.PI) swing += Math.PI * 2
+            yaw.current +=
+              Math.sign(swing) * Math.min(Math.abs(swing), delta * 2.6)
+          }
         }
       }
+      boom.current +=
+        (span - boom.current) *
+        Math.min(1, delta * (span < boom.current ? 9 : 3))
+
+      const aspect = viewport.width / Math.max(1, viewport.height)
+      const framing = Math.min(1.32, Math.max(1, 1 + (1.15 - aspect) * 0.42))
+
+      const reach = dolly * framing * boom.current
+      const targetX = px + Math.sin(yaw.current) * reach
+      const targetZ = pz + Math.cos(yaw.current) * reach
+      // Track the ground, not the hop, so the camera does not bounce.
+      const targetY =
+        py - hop.current.y + rise * framing * (0.72 + 0.28 * boom.current)
+
+      if (!camReady.current) {
+        camera.position.set(targetX, targetY, targetZ)
+        camReady.current = true
+      }
+      const ease = 1 - Math.pow(0.0015, delta)
+      camera.position.x += (targetX - camera.position.x) * ease
+      camera.position.y += (targetY - camera.position.y) * ease
+      camera.position.z += (targetZ - camera.position.z) * ease
+      camera.lookAt(px, py - hop.current.y + 1.4, pz)
     }
-    boom.current +=
-      (span - boom.current) * Math.min(1, delta * (span < boom.current ? 9 : 3))
-
-    const aspect = viewport.width / Math.max(1, viewport.height)
-    const framing = Math.min(1.32, Math.max(1, 1 + (1.15 - aspect) * 0.42))
-
-    const reach = dolly * framing * boom.current
-    const targetX = px + Math.sin(yaw.current) * reach
-    const targetZ = pz + Math.cos(yaw.current) * reach
-    // Track the ground, not the hop, so the camera does not bounce.
-    const targetY =
-      py - hop.current.y + rise * framing * (0.72 + 0.28 * boom.current)
-
-    if (!camReady.current) {
-      camera.position.set(targetX, targetY, targetZ)
-      camReady.current = true
-    }
-    const ease = 1 - Math.pow(0.0015, delta)
-    camera.position.x += (targetX - camera.position.x) * ease
-    camera.position.y += (targetY - camera.position.y) * ease
-    camera.position.z += (targetZ - camera.position.z) * ease
-    camera.lookAt(px, py - hop.current.y + 1.4, pz)
 
     /* -------------------------- interaction ------------------------- */
 
@@ -806,34 +1111,100 @@ export function Player() {
   })
 
   return (
-    <group ref={group}>
-      <Character
-        colors={outfit === 'tuxedo' ? TUXEDO : PLAYER_COLORS}
-        motion={motion}
-        gun={armed}
-        gunColor={PAINT.player}
-        kit={armed ? PAINT.player : undefined}
-        suit={outfit === 'tuxedo'}
-        bouquet={outfit === 'tuxedo'}
-        // Happy, from the moment she is called down.
-        smile={amaliaHere}
-        // Both hands are full at his own dance.
-        hand={
-          night && outfit !== 'tuxedo' && handLight !== 'none'
-            ? handLight
-            : undefined
-        }
-        danceStyle={amaliaHere ? 3 : undefined}
+    <>
+      <group ref={group}>
+        <Character
+          colors={outfit === 'tuxedo' ? TUXEDO : PLAYER_COLORS}
+          motion={motion}
+          // Down on one knee from the moment she arrives until she has
+          // answered; the ring is in his hand until it is on hers.
+          pose={
+            proposal === 'asking' || proposal === 'yes' ? 'kneel' : undefined
+          }
+          ring={proposal === 'asking'}
+          gun={armed}
+          gunColor={PAINT.player}
+          kit={armed ? PAINT.player : undefined}
+          suit={outfit === 'tuxedo'}
+          bouquet={outfit === 'tuxedo'}
+          // Happy, from the moment she is called down.
+          smile={amaliaHere}
+          // Both hands are full at his own dance.
+          hand={carrying}
+          danceStyle={amaliaHere ? 3 : undefined}
+        />
+        {/* Soft blob shadow so the player never looks like it floats. */}
+        <mesh
+          ref={shadow}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, 0.03, 0]}
+        >
+          <circleGeometry args={[0.55, 16]} />
+          <meshBasicMaterial color="#2a4a22" transparent opacity={0.22} />
+        </mesh>
+      </group>
+      <FirstPersonHeld
+        root={hand}
+        swing={handSwing}
+        lightSwing={lightSwing}
+        carrying={carrying}
+        armed={armed}
       />
-      {/* Soft blob shadow so the player never looks like it floats. */}
-      <mesh
-        ref={shadow}
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, 0.03, 0]}
-      >
-        <circleGeometry args={[0.55, 16]} />
-        <meshBasicMaterial color="#2a4a22" transparent opacity={0.22} />
-      </mesh>
+    </>
+  )
+}
+
+/**
+ * What he is holding, drawn straight to the camera when you are behind his
+ * eyes: the torch or flashlight he is carrying, and the marker if there is a
+ * match on. No arm and no fist — an arm across the bottom of the screen is
+ * one of those things that reads as clutter rather than as your own body.
+ *
+ * It is parented to nothing. The frame loop copies the camera's own position
+ * and rotation onto it, and the inner group rides the same stride the head
+ * does, so what you are carrying moves as you walk.
+ */
+function FirstPersonHeld({
+  root,
+  swing,
+  lightSwing,
+  carrying,
+  armed,
+}: {
+  root: RefObject<Group | null>
+  swing: RefObject<Group | null>
+  lightSwing: RefObject<Group | null>
+  carrying?: HandLight
+  armed: boolean
+}) {
+  return (
+    <group ref={root} visible={false}>
+      {/* Two pivots rather than one, so a beam can be given a gentler ride
+          than a gun without either of them losing the stride. */}
+      {carrying && (
+        <group ref={lightSwing}>
+          <group
+            position={
+              carrying === 'torch' ? [0.4, -0.78, -0.5] : [0.34, -0.4, -0.4]
+            }
+            rotation={carrying === 'torch' ? [0.14, 0, -0.12] : [0, Math.PI, 0]}
+          >
+            <HandLightRig kind={carrying} />
+          </group>
+        </group>
+      )}
+      {armed && (
+        <group ref={swing}>
+          {/* Turned a quarter forward and rolled upright: the marker is built
+              hanging barrel-down off a shoulder, and here it is being aimed. */}
+          <group
+            position={[FP_GUN.right, -0.3, 0]}
+            rotation={[Math.PI / 2, Math.PI, 0]}
+          >
+            <Marker accent={PAINT.player} />
+          </group>
+        </group>
+      )}
     </group>
   )
 }

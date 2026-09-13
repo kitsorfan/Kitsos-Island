@@ -8,7 +8,6 @@ import {
   type MeshBasicMaterial,
   type MeshStandardMaterial,
 } from 'three'
-import type { BuildingKind } from '../../types'
 import { TextPlane } from '../TextSign'
 import { GreekFlag } from '../InteriorProps'
 import { IbmMark, NtuaSeal, VeltistonMark } from '../Emblems'
@@ -78,11 +77,14 @@ function Door({
   width = 1.4,
   height = 2.4,
   color = '#2f6bb3',
+  step = true,
 }: {
   position: [number, number, number]
   width?: number
   height?: number
   color?: string
+  /** Off for a door that already has a flight of steps under it. */
+  step?: boolean
 }) {
   return (
     <group position={position}>
@@ -99,10 +101,12 @@ function Door({
           them fighting over the depth buffer — the flicker you saw at the
           house, the school, the camp and the radio mast. It stands a little
           proud of the grass now, which is what a doorstep does anyway. */}
-      <mesh position={[0, -height / 2 - 0.04, 0.55]} receiveShadow>
-        <boxGeometry args={[width + 1, 0.2, 1.2]} />
-        <meshStandardMaterial color="#cfc2a6" flatShading roughness={1} />
-      </mesh>
+      {step && (
+        <mesh position={[0, -height / 2 - 0.04, 0.55]} receiveShadow>
+          <boxGeometry args={[width + 1, 0.2, 1.2]} />
+          <meshStandardMaterial color="#cfc2a6" flatShading roughness={1} />
+        </mesh>
+      )}
     </group>
   )
 }
@@ -113,6 +117,13 @@ function Door({
 
 /** Two storeys over a basement, which is what is actually inside it. */
 const HOUSE = { W: 8.8, D: 7.8, H: 7.2 }
+
+/**
+ * The course of stone the house stands on: how far its face is from the
+ * middle of the building, and how high its top is. The front steps are laid
+ * off both, and so is the walkable ground pinned to them.
+ */
+const PLINTH = { z: (HOUSE.D + 0.5) / 2, top: 0.64 }
 
 /**
  * Louvered shutters, thrown back against the wall either side of a window.
@@ -227,7 +238,7 @@ function TiledRoof({
   )
 }
 
-function HouseModel() {
+export function HouseModel() {
   const { W, D, H } = HOUSE
   const vine = useRef<Group>(null)
 
@@ -243,8 +254,8 @@ function HouseModel() {
     <group>
       {/* Stone plinth. A whitewashed box sitting straight on grass looks
           dropped there; every house here stands on a course of stone. */}
-      <mesh position={[0, 0.32, 0]} castShadow receiveShadow>
-        <boxGeometry args={[W + 0.5, 0.64, D + 0.5]} />
+      <mesh position={[0, PLINTH.top / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[W + 0.5, PLINTH.top, D + 0.5]} />
         <meshStandardMaterial color="#b8ad97" flatShading roughness={1} />
       </mesh>
 
@@ -258,15 +269,29 @@ function HouseModel() {
       </group>
 
       {/* Front: the door under the pergola, two windows with shutters. */}
-      <Door position={[0, 1.92, D / 2 + 0.02]} color="#2f6bb3" />
-      {/* Two treads down off the plinth. Without them the front door opens
-          two thirds of a metre above the path. */}
-      {[
-        [0.44, 1.5],
-        [0.16, 2.3],
-      ].map(([y, z]) => (
-        <mesh key={z} position={[0, y, D / 2 + z]} receiveShadow castShadow>
-          <boxGeometry args={[3.4, 0.3, 0.9]} />
+      {/* Stood on the plinth rather than a hand's breadth over it: the
+          doorstep used to cover that gap, and it has its own steps now. */}
+      <Door
+        position={[0, PLINTH.top + 1.2, D / 2 + 0.02]}
+        color="#2f6bb3"
+        step={false}
+      />
+      {/* Three treads down off the plinth. Without them the front door opens
+          two thirds of a metre above the path.
+      
+          They start where the plinth ends rather than a stride out from it,
+          and they climb in four even steps of a sixth of a metre — the three
+          treads and the plinth itself. Whoever walks up them is walking on
+          LEDGES pinned to exactly this arithmetic, so neither the height of a
+          tread nor where the flight begins can be changed here alone. */}
+      {[0, 1, 2].map((i) => (
+        <mesh
+          key={i}
+          position={[0, 0.4 - i * 0.16, PLINTH.z + 0.45 + i * 0.9]}
+          receiveShadow
+          castShadow
+        >
+          <boxGeometry args={[3.4, 0.16, 0.9]} />
           <meshStandardMaterial color="#cfc2a6" flatShading roughness={1} />
         </mesh>
       ))}
@@ -584,7 +609,7 @@ function Cypress({ x, z, h = 6.4 }: { x: number; z: number; h?: number }) {
   )
 }
 
-function UniversityModel() {
+export function UniversityModel() {
   const W = 20.8
   const D = 12.8
   const H = 7
@@ -606,6 +631,18 @@ function UniversityModel() {
           <meshStandardMaterial color="#ded4bd" flatShading roughness={1} />
         </mesh>
       ))}
+
+      {/* The stylobate the whole thing stands on.
+          Everything above starts at 0.8 and there was nothing under it but
+          the front steps, so from any other side the building hung in the
+          air. Its top is 0.84 rather than 0.8: that is where the top step
+          lands, and where LEDGES puts the floor you actually walk on, so the
+          three of them come out flush. It is carried 0.3 proud of the walls
+          on each side, which is what a stylobate does anyway. */}
+      <mesh position={[0, 0.42, 0.5]} receiveShadow castShadow>
+        <boxGeometry args={[W + 0.6, 0.84, D + 1.6]} />
+        <meshStandardMaterial color="#e4dac2" flatShading roughness={1} />
+      </mesh>
 
       <mesh position={[0, H / 2 + 0.8, 0]} castShadow receiveShadow>
         <boxGeometry args={[W, H, D]} />
@@ -831,7 +868,7 @@ function WavingFlag({ y, children }: { y: number; children: React.ReactNode }) {
 /* Work District — glass tower plus a consulting annex                 */
 /* ------------------------------------------------------------------ */
 
-function WorkModel() {
+export function WorkModel() {
   const W = 12.8
   const D = 11.8
   /** Shared front-face depth so every facade detail lines up. */
@@ -987,7 +1024,7 @@ function Beacon({
 /* Army Camp — barracks, tents, watchtower                             */
 /* ------------------------------------------------------------------ */
 
-function ArmyModel() {
+export function ArmyModel() {
   const D = 10.8
   const barracksRoof = useGable(8.4, 1.5, 7.4)
 
@@ -1127,7 +1164,7 @@ function ArmyModel() {
 /* Town School — bell tower and a yard                                 */
 /* ------------------------------------------------------------------ */
 
-function SchoolModel() {
+export function SchoolModel() {
   const W = 12.8
   const D = 9.8
   const H = 5
@@ -1254,7 +1291,7 @@ function Clock({ position }: { position: [number, number, number] }) {
 /* Radio Center — station, dish and lattice mast                       */
 /* ------------------------------------------------------------------ */
 
-function RadioModel() {
+export function RadioModel() {
   const D = 7.8
   const mast = useRef<import('three').Group>(null)
 
@@ -1383,7 +1420,7 @@ function SignalRings() {
 /* The Old Lighthouse — the locked reward on the north-west cape       */
 /* ------------------------------------------------------------------ */
 
-function LighthouseModel() {
+export function LighthouseModel() {
   const beam = useRef<Group>(null)
   const bands = [0, 1, 2, 3, 4, 5]
 
@@ -1485,14 +1522,4 @@ function LighthouseModel() {
       </group>
     </group>
   )
-}
-
-export const BUILDING_MODELS: Record<BuildingKind, () => React.ReactElement> = {
-  lighthouse: LighthouseModel,
-  house: HouseModel,
-  university: UniversityModel,
-  work: WorkModel,
-  army: ArmyModel,
-  school: SchoolModel,
-  radio: RadioModel,
 }

@@ -11,13 +11,13 @@ stylesheet — it deploys as static files anywhere.
 
 ## Stack
 
-| Layer | Choice |
-| --- | --- |
-| Build | Vite 8 + TypeScript 6 |
-| UI | React 19 |
-| 3D | three.js · @react-three/fiber 9 · @react-three/drei 10 |
-| State | Zustand 5 |
-| Lint | oxlint |
+| Layer | Choice                                                 |
+| ----- | ------------------------------------------------------ |
+| Build | Vite 8 + TypeScript 6                                  |
+| UI    | React 19                                               |
+| 3D    | three.js · @react-three/fiber 9 · @react-three/drei 10 |
+| State | Zustand 5                                              |
+| Lint  | oxlint                                                 |
 
 ## Run it
 
@@ -31,19 +31,19 @@ npm run lint
 
 ## Controls
 
-| Action | Keyboard | Touch |
-| --- | --- | --- |
-| Move | `W A S D` / arrows | left stick |
-| Sprint | `Shift` | — |
-| Interact | `E` / `Enter` | `A` button |
-| Jump | `Space` | `⤒` button |
-| Turn camera | `Q` / `R` | — |
-| Map & fast travel | `M` | minimap / Map button |
-| Journal | `J` | `J` button |
-| Contact & full CV | `C` | Say hi button |
-| Music | `B` | HUD button |
-| Sound | `N` | HUD button |
-| Back / leave a building | `Esc` | tap outside |
+| Action                  | Keyboard           | Touch                |
+| ----------------------- | ------------------ | -------------------- |
+| Move                    | `W A S D` / arrows | left stick           |
+| Sprint                  | `Shift`            | —                    |
+| Interact                | `E` / `Enter`      | `A` button           |
+| Jump                    | `Space`            | `⤒` button           |
+| Turn camera             | `Q` / `R`          | —                    |
+| Map & fast travel       | `M`                | minimap / Map button |
+| Journal                 | `J`                | `J` button           |
+| Contact & full CV       | `C`                | Say hi button        |
+| Music                   | `B`                | HUD button           |
+| Sound                   | `N`                | HUD button           |
+| Back / leave a building | `Esc`              | tap outside          |
 
 ## The island
 
@@ -51,15 +51,15 @@ Seven roads radiate from the town square. Each district building can be entered:
 walking through the door swaps the world for a hand-built room full of exhibits,
 people and — in five of them — a key.
 
-| Place | Inside |
-| --- | --- |
-| **Kitsos House** (SW) | Trainer card, languages, hobbies, the workbench · 🔑 Brass Key |
-| **NTUA Academy** (N) | Degree, thesis and contests, published research, certifications, two academic references, student council · 🔑 Lecture Hall Key |
-| **Work District** (E) | Veltiston AI, the platform, IBM, full skills matrix · 🔑 Server Room Key |
-| **Army Camp** (SE) | Service record and the Battalion Commander's letter, under the Greek flag · 🔑 Footlocker Key |
-| **Town School** (W) | Early education, teaching and volunteering, the foundation's letter · 🔑 Cabinet Key |
-| **Radio Center** (S) | The transmitter — email, LinkedIn and a message desk |
-| **The Old Lighthouse** (NW cape) | Sealed with five locks. Inside: the career summary, what he is good at, what he is looking for, and a CV download |
+| Place                            | Inside                                                                                                                          |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Kitsos House** (SW)            | Trainer card, languages, hobbies, the workbench · 🔑 Brass Key                                                                  |
+| **NTUA Academy** (N)             | Degree, thesis and contests, published research, certifications, two academic references, student council · 🔑 Lecture Hall Key |
+| **Work District** (E)            | Veltiston AI, the platform, IBM, full skills matrix · 🔑 Server Room Key                                                        |
+| **Army Camp** (SE)               | Service record and the Battalion Commander's letter, under the Greek flag · 🔑 Footlocker Key                                   |
+| **Town School** (W)              | Early education, teaching and volunteering, the foundation's letter · 🔑 Cabinet Key                                            |
+| **Radio Center** (S)             | The transmitter — email, LinkedIn and a message desk                                                                            |
+| **The Old Lighthouse** (NW cape) | Sealed with five locks. Inside: the career summary, what he is good at, what he is looking for, and a CV download               |
 
 ### Missions and keys
 

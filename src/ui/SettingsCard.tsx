@@ -57,7 +57,11 @@ export function SettingsCard() {
 
       <div className="setting setting--stacked">
         <span className="setting__name">{t('Language')}</span>
-        <div className="setting__choices" role="group" aria-label="Language">
+        <div
+          className="setting__choices"
+          role="group"
+          aria-label={t('Language')}
+        >
           {LOCALES.map((l) => (
             <button
               key={l.id}
@@ -108,7 +112,11 @@ export function SettingsCard() {
 
       <div className="setting setting--stacked">
         <span className="setting__name">{t('Quality')}</span>
-        <div className="setting__choices" role="group" aria-label="Quality">
+        <div
+          className="setting__choices"
+          role="group"
+          aria-label={t('Quality')}
+        >
           {QUALITIES.map((q) => (
             <button
               key={q.id}
@@ -193,7 +201,7 @@ export function SettingsCard() {
           </div>
           <div>
             <dt>{t('Interact')}</dt>
-            <dd>{t('E / Enter')}</dd>
+            <dd>{t('Enter')}</dd>
           </div>
           <div>
             <dt>{t('Jump')}</dt>
@@ -201,11 +209,15 @@ export function SettingsCard() {
           </div>
           <div>
             <dt>{t('Turn camera')}</dt>
-            <dd>{t('Q and R')}</dd>
+            <dd>{t('Q and E')}</dd>
           </div>
           <div>
             <dt>{t('Zoom')}</dt>
-            <dd>{t('Wheel, - and =')}</dd>
+            <dd>{t('Z and C, or the wheel')}</dd>
+          </div>
+          <div>
+            <dt>{t('First person')}</dt>
+            <dd>X</dd>
           </div>
           <div>
             <dt>{t('Map & travel')}</dt>

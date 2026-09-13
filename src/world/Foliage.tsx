@@ -1,6 +1,13 @@
 import { useMemo } from 'react'
 import { Instance, Instances } from '@react-three/drei'
-import { FLOWERS, HILLS, HILL_TREES, ROCKS, TREES, TUFTS } from '../game/terrain'
+import {
+  FLOWERS,
+  HILLS,
+  HILL_TREES,
+  ROCKS,
+  TREES,
+  TUFTS,
+} from '../game/terrain'
 import type { Scatter } from '../game/terrain'
 
 const CANOPY_COLORS = ['#4f9c3f', '#3f8a37', '#63ad46', '#2f7a35']
@@ -147,7 +154,11 @@ function Palm({ data }: { data: Scatter }) {
   const lean = Math.sin(data.rotation) * 0.16
   const fronds = 7
   return (
-    <group position={[x, data.y, z]} rotation={[0, data.rotation, 0]} scale={data.scale}>
+    <group
+      position={[x, data.y, z]}
+      rotation={[0, data.rotation, 0]}
+      scale={data.scale}
+    >
       <mesh position={[lean * 1.6, 2.1, 0]} rotation={[0, 0, -lean]} castShadow>
         <cylinderGeometry args={[0.17, 0.3, 4.4, 6]} />
         <meshStandardMaterial color="#8a6a45" flatShading roughness={1} />
@@ -193,7 +204,13 @@ function Rocks() {
           position={[r.position[0], r.y + 0.18 * r.scale, r.position[1]]}
           rotation={[r.rotation * 0.4, r.rotation, r.rotation * 0.2]}
           scale={[r.scale, r.scale * 0.65, r.scale * 0.9]}
-          color={r.variant === 0 ? '#a8b0b4' : r.variant === 1 ? '#8d979d' : '#b3a99a'}
+          color={
+            r.variant === 0
+              ? '#a8b0b4'
+              : r.variant === 1
+                ? '#8d979d'
+                : '#b3a99a'
+          }
         />
       ))}
     </Instances>

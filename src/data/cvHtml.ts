@@ -1,6 +1,6 @@
-import type { PanelBlock, PanelSection } from '../types'
-import { CV_PARTS } from './cv'
-import { PROFILE } from './profile'
+import type { PanelBlock, PanelSection } from '../types.ts'
+import { CV_PARTS } from './cv.ts'
+import { PROFILE } from './profile.ts'
 
 /**
  * The CV as a single self-contained HTML page.

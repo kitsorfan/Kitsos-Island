@@ -105,7 +105,7 @@ export function RadioConsole() {
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Ada Lovelace"
+              placeholder={t('Ada Lovelace')}
             />
           </label>
           <label className="field">
@@ -113,7 +113,7 @@ export function RadioConsole() {
             <input
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              placeholder="ada@example.com"
+              placeholder={t('ada@example.com')}
               type="email"
             />
           </label>
@@ -134,7 +134,7 @@ export function RadioConsole() {
             rows={5}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Hi Kitsos — I found you on your island…"
+            placeholder={t('Hi Kitsos — I found you on your island…')}
           />
         </label>
 

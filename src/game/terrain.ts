@@ -247,11 +247,22 @@ export const STATIC_COLLIDERS: Collider[] = [
     hx: b.half[0],
     hz: b.half[1],
   })),
+  /*
+   * A hill is drawn as a lump of a sphere: an icosahedron of radius one,
+   * scaled out to `radius` and up to 1.35 of its height, sunk so that a
+   * third of it is underground. Its waist is therefore not at head height,
+   * and what you actually walk into is the slice of it at yours — 97% of
+   * the radius at your boots, 93% at your eyes.
+   *
+   * Four fifths of the radius, which is what this used to be, is a metre
+   * and a half inside the grass on the big ones. You could put your
+   * shoulder through the hillside and see daylight from inside it.
+   */
   ...HILLS.map((h) => ({
     x: h.position[0],
     z: h.position[1],
-    hx: h.radius * 0.82,
-    hz: h.radius * 0.82,
+    hx: h.radius * 0.94,
+    hz: h.radius * 0.94,
     circle: true,
   })),
   {
@@ -509,7 +520,9 @@ export const TREE_COLLIDERS: Collider[] = TREES.map((t) => ({
 export const ROCK_COLLIDERS: Collider[] = ROCKS.filter(
   (r) =>
     r.scale >= 1 &&
-    Math.hypot(r.position[0], r.position[1]) < ISLAND_WALK_RADIUS,
+    // A stride past the edge rather than up to it: a boulder he can stand
+    // beside and put his shoulder through is worse than one he cannot reach.
+    Math.hypot(r.position[0], r.position[1]) < ISLAND_WALK_RADIUS + 4,
 ).map((r) => ({
   x: r.position[0],
   z: r.position[1],

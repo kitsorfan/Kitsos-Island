@@ -60,14 +60,21 @@ export function TitleScreen() {
             <kbd>Shift</kbd> {t('sprint')}
           </li>
           <li>
-            <kbd>E</kbd> {t('interact')}
+            <kbd>Enter</kbd> {t('interact')}
           </li>
           <li>
             <kbd>Space</kbd> {t('jump')}
           </li>
           <li>
             <kbd>Q</kbd>
-            <kbd>R</kbd> {t('turn camera')}
+            <kbd>E</kbd> {t('turn camera')}
+          </li>
+          <li>
+            <kbd>Z</kbd>
+            <kbd>C</kbd> {t('zoom in and out')}
+          </li>
+          <li>
+            <kbd>X</kbd> {t('out of his own eyes')}
           </li>
           <li>
             <kbd>M</kbd> {t('map & travel')}

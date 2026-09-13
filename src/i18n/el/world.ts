@@ -478,6 +478,28 @@ export const WORLD: Record<string, string> = {
     'ΟΔΟΣ ΗΓΕΣΙΑΣ — το Στρατόπεδο, νοτιοανατολικά. Ζήτα τον λοχία Πέτρο.',
   'Marine Battalion, reserve. Platoon Leader and Weapons Officer.':
     'Τάγμα Πεζοναυτών, έφεδρος. Διμοιρίτης και Αξιωματικός Οπλισμού.',
+  /* ------------------------- Mission hints ---------------------------- */
+
+  'Server rack, back wall. Do not touch anything blinking.':
+    'Το ράφι των διακομιστών, πίσω τοίχος. Μην αγγίξεις ό,τι αναβοσβήνει.',
+  'The thesis display, past the lectern. Mind the cables.':
+    'Η προθήκη της διπλωματικής, μετά το αναλόγιο. Πρόσεχε τα καλώδια.',
+  'Trophy case, beside the blackboard. Quietly, please.':
+    'Η προθήκη με τα τρόπαια, δίπλα στον πίνακα. Αθόρυβα, παρακαλώ.',
+
+  /* ------------------------ The radio beacon -------------------------- */
+
+  'Everything here belongs to Christos "Kitsos" Orfanopoulos — a senior full stack engineer and technical lead out of Athens, Greece.':
+    'Όλα εδώ ανήκουν στον Χρήστο «Κίτσο» Ορφανόπουλο — senior full stack μηχανικό και τεχνικό υπεύθυνο, από την Αθήνα.',
+  'Reach Kitsos at kitsorfan@protonmail.com or linkedin.com/in/kitsorfan.':
+    'Βρες τον Κίτσο στο kitsorfan@protonmail.com ή στο linkedin.com/in/kitsorfan.',
+
   'He slept last and woke first. Nobody on this road had to be told twice.':
     'Κοιμόταν τελευταίος και ξυπνούσε πρώτος. Σε αυτόν τον δρόμο κανείς δεν χρειάστηκε να του πουν κάτι δεύτερη φορά.',
+
+  /* ------------------------- Off the jetty ---------------------------- */
+
+  'Off the end of the jetty': 'Από την άκρη της προβλήτας',
+  'Two hops on the planks and the third one over the side. The water is colder than it looks, the whole coast is yours to swim, and any beach will take you back.':
+    'Δύο αναπηδήσεις στα σανίδια και η τρίτη σε ρίχνει στο νερό. Είναι πιο κρύο απ’ ό,τι δείχνει, όλη η ακτή είναι δική σου για κολύμπι, και όποια παραλία θέλεις σε βγάζει πάλι στη στεριά.',
 }

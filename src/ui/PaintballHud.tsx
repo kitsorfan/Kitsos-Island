@@ -142,12 +142,13 @@ export function PaintballHud() {
       <p className="pb__keys">
         {coarse ? (
           <>
-            <kbd>FIRE</kbd> shoot · <kbd>DUCK</kbd> get down
+            <kbd>FIRE</kbd> {t('shoot')} · <kbd>DUCK</kbd> {t('get down')}
           </>
         ) : (
           <>
-            <kbd>Space</kbd> shoot · <kbd>Ctrl</kbd> get down · <kbd>Q</kbd>
-            <kbd>R</kbd> turn
+            <kbd>Space</kbd> {t('shoot')} · <kbd>Ctrl</kbd> {t('get down')} ·{' '}
+            <kbd>Q</kbd>
+            <kbd>R</kbd> {t('turn')}
           </>
         )}
       </p>

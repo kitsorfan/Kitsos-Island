@@ -13,7 +13,7 @@ import {
 import { ACTOR_POS } from '../game/actors'
 import { groundHeight } from '../game/terrain'
 import { Character, type CharacterMotion } from './Character'
-import { PLAYER_POS } from './Player'
+import { PLAYER_POS } from '../game/player'
 import { TextPlane } from './TextSign'
 
 const PINK = '#ff3d81'
@@ -23,7 +23,7 @@ const HEARTS = 5
 const PETALS = 14
 
 /** A heart: two lobes and a point, small enough to read at a distance. */
-function Heart({ color = PINK }: { color?: string }) {
+export function Heart({ color = PINK }: { color?: string }) {
   return (
     <group>
       {[-0.085, 0.085].map((x) => (
@@ -129,7 +129,7 @@ export function Amalia() {
     // Petals, falling past her all the way down and then settling.
     petals.current.forEach((petal, i) => {
       if (!petal) return
-      const phase = ((t * 0.4 + i / PETALS) % 1 + 1) % 1
+      const phase = (((t * 0.4 + i / PETALS) % 1) + 1) % 1
       const spread = 1.1 + (i % 4) * 0.45
       const angle = (i / PETALS) * Math.PI * 2 + t * 0.5
       petal.position.set(
@@ -154,7 +154,7 @@ export function Amalia() {
     hearts.current.forEach((heart, i) => {
       if (!heart) return
       heart.visible = landed
-      const phase = ((t * 0.28 + i / HEARTS) % 1 + 1) % 1
+      const phase = (((t * 0.28 + i / HEARTS) % 1) + 1) % 1
       heart.position.set(
         Math.sin(t * 0.8 + i * 2.1) * 0.75,
         2.5 + phase * 2.3,
@@ -164,9 +164,7 @@ export function Amalia() {
       heart.scale.setScalar(0.28 + fade * 0.42)
       heart.traverse((part) => {
         const material = (part as Mesh).material as
-          | MeshBasicMaterial
-          | MeshBasicMaterial[]
-          | undefined
+          MeshBasicMaterial | MeshBasicMaterial[] | undefined
         if (!material || Array.isArray(material)) return
         material.opacity = fade * 0.85
       })

@@ -221,12 +221,12 @@ export function HideHud() {
       <p className="hd__keys">
         {coarse ? (
           <>
-            <kbd>Stick</kbd> walk · <kbd>DUCK</kbd> low
+            <kbd>Stick</kbd> {t('walk')} · <kbd>DUCK</kbd> {t('keep low')}
           </>
         ) : (
           <>
-            <kbd>WASD</kbd> walk · <kbd>Ctrl</kbd> keep low · <kbd>T</kbd> torch
-            · <kbd>Esc</kbd> give up
+            <kbd>WASD</kbd> {t('walk')} · <kbd>Ctrl</kbd> {t('keep low')} ·{' '}
+            <kbd>T</kbd> {t('torch')} · <kbd>Esc</kbd> {t('give up')}
           </>
         )}
       </p>

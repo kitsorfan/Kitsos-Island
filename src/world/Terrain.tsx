@@ -55,7 +55,12 @@ export function Terrain() {
 
   return (
     <mesh geometry={geometry} receiveShadow position={[0, 0, 0]}>
-      <meshStandardMaterial vertexColors flatShading roughness={1} metalness={0} />
+      <meshStandardMaterial
+        vertexColors
+        flatShading
+        roughness={1}
+        metalness={0}
+      />
     </mesh>
   )
 }

@@ -1,7 +1,21 @@
 import type { Collider } from './terrain'
 
+/** A rectangle of ground, for a bound that is not a disc. */
+export interface Box {
+  x: number
+  z: number
+  hx: number
+  hz: number
+}
+
 export type Bounds =
-  | { kind: 'circle'; radius: number }
+  /**
+   * The island: a disc, with an optional strip running out of it for the
+   * jetty. The two are a union — anywhere inside either one is somewhere he
+   * may stand — so walking off the side of the planks puts him back on them
+   * rather than flinging him twenty metres to the nearest beach.
+   */
+  | { kind: 'circle'; radius: number; jetty?: Box }
   | { kind: 'rect'; hx: number; hz: number }
 
 /**
@@ -72,9 +86,36 @@ export function resolveCollisions(
 
   if (bounds.kind === 'circle') {
     const r = Math.hypot(out[0], out[1])
-    if (r > bounds.radius) {
-      out[0] = (out[0] / r) * bounds.radius
-      out[1] = (out[1] / r) * bounds.radius
+    const jetty = bounds.jetty
+    const onJetty =
+      jetty !== undefined &&
+      Math.abs(out[0] - jetty.x) <= jetty.hx &&
+      Math.abs(out[1] - jetty.z) <= jetty.hz
+    if (r > bounds.radius && !onJetty) {
+      // The nearest way back inside the shore, and — where there is a jetty
+      // — the nearest way back onto its planks. The shorter of the two wins,
+      // which is what keeps the join between them a step rather than a jump.
+      let bx = (out[0] / r) * bounds.radius
+      let bz = (out[1] / r) * bounds.radius
+      if (jetty) {
+        const jx = Math.min(
+          jetty.x + jetty.hx,
+          Math.max(jetty.x - jetty.hx, out[0]),
+        )
+        const jz = Math.min(
+          jetty.z + jetty.hz,
+          Math.max(jetty.z - jetty.hz, out[1]),
+        )
+        if (
+          Math.hypot(out[0] - jx, out[1] - jz) <
+          Math.hypot(out[0] - bx, out[1] - bz)
+        ) {
+          bx = jx
+          bz = jz
+        }
+      }
+      out[0] = bx
+      out[1] = bz
     }
   } else {
     out[0] = Math.min(bounds.hx, Math.max(-bounds.hx, out[0]))

@@ -13,11 +13,13 @@ import {
 import { useGame } from '../state/store'
 import { dialogueBridge } from './useKeyboard'
 import { useCoarsePointer } from './useCoarsePointer'
+import { useT } from '../i18n/useT'
 import * as sfx from '../game/audio'
 
 const RADIUS = 52
 
 export function TouchControls() {
+  const t = useT()
   const coarse = useCoarsePointer()
   const mode = useGame((s) => s.mode)
   const fighting = useGame((s) => s.paintball?.status === 'playing')
@@ -106,7 +108,7 @@ export function TouchControls() {
                 e.preventDefault()
                 queueJump()
               }}
-              aria-label="Jump"
+              aria-label={t('Jump')}
             >
               ⤒
             </button>
@@ -120,7 +122,7 @@ export function TouchControls() {
               e.preventDefault()
               queueFire()
             }}
-            aria-label="Wide pulse"
+            aria-label={t('Wide pulse')}
           >
             PULSE
           </button>
@@ -137,7 +139,7 @@ export function TouchControls() {
               onPointerUp={() => setKey('ShiftLeft', false)}
               onPointerCancel={() => setKey('ShiftLeft', false)}
               onPointerLeave={() => setKey('ShiftLeft', false)}
-              aria-label="Burner"
+              aria-label={t('Burner')}
             >
               BURN
             </button>
@@ -157,7 +159,7 @@ export function TouchControls() {
               onPointerLeave={() => {
                 dropHeld.water = false
               }}
-              aria-label="Drop a water bomb"
+              aria-label={t('Drop a water bomb')}
             >
               💧
             </button>
@@ -177,7 +179,7 @@ export function TouchControls() {
               onPointerLeave={() => {
                 dropHeld.confetti = false
               }}
-              aria-label="Throw confetti"
+              aria-label={t('Throw confetti')}
             >
               🎉
             </button>
@@ -192,7 +194,7 @@ export function TouchControls() {
             onPointerUp={() => setKey('Space', false)}
             onPointerCancel={() => setKey('Space', false)}
             onPointerLeave={() => setKey('Space', false)}
-            aria-label="Wheelie"
+            aria-label={t('Wheelie')}
           >
             WHEELIE
           </button>
@@ -213,7 +215,7 @@ export function TouchControls() {
               onPointerLeave={() => {
                 touchCrouch.on = false
               }}
-              aria-label="Get down"
+              aria-label={t('Get down')}
             >
               DUCK
             </button>
@@ -233,7 +235,7 @@ export function TouchControls() {
               onPointerLeave={() => {
                 firePointer.held = false
               }}
-              aria-label="Shoot paint"
+              aria-label={t('Shoot paint')}
             >
               FIRE
             </button>

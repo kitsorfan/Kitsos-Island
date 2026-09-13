@@ -1,6 +1,6 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
-import { buildCvHtml } from './src/data/cvHtml'
+import { buildCvHtml } from './src/data/cvHtml.ts'
 
 /**
  * Writes the plain HTML CV out beside the island.

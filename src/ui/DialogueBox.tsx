@@ -77,7 +77,7 @@ export function DialogueBox() {
           </span>
           <span className="dialogue__hint">
             {t(done ? (isLast ? 'Close' : 'Next') : 'Skip')}
-            <kbd>E</kbd>
+            <kbd>Enter</kbd>
           </span>
           {done && (
             <span className="dialogue__arrow" aria-hidden>

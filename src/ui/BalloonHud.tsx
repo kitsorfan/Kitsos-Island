@@ -191,15 +191,17 @@ export function BalloonHud() {
       <p className="bl__keys">
         {coarse ? (
           <>
-            <kbd>Stick</kbd> drift · <kbd>BURN</kbd> climb · <kbd>💧</kbd>
-            <kbd>🎉</kbd> drop
+            <kbd>Stick</kbd> {t('drift')} · <kbd>BURN</kbd> {t('climb')} ·{' '}
+            <kbd>💧</kbd>
+            <kbd>🎉</kbd> {t('drop')}
           </>
         ) : (
           <>
             <kbd>W</kbd>
-            <kbd>S</kbd> drift · <kbd>A</kbd>
-            <kbd>D</kbd> turn · <kbd>Shift</kbd> burner · <kbd>Ctrl</kbd> vent ·{' '}
-            <kbd>Space</kbd> bomb · <kbd>F</kbd> confetti
+            <kbd>S</kbd> {t('drift')} · <kbd>A</kbd>
+            <kbd>D</kbd> {t('turn')} · <kbd>Shift</kbd> {t('burner')} ·{' '}
+            <kbd>Ctrl</kbd> {t('vent')} · <kbd>Space</kbd> {t('bomb')} ·{' '}
+            <kbd>F</kbd> {t('confetti')}
           </>
         )}
       </p>

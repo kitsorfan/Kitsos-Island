@@ -114,7 +114,7 @@ function arcText(
  * torch-bearer and the flaming column, in the black-figure spirit of the
  * original without pretending to be it.
  */
-export function drawNtuaSeal(ctx: CanvasRenderingContext2D, w: number) {
+function drawNtuaSeal(ctx: CanvasRenderingContext2D, w: number) {
   const c = w / 2
   const u = w / 100
   ctx.clearRect(0, 0, w, w)
@@ -162,7 +162,12 @@ export function drawNtuaSeal(ctx: CanvasRenderingContext2D, w: number) {
   const tongue = (x: number, base: number, h: number, lean: number) => {
     ctx.beginPath()
     ctx.moveTo(x, base)
-    ctx.quadraticCurveTo(x + u * 2.1 + lean, base - h * 0.62, x + lean, base - h)
+    ctx.quadraticCurveTo(
+      x + u * 2.1 + lean,
+      base - h * 0.62,
+      x + lean,
+      base - h,
+    )
     ctx.quadraticCurveTo(x - u * 2.1 + lean, base - h * 0.55, x, base)
     ctx.fill()
   }
@@ -249,13 +254,22 @@ export function NtuaSeal({
   position?: [number, number, number]
   rotation?: [number, number, number]
 }) {
-  const drawn = useDrawnTexture((ctx, w) => drawNtuaSeal(ctx, w), 640, 640, 'ntua')
+  const drawn = useDrawnTexture(
+    (ctx, w) => drawNtuaSeal(ctx, w),
+    640,
+    640,
+    'ntua',
+  )
   const supplied = useSuppliedTexture('ntua.png')
 
   return (
     <mesh position={position} rotation={rotation}>
       <planeGeometry args={[size, size]} />
-      <meshBasicMaterial map={supplied ?? drawn} transparent depthWrite={false} />
+      <meshBasicMaterial
+        map={supplied ?? drawn}
+        transparent
+        depthWrite={false}
+      />
     </mesh>
   )
 }
@@ -265,11 +279,7 @@ export function NtuaSeal({
 const IBM_BLUE = '#1f70c1'
 
 /** The letters, then horizontal gaps cut back out of them. */
-export function drawIbmMark(
-  ctx: CanvasRenderingContext2D,
-  w: number,
-  h: number,
-) {
+function drawIbmMark(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.clearRect(0, 0, w, h)
 
   ctx.fillStyle = IBM_BLUE
@@ -304,18 +314,18 @@ export function IbmMark({
   return (
     <mesh position={position} rotation={rotation}>
       <planeGeometry args={[width, width / 2]} />
-      <meshBasicMaterial map={supplied ?? drawn} transparent depthWrite={false} />
+      <meshBasicMaterial
+        map={supplied ?? drawn}
+        transparent
+        depthWrite={false}
+      />
     </mesh>
   )
 }
 
 /* --------------------------- Veltiston mark --------------------------- */
 
-export function drawVeltiston(
-  ctx: CanvasRenderingContext2D,
-  w: number,
-  h: number,
-) {
+function drawVeltiston(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.clearRect(0, 0, w, h)
 
   // A node-and-spoke glyph, then the wordmark beside it.
@@ -333,7 +343,13 @@ export function drawVeltiston(
     ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r)
     ctx.stroke()
     ctx.beginPath()
-    ctx.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r, h * 0.085, 0, Math.PI * 2)
+    ctx.arc(
+      cx + Math.cos(a) * r,
+      cy + Math.sin(a) * r,
+      h * 0.085,
+      0,
+      Math.PI * 2,
+    )
     ctx.fill()
   }
   ctx.beginPath()
@@ -375,7 +391,11 @@ export function VeltistonMark({
   return (
     <mesh position={position} rotation={rotation}>
       <planeGeometry args={[width, width / 4]} />
-      <meshBasicMaterial map={supplied ?? drawn} transparent depthWrite={false} />
+      <meshBasicMaterial
+        map={supplied ?? drawn}
+        transparent
+        depthWrite={false}
+      />
     </mesh>
   )
 }

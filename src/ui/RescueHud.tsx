@@ -180,13 +180,14 @@ export function RescueHud() {
       <p className="rescue__keys">
         {coarse ? (
           <>
-            <kbd>Stick</kbd> helm · pull back to stop alongside
+            <kbd>Stick</kbd> {t('helm')} · {t('pull back to stop alongside')}
           </>
         ) : (
           <>
             <kbd>W</kbd>
-            <kbd>S</kbd> throttle · <kbd>A</kbd>
-            <kbd>D</kbd> helm · <kbd>M</kbd> chart · <kbd>Esc</kbd> put in
+            <kbd>S</kbd> {t('throttle')} · <kbd>A</kbd>
+            <kbd>D</kbd> {t('helm')} · <kbd>M</kbd> {t('chart')} ·{' '}
+            <kbd>Esc</kbd> {t('put in')}
           </>
         )}
       </p>

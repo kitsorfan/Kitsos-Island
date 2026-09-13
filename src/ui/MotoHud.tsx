@@ -175,13 +175,14 @@ export function MotoHud() {
       <p className="moto__keys">
         {coarse ? (
           <>
-            <kbd>Stick</kbd> ride · <kbd>WHEELIE</kbd> hold
+            <kbd>Stick</kbd> {t('ride')} · <kbd>WHEELIE</kbd> {t('hold it')}
           </>
         ) : (
           <>
             <kbd>W</kbd>
-            <kbd>S</kbd> gas &amp; brake · <kbd>A</kbd>
-            <kbd>D</kbd> steer · <kbd>Space</kbd> wheelie · <kbd>M</kbd> map
+            <kbd>S</kbd> {t('gas & brake')} · <kbd>A</kbd>
+            <kbd>D</kbd> {t('steer')} · <kbd>Space</kbd> {t('wheelie')} ·{' '}
+            <kbd>M</kbd> {t('map')}
           </>
         )}
       </p>

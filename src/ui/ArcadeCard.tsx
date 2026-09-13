@@ -55,7 +55,7 @@ export function ArcadeCard() {
           <button
             className="panel__close"
             onClick={() => close()}
-            aria-label="Close"
+            aria-label={t('Close')}
           >
             ✕
           </button>

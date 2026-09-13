@@ -9,8 +9,9 @@
  * standing in it. Stepped once a frame by <Hide/> and read by <Npcs/>, so
  * none of it costs a React render.
  */
-import { ISLAND_WALK_RADIUS, NPCS } from '../data/world'
+import { DOCK_WALK, ISLAND_WALK_RADIUS, NPCS } from '../data/world'
 import { resolveCollisions } from './collision'
+import type { Bounds } from './collision'
 import { STATIC_COLLIDERS, TREE_COLLIDERS } from './terrain'
 import type { Vec2 } from '../types'
 
@@ -35,16 +36,48 @@ export const HOLD_OUT = 90
  */
 export const TOUCH = 2.4
 
+/**
+ * Exactly the ground he has, jetty and all. Give them any less and the shore
+ * becomes a place they can see you and never reach: they walk up to the edge
+ * of their own smaller island, stop a couple of metres short of you, and
+ * stand there for the rest of the game.
+ */
+const SEARCH_GROUND: Bounds = {
+  kind: 'circle',
+  radius: ISLAND_WALK_RADIUS,
+  jetty: DOCK_WALK,
+}
+
 /** Their beam, which is narrower, and much wider if you leave your own on. */
 const SEARCH_ARC = 0.46
 const SEARCH_REACH = 16
 const LIT_ARC = 1.3
 const LIT_REACH = 34
 
-const PACE = 3.6
+/**
+ * How near somebody gets before the torch stops mattering. Inside this they
+ * have you whatever way they are pointing it — because a man who has walked
+ * up to arm's length of you in the dark does not need to be looking straight
+ * at you, and because a seeker stood two metres off sweeping past your face
+ * all night is the one thing the game must never do. Down low and perfectly
+ * still you can let them come nearer than that.
+ */
+const SENSE = 6.5
+const SENSE_STILL = 3
+
+const PACE = 5.2
 const PAUSE = 1.4
 /** How wide they swing the torch while stood still. */
 const SWEEP = 1.1
+
+/**
+ * Nobody in this game reads a map: they walk at where they want to be. So
+ * when one of them stops getting anywhere — a wall, a corner, the back of
+ * the bakery — they take it as a wall and walk along it for a moment
+ * instead of leaning on it for the rest of the game.
+ */
+const JAMMED = 0.3
+const SKIRT = 1.2
 
 /**
  * The moment somebody's beam lands on you they stop looking and start
@@ -130,6 +163,15 @@ export interface Folk {
   /** Seeker game: you have shone a light on this one. */
   found: boolean
   moving: boolean
+  /** How fast they are actually going, so the legs match the walk. */
+  speed: number
+  /** Seconds spent getting nowhere, and seconds left of walking it off. */
+  stuck: number
+  skirt: number
+  /** The heading their torch swings about while they are stood still. */
+  look: number
+  /** Their place in that swing, so eleven torches are not all in step. */
+  phase: number
   /** Seconds they stand and sweep before moving on. */
   pause: number
   /** Seconds of chase left. Above zero they are running, not looking. */
@@ -220,16 +262,26 @@ export function openHide(role: Role) {
     const spot = spots[i % spots.length]
     // Seeking, they are already tucked away. Hiding, they start in the square
     // with their eyes shut and their backs to you.
-    const at: Vec2 = role === 'seeker' ? spot : [Math.sin(i) * 6, Math.cos(i) * 6]
+    const at: Vec2 =
+      role === 'seeker' ? spot : [Math.sin(i) * 6, Math.cos(i) * 6]
+    const facing =
+      role === 'seeker'
+        ? hash(i + 1) * Math.PI * 2
+        : Math.atan2(-at[0], -at[1]) + Math.PI
     return {
       id,
       x: at[0],
       z: at[1],
-      facing: role === 'seeker' ? hash(i + 1) * Math.PI * 2 : Math.atan2(-at[0], -at[1]) + Math.PI,
+      facing,
       toX: at[0],
       toZ: at[1],
       found: false,
       moving: false,
+      speed: 0,
+      stuck: 0,
+      skirt: 0,
+      look: facing,
+      phase: hash(i * 3 + 7) * Math.PI * 2,
       pause: PAUSE,
       chase: 0,
       lastX: at[0],
@@ -300,7 +352,10 @@ function inBeam(
 }
 
 /** The nearest one you have not found yet, for the arrow and the HUD. */
-export function nearestHidden(x: number, z: number): { folk: Folk; distance: number } | null {
+export function nearestHidden(
+  x: number,
+  z: number,
+): { folk: Folk; distance: number } | null {
   let best: Folk | null = null
   let bestDist = Infinity
   for (const f of HIDE.folk) {
@@ -363,6 +418,7 @@ export function stepHide(delta: number, player: HidePlayer): HideEvents {
     // They stay put. Your beam is the only thing that happens.
     for (const f of HIDE.folk) {
       f.moving = false
+      f.speed = 0
       if (f.found) continue
       // A light on somebody is not finding them. You have to reach them.
       if (Math.hypot(f.x - player.x, f.z - player.z) < TOUCH) {
@@ -381,7 +437,10 @@ export function stepHide(delta: number, player: HidePlayer): HideEvents {
     const near = nearestHidden(player.x, player.z)
     HIDE.warmth =
       near && near.distance < PULSE_RANGE
-        ? Math.max(0, Math.min(1, 1 - (near.distance - TOUCH) / (PULSE_RANGE - TOUCH)))
+        ? Math.max(
+            0,
+            Math.min(1, 1 - (near.distance - TOUCH) / (PULSE_RANGE - TOUCH)),
+          )
         : 0
 
     HIDE.pulseAt -= delta
@@ -417,14 +476,27 @@ export function stepHide(delta: number, player: HidePlayer): HideEvents {
 
   for (const f of HIDE.folk) {
     f.moving = false
+    f.speed = 0
     if (!searching) {
       // Counting, with their backs turned.
       continue
     }
 
-    if (inBeam(f.x, f.z, f.facing, player.x, player.z, arc, reach)) {
+    const off = Math.hypot(f.x - player.x, f.z - player.z)
+    // Either the beam lands on you, or they are simply near enough to have
+    // you without it.
+    const sense = player.crouched && !player.moving ? SENSE_STILL : SENSE
+    const spotted =
+      (off < sense && !blocked(f.x, f.z, player.x, player.z)) ||
+      inBeam(f.x, f.z, f.facing, player.x, player.z, arc, reach)
+
+    if (spotted) {
       if (f.chase <= 0) {
-        HIDE.feed = { text: 'Somebody has seen you.', kind: 'bad', at: Date.now() }
+        HIDE.feed = {
+          text: 'Somebody has seen you.',
+          kind: 'bad',
+          at: Date.now(),
+        }
       }
       f.chase = CHASE_MEMORY
       f.lastX = player.x
@@ -437,50 +509,76 @@ export function stepHide(delta: number, player: HidePlayer): HideEvents {
     const hunting = f.chase > 0
     if (hunting) {
       chasers++
-      closest = Math.min(closest, Math.hypot(f.x - player.x, f.z - player.z))
+      closest = Math.min(closest, off)
     }
 
     const dx = (hunting ? f.lastX : f.toX) - f.x
     const dz = (hunting ? f.lastZ : f.toZ) - f.z
     const gap = Math.hypot(dx, dz)
 
-    if (gap > 1) {
-      const step = Math.min(gap, (hunting ? CHASE_PACE : PACE) * delta)
-      const to: [number, number] = [
-        f.x + (dx / gap) * step,
-        f.z + (dz / gap) * step,
-      ]
+    // Running somebody down means running all the way onto them. Pulling up
+    // a metre short of where you were is how a seeker ends up stood beside
+    // you for the rest of the game with a hand never quite laid on you.
+    const halt = hunting ? 0.2 : 1
+
+    if (gap > halt) {
+      const pace = hunting ? CHASE_PACE : PACE
+      const step = Math.min(gap, pace * delta)
+      let ax = dx / gap
+      let az = dz / gap
+
+      // Walking a wall off: cut across it, still leaning the way they want
+      // to go, until they come round the end of it.
+      if (f.skirt > 0) {
+        f.skirt -= delta
+        const side = f.phase > Math.PI ? 1 : -1
+        const sx = ax * 0.3 - az * side
+        const sz = az * 0.3 + ax * side
+        const len = Math.hypot(sx, sz) || 1
+        ax = sx / len
+        az = sz / len
+      }
+
+      const fromX = f.x
+      const fromZ = f.z
+      const to: [number, number] = [f.x + ax * step, f.z + az * step]
       // Round the buildings rather than through them, so getting something
-      // solid between you and them is worth doing.
-      resolveCollisions(to, 0.6, STATIC_COLLIDERS, {
-        kind: 'circle',
-        radius: ISLAND_WALK_RADIUS - 4,
-      })
+      // solid between you and them is worth doing — but nowhere he can stand
+      // is out of their reach.
+      resolveCollisions(to, 0.6, STATIC_COLLIDERS, SEARCH_GROUND)
       f.x = to[0]
       f.z = to[1]
-      f.facing = Math.atan2(dx / gap, dz / gap)
+
+      if (Math.hypot(f.x - fromX, f.z - fromZ) < step * 0.5) {
+        f.stuck += delta
+        if (f.stuck > JAMMED && f.skirt <= 0) {
+          f.skirt = SKIRT
+          f.stuck = 0
+        }
+      } else {
+        f.stuck = Math.max(0, f.stuck - delta)
+      }
+
+      f.facing = Math.atan2(ax, az)
+      f.look = f.facing
       f.moving = true
+      f.speed = pace
       f.pause = PAUSE
     } else if (hunting) {
-      // Got to where you were and you are not there. Look about.
-      f.facing += Math.sin(HIDE.elapsed * 3 + f.x) * SWEEP * 2 * delta
+      // Got to where you were and you are not there. Look about, quickly.
+      f.facing = f.look + Math.sin(HIDE.elapsed * 2.6 + f.phase) * SWEEP
     } else {
-      // Stand and sweep the torch, then pick somewhere else to look.
+      // Stand and rake the torch across the dark, then pick somewhere else
+      // to look. The swing is about the way they came in, so the beam
+      // actually crosses the ground in front of them.
       f.pause -= delta
-      f.facing += Math.sin(HIDE.elapsed * 1.6 + f.x) * SWEEP * delta
+      f.facing = f.look + Math.sin(HIDE.elapsed * 1.15 + f.phase) * SWEEP
       if (f.pause <= 0) {
         const next = clearSpot(HIDE.elapsed * 13 + f.x + f.z)
         f.toX = next[0]
         f.toZ = next[1]
         f.pause = PAUSE
       }
-    }
-
-    // Nobody wanders off the island looking for you.
-    const out = Math.hypot(f.x, f.z)
-    if (out > ISLAND_WALK_RADIUS - 6) {
-      f.x = (f.x / out) * (ISLAND_WALK_RADIUS - 6)
-      f.z = (f.z / out) * (ISLAND_WALK_RADIUS - 6)
     }
   }
 
@@ -536,9 +634,9 @@ export function stepHide(delta: number, player: HidePlayer): HideEvents {
 
   // Seeing you is not catching you. Somebody has to get a hand on you, which
   // is the same rule you play by when it is the other way round.
-  const caught = searching && HIDE.folk.some(
-    (f) => Math.hypot(f.x - player.x, f.z - player.z) < TOUCH,
-  )
+  const caught =
+    searching &&
+    HIDE.folk.some((f) => Math.hypot(f.x - player.x, f.z - player.z) < TOUCH)
 
   if (caught) {
     HIDE.done = true

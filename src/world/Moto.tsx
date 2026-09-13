@@ -18,7 +18,7 @@ import { isDown, readMove } from '../game/input'
 import { groundHeight } from '../game/terrain'
 import { isInteractive, useGame } from '../state/store'
 import { Character, type CharacterMotion } from './Character'
-import { PLAYER_POS, PLAYER_VIEW } from './Player'
+import { PLAYER_POS, PLAYER_VIEW } from '../game/player'
 import type { Npc } from '../types'
 import * as sfx from '../game/audio'
 
@@ -94,7 +94,11 @@ function Markers() {
           >
             <mesh position={[0, 0.75, 0]} castShadow>
               <boxGeometry args={[0.12, 1.5, 0.12]} />
-              <meshStandardMaterial color="#e9edf2" flatShading roughness={0.8} />
+              <meshStandardMaterial
+                color="#e9edf2"
+                flatShading
+                roughness={0.8}
+              />
             </mesh>
             <mesh position={[0, 1.5, 0]}>
               <boxGeometry args={[0.7, 0.34, 0.06]} />
@@ -552,7 +556,10 @@ export function MotoGame() {
         y + 3.4 + Math.sin(state.clock.elapsedTime * 3) * 0.12,
         MOTO.z,
       )
-      pointer.current.rotation.y = Math.atan2(ahead.x - MOTO.x, ahead.z - MOTO.z)
+      pointer.current.rotation.y = Math.atan2(
+        ahead.x - MOTO.x,
+        ahead.z - MOTO.z,
+      )
     }
 
     PLAYER_POS.set(MOTO.x, y, MOTO.z)

@@ -520,6 +520,56 @@ canvas {
   animation: pop-in 0.16s ease both;
 }
 
+/* ---------------------------- the long hold --------------------------- */
+
+/* Sits above the interaction prompt rather than on top of it: she is
+   standing right there by the time you would ever want to do it twice. */
+.hold {
+  position: absolute;
+  left: 50%;
+  bottom: 5.5rem;
+  transform: translateX(-50%);
+  display: none;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 99px;
+  border: 3px solid var(--line);
+  background: rgba(253, 247, 233, 0.96);
+  box-shadow: 0 4px 0 rgba(42, 32, 51, 0.3);
+}
+
+.hold--on {
+  display: flex;
+}
+
+.hold__track {
+  width: 150px;
+  height: 9px;
+  border-radius: 99px;
+  background: var(--paper-2);
+  border: 2px solid var(--line);
+  overflow: hidden;
+}
+
+.hold__fill {
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #ffd166, #ff8fb3);
+}
+
+/* Full, and holding. It says nothing about what to do with it. */
+.hold--ready .hold__fill {
+  background: linear-gradient(90deg, #ff8fb3, #ff3d81);
+  animation: hold-ready 0.9s ease-in-out infinite;
+}
+
+@keyframes hold-ready {
+  50% {
+    opacity: 0.5;
+  }
+}
+
 .prompt strong {
   font-weight: 800;
   color: #2f6bb3;

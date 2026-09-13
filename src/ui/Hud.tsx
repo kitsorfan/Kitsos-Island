@@ -9,16 +9,55 @@ import {
   useGame,
 } from '../state/store'
 import * as sfx from '../game/audio'
-import { ZOOM_STEP, sprintLock, zoomBy } from '../game/input'
+import { ZOOM_STEP, sprintLock, zoomBy, zoomHold } from '../game/input'
 import { BalloonHud } from './BalloonHud'
 import { SettingsCard } from './SettingsCard'
 import { useT } from '../i18n/useT'
 import { HideHud } from './HideHud'
+import { HoldMeter } from './HoldMeter'
 import { Minimap } from './Minimap'
 import { MotoHud } from './MotoHud'
 import { RescueHud } from './RescueHud'
 import { PaintballHud } from './PaintballHud'
 import { useCoarsePointer } from './useCoarsePointer'
+
+/**
+ * One notch on the way down, and then it keeps going while you hold it.
+ *
+ * The step is on pointerdown rather than on click so that a press and a hold
+ * are the same gesture starting: click fires on release, which would have put
+ * an extra notch on the end of every hold.
+ */
+function ZoomButton({
+  way,
+  title,
+  label,
+}: {
+  way: 'in' | 'out'
+  title: string
+  label: string
+}) {
+  const stop = () => {
+    zoomHold.in = false
+    zoomHold.out = false
+  }
+  return (
+    <button
+      className="icon-button"
+      title={title}
+      onPointerDown={() => {
+        zoomBy(way === 'in' ? 1 / ZOOM_STEP : ZOOM_STEP)
+        zoomHold[way] = true
+      }}
+      onPointerUp={stop}
+      onPointerLeave={stop}
+      onPointerCancel={stop}
+    >
+      {way === 'in' ? '🔍' : '🔭'}
+      <span>{label}</span>
+    </button>
+  )
+}
 
 export function Hud() {
   const t = useT()
@@ -34,6 +73,7 @@ export function Hud() {
   const openMap = useGame((s) => s.openMap)
   const openGreeting = useGame((s) => s.openGreeting)
   const night = useGame((s) => s.night)
+  const firstPerson = useGame((s) => s.firstPerson)
   const toggleNight = useGame((s) => s.toggleNight)
   const handLight = useGame((s) => s.handLight)
   const toggleHandLight = useGame((s) => s.toggleHandLight)
@@ -44,6 +84,15 @@ export function Hud() {
   const flying = useGame((s) => s.balloon?.status === 'flying')
   const hiding = useGame((s) => s.hide?.status === 'playing')
   const sailing = useGame((s) => s.rescue?.status === 'sailing')
+  const swimming = useGame((s) => s.swimming)
+  /**
+   * Any game at all, briefing card and result card included — which is what
+   * the day-night switch is locked against, rather than only the minutes
+   * you are actually playing.
+   */
+  const inGame = useGame((s) =>
+    Boolean(s.hide || s.paintball || s.moto || s.balloon || s.rescue),
+  )
   const openArcade = useGame((s) => s.openArcade)
   const exitPaintball = useGame((s) => s.exitPaintball)
   const exitMoto = useGame((s) => s.exitMoto)
@@ -169,7 +218,7 @@ export function Hud() {
                 sfx.confirm()
                 openGreeting()
               }}
-              title={t('Contact & full CV (C)')}
+              title={t('Contact & full CV (G)')}
             >
               👋<span>{t('Say hi')}</span>
             </button>
@@ -187,15 +236,14 @@ export function Hud() {
         <div className="hud__buttons">
           <button
             className="icon-button"
-            onClick={() => {
-              sfx.confirm()
-              toggleNight()
-            }}
-            disabled={Boolean(hiding)}
+            onClick={toggleNight}
+            disabled={inGame}
             title={
               hiding
                 ? t('The lights stay out until the game is over')
-                : t('Day or night (L)')
+                : inGame
+                  ? t('The light stays as it is until the game is over')
+                  : t('Day or night (L)')
             }
           >
             {night ? '🌙' : '☀️'}
@@ -208,11 +256,13 @@ export function Hud() {
             {night && (
               <button
                 className="icon-button"
-                onClick={() => {
-                  sfx.confirm()
-                  toggleHandLight()
-                }}
-                title={t('Flashlight, torch, or out (T)')}
+                onClick={toggleHandLight}
+                disabled={swimming}
+                title={t(
+                  swimming
+                    ? 'Nothing stays alight in the water'
+                    : 'Flashlight, torch, or out (T)',
+                )}
               >
                 {handLight === 'torch'
                   ? '🔥'
@@ -243,20 +293,22 @@ export function Hud() {
             >
               👟<span>{t(sprint ? 'Running' : 'Walk')}</span>
             </button>
-            <button
-              className="icon-button"
-              onClick={() => zoomBy(1 / ZOOM_STEP)}
-              title={t('Zoom in (= or the wheel)')}
-            >
-              🔍<span>{t('In')}</span>
-            </button>
-            <button
-              className="icon-button"
-              onClick={() => zoomBy(ZOOM_STEP)}
-              title={t('Zoom out (- or the wheel)')}
-            >
-              🔭<span>{t('Out')}</span>
-            </button>
+            {/* Nothing to pull the camera back from when you are inside
+                his head, so the pair of them stand down. */}
+            {!firstPerson && (
+              <>
+                <ZoomButton
+                  way="in"
+                  title={t('Zoom in (Z, = or the wheel)')}
+                  label={t('In')}
+                />
+                <ZoomButton
+                  way="out"
+                  title={t('Zoom out (C, - or the wheel)')}
+                  label={t('Out')}
+                />
+              </>
+            )}
           </div>
         )}
       </div>
@@ -280,9 +332,11 @@ export function Hud() {
         </p>
       )}
 
+      <HoldMeter />
+
       {mode === 'explore' && nearby && !playing && (
         <div className={`prompt${nearby.blocked ? ' prompt--locked' : ''}`}>
-          <kbd>{coarse ? 'A' : 'E'}</kbd>
+          <kbd>{coarse ? 'A' : 'Enter'}</kbd>
           <span>
             {nearby.verb ? `${nearby.verb} ` : ''}
             <strong>{nearby.label}</strong>

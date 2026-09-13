@@ -1,6 +1,12 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Color, type Group, type Mesh, type MeshBasicMaterial, type PointLight } from 'three'
+import {
+  Color,
+  type Group,
+  type Mesh,
+  type MeshBasicMaterial,
+  type PointLight,
+} from 'three'
 import { Amalia } from './Amalia'
 import { DANCEFLOOR, PARTY_COLORS, STACK_ANGLES } from '../data/party'
 import { partyBeat } from '../game/party'
@@ -23,7 +29,13 @@ function Floor() {
   const tiles = useRef<(Mesh | null)[]>([])
 
   const layout = useMemo(() => {
-    const out: { inner: number; outer: number; from: number; ring: number; sector: number }[] = []
+    const out: {
+      inner: number
+      outer: number
+      from: number
+      ring: number
+      sector: number
+    }[] = []
     for (let ring = 0; ring < RINGS; ring++) {
       const inner = (DANCEFLOOR.radius * (ring + 0.15)) / RINGS
       const outer = (DANCEFLOOR.radius * (ring + 1)) / RINGS
@@ -56,7 +68,13 @@ function Floor() {
   })
 
   return (
-    <group position={[DANCEFLOOR.x, groundHeight(DANCEFLOOR.x, DANCEFLOOR.z) + 0.05, DANCEFLOOR.z]}>
+    <group
+      position={[
+        DANCEFLOOR.x,
+        groundHeight(DANCEFLOOR.x, DANCEFLOOR.z) + 0.05,
+        DANCEFLOOR.z,
+      ]}
+    >
       {layout.map((tile, i) => (
         <mesh
           key={i}
@@ -126,7 +144,11 @@ function Stack({ angle, index }: { angle: number; index: number }) {
         <boxGeometry args={[1.2, 0.8, 1]} />
         <meshStandardMaterial color="#2f3542" flatShading roughness={0.9} />
       </mesh>
-      <mesh ref={woofer} position={[0, 0.75, 0.62]} rotation={[Math.PI / 2, 0, 0]}>
+      <mesh
+        ref={woofer}
+        position={[0, 0.75, 0.62]}
+        rotation={[Math.PI / 2, 0, 0]}
+      >
         <cylinderGeometry args={[0.5, 0.5, 0.06, 14]} />
         <meshStandardMaterial color="#12151a" roughness={0.6} />
       </mesh>

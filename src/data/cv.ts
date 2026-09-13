@@ -1,4 +1,4 @@
-import type { PanelSection } from '../types'
+import type { PanelSection } from '../types.ts'
 import {
   ARMY_SECTIONS,
   CERTIFICATIONS_SECTIONS,
@@ -16,7 +16,7 @@ import {
   UNIVERSITY_SECTIONS,
   VELTISTON_SECTIONS,
   VOLUNTEER_SECTIONS,
-} from './profile'
+} from './profile.ts'
 
 function renderSections(sections: PanelSection[]): string[] {
   const out: string[] = []
@@ -58,8 +58,10 @@ function renderSections(sections: PanelSection[]): string[] {
           for (const entry of block.entries) {
             const org = entry.org ? ` — ${entry.org}` : ''
             out.push(`### ${entry.title}${org}`, `*${entry.meta}*`, '')
-            if (entry.bullets) out.push(...entry.bullets.map((b) => `- ${b}`), '')
-            if (entry.tags) out.push(`Technologies: ${entry.tags.join(', ')}`, '')
+            if (entry.bullets)
+              out.push(...entry.bullets.map((b) => `- ${b}`), '')
+            if (entry.tags)
+              out.push(`Technologies: ${entry.tags.join(', ')}`, '')
           }
           break
       }

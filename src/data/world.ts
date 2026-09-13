@@ -4,7 +4,15 @@ import { PROFILE } from './profile'
 
 /** Everything inside this radius is flat, walkable ground. */
 export const ISLAND_FLAT_RADIUS = 108
-export const ISLAND_WALK_RADIUS = 111
+/**
+ * And how far out on to the sand he may walk.
+ *
+ * Six metres short of the water, which leaves the whole width of the beach
+ * to walk down — and, more to the point, leaves room to get round the hill
+ * on the west shore, whose foot comes to within a metre of where this used
+ * to stop. A beach you cannot walk the length of is a wall with a view.
+ */
+export const ISLAND_WALK_RADIUS = 117
 export const ISLAND_SHORE_RADIUS = 138
 export const ISLAND_EDGE = 176
 
@@ -44,7 +52,89 @@ export interface Ledge {
   height: number
 }
 
-/** The Academy's front steps, and the portico landing they lead to. */
+/**
+ * The jetty on the west shore, out past the school.
+ *
+ * One definition of it, because the planks you can see, the surface you walk
+ * on and the strip that lets you off the island's leash are all the same
+ * jetty — and a dock kept in three places is a dock in the wrong place twice.
+ */
+export const DOCK = {
+  /** Centres of the first plank, at the top of the beach, and of the last. */
+  head: -112,
+  end: -134,
+  /** Plank spacing, which is also how long each plank is along the run. */
+  step: 2,
+  z: 20,
+  /** Half the width of the planking. */
+  halfWidth: 2.2,
+  /**
+   * Top of the decking, and it is level all the way out.
+   *
+   * High enough that the landward end stands clear of the sand on its piles:
+   * a deck laid at the height of the water would have its first few planks
+   * buried, which is a walkway you can feel underfoot and cannot see.
+   */
+  deck: 0.1,
+  /** How far the planks are laid off the ground. */
+  thickness: 0.2,
+  /** Length of the gangway board that bridges the sand and the deck. */
+  ramp: 4,
+  /**
+   * How far short of the planking's own edge he is stopped, on every side of
+   * it that ends in water. Half a metre: he leans over the edge rather than
+   * standing on the last inch of it, and — since the decking stops being
+   * ground he can stand on at exactly that edge — never at the one spot
+   * where the planks are behind him and the sea bed is underfoot.
+   */
+  inset: 0.5,
+  /**
+   * How far back up the sand the walkable strip reaches past the gangway.
+   * The island's own edge cuts across the beach here, and without the
+   * overlap the jetty would be a walkway you could see and never set foot on.
+   */
+  approach: 3,
+} as const
+
+/** The planks themselves, beach end first. */
+export const DOCK_PLANKS: number[] = Array.from(
+  { length: Math.round(Math.abs(DOCK.end - DOCK.head) / DOCK.step) + 1 },
+  (_, i) => DOCK.head - i * DOCK.step,
+)
+
+/** Landward edge of the decking, where the gangway meets it. */
+export const DOCK_EDGE = DOCK.head + DOCK.step / 2
+
+/** And the seaward one, off the end of the last plank. */
+export const DOCK_TIP = DOCK.end - DOCK.step / 2
+
+/**
+ * The gangway: a board from the sand up on to the deck, so the step on is
+ * walked up rather than stepped over. The sand it starts from is the flat
+ * top of the beach, which is why the near end can simply be nought.
+ */
+export const DOCK_RAMP: Ramp = {
+  from: [DOCK_EDGE + DOCK.ramp, DOCK.z],
+  to: [DOCK_EDGE, DOCK.z],
+  halfWidth: DOCK.halfWidth,
+  fromHeight: 0,
+  toHeight: DOCK.deck,
+}
+
+/**
+ * The strip he may walk down: the decking and its gangway, plus the sand
+ * that joins them to the island. Half a metre narrower than the planks, so
+ * he stops at the edge rather than with half of him over the water.
+ */
+export const DOCK_WALK = {
+  x: (DOCK_EDGE + DOCK.ramp + DOCK.approach + DOCK_TIP + DOCK.inset) / 2,
+  z: DOCK.z,
+  hx:
+    Math.abs(DOCK_TIP + DOCK.inset - DOCK_EDGE - DOCK.ramp - DOCK.approach) / 2,
+  hz: DOCK.halfWidth - DOCK.inset,
+}
+
+/** The Academy's steps and the portico landing, and the jetty's gangway. */
 export const RAMPS: Ramp[] = [
   {
     from: [0, -63.95],
@@ -53,11 +143,42 @@ export const RAMPS: Ramp[] = [
     fromHeight: 0,
     toHeight: 1.26,
   },
+  DOCK_RAMP,
 ]
 
-/** The top tread and the portico floor behind it, both at full height. */
+/**
+ * The house's front steps: three treads from the path up to the plinth.
+ *
+ * In world measurements rather than the building's own, because this is
+ * ground rather than scenery — the model is drawn at a fifty per cent scale
+ * and turned to face the path, and these are where its treads land once it
+ * has been. Their tops climb by a quarter of a metre a time, which is the
+ * same flight <HouseModel/> draws; moving one without the other puts him
+ * either inside the stone or walking a hand's breadth above it.
+ */
+const HOUSE_STEPS: Ledge[] = [0.72, 0.48, 0.24].map((height, i) => ({
+  x: -62,
+  z: 49.1 - i * 1.35,
+  hx: 2.55,
+  hz: 0.675,
+  height,
+}))
+
+/**
+ * The top tread and the portico floor behind it, both at full height — the
+ * jetty's decking, which is walkable ground laid out over the water — and
+ * the flight up to the front door of the house.
+ */
 export const LEDGES: Ledge[] = [
   { x: 0, z: -68.45, hx: 8.1, hz: 1.45, height: 1.26 },
+  ...HOUSE_STEPS,
+  {
+    x: (DOCK_EDGE + DOCK_TIP) / 2,
+    z: DOCK.z,
+    hx: Math.abs(DOCK_TIP - DOCK_EDGE) / 2,
+    hz: DOCK.halfWidth,
+    height: DOCK.deck,
+  },
 ]
 
 export const BUILDINGS: Building[] = [

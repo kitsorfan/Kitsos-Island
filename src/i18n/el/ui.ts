@@ -44,6 +44,9 @@ export const UI: Record<string, string> = {
   'Zoom out (- or the wheel)': 'Ζουμ μακριά (- ή η ροδέλα)',
   'Sound, music, quality, and the controls':
     'Ήχος, μουσική, ποιότητα και χειριστήρια',
+  'The light stays as it is until the game is over':
+    'Το φως μένει όπως είναι μέχρι να τελειώσει το παιχνίδι',
+  'Nothing stays alight in the water': 'Τίποτα δεν μένει αναμμένο στο νερό',
   'The lights stay out until the game is over':
     'Τα φώτα μένουν σβηστά μέχρι να τελειώσει το παιχνίδι',
   'Day or night (L)': 'Μέρα ή νύχτα (L)',
@@ -334,4 +337,61 @@ export const UI: Record<string, string> = {
   Subject: 'Θέμα',
   Message: 'Μήνυμα',
   '📡 Transmit': '📡 Εκπομπή',
+  'Hi Kitsos — I found you on your island…':
+    'Γεια σου Κίτσο — σε βρήκα στο νησί σου…',
+
+  /* --------------------------- Buttons and titles -------------------- */
+
+  'Open the map': 'Άνοιξε τον χάρτη',
+  'Open the map (M)': 'Άνοιξε τον χάρτη (M)',
+  'Contact & full CV (G)': 'Επικοινωνία & πλήρες βιογραφικό (G)',
+  'Zoom in (Z, = or the wheel)': 'Μεγέθυνση (Z, = ή η ρόδα)',
+  'Zoom out (C, - or the wheel)': 'Σμίκρυνση (C, - ή η ρόδα)',
+  'First person': 'Πρώτο πρόσωπο',
+  Laps: 'Γύροι',
+  Grade: 'Επίπεδο',
+
+  /* ------------------------- On-screen controls ---------------------- */
+
+  'Drop a water bomb': 'Ρίξε βόμβα νερού',
+  'Throw confetti': 'Πέτα κομφετί',
+
+  /* ---------------------------- Key legends -------------------------- */
+
+  /*
+   * What each control does, alongside the key that does it. The keys
+   * themselves stay as they are printed — a Greek keyboard has the same W
+   * and the same Shift on it, and the labels on the on-screen buttons are
+   * the ones the legend has to match.
+   */
+  'out of his own eyes': 'μέσα από τα μάτια του',
+  'zoom in and out': 'μεγέθυνση και σμίκρυνση',
+  'W and S': 'W και S',
+  'Q and E': 'Q και E',
+  'Z and C, or the wheel': 'Z και C, ή η ρόδα',
+  drift: 'πλεύση',
+  climb: 'άνοδος',
+  drop: 'ρίψη',
+  turn: 'στροφή',
+  burner: 'καυστήρας',
+  vent: 'εκτόνωση',
+  bomb: 'βόμβα',
+  confetti: 'κομφετί',
+  ride: 'οδήγηση',
+  'hold it': 'κράτα το',
+  'gas & brake': 'γκάζι & φρένο',
+  steer: 'τιμόνι',
+  wheelie: 'σούζα',
+  map: 'χάρτης',
+  shoot: 'βολή',
+  'get down': 'σκύψε',
+  walk: 'περπάτημα',
+  'keep low': 'μείνε χαμηλά',
+  torch: 'δάδα',
+  'give up': 'εγκατάλειψη',
+  helm: 'πηδάλιο',
+  'pull back to stop alongside': 'τράβα πίσω για να σταματήσεις δίπλα',
+  throttle: 'γκάζι',
+  chart: 'χάρτης',
+  'put in': 'επιστροφή',
 }

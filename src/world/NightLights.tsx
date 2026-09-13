@@ -61,7 +61,8 @@ function CampSearchlight() {
   }, [])
 
   useFrame((state) => {
-    if (sweep.current) sweep.current.rotation.y = state.clock.elapsedTime * SWEEP_SPEED
+    if (sweep.current)
+      sweep.current.rotation.y = state.clock.elapsedTime * SWEEP_SPEED
   })
 
   if (!building) return null

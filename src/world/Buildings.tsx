@@ -4,7 +4,7 @@ import type { Mesh, MeshBasicMaterial } from 'three'
 import { BUILDINGS, KEYS } from '../data/world'
 import { groundHeight } from '../game/terrain'
 import { keyCount, useGame } from '../state/store'
-import { BUILDING_MODELS } from './buildings/Models'
+import { BUILDING_MODELS } from './buildings/registry'
 import { TextPlane } from './TextSign'
 import type { Building } from '../types'
 
@@ -45,8 +45,14 @@ function Signpost({ building }: { building: Building }) {
   // Wide buildings need the board further out, clear of steps and columns.
   const side = Math.min(building.half[0] - 1, 10)
   const front = 2
-  const x = dx + Math.cos(building.rotation) * side + Math.sin(building.rotation) * front
-  const z = dz - Math.sin(building.rotation) * side + Math.cos(building.rotation) * front
+  const x =
+    dx +
+    Math.cos(building.rotation) * side +
+    Math.sin(building.rotation) * front
+  const z =
+    dz -
+    Math.sin(building.rotation) * side +
+    Math.cos(building.rotation) * front
 
   return (
     <group

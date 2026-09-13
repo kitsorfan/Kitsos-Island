@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { DoubleSide } from 'three'
 import type { Group, Object3D, PointLight, SpotLight } from 'three'
 import { partyBeat } from '../game/party'
+import { RING } from '../data/party'
 import type { HandLight, Npc } from '../types'
 
 export interface CharacterMotion {
@@ -21,6 +22,8 @@ export interface CharacterMotion {
   fright?: number
   /** 0 to 1: one arm straight out — stop where you are. */
   halt?: number
+  /** 0 to 1: chest-deep in the sea and pulling, rather than standing. */
+  swimming?: number
 }
 
 interface CharacterProps {
@@ -41,8 +44,10 @@ interface CharacterProps {
   gunColor?: string
   /** Paint on the chest, for someone who has been hit out. */
   paint?: string
-  /** A pose that overrides the idle stance — sitting on a bike, so far. */
-  pose?: 'ride'
+  /** A pose that overrides the idle stance: astride a bike, or on one knee. */
+  pose?: 'ride' | 'kneel'
+  /** A ring, held out in the free hand — or worn on it, once it is hers. */
+  ring?: boolean
   /** Carried in the off hand. Nothing else about him gives off any light. */
   hand?: HandLight
   /** Long hair, falling down the back, instead of the cropped default. */
@@ -66,10 +71,29 @@ interface CharacterProps {
 
 const IDLE: CharacterMotion = { moving: false, speed: 0, airborne: false }
 
+/**
+ * Swimming, which is the one thing he does lying down.
+ *
+ * The pitch lays him on his front a few degrees head-up; the lift and the
+ * shift put the middle of his body back over his own feet, since the rig
+ * turns about the soles of his boots and nothing else would leave him in the
+ * water he is meant to be in.
+ */
+const SWIM_PITCH = 1.36
+const SWIM_LIFT = 1.02
+const SWIM_SHIFT = -0.78
+
 /** Leg measurements, shared by the rig and the crouch that folds it. */
 const HIP = 0.85
 const THIGH = 0.42
 const SHIN = 0.43
+
+/**
+ * On one knee: how far the hips have to come down for the back knee to
+ * reach the ground with the thigh hanging straight. It is the length of the
+ * thigh and nothing else, which is why it is written as one.
+ */
+const KNEEL_SINK = HIP - THIGH
 
 export function Character({
   colors,
@@ -93,6 +117,7 @@ export function Character({
   bouquet = false,
   helmet,
   kit,
+  ring = false,
 }: CharacterProps) {
   const root = useRef<Group>(null)
   const body = useRef<Group>(null)
@@ -111,18 +136,20 @@ export function Character({
   const duck = useRef(0)
   /** Eased seat, 0 standing to 1 sitting astride a bike. */
   const seat = useRef(0)
+  /** Eased kneel, 0 standing to 1 down on one knee. */
+  const knelt = useRef(0)
   /** Eased dance, so joining in and stopping are not a snap. */
   const groove = useRef(0)
   /** Eased fright, likewise: nobody goes from calm to bolting in one frame. */
   const alarm = useRef(0)
   /** Eased halt, for the arm a sentry puts out. */
   const bar = useRef(0)
+  /** Eased swim, so going in and wading out are both a settle, not a snap. */
+  const paddle = useRef(0)
   /** The wrist that whatever he is carrying hangs in, and a torch's flame. */
   const gripRef = useRef<Group>(null)
   /** The other wrist, for the flowers. */
   const bouquetRef = useRef<Group>(null)
-  const flame = useRef<Group>(null)
-  const flameLight = useRef<PointLight>(null)
 
   useFrame((state, delta) => {
     const m = motion?.current ?? IDLE
@@ -139,13 +166,19 @@ export function Character({
     duck.current += (wanted - duck.current) * Math.min(1, delta * 12)
     const crouch = duck.current
 
-    seat.current += ((pose === 'ride' ? 1 : 0) - seat.current) *
-      Math.min(1, delta * 10)
+    seat.current +=
+      ((pose === 'ride' ? 1 : 0) - seat.current) * Math.min(1, delta * 10)
     const sit = seat.current
+
+    knelt.current +=
+      ((pose === 'kneel' ? 1 : 0) - knelt.current) * Math.min(1, delta * 6)
+    const kneel = knelt.current
 
     groove.current += ((m.dance ?? 0) - groove.current) * Math.min(1, delta * 6)
     alarm.current += ((m.fright ?? 0) - alarm.current) * Math.min(1, delta * 9)
     bar.current += ((m.halt ?? 0) - bar.current) * Math.min(1, delta * 10)
+    paddle.current +=
+      ((m.swimming ?? 0) - paddle.current) * Math.min(1, delta * 5)
 
     if (m.recoil !== undefined && m.recoil > 0) m.recoil -= delta
     const kick = Math.max(0, m.recoil ?? 0) * 3
@@ -169,7 +202,7 @@ export function Character({
     const sink =
       HIP - (THIGH * Math.cos(stand) + SHIN * Math.cos(standBend - stand))
 
-    const stride = Math.max(0, 1 - crouch - sit)
+    const stride = Math.max(0, 1 - crouch - sit - kneel)
     if (legL.current) {
       legL.current.rotation.x = m.airborne ? -0.55 : swing * stride - fold
     }
@@ -185,18 +218,22 @@ export function Character({
       // not tip the barrel at the ground.
       armL.current.rotation.x = gun
         ? -1.36 - lean + kick * 0.2
-        : hand === 'torch'
-          ? -0.95 - lean + Math.sin(phase.current) * 0.05
-          : hand === 'flashlight'
-            ? -1.18 - lean + Math.sin(phase.current) * 0.05
-            : -swing * 0.85 * (1 - sit) + (-1.22 - lean) * sit
+        : ring
+          ? -1.22 - lean + Math.sin(t * 1.4) * 0.02
+          : hand === 'torch'
+            ? -0.95 - lean + Math.sin(phase.current) * 0.05
+            : hand === 'flashlight'
+              ? -1.18 - lean + Math.sin(phase.current) * 0.05
+              : -swing * 0.85 * (1 - sit) + (-1.22 - lean) * sit
       armL.current.rotation.z = gun
         ? -0.44
-        : hand === 'torch'
-          ? -0.36
-          : hand === 'flashlight'
-            ? -0.16
-            : (m.airborne ? 0.9 : 0) * (1 - sit) - 0.28 * sit
+        : ring
+          ? -0.12
+          : hand === 'torch'
+            ? -0.36
+            : hand === 'flashlight'
+              ? -0.16
+              : (m.airborne ? 0.9 : 0) * (1 - sit) - 0.28 * sit
     }
     if (armR.current) {
       armR.current.rotation.x = gun
@@ -228,23 +265,13 @@ export function Character({
 
     if (body.current) {
       body.current.position.y = bounce * (1 - crouch) - sink
+      // Upright and over his own feet, unless something below lays him down.
+      body.current.position.z = 0
+      body.current.rotation.x = 0
       body.current.rotation.z = m.moving ? Math.sin(phase.current) * 0.04 : 0
       // The shoulders follow a little, so it is not just a swivelling head.
       body.current.rotation.y = target ? gaze.current.x * 0.3 : 0
     }
-    if (flame.current) {
-      // Two fast waves plus a little noise: never quite the same shape twice.
-      const lick =
-        0.86 +
-        Math.sin(t * 11) * 0.08 +
-        Math.sin(t * 23.3) * 0.05 +
-        Math.random() * 0.03
-      flame.current.scale.set(1 + (1 - lick) * 0.5, lick, 1 + (1 - lick) * 0.5)
-      flame.current.rotation.y = t * 2.4
-      flame.current.position.x = Math.sin(t * 7.3) * 0.015
-      if (flameLight.current) flameLight.current.intensity = 22 * lick
-    }
-
     if (head.current) {
       head.current.rotation.y = target
         ? gaze.current.x * 0.8
@@ -252,10 +279,47 @@ export function Character({
           ? 0
           : Math.sin(t * 0.6) * 0.28
       // Looking ahead rather than at his own boots.
-      head.current.rotation.x = (target ? gaze.current.y * 0.32 : 0) - lean * 0.7
+      head.current.rotation.x =
+        (target ? gaze.current.y * 0.32 : 0) - lean * 0.7
       head.current.rotation.z = target
         ? gaze.current.x * -0.08
         : Math.sin(t * 1.1) * 0.03
+    }
+
+    /* --------------------------------- kneel ---------------------------- */
+
+    // Down on one knee. The back thigh hangs straight and its knee takes the
+    // ground — which is the whole reason the hips drop by exactly a thigh —
+    // while the front one comes up level with its shin under it. Chin up:
+    // whoever he is asking is standing in front of him, not on the sand.
+    if (knelt.current > 0.01) {
+      const mix = knelt.current
+      const blend = (current: number, wanted: number) =>
+        current * (1 - mix) + wanted * mix
+
+      if (legL.current) {
+        legL.current.rotation.x = blend(legL.current.rotation.x, 0)
+      }
+      if (kneeL.current) {
+        kneeL.current.rotation.x = blend(kneeL.current.rotation.x, 1.75)
+      }
+      if (legR.current) {
+        legR.current.rotation.x = blend(legR.current.rotation.x, -1.55)
+      }
+      if (kneeR.current) {
+        kneeR.current.rotation.x = blend(kneeR.current.rotation.x, 1.55)
+      }
+      if (torso.current) {
+        torso.current.rotation.x = blend(torso.current.rotation.x, 0.06)
+      }
+      if (head.current) {
+        head.current.rotation.x = blend(head.current.rotation.x, -0.2)
+        head.current.rotation.y = blend(head.current.rotation.y, 0)
+      }
+      if (body.current) {
+        body.current.position.y = blend(body.current.position.y, -KNEEL_SINK)
+        body.current.rotation.z = blend(body.current.rotation.z, 0)
+      }
     }
 
     /* --------------------------------- dance -------------------------- */
@@ -276,62 +340,100 @@ export function Character({
       if (style === 0) {
         // Hands up, bouncing on the beat.
         if (armL.current) {
-          armL.current.rotation.x = blend(armL.current.rotation.x, -2.5 - hop * 0.4)
+          armL.current.rotation.x = blend(
+            armL.current.rotation.x,
+            -2.5 - hop * 0.4,
+          )
           armL.current.rotation.z = blend(armL.current.rotation.z, -0.5)
         }
         if (armR.current) {
-          armR.current.rotation.x = blend(armR.current.rotation.x, -2.5 - hop * 0.4)
+          armR.current.rotation.x = blend(
+            armR.current.rotation.x,
+            -2.5 - hop * 0.4,
+          )
           armR.current.rotation.z = blend(armR.current.rotation.z, 0.5)
         }
-        if (legL.current) legL.current.rotation.x = blend(legL.current.rotation.x, hop * 0.2)
-        if (legR.current) legR.current.rotation.x = blend(legR.current.rotation.x, -hop * 0.2)
+        if (legL.current)
+          legL.current.rotation.x = blend(legL.current.rotation.x, hop * 0.2)
+        if (legR.current)
+          legR.current.rotation.x = blend(legR.current.rotation.x, -hop * 0.2)
       } else if (style === 1) {
         // Arms out, swaying from the waist.
         if (armL.current) {
-          armL.current.rotation.x = blend(armL.current.rotation.x, -0.3 + swing * 0.5)
+          armL.current.rotation.x = blend(
+            armL.current.rotation.x,
+            -0.3 + swing * 0.5,
+          )
           armL.current.rotation.z = blend(armL.current.rotation.z, -1.35)
         }
         if (armR.current) {
-          armR.current.rotation.x = blend(armR.current.rotation.x, -0.3 - swing * 0.5)
+          armR.current.rotation.x = blend(
+            armR.current.rotation.x,
+            -0.3 - swing * 0.5,
+          )
           armR.current.rotation.z = blend(armR.current.rotation.z, 1.35)
         }
-        if (legL.current) legL.current.rotation.x = blend(legL.current.rotation.x, swing * 0.28)
-        if (legR.current) legR.current.rotation.x = blend(legR.current.rotation.x, -swing * 0.28)
+        if (legL.current)
+          legL.current.rotation.x = blend(legL.current.rotation.x, swing * 0.28)
+        if (legR.current)
+          legR.current.rotation.x = blend(
+            legR.current.rotation.x,
+            -swing * 0.28,
+          )
       } else if (style === 3) {
         // Hers: both arms high, and turning the whole time.
         if (armL.current) {
-          armL.current.rotation.x = blend(armL.current.rotation.x, -2.75 - hop * 0.3)
+          armL.current.rotation.x = blend(
+            armL.current.rotation.x,
+            -2.75 - hop * 0.3,
+          )
           armL.current.rotation.z = blend(armL.current.rotation.z, -0.42)
         }
         if (armR.current) {
-          armR.current.rotation.x = blend(armR.current.rotation.x, -2.75 - hop * 0.3)
+          armR.current.rotation.x = blend(
+            armR.current.rotation.x,
+            -2.75 - hop * 0.3,
+          )
           armR.current.rotation.z = blend(armR.current.rotation.z, 0.42)
         }
-        if (legL.current) legL.current.rotation.x = blend(legL.current.rotation.x, swing * 0.34)
-        if (legR.current) legR.current.rotation.x = blend(legR.current.rotation.x, -swing * 0.34)
+        if (legL.current)
+          legL.current.rotation.x = blend(legL.current.rotation.x, swing * 0.34)
+        if (legR.current)
+          legR.current.rotation.x = blend(
+            legR.current.rotation.x,
+            -swing * 0.34,
+          )
       } else {
         // Step and touch, turning a quarter at a time.
         if (armL.current) {
-          armL.current.rotation.x = blend(armL.current.rotation.x, -1.5 - swing * 0.6)
+          armL.current.rotation.x = blend(
+            armL.current.rotation.x,
+            -1.5 - swing * 0.6,
+          )
           armL.current.rotation.z = blend(armL.current.rotation.z, -0.7)
         }
         if (armR.current) {
-          armR.current.rotation.x = blend(armR.current.rotation.x, -1.5 + swing * 0.6)
+          armR.current.rotation.x = blend(
+            armR.current.rotation.x,
+            -1.5 + swing * 0.6,
+          )
           armR.current.rotation.z = blend(armR.current.rotation.z, 0.7)
         }
-        if (legL.current) legL.current.rotation.x = blend(legL.current.rotation.x, swing * 0.55)
-        if (legR.current) legR.current.rotation.x = blend(legR.current.rotation.x, -swing * 0.55)
+        if (legL.current)
+          legL.current.rotation.x = blend(legL.current.rotation.x, swing * 0.55)
+        if (legR.current)
+          legR.current.rotation.x = blend(
+            legR.current.rotation.x,
+            -swing * 0.55,
+          )
       }
 
       if (body.current) {
         body.current.position.y += hop * (style === 3 ? 0.2 : 0.13) * mix
         body.current.rotation.z += slow * 0.14 * mix
         body.current.rotation.y +=
-          (style === 3
-            ? beat * 0.9
-            : style === 2
-              ? slow * 0.5
-              : swing * 0.16) * mix
+          (style === 3 ? beat * 0.9 : style === 2 ? slow * 0.5 : swing * 0.16) *
+          mix
       }
       if (head.current) {
         head.current.rotation.x += hop * 0.16 * mix
@@ -350,11 +452,17 @@ export function Character({
         current * (1 - mix) + wanted * mix
 
       if (armL.current) {
-        armL.current.rotation.x = blend(armL.current.rotation.x, -2.72 + flap * 0.32)
+        armL.current.rotation.x = blend(
+          armL.current.rotation.x,
+          -2.72 + flap * 0.32,
+        )
         armL.current.rotation.z = blend(armL.current.rotation.z, -0.55)
       }
       if (armR.current) {
-        armR.current.rotation.x = blend(armR.current.rotation.x, -2.72 - flap * 0.32)
+        armR.current.rotation.x = blend(
+          armR.current.rotation.x,
+          -2.72 - flap * 0.32,
+        )
         armR.current.rotation.z = blend(armR.current.rotation.z, 0.55)
       }
       if (torso.current) {
@@ -377,6 +485,83 @@ export function Character({
           armR.current.rotation.z * (1 - mix) + 0.14 * mix
       }
       if (head.current) head.current.rotation.x -= 0.08 * mix
+    }
+
+    /* --------------------------------- swim ----------------------------- */
+
+    // Laid out flat on the water and pulling: the body pitches over on to
+    // its front, the arms take alternate strokes over the head, the legs
+    // flutter behind and the whole of him rolls with the stroke.
+    //
+    // He is drawn from the feet up, so tipping him forward alone would swing
+    // him round his own ankles and stand his head a body's length in front
+    // of where he is. The lift and the shift back are what put the middle of
+    // him back over the middle of him, lying along the surface.
+    if (paddle.current > 0.01) {
+      const mix = paddle.current
+      // Half the stride rate: an arm that swings like a walk is not a stroke.
+      const pull = phase.current * 0.5
+      const stroke = Math.sin(pull)
+      const blend = (current: number, wanted: number) =>
+        current * (1 - mix) + wanted * mix
+
+      if (armL.current) {
+        // From stretched out over the head to back past the hip, which is
+        // one whole stroke of a crawl.
+        armL.current.rotation.x = blend(
+          armL.current.rotation.x,
+          -1.85 + stroke * 1.3,
+        )
+        armL.current.rotation.z = blend(armL.current.rotation.z, -0.3)
+      }
+      if (armR.current) {
+        armR.current.rotation.x = blend(
+          armR.current.rotation.x,
+          -1.85 - stroke * 1.3,
+        )
+        armR.current.rotation.z = blend(armR.current.rotation.z, 0.3)
+      }
+      const kick = Math.sin(pull * 3.2)
+      if (legL.current) {
+        legL.current.rotation.x = blend(legL.current.rotation.x, kick * 0.26)
+      }
+      if (legR.current) {
+        legR.current.rotation.x = blend(legR.current.rotation.x, -kick * 0.26)
+      }
+      // Barely bent: a flutter kick is not a stride.
+      if (kneeL.current) {
+        kneeL.current.rotation.x = blend(
+          kneeL.current.rotation.x,
+          0.18 + kick * 0.16,
+        )
+      }
+      if (kneeR.current) {
+        kneeR.current.rotation.x = blend(
+          kneeR.current.rotation.x,
+          0.18 - kick * 0.16,
+        )
+      }
+      if (torso.current) {
+        torso.current.rotation.x = blend(torso.current.rotation.x, -0.1)
+      }
+      if (head.current) {
+        // Face in the water, chin lifted enough to see where he is going.
+        head.current.rotation.x = blend(head.current.rotation.x, -0.62)
+        head.current.rotation.y = blend(head.current.rotation.y, 0)
+        head.current.rotation.z = blend(head.current.rotation.z, 0)
+      }
+      if (body.current) {
+        // Flat on the water, a few degrees head-up the way a swimmer lies.
+        body.current.rotation.x = blend(body.current.rotation.x, SWIM_PITCH)
+        // The roll of the stroke, about his own long axis — applied before
+        // the pitch by the default Euler order, which is what makes it one.
+        body.current.rotation.z = blend(body.current.rotation.z, stroke * 0.26)
+        body.current.position.y = blend(
+          body.current.position.y,
+          SWIM_LIFT + Math.sin(t * 1.7) * 0.05,
+        )
+        body.current.position.z = blend(body.current.position.z, SWIM_SHIFT)
+      }
     }
 
     // Wrists, last of all, so they read whatever the arms finally settled on
@@ -451,7 +636,11 @@ export function Character({
             {/* Torso */}
             <mesh position={[0, 1.05, 0]} castShadow>
               <boxGeometry args={[0.62, 0.72, 0.38]} />
-              <meshStandardMaterial color={colors.shirt} flatShading roughness={0.9} />
+              <meshStandardMaterial
+                color={colors.shirt}
+                flatShading
+                roughness={0.9}
+              />
             </mesh>
 
             {/* Match kit: a team bib over whatever they turned up in */}
@@ -459,7 +648,11 @@ export function Character({
               <group>
                 <mesh position={[0, 1.06, 0]} castShadow>
                   <boxGeometry args={[0.66, 0.58, 0.42]} />
-                  <meshStandardMaterial color={kit} flatShading roughness={0.7} />
+                  <meshStandardMaterial
+                    color={kit}
+                    flatShading
+                    roughness={0.7}
+                  />
                 </mesh>
                 {/* A dark panel down the front, and a shoulder stripe each side */}
                 <mesh position={[0, 1.04, 0.213]}>
@@ -489,14 +682,26 @@ export function Character({
                     rotation={[0, 0, lx > 0 ? -0.13 : 0.13]}
                   >
                     <boxGeometry args={[0.13, 0.44, 0.03]} />
-                    <meshStandardMaterial color="#25282f" flatShading roughness={0.5} />
+                    <meshStandardMaterial
+                      color="#25282f"
+                      flatShading
+                      roughness={0.5}
+                    />
                   </mesh>
                 ))}
                 <group position={[0, 1.31, 0.215]}>
                   {[-0.075, 0.075].map((bx) => (
-                    <mesh key={bx} position={[bx, 0, 0]} rotation={[0, 0, bx > 0 ? -0.5 : 0.5]}>
+                    <mesh
+                      key={bx}
+                      position={[bx, 0, 0]}
+                      rotation={[0, 0, bx > 0 ? -0.5 : 0.5]}
+                    >
                       <boxGeometry args={[0.11, 0.09, 0.04]} />
-                      <meshStandardMaterial color="#1c1f26" flatShading roughness={0.5} />
+                      <meshStandardMaterial
+                        color="#1c1f26"
+                        flatShading
+                        roughness={0.5}
+                      />
                     </mesh>
                   ))}
                   <mesh>
@@ -554,20 +759,16 @@ export function Character({
                   />
                 </mesh>
                 {gun && arm.ref === armR && <Marker accent={gunColor} />}
-            {bouquet && !gun && arm.ref === armR && (
-              <group ref={bouquetRef} position={[0, -0.6, 0]}>
-                <Bouquet />
-              </group>
-            )}
-            {hand && arm.ref === armL && (
-              <group ref={gripRef} position={[0, -0.6, 0]}>
-                {hand === 'torch' ? (
-                  <Torch flame={flame} light={flameLight} />
-                ) : (
-                  <Flashlight />
+                {bouquet && !gun && arm.ref === armR && (
+                  <group ref={bouquetRef} position={[0, -0.6, 0]}>
+                    <Bouquet />
+                  </group>
                 )}
-              </group>
-            )}
+                {(hand || ring) && arm.ref === armL && (
+                  <group ref={gripRef} position={[0, -0.6, 0]}>
+                    {hand ? <HandLightRig kind={hand} /> : <RingBand />}
+                  </group>
+                )}
               </group>
             ))}
 
@@ -575,18 +776,30 @@ export function Character({
             <group ref={head} position={[0, 1.72, 0]}>
               <mesh castShadow>
                 <boxGeometry args={[0.56, 0.54, 0.52]} />
-                <meshStandardMaterial color={colors.skin} flatShading roughness={0.85} />
+                <meshStandardMaterial
+                  color={colors.skin}
+                  flatShading
+                  roughness={0.85}
+                />
               </mesh>
               {/* Hair, unless a helmet has swallowed it */}
               {!helmet && (
                 <group>
                   <mesh position={[0, 0.2, -0.03]} castShadow>
                     <boxGeometry args={[0.6, 0.24, 0.56]} />
-                    <meshStandardMaterial color={colors.hair} flatShading roughness={0.9} />
+                    <meshStandardMaterial
+                      color={colors.hair}
+                      flatShading
+                      roughness={0.9}
+                    />
                   </mesh>
                   <mesh position={[0, 0.03, -0.28]}>
                     <boxGeometry args={[0.58, 0.34, 0.1]} />
-                    <meshStandardMaterial color={colors.hair} flatShading roughness={0.9} />
+                    <meshStandardMaterial
+                      color={colors.hair}
+                      flatShading
+                      roughness={0.9}
+                    />
                   </mesh>
                 </group>
               )}
@@ -665,7 +878,12 @@ function Helmet({ color }: { color: string }) {
     <group position={[0, 0.07, 0]}>
       <mesh castShadow>
         <boxGeometry args={[0.66, 0.6, 0.64]} />
-        <meshStandardMaterial color={color} flatShading roughness={0.32} metalness={0.15} />
+        <meshStandardMaterial
+          color={color}
+          flatShading
+          roughness={0.32}
+          metalness={0.15}
+        />
       </mesh>
       {/* A crown stripe, because every helmet has one */}
       <mesh position={[0, 0.31, 0]}>
@@ -730,6 +948,48 @@ function Mask({ color }: { color: string }) {
   )
 }
 
+/**
+ * The ring, pinched between finger and thumb and held up: a gold band stood
+ * on edge with one stone in it, and a glint on the stone that does not need
+ * a light in the scene to work. Half of what makes it read at this size is
+ * that it is held out on its own, well clear of the body.
+ */
+function RingBand() {
+  return (
+    <group position={[0, -0.06, 0.07]}>
+      {/* The band stands on edge, the way a ring does between finger and
+          thumb, so what you see is the circle of it and the stone on top. */}
+      <mesh castShadow>
+        <torusGeometry args={[0.052, 0.013, 8, 20]} />
+        <meshStandardMaterial
+          color={RING.band}
+          roughness={0.18}
+          metalness={0.85}
+        />
+      </mesh>
+      {/* The setting it sits in, and the stone over that */}
+      <mesh position={[0, 0.072, 0]}>
+        <cylinderGeometry args={[0.022, 0.03, 0.022, 8]} />
+        <meshStandardMaterial
+          color={RING.band}
+          roughness={0.18}
+          metalness={0.85}
+        />
+      </mesh>
+      <mesh position={[0, 0.108, 0]}>
+        <octahedronGeometry args={[0.036, 0]} />
+        <meshStandardMaterial
+          color={RING.stone}
+          roughness={0.05}
+          metalness={0.35}
+          emissive={RING.stone}
+          emissiveIntensity={0.6}
+        />
+      </mesh>
+    </group>
+  )
+}
+
 /** A bunch of flowers, wrapped, held stems down. */
 function Bouquet() {
   return (
@@ -788,17 +1048,40 @@ function Bouquet() {
 }
 
 /**
+ * Whatever he is carrying to see by, on its own. The first-person view mounts
+ * this straight onto the camera: the body it normally hangs off is hidden in
+ * there, and hiding the body used to take the light with it.
+ */
+export function HandLightRig({ kind }: { kind: HandLight }) {
+  return kind === 'torch' ? <Torch /> : <Flashlight />
+}
+
+/**
  * A torch: a stick, a wrapped head, and a flame that is the only thing
  * lighting the ground he walks on after dark. Built pointing straight up out
  * of the fist — the grip it hangs in keeps it that way.
  */
-function Torch({
-  flame,
-  light,
-}: {
-  flame: RefObject<Group | null>
-  light: RefObject<PointLight | null>
-}) {
+function Torch() {
+  const flame = useRef<Group>(null)
+  const light = useRef<PointLight>(null)
+
+  // Two fast waves plus a little noise: never quite the same shape twice.
+  // It lives here rather than in the rig above so that a torch is a torch
+  // wherever it is held — including in a hand drawn straight to the camera.
+  useFrame((state) => {
+    if (!flame.current) return
+    const t = state.clock.elapsedTime
+    const lick =
+      0.86 +
+      Math.sin(t * 11) * 0.08 +
+      Math.sin(t * 23.3) * 0.05 +
+      Math.random() * 0.03
+    flame.current.scale.set(1 + (1 - lick) * 0.5, lick, 1 + (1 - lick) * 0.5)
+    flame.current.rotation.y = t * 2.4
+    flame.current.position.x = Math.sin(t * 7.3) * 0.015
+    if (light.current) light.current.intensity = 22 * lick
+  })
+
   return (
     <group>
       {/* Handle, gripped in the middle */}
@@ -937,7 +1220,12 @@ const GUN_STEEL = '#8e99ab'
  * axes: in here **-y points down the barrel** and **+z is up**. Everything is
  * laid out along those two, so no rotation of its own is needed.
  */
-function Marker({ accent }: { accent: string }) {
+/**
+ * The marker, on its own. Hung off a shoulder in the rig above, and held
+ * straight to the camera in the first-person view — which is why it is
+ * exported rather than buried in here.
+ */
+export function Marker({ accent }: { accent: string }) {
   return (
     <group position={[0, -0.5, 0.02]}>
       {/* Receiver */}
@@ -1018,7 +1306,11 @@ function Accessory({ prop }: { prop?: Npc['prop'] }) {
       )
     case 'beret':
       return (
-        <mesh position={[0.06, 0.3, -0.02]} rotation={[0.1, 0, -0.28]} castShadow>
+        <mesh
+          position={[0.06, 0.3, -0.02]}
+          rotation={[0.1, 0, -0.28]}
+          castShadow
+        >
           <cylinderGeometry args={[0.34, 0.28, 0.14, 12]} />
           <meshStandardMaterial color="#3f4a2a" flatShading roughness={0.95} />
         </mesh>
@@ -1085,7 +1377,11 @@ function Accessory({ prop }: { prop?: Npc['prop'] }) {
             return (
               <group
                 key={i}
-                position={[Math.sin(angle) * 0.31, 0.05, Math.cos(angle) * 0.31]}
+                position={[
+                  Math.sin(angle) * 0.31,
+                  0.05,
+                  Math.cos(angle) * 0.31,
+                ]}
               >
                 {[0, 1, 2, 3].map((j) => {
                   const a = (j / 4) * Math.PI * 2
@@ -1112,7 +1408,9 @@ function Accessory({ prop }: { prop?: Npc['prop'] }) {
       return (
         <group position={[0, 0.29, 0]}>
           <mesh castShadow>
-            <sphereGeometry args={[0.31, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2]} />
+            <sphereGeometry
+              args={[0.31, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2]}
+            />
             <meshStandardMaterial color="#f0b429" flatShading roughness={0.7} />
           </mesh>
           <mesh position={[0, 0, 0.08]}>

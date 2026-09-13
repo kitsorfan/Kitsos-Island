@@ -166,6 +166,8 @@ export const INTERIORS: Record<string, string> = {
     'Το γραφείο μηνυμάτων συντάσσει email κατευθείαν προς τον Κίτσο — χωρίς κανέναν χειριστή στη μέση.',
   'Summit room': 'Το δωμάτιο της κορυφής',
   'the keeper’s logbook': 'το ημερολόγιο του φαροφύλακα',
+  'The shelf swings out on a hinge nobody fitted by accident.':
+    'Το ράφι ανοίγει σε έναν μεντεσέ που δεν τον έβαλε κανείς κατά λάθος.',
   'The short version': 'Η σύντομη εκδοχή',
   'Opened with all five district keys. The keeper’s logbook holds the career summary, what he is good at, and what he is looking for.':
     'Άνοιξε με τα πέντε κλειδιά των συνοικιών. Το ημερολόγιο του φαροφύλακα κρατάει τη σύνοψη της καριέρας, σε τι είναι καλός, και τι ψάχνει.',

@@ -1,4 +1,4 @@
-import type { Letter, PanelSection } from '../types'
+import type { Letter, PanelSection } from '../types.ts'
 
 export const PROFILE = {
   firstName: 'Christos',

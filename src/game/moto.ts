@@ -125,8 +125,7 @@ export const GRADES: Grade[] = [
 ]
 
 export const GRADE_BY_ID = new Map(GRADES.map((g) => [g.id, g]))
-export const gradeOf = (id: Difficulty) =>
-  GRADE_BY_ID.get(id) ?? GRADES[1]
+export const gradeOf = (id: Difficulty) => GRADE_BY_ID.get(id) ?? GRADES[1]
 
 /**
  * The circuit is cut into sectors and you have to pass through them in order,
@@ -213,7 +212,10 @@ export function pointAt(distance: number): {
 }
 
 /** The nearest point of the line to somewhere out in the world. */
-export function project(x: number, z: number): {
+export function project(
+  x: number,
+  z: number,
+): {
   /** How far round the lap that point is. */
   progress: number
   /** How far off the middle of the road, whichever side. */
@@ -524,7 +526,10 @@ export const MOTO = {
   finish: 0,
 }
 
-export function openRide(laps: number = LAPS, difficulty: Difficulty = 'normal') {
+export function openRide(
+  laps: number = LAPS,
+  difficulty: Difficulty = 'normal',
+) {
   MOTO.laps = Math.max(1, Math.round(laps))
   MOTO.grade = gradeOf(difficulty)
   MOTO.x = MOTO_START.x
@@ -757,7 +762,9 @@ function slipstream(): number {
  * would close on it, and how fast it is going. Both the other two and you
  * count, which is what makes sitting in front of one of them worth doing.
  */
-function trafficAhead(rival: Rival): { gap: number; speed: number; side: number } | null {
+function trafficAhead(
+  rival: Rival,
+): { gap: number; speed: number; side: number } | null {
   let best: { gap: number; speed: number; side: number } | null = null
   const ahead = (at: number) => {
     const d = at - rival.progress
@@ -824,7 +831,10 @@ function stepRival(rival: Rival, delta: number, playerAt: number) {
   }
 
   const rate = target > rival.speed ? ACCEL * 0.85 : BRAKE
-  rival.speed += Math.max(-rate * delta, Math.min(rate * delta, target - rival.speed))
+  rival.speed += Math.max(
+    -rate * delta,
+    Math.min(rate * delta, target - rival.speed),
+  )
 
   if (rival.finished) {
     // Past the flag they roll it off rather than stopping dead on the road.
@@ -842,8 +852,7 @@ function stepRival(rival: Rival, delta: number, playerAt: number) {
   }
 
   // The line they hold drifts a little, which reads as a rider working.
-  const side =
-    rival.line + rival.drift + Math.sin(rival.progress * 0.035) * 0.6
+  const side = rival.line + rival.drift + Math.sin(rival.progress * 0.035) * 0.6
   const spot = pointAt(rival.progress)
   rival.x = spot.x + Math.cos(spot.heading) * side
   rival.z = spot.z - Math.sin(spot.heading) * side
@@ -853,8 +862,10 @@ function stepRival(rival: Rival, delta: number, playerAt: number) {
   while (swing < -Math.PI) swing += Math.PI * 2
   rival.heading += swing * Math.min(1, delta * 8)
   // Lean with the corner, and harder the faster it is being taken.
-  const lean = (swing / Math.max(delta, 0.001)) * 0.13 * (rival.speed / MAX_SPEED)
-  rival.roll += (Math.max(-0.6, Math.min(0.6, lean)) - rival.roll) * Math.min(1, delta * 5)
+  const lean =
+    (swing / Math.max(delta, 0.001)) * 0.13 * (rival.speed / MAX_SPEED)
+  rival.roll +=
+    (Math.max(-0.6, Math.min(0.6, lean)) - rival.roll) * Math.min(1, delta * 5)
   rival.wheel += rival.speed * delta * 1.6
 }
 
@@ -907,7 +918,8 @@ export function stepMoto(delta: number, input: MotoInput): MotoEvents {
   // Below walking pace the bars do very little, as on a real bike.
   const grip = Math.min(1, Math.abs(MOTO.speed) / 12)
   MOTO.heading -= input.steer * TURN * delta * grip * Math.sign(MOTO.speed || 1)
-  MOTO.roll += (input.steer * MAX_ROLL * grip - MOTO.roll) * Math.min(1, delta * 6)
+  MOTO.roll +=
+    (input.steer * MAX_ROLL * grip - MOTO.roll) * Math.min(1, delta * 6)
 
   if (input.wheelie && MOTO.speed > 7) {
     MOTO.wheelie = Math.min(1, MOTO.wheelie + delta * 3)
@@ -977,7 +989,8 @@ export function stepMoto(delta: number, input: MotoInput): MotoEvents {
     MOTO.gate = (MOTO.gate + 1) % SECTORS
     // Back round to the first sector means the line has just gone under you.
     if (MOTO.gate === 1) {
-      MOTO.best = MOTO.best === 0 ? MOTO.lapTime : Math.min(MOTO.best, MOTO.lapTime)
+      MOTO.best =
+        MOTO.best === 0 ? MOTO.lapTime : Math.min(MOTO.best, MOTO.lapTime)
       MOTO.lapTime = 0
       if (MOTO.lap >= MOTO.laps) {
         MOTO.done = true

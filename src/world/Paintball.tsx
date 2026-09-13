@@ -6,7 +6,7 @@ import { isCrouching } from '../game/input'
 import { groundHeight } from '../game/terrain'
 import { isInteractive, useGame } from '../state/store'
 import { Character, type CharacterMotion } from './Character'
-import { PLAYER_POS, PLAYER_VIEW } from './Player'
+import { PLAYER_POS, PLAYER_VIEW } from '../game/player'
 import * as sfx from '../game/audio'
 
 /** Balls and marks in flight at once. Both pools are reused, never grown. */

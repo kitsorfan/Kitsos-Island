@@ -266,7 +266,12 @@ export function engineStart() {
  * behind it, `rough` whether the wheels are on grass, and `lean` how far over
  * it is in a corner — which is what the note flutters with.
  */
-export function engineRevs(revs: number, load: number, rough = false, lean = 0) {
+export function engineRevs(
+  revs: number,
+  load: number,
+  rough = false,
+  lean = 0,
+) {
   const e = engine
   const ac = e && audioContext()
   if (!e || !ac) return

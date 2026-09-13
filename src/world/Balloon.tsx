@@ -18,7 +18,7 @@ import { consumeDrop, isCrouching, readMove } from '../game/input'
 import { groundHeight } from '../game/terrain'
 import { isInteractive, useGame } from '../state/store'
 import { Character, type CharacterMotion } from './Character'
-import { PLAYER_POS, PLAYER_VIEW } from './Player'
+import { PLAYER_POS, PLAYER_VIEW } from '../game/player'
 import * as sfx from '../game/audio'
 
 const WATER = PAYLOAD_COLOR.water
@@ -35,7 +35,14 @@ const MARKER_LIFT = 7.5
  */
 const MARKER_SCALE = 2.4
 /** Colours a confetti burst throws about. */
-const FLECKS = ['#ff5fa8', '#f5c33b', '#3ecf6e', '#3f7bd6', '#ff8c1a', '#b95fd0']
+const FLECKS = [
+  '#ff5fa8',
+  '#f5c33b',
+  '#3ecf6e',
+  '#3f7bd6',
+  '#ff8c1a',
+  '#b95fd0',
+]
 
 /**
  * The fourteen gatherings, each with a ring on the grass, a column of colour
@@ -86,7 +93,11 @@ function Calls() {
             </mesh>
             <mesh position={[0, 0.07, 0]} rotation={[-Math.PI / 2, 0, 0]}>
               <ringGeometry
-                args={[BURST_RADIUS[call.want] - 0.8, BURST_RADIUS[call.want], 32]}
+                args={[
+                  BURST_RADIUS[call.want] - 0.8,
+                  BURST_RADIUS[call.want],
+                  32,
+                ]}
               />
               <meshBasicMaterial color={color} transparent opacity={0.95} />
             </mesh>
@@ -181,7 +192,14 @@ function PartyCone() {
  * balloon; cheering a faceful of confetti; or getting away from a water bomb
  * as fast as their legs will carry them.
  */
-const SHIRTS = ['#e8442f', '#3f7bd6', '#f0a33c', '#2fb59a', '#b95fd0', '#e6a63c']
+const SHIRTS = [
+  '#e8442f',
+  '#3f7bd6',
+  '#f0a33c',
+  '#2fb59a',
+  '#b95fd0',
+  '#e6a63c',
+]
 const PANTS = ['#2a3f78', '#3a3f4a', '#6f7f4a', '#7d5228']
 const SKINS = ['#f0c39a', '#d9a173', '#a9764c', '#8a5a34']
 
@@ -252,9 +270,10 @@ function Reveller({ call, who }: { call: Call; who: Bystander }) {
       root.current.position.set(x, groundHeight(x, z), z)
       // Running, they face the way out. Otherwise they are watching the
       // balloon, which is the whole reason anybody is standing here.
-      const facing = r && r.kind === 'fright'
-        ? Math.atan2(x - r.x, z - r.z)
-        : Math.atan2(BALLOON.x - x, BALLOON.z - z)
+      const facing =
+        r && r.kind === 'fright'
+          ? Math.atan2(x - r.x, z - r.z)
+          : Math.atan2(BALLOON.x - x, BALLOON.z - z)
       let turn = facing - root.current.rotation.y
       while (turn > Math.PI) turn -= Math.PI * 2
       while (turn < -Math.PI) turn += Math.PI * 2
@@ -262,8 +281,10 @@ function Reveller({ call, who }: { call: Call; who: Bystander }) {
     }
 
     const step = Math.sin(phase.current)
-    if (legL.current) legL.current.rotation.x = scared ? step * 0.95 : step * 0.06
-    if (legR.current) legR.current.rotation.x = scared ? -step * 0.95 : -step * 0.06
+    if (legL.current)
+      legL.current.rotation.x = scared ? step * 0.95 : step * 0.06
+    if (legR.current)
+      legR.current.rotation.x = scared ? -step * 0.95 : -step * 0.06
 
     /* -------------------------- arms, and the mood ----------------------- */
 
@@ -305,19 +326,31 @@ function Reveller({ call, who }: { call: Call; who: Bystander }) {
         <group ref={legL} position={[-0.16, 0.62, 0]}>
           <mesh position={[0, -0.31, 0]} castShadow>
             <boxGeometry args={[0.22, 0.62, 0.22]} />
-            <meshStandardMaterial color={look.pants} flatShading roughness={0.9} />
+            <meshStandardMaterial
+              color={look.pants}
+              flatShading
+              roughness={0.9}
+            />
           </mesh>
         </group>
         <group ref={legR} position={[0.16, 0.62, 0]}>
           <mesh position={[0, -0.31, 0]} castShadow>
             <boxGeometry args={[0.22, 0.62, 0.22]} />
-            <meshStandardMaterial color={look.pants} flatShading roughness={0.9} />
+            <meshStandardMaterial
+              color={look.pants}
+              flatShading
+              roughness={0.9}
+            />
           </mesh>
         </group>
 
         <mesh position={[0, 1.0, 0]} castShadow>
           <boxGeometry args={[0.54, 0.76, 0.32]} />
-          <meshStandardMaterial color={look.shirt} flatShading roughness={0.85} />
+          <meshStandardMaterial
+            color={look.shirt}
+            flatShading
+            roughness={0.85}
+          />
         </mesh>
 
         {/* Arms and head do not cast: forty-two of these are on the island
@@ -325,19 +358,31 @@ function Reveller({ call, who }: { call: Call; who: Bystander }) {
         <group ref={armL} position={[-0.36, 1.3, 0]}>
           <mesh position={[0, -0.28, 0]}>
             <boxGeometry args={[0.17, 0.58, 0.17]} />
-            <meshStandardMaterial color={look.skin} flatShading roughness={0.9} />
+            <meshStandardMaterial
+              color={look.skin}
+              flatShading
+              roughness={0.9}
+            />
           </mesh>
         </group>
         <group ref={armR} position={[0.36, 1.3, 0]}>
           <mesh position={[0, -0.28, 0]}>
             <boxGeometry args={[0.17, 0.58, 0.17]} />
-            <meshStandardMaterial color={look.skin} flatShading roughness={0.9} />
+            <meshStandardMaterial
+              color={look.skin}
+              flatShading
+              roughness={0.9}
+            />
           </mesh>
         </group>
 
         <mesh position={[0, 1.62, 0]}>
           <boxGeometry args={[0.42, 0.42, 0.4]} />
-          <meshStandardMaterial color={look.skin} flatShading roughness={0.85} />
+          <meshStandardMaterial
+            color={look.skin}
+            flatShading
+            roughness={0.85}
+          />
         </mesh>
       </group>
 
@@ -426,7 +471,11 @@ function Envelope({ flame }: { flame: React.RefObject<Group | null> }) {
       </mesh>
       <mesh position={[0, 0.02, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <circleGeometry args={[1.5, 20]} />
-        <meshStandardMaterial color="#c9b287" side={DoubleSide} roughness={0.9} />
+        <meshStandardMaterial
+          color="#c9b287"
+          side={DoubleSide}
+          roughness={0.9}
+        />
       </mesh>
 
       {/* Crown ring at the top. */}
@@ -584,7 +633,11 @@ function Parcels() {
         >
           <mesh>
             <boxGeometry args={[0.62, 0.62, 0.62]} />
-            <meshStandardMaterial color={CONFETTI} flatShading roughness={0.6} />
+            <meshStandardMaterial
+              color={CONFETTI}
+              flatShading
+              roughness={0.6}
+            />
           </mesh>
           {/* A ribbon round it, so a tumbling parcel reads as one. */}
           <mesh>
@@ -792,7 +845,8 @@ export function BalloonGame() {
       if (!live) continue
       const aim = aimPoint(kind)
       ring.position.set(aim.x, aim.y + 0.09, aim.z)
-      ring.rotation.y = state.clock.elapsedTime * (kind === 'water' ? 0.6 : -0.6)
+      ring.rotation.y =
+        state.clock.elapsedTime * (kind === 'water' ? 0.6 : -0.6)
     }
 
     // And an arrow over the crown, pointing at whichever gathering is nearest.

@@ -1,4 +1,10 @@
-import { GRADES, LAP_CHOICES, LAP_LENGTH, RIVALS, racerName } from '../game/moto'
+import {
+  GRADES,
+  LAP_CHOICES,
+  LAP_LENGTH,
+  RIVALS,
+  racerName,
+} from '../game/moto'
 import { useGame } from '../state/store'
 import * as sfx from '../game/audio'
 import { useCoarsePointer } from './useCoarsePointer'
@@ -20,7 +26,12 @@ const LAP_WORD: Record<number, string> = { 1: 'One', 3: 'Three', 5: 'Five' }
  */
 function GradeMeter({ rank }: { rank: number }) {
   return (
-    <svg className="grade__meter" viewBox="0 0 32 20" aria-hidden focusable="false">
+    <svg
+      className="grade__meter"
+      viewBox="0 0 32 20"
+      aria-hidden
+      focusable="false"
+    >
       {[0, 1, 2].map((i) => {
         const height = 7 + i * 6
         return (

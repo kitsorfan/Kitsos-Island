@@ -13,7 +13,10 @@ import { Party } from './Party'
 import { PartyButton } from './PartyButton'
 import { Paths } from './Paths'
 import { Player } from './Player'
+import { Proposal } from './Proposal'
 import { Props } from './Props'
+import { SwimWake } from './Swim'
+import { swimmingPlayer } from '../game/swim'
 import { Terrain } from './Terrain'
 import { Water } from './Water'
 import { useGame } from '../state/store'
@@ -27,6 +30,9 @@ export function Island() {
   const night = useGame((s) => s.night)
   const party = useGame((s) => s.party)
   const amaliaHere = useGame((s) => s.amaliaHere)
+  const proposal = useGame((s) => s.proposal)
+  /** Keyed on the round, so asking her again is a scene and not a repaint. */
+  const round = useGame((s) => s.proposalRound)
   return (
     <>
       <Daylight night={night} />
@@ -49,11 +55,16 @@ export function Island() {
       ) : sailing ? (
         <BoatGame />
       ) : (
-        <Player />
+        <>
+          <Player />
+          {/* What he leaves on the water, on the one walk that ends in it */}
+          <SwimWake read={swimmingPlayer} />
+        </>
       )}
       {hiding && <Hide />}
       {night && <NightLights />}
       {party && <Party amalia={amaliaHere} />}
+      {proposal && <Proposal key={round} />}
       {match && <Paintball />}
     </>
   )

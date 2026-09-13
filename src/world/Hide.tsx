@@ -5,7 +5,7 @@ import { HIDE, stepHide } from '../game/hide'
 import { isCrouching, readMove } from '../game/input'
 import { groundHeight } from '../game/terrain'
 import { isInteractive, useGame } from '../state/store'
-import { PLAYER_POS, PLAYER_VIEW } from './Player'
+import { PLAYER_POS, PLAYER_VIEW } from '../game/player'
 import * as sfx from '../game/audio'
 
 const FOUND = '#7ce8a8'
@@ -14,9 +14,9 @@ const FOUND = '#7ce8a8'
  * Runs a game of hide and seek.
  *
  * It is walked with the ordinary controls, so <Player/> stays exactly where
- * it is and this only steps the game, marks whoever has been found, and
- * leans a pointer at whoever is nearest — because eleven people spread over
- * a dark island is otherwise a very long walk.
+ * it is and this only steps the game, rings whoever has been found, and
+ * plays the thump that gets quicker as you near somebody — which is the only
+ * help you get, eleven people spread over a dark island notwithstanding.
  */
 export function Hide() {
   const marks = useRef<(Mesh | null)[]>([])
@@ -59,7 +59,6 @@ export function Hide() {
       const mat = mark.material as MeshBasicMaterial
       mat.opacity = 0.5 + Math.sin(state.clock.elapsedTime * 2 + i) * 0.12
     }
-
   })
 
   return (
@@ -77,7 +76,6 @@ export function Hide() {
           <meshBasicMaterial color={FOUND} transparent opacity={0.6} />
         </mesh>
       ))}
-
     </group>
   )
 }

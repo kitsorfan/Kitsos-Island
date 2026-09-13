@@ -64,4 +64,29 @@ export const GAMES: Record<string, string> = {
   'You built a whole island, and put a dancefloor in the middle of it.':
     'Έχτισες ολόκληρο νησί, και έβαλες πίστα στη μέση του.',
   'Come on, Kitso. Dance with me.': 'Έλα, Κίτσο. Χόρεψε μαζί μου.',
+
+  /* ------------------------- On the beach ----------------------------- */
+  Kitsos: 'Κίτσος',
+  'On one knee': 'Στο ένα γόνατο',
+  'Already nodding': 'Ήδη κουνάει το κεφάλι',
+  Engaged: 'Αρραβωνιασμένη',
+  'The candles were the easy part. This next bit I have gone over on every road on this island.':
+    'Τα κεριά ήταν το εύκολο. Αυτό που ακολουθεί το έχω πρόβα σε κάθε δρόμο αυτού του νησιού.',
+  'Amalia. You have put up with the late commits, the louder ideas, and every version of me there has ever been.':
+    'Αμαλία. Έχεις αντέξει τα ξενύχτια με τα commit, τις πιο φωνακλάδικες ιδέες, και κάθε εκδοχή μου που υπήρξε ποτέ.',
+  'So: will you marry me?': 'Λοιπόν: θα με παντρευτείς;',
+  'You built a whole island to ask me that.':
+    'Έχτισες ολόκληρο νησί για να μου το ζητήσεις αυτό.',
+  'Yes. Of course it is yes. Get up here.':
+    'Ναι. Φυσικά και είναι ναι. Σήκω πάνω.',
+  'I am going to be looking at this every five minutes for the rest of my life.':
+    'Θα το κοιτάζω αυτό κάθε πέντε λεπτά για την υπόλοιπη ζωή μου.',
+  'The whole island knew before I did, did it not. Every one of them knew.':
+    'Όλο το νησί το ήξερε πριν από μένα, έτσι δεν είναι. Όλοι τους το ήξεραν.',
+  'Come and sit with me. The candles have hours in them yet.':
+    'Έλα να καθίσεις μαζί μου. Τα κεριά έχουν ώρες ακόμη.',
+  'A ring, on the beach': 'Ένα δαχτυλίδι, στην παραλία',
+  'Candles in a heart in the sand, her walking up out of the dark, and a yes before the question was properly out. The island has had a lot of firsts on it. This is the one that counts.':
+    'Κεριά σε σχήμα καρδιάς στην άμμο, εκείνη να ανεβαίνει από το σκοτάδι, και ένα ναι πριν καλά καλά τελειώσει η ερώτηση. Το νησί έχει δει πολλές πρώτες φορές. Αυτή είναι που μετράει.',
+  'The west beach': 'Η δυτική παραλία',
 }

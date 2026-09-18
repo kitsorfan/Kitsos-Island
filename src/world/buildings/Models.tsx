@@ -126,6 +126,13 @@ const HOUSE = { W: 8.8, D: 7.8, H: 7.2 }
 const PLINTH = { z: (HOUSE.D + 0.5) / 2, top: 0.64 }
 
 /**
+ * The stretch of the plinth the garage mouth takes up, in the house's own
+ * z. The apron is 3.9 wide about z = -1.1, and the cut is a little wider
+ * than that so the stone never shows at the edge of the opening.
+ */
+const GARAGE_BAY = { from: -3.15, to: 0.95 }
+
+/**
  * Louvered shutters, thrown back against the wall either side of a window.
  * Nobody in this climate has a window without them, and they are most of
  * what stops a whitewashed box reading as a whitewashed box.
@@ -253,9 +260,41 @@ export function HouseModel() {
   return (
     <group>
       {/* Stone plinth. A whitewashed box sitting straight on grass looks
-          dropped there; every house here stands on a course of stone. */}
-      <mesh position={[0, PLINTH.top / 2, 0]} castShadow receiveShadow>
-        <boxGeometry args={[W + 0.5, PLINTH.top, D + 0.5]} />
+          dropped there; every house here stands on a course of stone.
+
+          It is cut away in front of the garage. The course stands a hand
+          proud of the wall everywhere else, which in front of a door the car
+          drives through would bury the bottom of it and leave the door
+          looking like it floats — so along that bay the stone stops at the
+          wall face and the mouth runs down to the apron. */}
+      {[
+        { from: -(D + 0.5) / 2, to: GARAGE_BAY.from },
+        { from: GARAGE_BAY.to, to: (D + 0.5) / 2 },
+      ].map((bay) => (
+        <mesh
+          key={bay.from}
+          position={[0, PLINTH.top / 2, (bay.from + bay.to) / 2]}
+          castShadow
+          receiveShadow
+        >
+          <boxGeometry args={[W + 0.5, PLINTH.top, bay.to - bay.from]} />
+          <meshStandardMaterial color="#b8ad97" flatShading roughness={1} />
+        </mesh>
+      ))}
+      {/* Behind the mouth the course is still there, just held back to the
+          wall face so it never stands in front of the door. */}
+      <mesh
+        position={[
+          -0.25 / 2,
+          PLINTH.top / 2,
+          (GARAGE_BAY.from + GARAGE_BAY.to) / 2,
+        ]}
+        castShadow
+        receiveShadow
+      >
+        <boxGeometry
+          args={[W + 0.25, PLINTH.top, GARAGE_BAY.to - GARAGE_BAY.from]}
+        />
         <meshStandardMaterial color="#b8ad97" flatShading roughness={1} />
       </mesh>
 
@@ -304,13 +343,15 @@ export function HouseModel() {
         position={[-2.6, 2.9, -D / 2 - 0.02]}
         rotation={[0, Math.PI, 0]}
       />
+      {/* Clear of the garage below it: the shutter leaves swing wide, and
+          the mouth and its apron take up the rest of this face. */}
       <Win
-        position={[W / 2 + 0.02, 2.9, 1.4]}
+        position={[W / 2 + 0.02, 2.9, 2.3]}
         rotation={[0, Math.PI / 2, 0]}
         lit
       />
       <Shutters
-        position={[W / 2 + 0.02, 2.9, 1.4]}
+        position={[W / 2 + 0.02, 2.9, 2.3]}
         rotation={[0, Math.PI / 2, 0]}
       />
 
@@ -323,12 +364,12 @@ export function HouseModel() {
         </group>
       ))}
       <Win
-        position={[W / 2 + 0.02, 5.9, 1.4]}
+        position={[W / 2 + 0.02, 5.9, 2.3]}
         rotation={[0, Math.PI / 2, 0]}
         lit
       />
       <Shutters
-        position={[W / 2 + 0.02, 5.9, 1.4]}
+        position={[W / 2 + 0.02, 5.9, 2.3]}
         rotation={[0, Math.PI / 2, 0]}
       />
       <Win position={[-2.6, 5.9, -D / 2 - 0.02]} rotation={[0, Math.PI, 0]} />
@@ -745,7 +786,24 @@ export function UniversityModel() {
             <meshStandardMaterial color={STONE} flatShading roughness={1} />
           </mesh>
         ))}
-        <NtuaSeal size={1.8} position={[0, 9.1, 0.92]} />
+        {/* The seal, sunk into a roundel. On bare marble it read as a
+            sticker; the tympanum is only 2.4 tall, so the disc is about as
+            large as the triangle admits once the rim is allowed for. */}
+        <group position={[0, 9.35, 0]}>
+          <mesh
+            position={[0, 0, 0.86]}
+            rotation={[Math.PI / 2, 0, 0]}
+            castShadow
+          >
+            <cylinderGeometry args={[1.14, 1.14, 0.12, 32]} />
+            <meshStandardMaterial color="#e6dcc4" flatShading roughness={1} />
+          </mesh>
+          <mesh position={[0, 0, 0.9]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[1.02, 1.02, 0.1, 32]} />
+            <meshStandardMaterial color="#d9cdb0" flatShading roughness={1} />
+          </mesh>
+          <NtuaSeal size={2.1} position={[0, 0, 0.97]} />
+        </group>
 
         {/* The name across the frieze, where it is on the real one.
             It used to sit two centimetres off the stone, which at this

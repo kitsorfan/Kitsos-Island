@@ -18,10 +18,14 @@ export interface CharacterMotion {
   recoil?: number
   /** 0 to 1: how much of him is dancing rather than standing. */
   dance?: number
+  /** 0 to 1: standing about in a conversation rather than just standing. */
+  chat?: number
   /** 0 to 1: hands over the head, running from whatever just went off. */
   fright?: number
   /** 0 to 1: one arm straight out — stop where you are. */
   halt?: number
+  /** 0 to 1: both arms up over the head, cheering. */
+  cheer?: number
   /** 0 to 1: chest-deep in the sea and pulling, rather than standing. */
   swimming?: number
 }
@@ -61,6 +65,10 @@ interface CharacterProps {
   danceStyle?: number
   /** A dinner jacket over a white shirt, with a bow tie. */
   suit?: boolean
+  /** The bow tie, if not the near-black one that goes with a black tuxedo. */
+  bowTie?: string
+  /** What is in the buttonhole: a flower to match hers, or a holly berry. */
+  buttonhole?: string
   /** A bunch of flowers, in whichever hand is free. */
   bouquet?: boolean
   /** A crash helmet in this colour, over the hair. Nobody rides without one. */
@@ -114,6 +122,8 @@ export function Character({
   smile = false,
   danceStyle,
   suit = false,
+  bowTie,
+  buttonhole,
   bouquet = false,
   helmet,
   kit,
@@ -140,10 +150,14 @@ export function Character({
   const knelt = useRef(0)
   /** Eased dance, so joining in and stopping are not a snap. */
   const groove = useRef(0)
+  /** Eased chatter, likewise — a conversation is joined, not switched on. */
+  const natter = useRef(0)
   /** Eased fright, likewise: nobody goes from calm to bolting in one frame. */
   const alarm = useRef(0)
   /** Eased halt, for the arm a sentry puts out. */
   const bar = useRef(0)
+  /** Eased ovation, so a room comes to its feet rather than snapping to it. */
+  const ovation = useRef(0)
   /** Eased swim, so going in and wading out are both a settle, not a snap. */
   const paddle = useRef(0)
   /** The wrist that whatever he is carrying hangs in, and a torch's flame. */
@@ -175,8 +189,11 @@ export function Character({
     const kneel = knelt.current
 
     groove.current += ((m.dance ?? 0) - groove.current) * Math.min(1, delta * 6)
+    natter.current += ((m.chat ?? 0) - natter.current) * Math.min(1, delta * 4)
     alarm.current += ((m.fright ?? 0) - alarm.current) * Math.min(1, delta * 9)
     bar.current += ((m.halt ?? 0) - bar.current) * Math.min(1, delta * 10)
+    ovation.current +=
+      ((m.cheer ?? 0) - ovation.current) * Math.min(1, delta * 5)
     paddle.current +=
       ((m.swimming ?? 0) - paddle.current) * Math.min(1, delta * 5)
 
@@ -319,6 +336,50 @@ export function Character({
       if (body.current) {
         body.current.position.y = blend(body.current.position.y, -KNEEL_SINK)
         body.current.rotation.z = blend(body.current.rotation.z, 0)
+      }
+    }
+
+    /* -------------------------------- chatting ------------------------ */
+
+    // Standing in a conversation rather than standing still: the weight goes
+    // from one foot to the other, the near hand comes up to make a point and
+    // drops again, and the head nods at whoever is making theirs.
+    //
+    // Three clocks at prime-ish rates, all offset by the seed. A crowd on one
+    // clock reads as a chorus line, and a gesture that never stops is
+    // semaphore rather than talk — so the hand rises on the cube of a slow
+    // sine, which is mostly zero and occasionally emphatic.
+    if (natter.current > 0.01) {
+      const mix = natter.current
+      const sway = Math.sin(t * 0.83)
+      const nod = Math.sin(t * 2.3)
+      const point = Math.max(0, Math.sin(t * 0.61)) ** 3
+      const blend = (current: number, wanted: number) =>
+        current * (1 - mix) + wanted * mix
+
+      if (body.current) {
+        body.current.rotation.z = blend(body.current.rotation.z, sway * 0.055)
+        // Turning a shoulder in and out of the circle, which is most of what
+        // somebody listening actually does.
+        body.current.rotation.y = blend(body.current.rotation.y, sway * 0.17)
+      }
+      if (armR.current) {
+        armR.current.rotation.x = blend(
+          armR.current.rotation.x,
+          -point * (0.95 + nod * 0.3),
+        )
+        armR.current.rotation.z = blend(armR.current.rotation.z, point * 0.55)
+      }
+      if (armL.current) {
+        armL.current.rotation.x = blend(armL.current.rotation.x, -point * 0.2)
+      }
+      if (head.current) {
+        head.current.rotation.x = blend(
+          head.current.rotation.x,
+          nod * 0.075 - 0.03,
+        )
+        head.current.rotation.y = blend(head.current.rotation.y, sway * 0.32)
+        head.current.rotation.z = blend(head.current.rotation.z, sway * 0.05)
       }
     }
 
@@ -485,6 +546,72 @@ export function Character({
           armR.current.rotation.z * (1 - mix) + 0.14 * mix
       }
       if (head.current) head.current.rotation.x -= 0.08 * mix
+    }
+
+    /* -------------------------------- ovation --------------------------- */
+
+    // A room cheering: both arms thrown up over the head, bouncing.
+    //
+    // Not clapping. Two hands meeting in front of a chest is a small, precise
+    // gesture, and this camera looks down on the room from the back of the
+    // hall — at that angle the hands disappear into the body and the whole
+    // thing reads as a twitch. Arms straight up read from anywhere, which is
+    // why a crowd in a stadium is drawn this way and a crowd in a drawing
+    // room is not.
+    //
+    // Everyone is on their own rhythm, off their own seed: a room cheering in
+    // unison is a chorus line, and that is a different thing entirely.
+    if (ovation.current > 0.01) {
+      const mix = ovation.current
+      // Roughly two to three bounces a second each, and each of them starting
+      // somewhere different in the cycle.
+      const rate = 2.1 + (Math.abs(seed) % 1) * 0.9
+      const cycle = t * rate + seed * 1.7
+      // Up fast, down slow — the pump of a raised arm, not a metronome.
+      const pump = Math.pow((Math.sin(cycle) + 1) / 2, 0.7)
+      // A slower sway underneath it, so nobody is a piston.
+      const sway = Math.sin(cycle * 0.41 + seed)
+
+      const blend = (current: number, wanted: number) =>
+        current * (1 - mix) + wanted * mix
+
+      // Straight up and a little out, punching higher on the beat. Past
+      // vertical at the top, which is what makes it a cheer rather than a
+      // stretch.
+      if (armL.current) {
+        armL.current.rotation.x = blend(
+          armL.current.rotation.x,
+          -2.42 - pump * 0.55,
+        )
+        armL.current.rotation.z = blend(
+          armL.current.rotation.z,
+          -0.34 + sway * 0.12,
+        )
+      }
+      if (armR.current) {
+        armR.current.rotation.x = blend(
+          armR.current.rotation.x,
+          -2.42 - pump * 0.55,
+        )
+        armR.current.rotation.z = blend(
+          armR.current.rotation.z,
+          0.34 + sway * 0.12,
+        )
+      }
+
+      // The body goes up with the arms and rolls a little with the sway, and
+      // the chin comes up — you cheer at somebody, not at the floor.
+      if (body.current) {
+        body.current.position.y += pump * 0.11 * mix
+        body.current.rotation.z += sway * 0.07 * mix
+      }
+      if (torso.current) {
+        torso.current.rotation.x = blend(torso.current.rotation.x, -pump * 0.1)
+      }
+      if (head.current) {
+        head.current.rotation.x -= (0.1 + pump * 0.12) * mix
+        head.current.rotation.z += sway * 0.06 * mix
+      }
     }
 
     /* --------------------------------- swim ----------------------------- */
@@ -698,21 +825,30 @@ export function Character({
                     >
                       <boxGeometry args={[0.11, 0.09, 0.04]} />
                       <meshStandardMaterial
-                        color="#1c1f26"
+                        color={bowTie ?? '#1c1f26'}
                         flatShading
                         roughness={0.5}
                       />
                     </mesh>
                   ))}
+                  {/* The knot, a shade darker than whatever the wings are. */}
                   <mesh>
                     <boxGeometry args={[0.05, 0.05, 0.05]} />
-                    <meshStandardMaterial color="#0f1115" roughness={0.5} />
+                    <meshStandardMaterial
+                      color={bowTie ? '#000000' : '#0f1115'}
+                      opacity={bowTie ? 0.55 : 1}
+                      transparent={Boolean(bowTie)}
+                      roughness={0.5}
+                    />
                   </mesh>
                 </group>
-                {/* A flower in the buttonhole, to match hers */}
+                {/* In the buttonhole: a flower to match hers, or a berry. */}
                 <mesh position={[0.2, 1.2, 0.2]}>
                   <sphereGeometry args={[0.045, 8, 6]} />
-                  <meshStandardMaterial color="#ffd7e6" roughness={0.6} />
+                  <meshStandardMaterial
+                    color={buttonhole ?? '#ffd7e6'}
+                    roughness={0.6}
+                  />
                 </mesh>
               </group>
             )}

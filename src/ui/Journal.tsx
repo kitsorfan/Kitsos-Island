@@ -1,15 +1,16 @@
-import { INTERIORS } from '../data/interiors'
-import { KEYS, MISSIONS, NPCS } from '../data/world'
-import { TOTAL_ENTRIES, TOTAL_KEYS, keyCount, useGame } from '../state/store'
+import { KEYS, MISSIONS } from '../data/world'
+import {
+  CATALOGUE,
+  TOTAL_ENTRIES,
+  TOTAL_KEYS,
+  keyCount,
+  useGame,
+} from '../state/store'
 import * as sfx from '../game/audio'
 import { useT } from '../i18n/useT'
 
-const ORDER = [
-  ...NPCS.filter((n) => n.journal).map((n) => n.id),
-  ...INTERIORS.flatMap((i) =>
-    i.exhibits.filter((e) => e.journal).map((e) => e.id),
-  ),
-]
+/** One card per entry the island holds, found or not, in catalogue order. */
+const ORDER = CATALOGUE.map((entry) => entry.id)
 
 export function Journal() {
   const t = useT()
@@ -56,7 +57,7 @@ export function Journal() {
         <div className="panel__body">
           <section className="panel__section">
             <h3 className="panel__heading">
-              {t('Keyring')} — {keyCount(keys)} {t('of')} {TOTAL_KEYS}
+              {t('Keyring')}: {keyCount(keys)} {t('of')} {TOTAL_KEYS}
             </h3>
             <div className="keycard-row">
               {KEYS.map((key) => {
@@ -90,7 +91,7 @@ export function Journal() {
             {found === 0 && (
               <p className="panel__text">
                 {t(
-                  'Nothing yet. Talk to the townspeople and step into the buildings — everything you learn is filed here.',
+                  'Nothing yet. Talk to the townspeople and step into the buildings. Everything you learn is filed here.',
                 )}
               </p>
             )}
@@ -122,7 +123,7 @@ export function Journal() {
           {found === TOTAL_ENTRIES && (
             <p className="journal__complete">
               {t(
-                'Island complete. You now know the whole CV — the Radio Center is waiting.',
+                'Island complete. You now know the whole CV. The Radio Center is waiting.',
               )}
             </p>
           )}

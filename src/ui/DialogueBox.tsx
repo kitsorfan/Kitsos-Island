@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useGame } from '../state/store'
 import * as sfx from '../game/audio'
 import { dialogueBridge } from './useKeyboard'
@@ -10,6 +10,7 @@ export function DialogueBox() {
   const t = useT()
   const dialogue = t(useGame((s) => s.dialogue))
   const advance = useGame((s) => s.advance)
+  const choose = useGame((s) => s.choose)
   const [typed, setTyped] = useState({ line: '', shown: 0 })
 
   const line = dialogue?.lines[dialogue.page] ?? ''
@@ -42,21 +43,25 @@ export function DialogueBox() {
   }, [line])
 
   /** First press finishes the line, the next one turns the page. */
-  const step = useCallback(() => {
+  const step = () => {
     if (done) advance()
     else setTyped({ line, shown: line.length })
-  }, [advance, done, line])
+  }
 
+  // Handed to the keyboard afresh every render, which is cheaper than
+  // keeping it memoised and never stale.
   useEffect(() => {
     dialogueBridge.advance = step
     return () => {
       dialogueBridge.advance = () => useGame.getState().advance()
     }
-  }, [step])
+  })
 
   if (!dialogue) return null
 
   const isLast = dialogue.page === dialogue.lines.length - 1
+  /** The answers, once the question has finished typing itself out. */
+  const choices = isLast && done ? dialogue.choices : undefined
 
   return (
     <div className="dialogue-layer" onPointerDown={step}>
@@ -71,15 +76,39 @@ export function DialogueBox() {
             {done ? '' : '▌'}
           </span>
         </p>
+        {choices && (
+          <ol className="dialogue__choices">
+            {choices.map((choice, i) => (
+              <li key={choice.text}>
+                <button
+                  type="button"
+                  className="dialogue__choice"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    choose(i)
+                  }}
+                >
+                  <kbd>{i + 1}</kbd>
+                  {choice.text}
+                </button>
+              </li>
+            ))}
+          </ol>
+        )}
         <div className="dialogue__footer">
           <span className="dialogue__pages">
             {dialogue.page + 1} / {dialogue.lines.length}
           </span>
-          <span className="dialogue__hint">
-            {t(done ? (isLast ? 'Close' : 'Next') : 'Skip')}
-            <kbd>Enter</kbd>
-          </span>
-          {done && (
+          {choices ? (
+            <span className="dialogue__hint">{t('Pick an answer')}</span>
+          ) : (
+            <span className="dialogue__hint">
+              {t(done ? (isLast ? 'Close' : 'Next') : 'Skip')}
+              <kbd>Enter</kbd>
+            </span>
+          )}
+          {done && !choices && (
             <span className="dialogue__arrow" aria-hidden>
               ▼
             </span>

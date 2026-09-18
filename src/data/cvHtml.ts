@@ -50,7 +50,7 @@ function renderBlock(block: PanelBlock): string {
     case 'timeline':
       return block.entries
         .map((e) => {
-          const org = e.org ? ` <span class="org">— ${esc(e.org)}</span>` : ''
+          const org = e.org ? ` <span class="org"> · ${esc(e.org)}</span>` : ''
           const bullets = e.bullets
             ? `<ul>${e.bullets.map((b) => `<li>${esc(b)}</li>`).join('')}</ul>`
             : ''
@@ -71,7 +71,7 @@ function renderBlock(block: PanelBlock): string {
       return block.letters
         .map(
           (l) =>
-            `<article class="letter"><h3>${esc(l.from)} <span class="org">— ${esc(
+            `<article class="letter"><h3>${esc(l.from)} <span class="org"> · ${esc(
               l.role,
             )}</span></h3><p class="meta">${esc(l.note)}</p><blockquote>${l.paragraphs
               .map((p) => `<p>${esc(p)}</p>`)
@@ -198,8 +198,8 @@ export function buildCvHtml(): string {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${esc(name)} — CV</title>
-<meta name="description" content="${esc(`${name} — ${PROFILE.title}, ${PROFILE.location}.`)}">
+<title>${esc(name)} · CV</title>
+<meta name="description" content="${esc(`${name} · ${PROFILE.title}, ${PROFILE.location}.`)}">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>${STYLE}</style>
 </head>

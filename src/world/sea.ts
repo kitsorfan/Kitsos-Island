@@ -21,7 +21,7 @@ export const SWELL_GLSL = /* glsl */ `
 
   /**
    * The chop on top of it: too fine to be worth tessellating for, so it is
-   * never displaced — only the normal knows about it. That keeps the CPU
+   * never displaced, only the normal knows about it. That keeps the CPU
    * side honest, since the hull only has to match the swell.
    */
   float chopAt(vec2 p, float t) {

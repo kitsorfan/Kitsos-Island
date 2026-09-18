@@ -14,12 +14,16 @@ import type {
   AreaId,
   Carried,
   ExhibitKind,
+  LiftStop,
   PanelSection,
   Quality,
   Vec2,
 } from '../types'
 import * as sfx from '../game/audio'
 import { LEVELS, setSfxLevel as applySfxLevel } from '../game/audio'
+import { BIRTHDAY, clampDate, isFeast } from '../game/calendar'
+import { LIFT_DOORS, LIFT_PER_FLOOR } from '../game/lift'
+import type { CalendarDate } from '../game/calendar'
 import type { Locale } from '../i18n'
 import { forgetProgress, isEmpty, loadProgress, saveProgress } from './save'
 import type { SavedProgress } from './save'
@@ -82,6 +86,8 @@ interface Settings {
   musicLevel: number
   sfxLevel: number
   locale: Locale
+  /** What the calendar on the basement wall is turned to. */
+  calendar: CalendarDate
 }
 
 const DEFAULTS: Settings = {
@@ -92,6 +98,7 @@ const DEFAULTS: Settings = {
   // its audience is not only in Greece — so Greek is a choice, never a guess
   // made from the browser’s language.
   locale: 'en',
+  calendar: { ...BIRTHDAY },
 }
 
 function clampLevel(value: unknown, fallback: number): number {
@@ -114,6 +121,7 @@ function storedSettings(): Settings {
       musicLevel: clampLevel(saved.musicLevel, DEFAULTS.musicLevel),
       sfxLevel: clampLevel(saved.sfxLevel, DEFAULTS.sfxLevel),
       locale: saved.locale === 'el' ? 'el' : DEFAULTS.locale,
+      calendar: clampDate(saved.calendar),
     }
   } catch {
     return DEFAULTS
@@ -151,14 +159,32 @@ export type Mode =
   | 'hide'
   /** The sea-rescue briefing, or the card at the end of a run. */
   | 'rescue'
+  /** The calendar off the basement wall, and the day it is turned to. */
+  | 'calendar'
+  /** Inside the lift car with the doors shut, between floors. */
+  | 'lift'
 
 export type MissionState = 'idle' | 'active' | 'done'
+
+/**
+ * One answer on offer at the end of a dialogue: what it says, what the
+ * speaker says back, and what a right one lets out.
+ */
+export interface DialogueChoice {
+  text: string
+  lines: string[]
+  /** Secret revealed by picking this, with the toast that announces it. */
+  reveals?: { id: string; title: string; body: string }
+  journal?: JournalEntry
+}
 
 export interface DialogueState {
   speaker: string
   role?: string
   lines: string[]
   page: number
+  /** Shown on the last page instead of Close; picking one carries on. */
+  choices?: DialogueChoice[]
 }
 
 export interface PanelPayload {
@@ -246,7 +272,7 @@ export interface HideGame {
 
 export interface Nearby {
   id: string
-  kind: 'npc' | 'door' | 'sign' | 'exhibit' | 'key' | 'exit' | 'board'
+  kind: 'npc' | 'door' | 'sign' | 'exhibit' | 'key' | 'exit' | 'board' | 'toy'
   label: string
   verb: string
   /** Set when the target cannot be used yet. */
@@ -264,7 +290,44 @@ export interface JournalEntry {
 export interface Spawn {
   area: AreaId
   position: Vec2
+  /** Which way he faces on arrival; into the room, if left off. */
+  facing?: number
   token: number
+}
+
+/**
+ * A lift ride in progress. The car is drawn from this: the doors shut, the
+ * indicator counts from `from` to `to`, the doors open again, and only then
+ * does the player step out onto the far floor.
+ *
+ * `started` is the clock the ride began on, in seconds; every phase is
+ * measured from it so the car and the indicator never drift apart.
+ */
+/**
+ * Standing in the car with the panel in front of you, before a button has
+ * been pressed. `linkId` is the car, so the ride knows where it started.
+ */
+export interface LiftCall {
+  linkId: string
+  room: string
+  floor: number
+  stops: LiftStop[]
+  /** Said by the car when a button with nothing behind it is pressed. */
+  refused?: string[]
+}
+
+export interface LiftRide {
+  /** The link being taken, so the arrival knows where to put him. */
+  linkId: string
+  /** Room the car is leaving, and the one it is going to. */
+  fromRoom: string
+  toRoom: string
+  /** Floor numbers, for the indicator over the doors. */
+  from: number
+  to: number
+  started: number
+  /** How long the whole ride lasts, doors included. */
+  duration: number
 }
 
 interface GameState {
@@ -313,6 +376,30 @@ interface GameState {
   sfxLevel: number
   /** Lights out: the island after dark. */
   night: boolean
+  /**
+   * When the whole table last stood at its places, or null. The toast reads
+   * it and takes itself off the screen three seconds later.
+   */
+  cheer: number | null
+  /**
+   * How far the thesis defence has got, or null when nobody is at the lectern.
+   * The caption under the board reads `slide`, and the banner reads `ovation`.
+   * Written from the frame loop, so it only ever changes on a slide turn
+   * rather than sixty times a second.
+   */
+  lecture: { slide: number; ovation: boolean } | null
+  /** The lift ride under way, or null when nobody is in the car. */
+  lift: LiftRide | null
+  /** The panel, while he is in the car and has not pressed anything. */
+  liftCall: LiftCall | null
+  /**
+   * What the calendar on the basement wall is turned to, and whether that
+   * happens to be Christmas Day. The second is only ever the first read
+   * through `isFeast`, kept beside it so the render path does not recompute
+   * it on every frame of a room that cares.
+   */
+  calendar: CalendarDate
+  christmas: boolean
   /** Behind his eyes rather than over his shoulder. */
   firstPerson: boolean
   /** What he carries after dark. */
@@ -346,6 +433,8 @@ interface GameState {
   setNearby: (n: Nearby | null) => void
   talk: (d: Omit<DialogueState, 'page'>) => void
   advance: () => void
+  /** Picks one of the answers on the last page of the dialogue. */
+  choose: (index: number) => void
   closeDialogue: () => void
   openPanel: (p: PanelPayload) => void
   closePanel: () => void
@@ -389,6 +478,23 @@ interface GameState {
   clearProposal: () => void
   markMoved: () => void
 
+  /** Takes the calendar off the wall, and puts it back. */
+  openCalendar: () => void
+  closeCalendar: () => void
+  /** Raises the toast, once, when the last of them reaches the table. */
+  cheerFeast: () => void
+  endCheer: () => void
+  setLecture: (slide: number, ovation: boolean) => void
+  endLecture: () => void
+
+  /** Turns it to a day. The house does the rest. */
+  setCalendar: (next: CalendarDate) => void
+  /**
+   * Puts it back to his birthday, silently. This is what leaving the room
+   * does: the decoration lasts as long as you are standing in it.
+   */
+  resetCalendar: () => void
+
   openArcade: () => void
   closeArcade: () => void
   openMoto: () => void
@@ -427,7 +533,17 @@ interface GameState {
   enterBuilding: (id: string) => void
   leaveBuilding: () => void
   /** Stairs and doors between the rooms of one building. */
-  goRoom: (to: string, arrive: Vec2) => void
+  goRoom: (to: string, arrive: Vec2, facing?: number) => void
+  /** Into the car: the doors stay open and the panel comes up. */
+  callLift: (call: LiftCall) => void
+  /** Out of the car without pressing anything. */
+  leaveLift: () => void
+  /** A button pressed: either the car moves, or it says why it will not. */
+  pressFloor: (stop: LiftStop) => void
+  /** Shuts the doors and starts the car moving. */
+  rideLift: (ride: LiftRide) => void
+  /** The car has arrived: put him out on the far floor. */
+  endLift: (arrive: Vec2, facing?: number) => void
   /** Lets a secret out, which is what opens the doors that need one. */
   /**
    * Lets a secret out, which is what opens the doors that need one. The line
@@ -453,7 +569,39 @@ interface GameState {
  * Written out in full here, in English, because this is also what a restored
  * save is rebuilt from: the file on disk holds ids and nothing else.
  */
-const CATALOGUE: JournalEntry[] = [
+/**
+ * The one entry nothing on the island points at: it is filed by turning the
+ * calendar to the twenty-fifth of December, and it stays filed after the
+ * calendar has been turned back. Listed here with the rest so the total it
+ * counts toward is honest and a save restores it.
+ */
+/**
+ * The defence, for whoever sits through the whole of it. Like the calendar
+ * it is an entry you earn by doing something rather than by walking past a
+ * board, so it is declared here beside that one and counted the same way.
+ */
+export const DEFENCE_GIVEN: JournalEntry = {
+  id: 'defence',
+  title: 'The thesis defence',
+  body: 'Step up to the lectern in the NTUA hall and the class files in for the defence: compliance analysis of movement exercises, pose estimation and a modified Levenshtein distance, running on the phone in the patient’s hand. Supervised by the Dean of the School, graded with distinction, and published on arXiv three years later.',
+  source: 'The lectern',
+}
+
+export const CHRISTMAS_FOUND: JournalEntry = {
+  id: 'christmas',
+  title: 'Christmas in the basement',
+  body: 'Turn the calendar to the twenty-fifth of December and the basement is dressed, the tree is up and both families are round the table. It is his nameday as well as Christmas, and the meal has always been hosted here.',
+  source: 'The calendar',
+}
+
+/**
+ * Every entry the journal can hold, in the order the journal shows them. The
+ * total on the meter, the cards in the grid and what a save is allowed to
+ * restore all read this one list.
+ */
+export const CATALOGUE: JournalEntry[] = [
+  CHRISTMAS_FOUND,
+  DEFENCE_GIVEN,
   ...NPCS.filter((n) => n.journal).map((n) => ({
     id: n.id,
     title: n.journal!.title,
@@ -480,6 +628,13 @@ const CATALOGUE: JournalEntry[] = [
         source: i.name,
       })),
   ),
+  // What a right answer to somebody's question files, under the question's id.
+  ...NPCS.filter((n) => n.quiz?.journal).map((n) => ({
+    id: n.quiz!.id,
+    title: n.quiz!.journal!.title,
+    body: n.quiz!.journal!.body,
+    source: n.name,
+  })),
 ]
 
 const ENTRY_BY_ID = new Map(CATALOGUE.map((entry) => [entry.id, entry]))
@@ -567,6 +722,12 @@ export const useGame = create<GameState>((set, get) => ({
   sfxLevel: SAVED.sfxLevel,
   locale: SAVED.locale,
   night: false,
+  cheer: null,
+  lecture: null,
+  lift: null,
+  liftCall: null,
+  calendar: SAVED.calendar,
+  christmas: isFeast(SAVED.calendar),
   firstPerson: false,
   handLight: 'flashlight',
   swimming: false,
@@ -592,9 +753,33 @@ export const useGame = create<GameState>((set, get) => ({
     if (!dialogue) return
     if (dialogue.page < dialogue.lines.length - 1) {
       set({ dialogue: { ...dialogue, page: dialogue.page + 1 } })
+    } else if (dialogue.choices) {
+      // A question waits for an answer; Enter does not close it.
+      return
     } else {
       set({ mode: 'explore', dialogue: null })
     }
+  },
+
+  choose: (index) => {
+    const { dialogue } = get()
+    const choice = dialogue?.choices?.[index]
+    if (!dialogue || !choice) return
+    if (choice.reveals) {
+      const { id, title, body } = choice.reveals
+      get().revealSecret(id, { title, body })
+    } else {
+      sfx.cancel()
+    }
+    if (choice.journal) get().record(choice.journal)
+    set({
+      dialogue: {
+        speaker: dialogue.speaker,
+        role: dialogue.role,
+        lines: choice.lines,
+        page: 0,
+      },
+    })
   },
 
   closeDialogue: () => set({ mode: 'explore', dialogue: null }),
@@ -656,8 +841,8 @@ export const useGame = create<GameState>((set, get) => ({
    * no-op that leaves the island stuck where one bad patch left it.
    */
   setQuality: (quality) => {
-    const { musicLevel, sfxLevel, locale } = get()
-    remember({ quality, musicLevel, sfxLevel, locale })
+    const { musicLevel, sfxLevel, locale, calendar } = get()
+    remember({ quality, musicLevel, sfxLevel, locale, calendar })
     set({ quality, autoDropped: false })
   },
 
@@ -668,16 +853,16 @@ export const useGame = create<GameState>((set, get) => ({
    */
   setMusicLevel: (level) => {
     const musicLevel = Math.max(0, Math.min(LEVELS, Math.round(level)))
-    const { quality, sfxLevel, locale } = get()
-    remember({ quality, musicLevel, sfxLevel, locale })
+    const { quality, sfxLevel, locale, calendar } = get()
+    remember({ quality, musicLevel, sfxLevel, locale, calendar })
     applyMusicLevel(musicLevel)
     set({ musicLevel })
   },
 
   setSfxLevel: (level) => {
     const sfxLevel = Math.max(0, Math.min(LEVELS, Math.round(level)))
-    const { quality, musicLevel, locale } = get()
-    remember({ quality, musicLevel, sfxLevel, locale })
+    const { quality, musicLevel, locale, calendar } = get()
+    remember({ quality, musicLevel, sfxLevel, locale, calendar })
     applySfxLevel(sfxLevel)
     set({ sfxLevel })
     // Let them hear what they just chose.
@@ -689,8 +874,8 @@ export const useGame = create<GameState>((set, get) => ({
    * only marks the verdict, and a visitor who disagrees can overrule it.
    */
   setLocale: (locale) => {
-    const { quality, musicLevel, sfxLevel } = get()
-    remember({ quality, musicLevel, sfxLevel, locale })
+    const { quality, musicLevel, sfxLevel, calendar } = get()
+    remember({ quality, musicLevel, sfxLevel, locale, calendar })
     set({ locale })
   },
 
@@ -863,10 +1048,12 @@ export const useGame = create<GameState>((set, get) => ({
    * Flashlight, torch, then nothing at all — which the camp run needs.
    *
    * Refused in the water. Both hands are busy out there and neither of them
-   * is holding anything that would still be alight.
+   * is holding anything that would still be alight. Refused indoors too:
+   * the rooms light themselves after dark, so there is nothing to carry.
    */
   toggleHandLight: () => {
-    if (get().swimming) return
+    const s0 = get()
+    if (s0.swimming || s0.area !== 'island') return
     sfx.confirm()
     set((s) => ({
       handLight:
@@ -903,6 +1090,81 @@ export const useGame = create<GameState>((set, get) => ({
   closeArcade: () => {
     sfx.cancel()
     set({ mode: 'explore' })
+  },
+
+  /* ----------------------------- calendar --------------------------- */
+
+  openCalendar: () => {
+    sfx.confirm()
+    set({ mode: 'calendar', dialogue: null, panel: null, nearby: null })
+  },
+
+  closeCalendar: () => {
+    sfx.cancel()
+    set({ mode: 'explore' })
+  },
+
+  /**
+   * Turns the calendar to a day and remembers it, so the basement is still
+   * decorated on the next visit rather than only until the tab closes.
+   *
+   * Arriving on the twenty-fifth of December is the whole point of the thing,
+   * so it announces itself: a jingle, and a journal entry that stays found
+   * even after the calendar is turned back.
+   */
+  setCalendar: (next) => {
+    const calendar = clampDate(next)
+    const christmas = isFeast(calendar)
+    const { quality, musicLevel, sfxLevel, locale } = get()
+    remember({ quality, musicLevel, sfxLevel, locale, calendar })
+    const arriving = christmas && !get().christmas
+    if (arriving) sfx.jingle()
+    else sfx.blip()
+    set({ calendar, christmas })
+    if (arriving) get().record(CHRISTMAS_FOUND)
+  },
+
+  /**
+   * Called from the frame loop the moment the last of them is in place, so
+   * it has to be idempotent — it is asked again every frame after that.
+   */
+  cheerFeast: () => {
+    if (get().cheer !== null) return
+    sfx.jingle()
+    set({ cheer: Date.now() })
+  },
+
+  endCheer: () => {
+    if (get().cheer === null) return
+    set({ cheer: null })
+  },
+
+  /**
+   * Called from the frame loop while he is at the lectern, so it has to be
+   * cheap to call on a frame that changes nothing: the slide only turns
+   * every eight seconds or so, and the ovation once.
+   */
+  setLecture: (slide, ovation) => {
+    const at = get().lecture
+    if (at && at.slide === slide && at.ovation === ovation) return
+    // The room comes to its feet once, not on every frame it stays on them.
+    if (ovation && !at?.ovation) {
+      sfx.applause()
+      get().record(DEFENCE_GIVEN)
+    }
+    set({ lecture: { slide, ovation } })
+  },
+
+  endLecture: () => {
+    if (get().lecture === null) return
+    set({ lecture: null })
+  },
+
+  resetCalendar: () => {
+    const calendar = { ...BIRTHDAY }
+    const { quality, musicLevel, sfxLevel, locale } = get()
+    remember({ quality, musicLevel, sfxLevel, locale, calendar })
+    set({ calendar, christmas: false })
   },
 
   /* ---------------------------- motocross --------------------------- */
@@ -1467,11 +1729,91 @@ export const useGame = create<GameState>((set, get) => ({
   },
 
   /**
+   * Into the car. Nothing moves yet: the doors stay open, the panel comes up,
+   * and he is free to walk straight back out again.
+   */
+  callLift: (call) => {
+    if (get().lift || get().liftCall) return
+    set({
+      liftCall: call,
+      mode: 'lift',
+      nearby: null,
+      panel: null,
+      dialogue: null,
+    })
+  },
+
+  leaveLift: () => {
+    if (!get().liftCall) return
+    set({ liftCall: null, mode: 'explore' })
+  },
+
+  /**
+   * A button. A floor with a room behind it shuts the doors and rides; the
+   * one with nothing behind it says so and leaves the doors open.
+   */
+  pressFloor: (stop) => {
+    const call = get().liftCall
+    if (!call) return
+    if (!stop.to || !INTERIOR_BY_ID.has(stop.to)) {
+      sfx.dry()
+      set({
+        liftCall: { ...call, refused: stop.lines ?? ['Nothing happens.'] },
+      })
+      return
+    }
+    /* Already on that floor: the doors do not even close. */
+    if (stop.to === call.room) {
+      sfx.dry()
+      set({
+        liftCall: { ...call, refused: ['You are on this floor already.'] },
+      })
+      return
+    }
+    get().rideLift({
+      linkId: call.linkId,
+      fromRoom: call.room,
+      toRoom: stop.to,
+      from: call.floor,
+      to: stop.floor,
+      started: performance.now() / 1000,
+      duration:
+        LIFT_DOORS * 2 +
+        Math.max(1, Math.abs(stop.floor - call.floor)) * LIFT_PER_FLOOR,
+    })
+  },
+
+  /**
+   * The doors shut and the car moves. The room does not change yet: he stands
+   * where he is until `endLift`, once the ride has run its course.
+   */
+  rideLift: (ride) => {
+    if (get().lift) return
+    if (!INTERIOR_BY_ID.has(ride.toRoom)) return
+    set({
+      lift: ride,
+      liftCall: null,
+      mode: 'lift',
+      nearby: null,
+      panel: null,
+      dialogue: null,
+    })
+  },
+
+  /** Out of the car on the far floor, and back in control. */
+  endLift: (arrive, facing) => {
+    const ride = get().lift
+    if (!ride) return
+    set({ lift: null })
+    get().goRoom(ride.toRoom, arrive, facing)
+  },
+
+  /**
    * Through a door or down the stairs inside one building. Not the same as
    * entering from outside: nothing is discovered, and the way out still knows
    * which doorstep it belongs to.
    */
-  goRoom: (to, arrive) => {
+  goRoom: (to, arrive, facing) => {
     if (get().hide) return
     if (!INTERIOR_BY_ID.has(to)) return
     set((s) => ({
@@ -1483,6 +1825,7 @@ export const useGame = create<GameState>((set, get) => ({
       spawn: {
         area: to,
         position: [...arrive] as Vec2,
+        facing,
         token: s.spawn.token + 1,
       },
     }))

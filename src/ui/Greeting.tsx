@@ -91,13 +91,13 @@ export function Greeting() {
           <p className="greeting__kicker">
             {t('A word from the island’s owner')}
           </p>
-          <h2 className="greeting__title">{t('Hey — nice to meet you!')}</h2>
+          <h2 className="greeting__title">{t('Hey, nice to meet you!')}</h2>
 
           <div className="greeting__speech">
             <p>
               <strong>{t('Fair warning: you’ll miss all the fun.')}</strong>{' '}
               {t(
-                'The island is the good part — the people, the buildings, the five keys and the lighthouse at the end of it.',
+                'The island is the good part: the people, the buildings, the five keys and the lighthouse at the end of it.',
               )}
             </p>
             <p>
@@ -107,7 +107,7 @@ export function Greeting() {
             </p>
             <p>
               {t(
-                'Either way, I would be very happy to connect. Say hello and I will answer — there is no one else on the other end.',
+                'Either way, I would be very happy to connect. Say hello and I will answer. There is no one else on the other end.',
               )}
             </p>
           </div>

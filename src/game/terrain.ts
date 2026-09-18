@@ -197,8 +197,26 @@ export const FENCE_HEIGHT = 1.2
 export const FENCE_SPACING = 2
 
 /**
- * The garden fence round the house, as four closed sides with a gate left in
- * the front one for the path to the door.
+ * The concrete apron outside the garage, and the drive that runs off it to
+ * the road. The garage mouth is in the west face of the house, so everything
+ * on this side of it — the gap in the fence, the scatter that has to keep
+ * off, the drive itself — is measured from here rather than guessed at twice.
+ */
+export const GARAGE_APRON = {
+  /** Centre line of the drive, which is the centre of the garage mouth. */
+  z: 57.65,
+  /** Half the width of the apron, and so of the drive that leaves it. */
+  halfWidth: 2.7,
+  /** World x of the garage mouth, where the apron starts. */
+  mouth: -68.78,
+  /** World x the drive runs out to, clear of the fence. */
+  end: -79,
+}
+
+/**
+ * The garden fence round the house, as four closed sides with two gaps left
+ * in it: one in the front for the path to the door, and one in the west side
+ * for the drive, which comes out of the garage and has to get to the road.
  */
 export const HOUSE_FENCE: FenceRun[] = (() => {
   const cx = -62
@@ -207,11 +225,15 @@ export const HOUSE_FENCE: FenceRun[] = (() => {
   const hd = 11
   /** Half-width of the gap the front path comes through. */
   const gate = 2.6
+  /** Centre and half-width of the gap the drive comes through. */
+  const drive = GARAGE_APRON.z
+  const driveGate = GARAGE_APRON.halfWidth + 0.5
   const front = cz - hd
   const back = cz + hd
   return [
     { from: [cx - hw, back], to: [cx + hw, back] },
-    { from: [cx - hw, front], to: [cx - hw, back] },
+    { from: [cx - hw, drive + driveGate], to: [cx - hw, back] },
+    { from: [cx - hw, front], to: [cx - hw, drive - driveGate] },
     { from: [cx + hw, front], to: [cx + hw, back] },
     { from: [cx - hw, front], to: [cx - gate, front] },
     { from: [cx + gate, front], to: [cx + hw, front] },
@@ -376,6 +398,16 @@ const insideBuilding = (x: number, z: number, pad: number) =>
       Math.abs(z - b.position[1]) < b.half[1] + pad,
   )
 
+/**
+ * The apron and the drive off it. Scatter keeps off this the way it keeps off
+ * the paths: the drive is not a path in PATHS — nobody walks it to get
+ * anywhere — but a boulder parked on it is just as wrong.
+ */
+const onDrive = (x: number, z: number, pad: number) =>
+  x > GARAGE_APRON.end - pad &&
+  x < GARAGE_APRON.mouth + pad &&
+  Math.abs(z - GARAGE_APRON.z) < GARAGE_APRON.halfWidth + pad
+
 const nearDoor = (x: number, z: number, pad: number) =>
   BUILDINGS.some((b) => Math.hypot(x - b.door[0], z - b.door[1]) < pad)
 
@@ -427,6 +459,7 @@ function scatter(
 
     if (insideBuilding(x, z, opts.buildingPad)) continue
     if (nearPath(x, z, opts.pathMargin)) continue
+    if (onDrive(x, z, opts.pathMargin)) continue
     if (nearDoor(x, z, 8)) continue
     if (nearPeople(x, z, 4)) continue
     if (opts.avoidHills !== false && nearHill(x, z, 2)) continue

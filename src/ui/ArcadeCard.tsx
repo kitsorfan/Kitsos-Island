@@ -37,8 +37,8 @@ export function ArcadeCard() {
     if (game.needs === 'lighthouse' && !lighthouseOpen) {
       return 'Behind five locks. Find every district key first.'
     }
-    if (game.when === 'night' && !night) return 'After dark only — press L.'
-    if (game.when === 'day' && night) return 'Daylight only — press L.'
+    if (game.when === 'night' && !night) return 'After dark only. Press L.'
+    if (game.when === 'day' && night) return 'Daylight only. Press L.'
     return null
   }
 

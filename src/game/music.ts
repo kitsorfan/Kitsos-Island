@@ -23,6 +23,8 @@ export type Mood =
   | 'balloon'
   | 'moto'
   | 'boat'
+  /** The basement, on the one day of the year it is decorated. */
+  | 'christmas'
 
 export const BPM = 104
 const BEAT = 60 / BPM
@@ -895,6 +897,114 @@ function scheduleBoat(ac: AudioContext, index: number, at: number) {
   if (index % 8 === 7) hit(ac, at + BEAT * 3, 0.05, 900, 0.4, 0.6)
 }
 
+/* --------------------------- the twenty-fifth -------------------------- */
+
+/**
+ * The basement on Christmas Day.
+ *
+ * An original piece in the idiom rather than a carol: everything on this
+ * island is written here so there is no licence to honour, and that holds for
+ * this too, however tempting the obvious tune was.
+ *
+ * G major, which is the warmest key the voices here have; a plagal turn
+ * through IV and back, which is the sound of every carol ever written without
+ * being any of them; bells two octaves up rather than the square lead; and a
+ * shaker on the offbeats standing in for sleigh bells. The lilt is in the
+ * rhythm — a long-short dotted pair on each beat, which is what makes it
+ * swing rather than march.
+ */
+const CHRISTMAS: Chord[] = [
+  { bass: 43, triad: [67, 71, 74] }, // G
+  { bass: 48, triad: [67, 72, 76] }, // C, the plagal step out
+  { bass: 43, triad: [67, 71, 74] }, // G
+  { bass: 38, triad: [66, 69, 74] }, // D, and the step home
+  { bass: 40, triad: [67, 71, 76] }, // Em
+  { bass: 48, triad: [67, 72, 76] }, // C
+  { bass: 45, triad: [69, 72, 76] }, // Am
+  { bass: 38, triad: [66, 69, 74] }, // D
+]
+
+/**
+ * Eight eighths of carol per bar. It rises to the octave over the first half
+ * and comes down the long way, which is the shape everybody already knows
+ * without being able to name a tune it belongs to.
+ */
+const CAROL: (number | null)[][] = [
+  [74, null, 74, 76, 74, null, 71, null],
+  [72, null, 72, 74, 72, null, 67, null],
+  [74, null, 76, 79, 78, null, 76, null],
+  [74, null, null, 73, 74, null, null, null],
+  [76, null, 76, 74, 71, null, 74, null],
+  [72, null, 74, 76, 72, null, 67, null],
+  [69, null, 72, 74, 76, null, 74, null],
+  [71, null, null, 74, 71, null, null, null],
+]
+
+function scheduleChristmas(ac: AudioContext, index: number, at: number) {
+  const chord = CHRISTMAS[index % CHRISTMAS.length]
+  const line = CAROL[index % CAROL.length]
+
+  pad(ac, chord.triad, at, 0.13, 0.3)
+
+  // Bass on one and three, and the fifth lifting into the next bar.
+  tone(ac, {
+    freq: midi(chord.bass),
+    at,
+    duration: BEAT * 1.7,
+    type: 'triangle',
+    level: 0.3,
+  })
+  tone(ac, {
+    freq: midi(chord.bass),
+    at: at + BEAT * 2,
+    duration: BEAT * 0.9,
+    type: 'triangle',
+    level: 0.24,
+  })
+  tone(ac, {
+    freq: midi(chord.bass + 7),
+    at: at + BEAT * 3.5,
+    duration: BEAT * 0.45,
+    type: 'triangle',
+    level: 0.18,
+  })
+
+  // The tune, dotted: the note on the beat is held long and the one after it
+  // is clipped, which is the whole difference between a lilt and a march.
+  for (let i = 0; i < line.length; i++) {
+    const note = line[i]
+    if (note === null) continue
+    const onBeat = i % 2 === 0
+    tone(ac, {
+      freq: midi(note),
+      at: at + i * (BEAT / 2) + (onBeat ? 0 : BEAT * 0.16),
+      duration: BEAT * (onBeat ? 0.62 : 0.2),
+      type: 'triangle',
+      level: onBeat ? 0.1 : 0.07,
+      attack: 0.015,
+      vibrato: 1.2,
+    })
+  }
+
+  // A glockenspiel two octaves over the chord, one note a bar, so the room
+  // has something bright in it that is not the tune.
+  tone(ac, {
+    freq: midi(chord.triad[index % 3] + 24),
+    at: at + BEAT * (index % 2 === 0 ? 0 : 2),
+    duration: BEAT * 2.4,
+    type: 'sine',
+    level: 0.055,
+    attack: 0.01,
+  })
+
+  // Sleigh bells: a shaker on every offbeat, with the accent on the four.
+  for (const beat of [0.5, 1.5, 2.5, 3.5]) {
+    hit(ac, at + beat * BEAT, beat === 3.5 ? 0.055 : 0.034, 7200, 0.9, 0.075)
+  }
+  thump(ac, at, 0.26, 96, 44)
+  thump(ac, at + BEAT * 2, 0.2, 92, 42)
+}
+
 /* -------------------------------- tracks ------------------------------ */
 
 interface Track {
@@ -940,6 +1050,7 @@ const TRACKS: Record<Mood, Track> = {
   balloon: { gain: 0.14, cutoff: 3200, play: scheduleBalloon },
   moto: { gain: 0.15, cutoff: 5200, play: scheduleMoto },
   boat: { gain: 0.14, cutoff: 2400, play: scheduleBoat },
+  christmas: { gain: 0.125, cutoff: 3400, play: scheduleChristmas },
 }
 
 /* ------------------------------ sequencing ---------------------------- */

@@ -1,47 +1,116 @@
-import { useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { BackSide } from 'three'
-import type { Group, Mesh } from 'three'
+import { BackSide, Path, Shape, ShapeGeometry } from 'three'
+import type { Group, Mesh, MeshBasicMaterial } from 'three'
 import { INTERIOR_BY_ID } from '../data/interiors'
-import { FLIGHT, FLIGHT_RISE, FLIGHT_RUN, WALL_HEIGHT } from '../game/interior'
+import {
+  DOORWAY_WIDTH,
+  FLIGHT,
+  FLIGHT_RISE,
+  FLIGHT_RUN,
+  WALL_HEIGHT,
+  WELL,
+  roomProps,
+} from '../game/interior'
+import { MONTH_NAMES, nameOfDay } from '../game/calendar'
+import { examine } from '../game/examine'
+import { LECTURE_AREA } from '../game/lecture'
+import { liftPhase } from '../game/lift'
 import { useGame } from '../state/store'
+import { useT } from '../i18n/useT'
 import { InteriorFurniture } from './InteriorProps'
+import { Slides } from './Slides'
 import { Npcs } from './Npcs'
 import { Player } from './Player'
 import { TextPlane } from './TextSign'
-import type { Exhibit, Interior as InteriorData, InteriorLink } from '../types'
-
-const DOOR_WIDTH = 4
+import type {
+  Exhibit,
+  Interior as InteriorData,
+  InteriorLink,
+  InteriorProp,
+} from '../types'
 
 export function Interior({ id }: { id: string }) {
   const interior = INTERIOR_BY_ID.get(id)
   const secrets = useGame((s) => s.secrets)
+  const christmas = useGame((s) => s.christmas)
   if (!interior) return null
 
   // Underground there is no sun and no sky: the light comes off whatever is
   // screwed to the joists, so it is warmer, flatter and lower.
   const under = Boolean(interior.underground)
+  /** Decorated, which only one room in the house ever is. */
+  const festive = christmas && Boolean(interior.festive)
 
   return (
     <>
-      <color attach="background" args={[under ? '#120f18' : '#1b1622']} />
-      <ambientLight intensity={under ? 0.62 : 0.9} />
+      {/*
+        Christmas evening is lit down rather than up. The flat fill that makes
+        an ordinary room readable is exactly what kills a cosy one, so on the
+        day the ambient, the sky and both suns come almost all the way off and
+        the room is lit by the things in it instead: the hearth, the tree, and
+        a warm pool over the table. Dark between them is the point.
+      */}
+      <color
+        attach="background"
+        args={[festive ? '#0c0910' : under ? '#120f18' : '#1b1622']}
+      />
+      <ambientLight
+        intensity={festive ? 0.2 : under ? 0.62 : 0.9}
+        color={festive ? '#ffd0a0' : '#ffffff'}
+      />
       <hemisphereLight
-        args={under ? ['#ffe0b4', '#2b2536', 0.5] : ['#fff4e2', '#4a4152', 0.7]}
+        args={
+          festive
+            ? ['#ffcf9a', '#1b1420', 0.22]
+            : under
+              ? ['#ffe0b4', '#2b2536', 0.5]
+              : ['#fff4e2', '#4a4152', 0.7]
+        }
       />
       <directionalLight
         position={[8, 18, 10]}
-        intensity={under ? 0.55 : 1.1}
-        color={under ? '#ffe6c0' : '#fff2dd'}
+        intensity={festive ? 0.16 : under ? 0.55 : 1.1}
+        color={festive ? '#ffdcb0' : under ? '#ffe6c0' : '#fff2dd'}
       />
       <directionalLight
         position={[-10, 14, -8]}
-        intensity={under ? 0.3 : 0.45}
-        color={under ? '#9fb2d8' : '#bcd4ff'}
+        intensity={festive ? 0.1 : under ? 0.3 : 0.45}
+        color={festive ? '#8a93c4' : under ? '#9fb2d8' : '#bcd4ff'}
       />
+      {/* Three warm pools, tight rather than broad: over the table, off the
+          tree, and one at the back so the stairs are not a black hole. The
+          hearth does the rest of it, and flickers. */}
+      {festive && (
+        <>
+          <pointLight
+            position={[0, 3.6, -5]}
+            intensity={30}
+            distance={15}
+            decay={1.9}
+            color="#ffbe78"
+          />
+          <pointLight
+            position={[-11.6, 2.4, -5]}
+            intensity={15}
+            distance={10}
+            decay={2}
+            color="#ffd08a"
+          />
+          <pointLight
+            position={[2, 3.6, 6]}
+            intensity={13}
+            distance={12}
+            decay={2}
+            color="#ffcf96"
+          />
+        </>
+      )}
 
       <Room interior={interior} />
-      <InteriorFurniture props={interior.props} />
+      <InteriorFurniture props={roomProps(interior, festive)} />
+      {/* Chalked on the board, and only while somebody is at the lectern. */}
+      {id === LECTURE_AREA && <Slides />}
       {(interior.links ?? []).map((link) => (
         <LinkPiece
           key={link.id}
@@ -57,19 +126,54 @@ export function Interior({ id }: { id: string }) {
           accent={interior.accent}
         />
       ))}
-      <ExitPad interior={interior} />
+      {!interior.building && <ExitPad interior={interior} />}
       <Npcs area={id} />
       <Player />
     </>
   )
 }
 
-/** Floor, skirting and four walls — the near ones fade out of the way. */
+/**
+ * Floor, skirting and four walls — the near ones fade out of the way. The
+ * front room has the doorway to the island cut in its south wall; a room
+ * deeper in the building has a solid wall there, and is left by its links.
+ */
 function Room({ interior }: { interior: InteriorData }) {
   const [hx, hz] = interior.half
+  const front = !interior.building
   const walls = useRef<Group>(null)
   const camera = useThree((s) => s.camera)
   const night = useGame((s) => s.night)
+
+  /**
+   * The floor, with a hole cut for every stairwell. The shape is drawn in
+   * its own x/y and then laid flat, which turns its y into -z — so a well at
+   * (x, z) in the room is a hole at (x, -z) in the shape.
+   */
+  const floor = useMemo(() => {
+    const shape = new Shape()
+    shape.moveTo(-hx, -hz)
+    shape.lineTo(hx, -hz)
+    shape.lineTo(hx, hz)
+    shape.lineTo(-hx, hz)
+    shape.closePath()
+    for (const link of interior.links ?? []) {
+      if (link.kind !== 'stairsDown') continue
+      const across = Math.abs(Math.sin(link.rotation ?? 0)) > 0.7
+      const hw = across ? WELL.halfLength : WELL.halfWidth
+      const hl = across ? WELL.halfWidth : WELL.halfLength
+      const [wx, wz] = link.position
+      const hole = new Path()
+      hole.moveTo(wx - hw, -(wz - hl))
+      hole.lineTo(wx + hw, -(wz - hl))
+      hole.lineTo(wx + hw, -(wz + hl))
+      hole.lineTo(wx - hw, -(wz + hl))
+      hole.closePath()
+      shape.holes.push(hole)
+    }
+    return new ShapeGeometry(shape)
+  }, [interior, hx, hz])
+  useEffect(() => () => floor.dispose(), [floor])
 
   useFrame(() => {
     if (!walls.current) return
@@ -92,8 +196,7 @@ function Room({ interior }: { interior: InteriorData }) {
 
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[hx * 2, hz * 2]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} geometry={floor} receiveShadow>
         <meshStandardMaterial color={interior.floor} roughness={1} />
       </mesh>
 
@@ -129,30 +232,41 @@ function Room({ interior }: { interior: InteriorData }) {
           <boxGeometry args={[0.4, WALL_HEIGHT, hz * 2 + 0.8]} />
           {wallMat}
         </mesh>
-        {/* South wall, split around the doorway */}
-        <group userData={{ side: 'south' }}>
-          {[-1, 1].map((sign) => {
-            const width = hx - DOOR_WIDTH / 2
-            return (
-              <mesh
-                key={sign}
-                position={[
-                  sign * (DOOR_WIDTH / 2 + width / 2),
-                  WALL_HEIGHT / 2,
-                  hz + 0.2,
-                ]}
-                receiveShadow
-              >
-                <boxGeometry args={[width, WALL_HEIGHT, 0.4]} />
-                {wallMat}
-              </mesh>
-            )
-          })}
-          <mesh position={[0, WALL_HEIGHT - 0.5, hz + 0.2]}>
-            <boxGeometry args={[DOOR_WIDTH, 1, 0.4]} />
+        {/* South wall, split around the doorway in the front room only. */}
+        {front ? (
+          <group userData={{ side: 'south' }}>
+            {[-1, 1].map((sign) => {
+              const width = hx - DOORWAY_WIDTH / 2
+              return (
+                <mesh
+                  key={sign}
+                  position={[
+                    sign * (DOORWAY_WIDTH / 2 + width / 2),
+                    WALL_HEIGHT / 2,
+                    hz + 0.2,
+                  ]}
+                  receiveShadow
+                >
+                  <boxGeometry args={[width, WALL_HEIGHT, 0.4]} />
+                  {wallMat}
+                </mesh>
+              )
+            })}
+            <mesh position={[0, WALL_HEIGHT - 0.5, hz + 0.2]}>
+              <boxGeometry args={[DOORWAY_WIDTH, 1, 0.4]} />
+              {wallMat}
+            </mesh>
+          </group>
+        ) : (
+          <mesh
+            userData={{ side: 'south' }}
+            position={[0, WALL_HEIGHT / 2, hz + 0.2]}
+            receiveShadow
+          >
+            <boxGeometry args={[hx * 2 + 0.8, WALL_HEIGHT, 0.4]} />
             {wallMat}
           </mesh>
-        </group>
+        )}
       </group>
 
       {/* Down here the ceiling is the floor above: joists, and a strip
@@ -214,16 +328,16 @@ function Room({ interior }: { interior: InteriorData }) {
   )
 }
 
+/** The ring on the floor of the front doorway. Step into it and you are out. */
 function ExitPad({ interior }: { interior: InteriorData }) {
   const ring = useRef<Mesh>(null)
-  const active = useGame((s) => s.nearby?.id === 'exit')
+  const t = useT()
   const z = interior.half[1] - 1.8
-  const label = interior.exit?.label ?? 'Way out'
 
   useFrame((state) => {
     if (!ring.current) return
     const pulse = (Math.sin(state.clock.elapsedTime * 2.4) + 1) / 2
-    ring.current.scale.setScalar((active ? 1.15 : 1) + pulse * 0.08)
+    ring.current.scale.setScalar(1 + pulse * 0.08)
   })
 
   return (
@@ -241,9 +355,9 @@ function ExitPad({ interior }: { interior: InteriorData }) {
         />
       </mesh>
       <TextPlane
-        text={label}
-        width={interior.exit ? 5 : 3}
-        aspect={interior.exit ? 7.6 : 4.4}
+        text={t('Way out')}
+        width={3}
+        aspect={4.4}
         color="#ffe9c4"
         outline="rgba(0,0,0,0.6)"
         position={[0, 3.4, 0]}
@@ -267,24 +381,151 @@ function ExhibitPiece({
   const active = useGame((s) => s.nearby?.id === exhibit.id)
 
   return (
-    <group
-      position={[exhibit.position[0], 0, exhibit.position[1]]}
-      rotation={[0, exhibit.rotation ?? 0, 0]}
+    <>
+      {/* The thing you click, when the exhibit is a thing rather than a
+          board: an invisible box sitting on the real object across the room
+          from the prompt. It is given in room coordinates of its own because
+          the toy it covers belongs to a piece of furniture, not to this
+          group. */}
+      {exhibit.hitbox && <ExhibitHitbox exhibit={exhibit} accent={accent} />}
+      <group
+        position={[exhibit.position[0], 0, exhibit.position[1]]}
+        rotation={[0, exhibit.rotation ?? 0, 0]}
+      >
+        {exhibit.kind === 'key' ? (
+          <KeyStand taken={taken} active={active} accent={accent} />
+        ) : exhibit.kind === 'case' ? (
+          <DisplayCase accent={accent} />
+        ) : exhibit.kind === 'terminal' ? (
+          <Terminal accent={accent} />
+        ) : exhibit.kind === 'radio' ? (
+          <Transmitter accent={accent} />
+        ) : exhibit.kind === 'cv' ? (
+          <Logbook accent={accent} />
+        ) : exhibit.kind === 'calendar' ? (
+          <WallCalendar />
+        ) : exhibit.kind === 'toy' ? null : (
+          <NoticeBoard accent={accent} />
+        )}
+        {active && <Halo accent={accent} />}
+      </group>
+    </>
+  )
+}
+
+/**
+ * The clickable box over a toy. Invisible, but it takes the pointer: hovering
+ * it puts the hand cursor up and clicking it does exactly what walking over
+ * and pressing Enter does, because both call `examine`.
+ *
+ * The cursor is reset on unmount as well as on pointer-out — leaving the room
+ * with the pointer still over the toy would otherwise leave the hand cursor
+ * up over the whole island.
+ */
+function ExhibitHitbox({
+  exhibit,
+  accent,
+}: {
+  exhibit: Exhibit
+  accent: string
+}) {
+  const area = useGame((s) => s.area)
+  const name = INTERIOR_BY_ID.get(area)?.name ?? ''
+  const box = exhibit.hitbox!
+  const hovered = useRef(false)
+
+  const cursor = (on: boolean) => {
+    hovered.current = on
+    document.body.style.cursor = on ? 'pointer' : ''
+  }
+  useEffect(
+    () => () => {
+      if (hovered.current) document.body.style.cursor = ''
+    },
+    [],
+  )
+
+  return (
+    <mesh
+      position={[box.at[0], box.y, box.at[1]]}
+      visible={false}
+      onPointerOver={(e) => {
+        e.stopPropagation()
+        cursor(true)
+      }}
+      onPointerOut={() => cursor(false)}
+      onClick={(e) => {
+        e.stopPropagation()
+        cursor(false)
+        examine(exhibit, accent, name)
+      }}
     >
-      {exhibit.kind === 'key' ? (
-        <KeyStand taken={taken} active={active} accent={accent} />
-      ) : exhibit.kind === 'case' ? (
-        <DisplayCase accent={accent} />
-      ) : exhibit.kind === 'terminal' ? (
-        <Terminal accent={accent} />
-      ) : exhibit.kind === 'radio' ? (
-        <Transmitter accent={accent} />
-      ) : exhibit.kind === 'cv' ? (
-        <Logbook accent={accent} />
-      ) : (
-        <NoticeBoard accent={accent} />
+      {/* Never drawn — `visible` false keeps it out of the render entirely,
+          while three still raycasts it, so it cannot tint or occlude the toy
+          it sits on. */}
+      <boxGeometry args={[box.size * 2, box.size * 2, box.size * 2]} />
+      <meshBasicMaterial />
+    </mesh>
+  )
+}
+
+/**
+ * The calendar on the basement wall. A block with the month across the head
+ * of it and the day underneath, big enough to read from the middle of the
+ * room — it is the only thing in the house that tells you what day it is, and
+ * the only thing that decides.
+ *
+ * It reads whatever it has been turned to, so walking back in on the
+ * twenty-fifth finds it still on the twenty-fifth.
+ */
+function WallCalendar() {
+  const date = useGame((s) => s.calendar)
+  const festive = useGame((s) => s.christmas)
+  const t = useT()
+  const named = nameOfDay(date)
+  return (
+    <group position={[0, 3, 0]}>
+      {/* Backing board and the nail it hangs off. */}
+      <mesh castShadow>
+        <boxGeometry args={[1.5, 2.1, 0.1]} />
+        <meshStandardMaterial color="#8a6642" flatShading roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 0.63, 0.07]}>
+        <planeGeometry args={[1.32, 0.46]} />
+        <meshStandardMaterial
+          color={festive ? '#b5442f' : '#2f6fa8'}
+          roughness={0.85}
+        />
+      </mesh>
+      <mesh position={[0, -0.28, 0.07]}>
+        <planeGeometry args={[1.32, 1.3]} />
+        <meshStandardMaterial color="#fdf7e9" roughness={0.9} />
+      </mesh>
+      <TextPlane
+        text={t(MONTH_NAMES[date.month - 1])}
+        width={1.24}
+        aspect={5.2}
+        color="#fff6e2"
+        position={[0, 0.63, 0.09]}
+      />
+      <TextPlane
+        text={String(date.day)}
+        width={0.8}
+        aspect={1.15}
+        color="#33302c"
+        position={[0, -0.1, 0.09]}
+      />
+      {/* And whose day it is, for the two in the year that are somebody's. */}
+      {named && (
+        <TextPlane
+          text={t(named)}
+          width={1.24}
+          aspect={8.4}
+          color={festive ? '#a3352a' : '#2f6fa8'}
+          outline="rgba(255,255,255,0)"
+          position={[0, -0.78, 0.09]}
+        />
       )}
-      {active && <Halo accent={accent} />}
     </group>
   )
 }
@@ -578,23 +819,43 @@ function Window({
   const glass = night ? '#26375e' : '#cfeaf7'
   const glow = night ? 0.35 : 1.15
   const along = side === 'north' ? at * hx : at * hz
+  // The wall's inner face. Everything here is measured back from it into the
+  // wall, so the window is a hole with something in it rather than a slab
+  // stuck to the surface — which from any angle but straight on read as a
+  // panel hanging in the room.
   const position: [number, number, number] =
     side === 'north'
-      ? [along, 2.9, -hz - 0.02]
+      ? [along, 2.9, -hz]
       : side === 'east'
-        ? [hx + 0.02, 2.9, along]
-        : [-hx - 0.02, 2.9, along]
+        ? [hx, 2.9, along]
+        : [-hx, 2.9, along]
   const turn =
     side === 'north' ? 0 : side === 'east' ? -Math.PI / 2 : Math.PI / 2
 
   return (
     <group position={position} rotation={[0, turn, 0]}>
-      <mesh>
-        <boxGeometry args={[3.4, 2.6, 0.3]} />
-        <meshStandardMaterial color="#f7f2e6" flatShading roughness={0.9} />
+      {/*
+        The reveal: the four faces of the hole through the wall, drawn as a
+        box seen from inside so the wall appears to have real thickness.
+
+        Nothing else here shares a plane with it. Two faces at the same depth
+        flicker in bands as the camera moves, so the glass is set well back
+        from the mouth and a little narrower than the hole, and the surround
+        stands clear in front of it rather than landing on its front edge.
+      */}
+      <mesh position={[0, 0, -0.22]}>
+        <boxGeometry args={[3.1, 2.3, 0.44]} />
+        <meshStandardMaterial
+          color="#e8e0cf"
+          flatShading
+          roughness={0.95}
+          side={BackSide}
+        />
       </mesh>
-      <mesh position={[0, 0, 0.17]}>
-        <planeGeometry args={[2.9, 2.1]} />
+      {/* The glass, inset from the reveal on every side so its edges never
+          meet the reveal's own walls, and short of the back of it. */}
+      <mesh position={[0, 0, -0.38]}>
+        <planeGeometry args={[2.96, 2.16]} />
         <meshStandardMaterial
           color={glass}
           emissive={glass}
@@ -602,19 +863,30 @@ function Window({
           toneMapped={false}
         />
       </mesh>
-      {/* Glazing bars, which is most of what makes a window read as one.
-          These and the pane have to clear the frame box, which reaches to
-          0.15: inside it, the frame was drawing over its own glass. */}
-      <mesh position={[0, 0, 0.2]}>
-        <boxGeometry args={[0.12, 2.1, 0.06]} />
+      {/* Glazing bars, a clear gap in front of the pane. */}
+      <mesh position={[0, 0, -0.31]}>
+        <boxGeometry args={[0.1, 2.16, 0.05]} />
         <meshStandardMaterial color="#f7f2e6" flatShading />
       </mesh>
-      <mesh position={[0, 0, 0.2]}>
-        <boxGeometry args={[2.9, 0.12, 0.06]} />
+      <mesh position={[0, 0, -0.31]}>
+        <boxGeometry args={[2.96, 0.1, 0.05]} />
         <meshStandardMaterial color="#f7f2e6" flatShading />
       </mesh>
-      <mesh position={[0, -1.42, 0.28]}>
-        <boxGeometry args={[3.7, 0.18, 0.5]} />
+      {/* The surround, standing just proud of the wall face rather than
+          flush with it: flush put its back on the reveal's front edge. */}
+      {[
+        { p: [-1.62, 0, 0.05] as const, a: [0.24, 2.74, 0.1] as const },
+        { p: [1.62, 0, 0.05] as const, a: [0.24, 2.74, 0.1] as const },
+        { p: [0, 1.27, 0.05] as const, a: [3.48, 0.24, 0.1] as const },
+      ].map((bar, i) => (
+        <mesh key={i} position={[...bar.p]}>
+          <boxGeometry args={[...bar.a]} />
+          <meshStandardMaterial color="#f7f2e6" flatShading roughness={0.9} />
+        </mesh>
+      ))}
+      {/* The sill, which stands out further still. */}
+      <mesh position={[0, -1.29, 0.1]}>
+        <boxGeometry args={[3.66, 0.18, 0.34]} />
         <meshStandardMaterial color="#e6dcc6" flatShading roughness={0.9} />
       </mesh>
       <pointLight
@@ -627,7 +899,11 @@ function Window({
   )
 }
 
-/** The stairs, the door nobody has the key to, and the shelf that swings. */
+/**
+ * The stairs, the door nobody has the key to, and the shelf that swings. Each
+ * one is drawn on its wall with a sign over it saying where it goes, and is
+ * taken by walking into it — so there is no prompt and no ring to wait for.
+ */
 function LinkPiece({
   link,
   accent,
@@ -637,52 +913,79 @@ function LinkPiece({
   accent: string
   shown: boolean
 }) {
-  const active = useGame((s) => s.nearby?.id === link.id)
-  if (!shown) return null
+  const t = useT()
+  const dest = link.to ? INTERIOR_BY_ID.get(link.to) : undefined
+  const camera = useThree((s) => s.camera)
+  const piece = useRef<Group>(null)
+  /* A door or shelf standing in the south wall goes with the wall when the
+     wall fades out of the camera's way: at full height it would otherwise be
+     the one thing left standing between you and the room. The stairs stay,
+     being low enough to see over and the thing you came to find. */
+  const fades =
+    link.kind !== 'stairsUp' &&
+    link.kind !== 'stairsDown' &&
+    Math.cos(link.rotation ?? 0) < -0.7
+  useFrame(() => {
+    if (!piece.current || !fades) return
+    piece.current.visible = camera.position.z < link.position[1]
+  })
+  /* Until the secret is out, the shelf that swings is a shelf like the
+     others in the run: nothing about it says otherwise. */
+  const shut = useMemo<InteriorProp[]>(
+    () => [
+      {
+        kind: 'bookshelf',
+        position: link.position,
+        rotation: link.rotation,
+        solid: false,
+      },
+    ],
+    [link],
+  )
+  if (!shown) {
+    return link.kind === 'hatch' ? <InteriorFurniture props={shut} /> : null
+  }
 
   return (
     <group
       position={[link.position[0], 0, link.position[1]]}
       rotation={[0, link.rotation ?? 0, 0]}
     >
-      {link.kind === 'stairsDown' ? (
-        <Stairwell active={active} />
-      ) : link.kind === 'stairsUp' ? (
-        <UpFlight />
-      ) : link.kind === 'locked' ? (
-        <ShutDoor accent={accent} />
-      ) : link.kind === 'door' ? (
-        <OpenDoor accent={accent} />
-      ) : (
-        <SwungShelf />
-      )}
-      {/* The ring marks the spot you take it from, which for a staircase is
-          the head of the flight rather than the floor at the bottom of it. */}
-      {active && (
-        <group
-          position={
-            link.kind === 'stairsUp'
-              ? [0, FLIGHT_RISE, FLIGHT.foot - FLIGHT_RUN]
-              : [0, 0, 0]
-          }
-        >
-          <Halo accent={accent} />
-        </group>
-      )}
-      {link.kind !== 'locked' && (
+      <group ref={piece}>
+        {link.kind === 'stairsDown' ? (
+          <Stairwell />
+        ) : link.kind === 'stairsUp' ? (
+          <UpFlight />
+        ) : link.kind === 'locked' ? (
+          <ShutDoor accent={accent} />
+        ) : link.kind === 'lift' ? (
+          <LiftDoors link={link} accent={accent} />
+        ) : link.kind === 'door' ? (
+          <OpenDoor accent={accent} />
+        ) : (
+          <SwungShelf accent={accent} />
+        )}
+      </group>
+      {/*
+        A lit sill on the floor of the opening, which never fades.
+
+        The piece above it is allowed to drop out of the camera's way, and for
+        a door in the south wall that means turning to face it makes it
+        vanish — fine for a wall, useless for the only way out of a room. The
+        threshold is flat on the ground, so it can never be in the way, and it
+        is what actually marks the opening from inside.
+      */}
+      {link.kind === 'hatch' && <Threshold accent={accent} />}
+      {/* Where it goes, over the top of it. The secret room's shelf keeps
+          its own counsel: the sign just says you can get through. */}
+      {link.kind !== 'locked' && link.kind !== 'lift' && (
         <TextPlane
-          text={
-            link.kind === 'stairsDown'
-              ? 'Down'
-              : link.kind === 'stairsUp'
-                ? 'Up'
-                : 'Through'
-          }
-          width={2.2}
-          aspect={3.4}
+          text={t(link.kind === 'hatch' || !dest ? 'Through' : dest.kicker)}
+          width={link.kind === 'hatch' || !dest ? 2.2 : 4.6}
+          aspect={link.kind === 'hatch' || !dest ? 3.4 : 7}
           color="#ffe9c4"
           outline="rgba(0,0,0,0.6)"
-          position={[0, 3.2, 0]}
+          position={[0, 4.35, 0.3]}
         />
       )}
     </group>
@@ -695,13 +998,13 @@ function LinkPiece({
  * drawn inside — which from a camera that never gets below the ceiling is
  * indistinguishable from the real thing.
  */
-function Stairwell({ active }: { active: boolean }) {
+function Stairwell() {
   const glow = useRef<Mesh>(null)
   useFrame((state) => {
     if (!glow.current) return
     const material = glow.current.material as { opacity: number }
     const pulse = (Math.sin(state.clock.elapsedTime * 2.2) + 1) / 2
-    material.opacity = (active ? 0.5 : 0.28) + pulse * 0.12
+    material.opacity = 0.3 + pulse * 0.12
   })
 
   return (
@@ -766,6 +1069,130 @@ function Stairwell({ active }: { active: boolean }) {
 }
 
 /** The door down the hall. It does not open, and it is meant to look like it. */
+/** One leaf of the lift doors, with its edge rail on the meeting side. */
+function LiftLeaf({ handed }: { handed: number }) {
+  return (
+    <group>
+      <mesh position={[0, 1.72, 0]} castShadow>
+        <boxGeometry args={[1.3, 3.36, 0.14]} />
+        <meshStandardMaterial
+          color="#b9c2cb"
+          flatShading
+          roughness={0.35}
+          metalness={0.65}
+        />
+      </mesh>
+      <mesh position={[handed * -0.6, 1.72, 0.08]}>
+        <boxGeometry args={[0.06, 3.3, 0.04]} />
+        <meshStandardMaterial color="#79828d" flatShading metalness={0.6} />
+      </mesh>
+    </group>
+  )
+}
+
+/**
+ * The lift. Two leaves that slide into the jamb, a lit floor indicator over
+ * them, and a call panel down the side with a button per floor.
+ *
+ * The doors are drawn from the ride on the store rather than from a local
+ * animation, so the car you are standing in and the number counting over your
+ * head can never disagree — see game/lift.ts, which owns the timing.
+ *
+ * Standing on a floor with no ride under way, the doors are open: this is
+ * both the car you get into and the opening you get out of.
+ */
+function LiftDoors({ link, accent }: { link: InteriorLink; accent: string }) {
+  const leftLeaf = useRef<Group>(null)
+  const rightLeaf = useRef<Group>(null)
+  const lamp = useRef<MeshBasicMaterial>(null)
+  const [floor, setFloor] = useState(link.floor ?? 0)
+
+  useFrame(() => {
+    const ride = useGame.getState().lift
+    /* Only the car he is actually riding moves. The lift on every other
+       floor stands with its doors open, waiting to be called. */
+    const mine = ride && ride.linkId === link.id
+    const phase = mine
+      ? liftPhase(ride, performance.now() / 1000)
+      : { open: 1, floor: link.floor ?? 0, done: true, t: 1 }
+    const slide = 0.62 + (1 - phase.open) * 0.62
+    if (leftLeaf.current) leftLeaf.current.position.x = -slide
+    if (rightLeaf.current) rightLeaf.current.position.x = slide
+    if (lamp.current) {
+      /* Brightest while it is moving: the indicator is the only thing in the
+         car that tells you anything is happening. */
+      lamp.current.opacity = phase.open < 0.5 ? 1 : 0.55
+    }
+    /* The only thing here allowed to re-render, and only when the number
+       over the doors actually changes: once or twice a ride. */
+    setFloor((was) => (was === phase.floor ? was : phase.floor))
+  })
+
+  return (
+    <group>
+      {/* The shaft behind the doors, so an open car is a hole and not a wall. */}
+      <mesh position={[0, 1.75, -0.45]}>
+        <boxGeometry args={[2.5, 3.5, 0.9]} />
+        <meshStandardMaterial color="#1b2026" flatShading roughness={1} />
+      </mesh>
+      {/* The jamb. */}
+      <mesh position={[0, 1.8, 0.06]}>
+        <boxGeometry args={[3.4, 3.9, 0.3]} />
+        <meshStandardMaterial
+          color="#79828d"
+          flatShading
+          roughness={0.55}
+          metalness={0.4}
+        />
+      </mesh>
+      {/* Two leaves, brushed steel, sliding apart into the jamb. */}
+      <group ref={leftLeaf} position={[-0.62, 0, 0.2]}>
+        <LiftLeaf handed={-1} />
+      </group>
+      <group ref={rightLeaf} position={[0.62, 0, 0.2]}>
+        <LiftLeaf handed={1} />
+      </group>
+      {/* The indicator: the floor it is passing, lit over the doors. */}
+      <mesh position={[0, 3.62, 0.24]}>
+        <boxGeometry args={[1.1, 0.5, 0.12]} />
+        <meshStandardMaterial color="#141a1f" flatShading />
+      </mesh>
+      <TextPlane
+        text={String(floor)}
+        width={0.5}
+        aspect={1}
+        color={accent}
+        position={[0, 3.62, 0.32]}
+      />
+      <mesh position={[0, 3.62, 0.3]}>
+        <planeGeometry args={[1.02, 0.42]} />
+        <meshBasicMaterial
+          ref={lamp}
+          color={accent}
+          transparent
+          opacity={0.55}
+        />
+      </mesh>
+      {/* The call panel, down the jamb on the right. */}
+      <mesh position={[1.42, 1.5, 0.24]}>
+        <boxGeometry args={[0.3, 0.9, 0.1]} />
+        <meshStandardMaterial color="#5c646d" flatShading metalness={0.5} />
+      </mesh>
+      {[0, 1, 2].map((i) => (
+        <mesh key={i} position={[1.42, 1.15 + i * 0.3, 0.3]}>
+          <cylinderGeometry args={[0.07, 0.07, 0.04, 10]} />
+          <meshStandardMaterial
+            color={i === 2 ? '#3a4048' : accent}
+            flatShading
+            emissive={i === 2 ? '#000000' : accent}
+            emissiveIntensity={i === 2 ? 0 : 0.5}
+          />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
 function ShutDoor({ accent }: { accent: string }) {
   return (
     <group>
@@ -800,51 +1227,178 @@ function ShutDoor({ accent }: { accent: string }) {
   )
 }
 
-/** The bookshelf, standing a foot off the wall on a hinge nobody admits to. */
-function SwungShelf() {
+/**
+ * The floor of a hatch opening: a warm sill with the far room's colour
+ * washing over it, drawn flat so nothing can hide it.
+ *
+ * It is the one part of a secret door that is always readable. Everything
+ * standing up out of the floor is subject to the camera fade; this is not,
+ * so from inside the playroom there is always something on the ground saying
+ * the way out is here.
+ */
+function Threshold({ accent }: { accent: string }) {
+  const glow = useRef<MeshBasicMaterial>(null)
+  useFrame((state) => {
+    if (!glow.current) return
+    const pulse = (Math.sin(state.clock.elapsedTime * 1.8) + 1) / 2
+    glow.current.opacity = 0.34 + pulse * 0.16
+  })
   return (
     <group>
-      {/* The dark of the room behind it, which is the tell. */}
-      <mesh position={[0, 1.6, 0]}>
-        <boxGeometry args={[0.3, 3.2, 2.6]} />
-        <meshStandardMaterial color="#191420" flatShading roughness={1} />
+      {/* The sill itself: a board across the opening, proud of the floor. */}
+      <mesh position={[0, 0.05, 0.08]} receiveShadow>
+        <boxGeometry args={[2.5, 0.1, 0.66]} />
+        <meshStandardMaterial color="#6f5a3e" flatShading roughness={0.95} />
       </mesh>
-      <group position={[0.62, 0, 0.5]} rotation={[0, -0.42, 0]}>
-        <mesh position={[0, 1.5, 0]} castShadow>
-          <boxGeometry args={[0.36, 3, 2.4]} />
-          <meshStandardMaterial color="#8a6642" flatShading roughness={0.95} />
+      {/* Light spilling out of the opening onto it. */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.12, 0.42]}>
+        <planeGeometry args={[2.4, 1.5]} />
+        <meshBasicMaterial
+          ref={glow}
+          color={accent}
+          transparent
+          opacity={0.4}
+          depthWrite={false}
+        />
+      </mesh>
+    </group>
+  )
+}
+
+/**
+ * The bookshelf that turned out to be a door, standing open.
+ *
+ * Built like the doorway next to it rather than like a prop: a dark recess
+ * cut into the wall with the far room's light hanging in it, a lining round
+ * the opening, and the shelf itself swung out into the room on a hinge that
+ * is actually drawn. The books are still on it, because whoever fitted the
+ * hinge did not clear the shelf first.
+ *
+ * It reads from both sides. From the library it is the way in, so the pivot
+ * carries the shelf clear of the opening; from the playroom the same piece
+ * is the way out, which is the only thing in that room you are looking for.
+ */
+function SwungShelf({ accent }: { accent: string }) {
+  return (
+    <group>
+      {/*
+        The opening. A recess rather than a plane, so the wall reads as
+        having thickness and there is somewhere for the light to come from.
+        The wash sits just clear of the back face: level with it the two
+        fight for the same depth and the panel strobes.
+      */}
+      <mesh position={[0, 1.6, -0.16]}>
+        <boxGeometry args={[2.5, 3.2, 0.32]} />
+        <meshStandardMaterial color="#17121f" flatShading roughness={1} />
+      </mesh>
+      <mesh position={[0, 1.58, -0.12]}>
+        <planeGeometry args={[2.36, 3.04]} />
+        <meshBasicMaterial color="#b9a2ff" transparent opacity={0.2} />
+      </mesh>
+
+      {/* The lining: two jambs and a head, in the plaster of the wall. The
+          head is deliberately plain — a secret door does not get an
+          architrave, or it would have been found years ago. */}
+      {[-1.38, 1.38].map((x) => (
+        <mesh key={x} position={[x, 1.65, 0.05]} castShadow>
+          <boxGeometry args={[0.26, 3.5, 0.3]} />
+          <meshStandardMaterial color="#e6dcc6" flatShading roughness={0.95} />
         </mesh>
-        {[0.5, 1.24, 1.98].map((y) => (
-          <mesh key={y} position={[0.06, y, 0]}>
-            <boxGeometry args={[0.3, 0.08, 2.2]} />
-            <meshStandardMaterial color="#7d5a3a" flatShading />
+      ))}
+      <mesh position={[0, 3.32, 0.05]} castShadow>
+        <boxGeometry args={[3.02, 0.26, 0.3]} />
+        <meshStandardMaterial color="#e6dcc6" flatShading roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 3.52, 0.05]}>
+        <boxGeometry args={[3.16, 0.14, 0.36]} />
+        <meshStandardMaterial color={accent} flatShading roughness={0.85} />
+      </mesh>
+
+      {/*
+        The shelf, hung off the left jamb and swung into the room. The group
+        sits on the hinge line and the carcass hangs off it, so however far
+        it is opened the hinge edge stays welded to the frame — the same
+        trick the door next door uses.
+      */}
+      <group position={[-1.3, 0, 0.16]} rotation={[0, 1.02, 0]}>
+        <group position={[1.3, 0, 0]}>
+          {/* Carcass: a back, two ends and the boards between them. */}
+          <mesh position={[0, 1.6, -0.16]} castShadow>
+            <boxGeometry args={[2.6, 3.2, 0.12]} />
+            <meshStandardMaterial
+              color="#6f4f33"
+              flatShading
+              roughness={0.95}
+            />
           </mesh>
-        ))}
-        {/* Books, still on it. Whoever built this did not clear the shelf. */}
-        {[0.5, 1.24, 1.98].map((y) =>
-          Array.from({ length: 7 }, (_, i) => (
-            <mesh
-              key={`${y}-${i}`}
-              position={[0.08, y + 0.28, -0.95 + i * 0.31]}
-              castShadow
-            >
-              <boxGeometry args={[0.22, 0.44, 0.22]} />
+          {[-1.24, 1.24].map((x) => (
+            <mesh key={x} position={[x, 1.6, 0.04]} castShadow>
+              <boxGeometry args={[0.12, 3.2, 0.52]} />
               <meshStandardMaterial
-                color={
-                  ['#8c4b3a', '#3f5f8a', '#5d7a4a', '#8a7233', '#6b4a72'][i % 5]
-                }
+                color="#8a6642"
                 flatShading
-                roughness={0.9}
+                roughness={0.95}
               />
             </mesh>
-          )),
-        )}
+          ))}
+          {[0.12, 0.86, 1.6, 2.34, 3.08].map((y) => (
+            <mesh key={y} position={[0, y, 0.04]} castShadow receiveShadow>
+              <boxGeometry args={[2.6, 0.1, 0.52]} />
+              <meshStandardMaterial
+                color="#8a6642"
+                flatShading
+                roughness={0.95}
+              />
+            </mesh>
+          ))}
+
+          {/* Books, still on it, leaning the way books do on a shelf that
+              has just been swung through ninety degrees. */}
+          {[0.86, 1.6, 2.34].map((y, row) =>
+            Array.from({ length: 8 }, (_, i) => (
+              <mesh
+                key={`${y}-${i}`}
+                position={[-1.05 + i * 0.29, y + 0.36, 0.06]}
+                rotation={[0, 0, i === 7 ? 0.22 : 0]}
+                scale={[1, 0.72 + ((i * 5 + row * 3) % 4) * 0.1, 1]}
+                castShadow
+              >
+                <boxGeometry args={[0.22, 0.58, 0.34]} />
+                <meshStandardMaterial
+                  color={
+                    ['#8c4b3a', '#3f5f8a', '#5d7a4a', '#8a7233', '#6b4a72'][
+                      (i + row) % 5
+                    ]
+                  }
+                  flatShading
+                  roughness={0.9}
+                />
+              </mesh>
+            )),
+          )}
+        </group>
+
+        {/* The hinges, which are the whole story of this thing: somebody
+            fitted these on purpose and then put books in front of them. */}
+        {[0.6, 1.6, 2.6].map((y) => (
+          <mesh key={y} position={[0, y, 0]} castShadow>
+            <cylinderGeometry args={[0.07, 0.07, 0.3, 8]} />
+            <meshStandardMaterial
+              color="#6f6152"
+              metalness={0.6}
+              roughness={0.45}
+            />
+          </mesh>
+        ))}
       </group>
+
+      {/* The light out of the room behind, cool against the warm house so
+          the opening reads as somewhere else rather than as a shadow. */}
       <pointLight
-        position={[0.4, 1.6, 0]}
-        intensity={5}
-        distance={5}
-        color="#8f7ad4"
+        position={[0, 1.7, 0.5]}
+        intensity={9}
+        distance={8}
+        color="#a98fe0"
       />
     </group>
   )
@@ -858,15 +1412,21 @@ function SwungShelf() {
 function OpenDoor({ accent }: { accent: string }) {
   return (
     <group>
-      {/* The opening, which is a dark panel with a warm wash over it: there
-          is no geometry behind it, and at this camera angle there does not
-          need to be. */}
-      <mesh position={[0, 1.7, -0.06]}>
-        <boxGeometry args={[2.2, 3.4, 0.12]} />
+      {/*
+        The opening: a dark recess with a warm wash hanging in it. There is
+        no geometry behind it, and at this camera angle there does not need
+        to be.
+
+        The wash is a plane, so it has to keep a clear gap from the face
+        behind it and stay inside its edges — level with it, the two fight
+        for the same depth and a band of light strobes across the doorway.
+      */}
+      <mesh position={[0, 1.7, -0.14]}>
+        <boxGeometry args={[2.2, 3.4, 0.28]} />
         <meshStandardMaterial color="#1d1822" flatShading roughness={1} />
       </mesh>
-      <mesh position={[0, 1.5, 0.05]}>
-        <planeGeometry args={[2, 3]} />
+      <mesh position={[0, 1.66, -0.11]}>
+        <planeGeometry args={[2.06, 3.22]} />
         <meshBasicMaterial color="#ffca7a" transparent opacity={0.16} />
       </mesh>
       {/* Lining: two jambs and a head. */}
@@ -884,26 +1444,55 @@ function OpenDoor({ accent }: { accent: string }) {
         <boxGeometry args={[2.9, 0.16, 0.4]} />
         <meshStandardMaterial color={accent} flatShading roughness={0.85} />
       </mesh>
-      {/* The door, folded back flat against the wall beside the opening. */}
-      <group position={[1.62, 0, 0.24]} rotation={[0, -0.28, 0]}>
-        <mesh position={[0, 1.62, 0]} castShadow>
-          <boxGeometry args={[1.9, 3.2, 0.12]} />
-          <meshStandardMaterial color="#a97c4e" flatShading roughness={0.9} />
-        </mesh>
-        {[2.3, 0.95].map((y) => (
-          <mesh key={y} position={[0, y, 0.08]}>
-            <boxGeometry args={[1.4, 1.05, 0.04]} />
-            <meshStandardMaterial color="#8f6741" flatShading roughness={0.9} />
+      {/*
+        The door, standing open on its hinge.
+
+        It swings about the inner face of the right-hand jamb rather than
+        floating somewhere beside it: the group sits on the hinge line and
+        the leaf hangs off it, so however far it is opened the hinge edge
+        stays welded to the frame. The leaf is as wide as the opening, which
+        is what lets it read as a door that could actually shut.
+      */}
+      <group position={[1.1, 0, 0.18]} rotation={[0, -1.15, 0]}>
+        {/* Hung from the hinge edge, so the leaf reaches into the room. */}
+        <group position={[1.05, 0, 0]}>
+          <mesh position={[0, 1.7, 0]} castShadow>
+            <boxGeometry args={[2.1, 3.34, 0.1]} />
+            <meshStandardMaterial color="#a97c4e" flatShading roughness={0.9} />
+          </mesh>
+          {[2.44, 0.98].map((y) => (
+            <mesh key={y} position={[0, y, 0.065]}>
+              <boxGeometry args={[1.5, 1.08, 0.03]} />
+              <meshStandardMaterial
+                color="#8f6741"
+                flatShading
+                roughness={0.9}
+              />
+            </mesh>
+          ))}
+          {/* Handle on the swinging edge, the far one from the hinge. */}
+          {[0.075, -0.075].map((z) => (
+            <mesh key={z} position={[-0.82, 1.62, z]}>
+              <sphereGeometry args={[0.1, 8, 6]} />
+              <meshStandardMaterial
+                color="#d8b25c"
+                metalness={0.7}
+                roughness={0.3}
+              />
+            </mesh>
+          ))}
+        </group>
+        {/* Two hinges on the line the leaf turns about. */}
+        {[0.85, 2.55].map((y) => (
+          <mesh key={y} position={[0, y, 0]}>
+            <cylinderGeometry args={[0.05, 0.05, 0.26, 6]} />
+            <meshStandardMaterial
+              color="#8a6f4e"
+              metalness={0.5}
+              roughness={0.5}
+            />
           </mesh>
         ))}
-        <mesh position={[-0.72, 1.6, 0.12]}>
-          <sphereGeometry args={[0.11, 8, 6]} />
-          <meshStandardMaterial
-            color="#d8b25c"
-            metalness={0.7}
-            roughness={0.3}
-          />
-        </mesh>
       </group>
       <pointLight
         position={[0, 1.8, 0.8]}

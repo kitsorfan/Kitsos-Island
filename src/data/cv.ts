@@ -32,7 +32,7 @@ function renderSections(sections: PanelSection[]): string[] {
         case 'letters':
           for (const letter of block.letters) {
             out.push(
-              `### ${letter.from} — ${letter.role}`,
+              `### ${letter.from} · ${letter.role}`,
               `*${letter.note}*`,
               '',
               ...letter.paragraphs.flatMap((p) => [`> ${p}`, '']),
@@ -56,7 +56,7 @@ function renderSections(sections: PanelSection[]): string[] {
           break
         case 'timeline':
           for (const entry of block.entries) {
-            const org = entry.org ? ` — ${entry.org}` : ''
+            const org = entry.org ? `${entry.org}` : ''
             out.push(`### ${entry.title}${org}`, `*${entry.meta}*`, '')
             if (entry.bullets)
               out.push(...entry.bullets.map((b) => `- ${b}`), '')

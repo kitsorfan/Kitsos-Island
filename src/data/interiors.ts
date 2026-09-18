@@ -1,14 +1,20 @@
-import type { Interior } from '../types'
+import type { Interior, LiftStop } from '../types'
 import {
   ARMY_SECTIONS,
   CERTIFICATIONS_SECTIONS,
+  ELEMENTARY_SECTIONS,
+  EVANGELIKI_CLUBS_SECTIONS,
+  EVANGELIKI_SECTIONS,
   FAMILY_SECTIONS,
   GARAGE_SECTIONS,
+  GUIDE_SECTIONS,
   HOUSE_SECTIONS,
   LAB_SECTIONS,
   LIBRARY_SECTIONS,
   PLAYROOM_SECTIONS,
+  CAPABILITIES_SECTIONS,
   IBM_SECTIONS,
+  IONIDIOS_SECTIONS,
   LIGHTHOUSE_SECTIONS,
   PLATFORM_SECTIONS,
   PUBLICATION_SECTIONS,
@@ -16,19 +22,56 @@ import {
   REFERENCE_ACADEMY_SECTIONS,
   REFERENCE_ARMY_SECTIONS,
   REFERENCE_FOUNDATION_SECTIONS,
-  SCHOOL_SECTIONS,
+  REFERENCE_IONIDIOS_SECTIONS,
   SKILLS_SECTIONS,
   STUDENT_LIFE_SECTIONS,
   THESIS_SECTIONS,
+  TOY_SHELF_SECTIONS,
+  TRANSCRIPT_SECTIONS,
   UNIVERSITY_SECTIONS,
+  STUDENT_JOBS_SECTIONS,
   VELTISTON_SECTIONS,
+  VELTISTON_STACK_SECTIONS,
+  WORK_DIRECTORY_SECTIONS,
   VERNE_SECTIONS,
   VOLUNTEER_SECTIONS,
 } from './profile'
 
 /**
- * One room per building. The door is always on the +Z wall, so you walk in
- * facing -Z with the way out behind you.
+ * The panel inside the Work District lift. Every car has the same one, which
+ * is the point of it: from anywhere in the building you can see that there
+ * are three floors and that one of them is not built.
+ */
+const LIFT_PANEL: LiftStop[] = [
+  { floor: 0, label: 'Reception', to: 'work' },
+  { floor: 1, label: 'IBM', to: 'work-ibm' },
+  { floor: 2, label: 'Veltiston AI', to: 'work-veltiston' },
+  {
+    floor: 3,
+    label: '—',
+    lines: [
+      'The button for the third floor does not light when you press it.',
+      'The shaft goes up past the second floor — you can hear it — but there is no landing at the top yet. Nobody has poured one.',
+      'IBM, then Veltiston AI. Whatever the third thing turns out to be, it has not been signed for.',
+      'Come back in a later commit.',
+    ],
+  },
+]
+
+/**
+ * The rooms. The one behind each building's door on the island has that door
+ * in its +Z wall, so you walk in facing -Z with the way out behind you. The
+ * other rooms of a building hang off it through links — a door in a wall, a
+ * flight up, a well down — and every link has its partner on the far side, so
+ * the room you arrive in has the way back exactly where you came in.
+ *
+ * Kitsos House, room by room:
+ *
+ *     first floor    [ landing ]──east──[ lab ]
+ *                        ║ well
+ *     ground floor   [ library ]──east──[ living room ]──east──[ garage ]
+ *                        ║ shelf              ║ well
+ *                    [ playroom ]        [ basement ]
  */
 export const INTERIORS: Interior[] = [
   {
@@ -51,12 +94,13 @@ export const INTERIORS: Interior[] = [
       { kind: 'sofa', position: [-7.5, 5.2], rotation: Math.PI },
       { kind: 'armchair', position: [-3.6, 3.4], rotation: -Math.PI / 2 },
       { kind: 'table', position: [-7, 1.6] },
-      { kind: 'bookshelf', position: [-12.7, -6.4], rotation: Math.PI / 2 },
+      /* Between the library door and the foot of the stairs. */
+      { kind: 'bookshelf', position: [-12.7, -6.8], rotation: Math.PI / 2 },
       { kind: 'lamp', position: [-12.4, 7.4] },
       { kind: 'plant', position: [-12.8, 9] },
-      /* Clear of the stair soffit, which is a dark box the painting was
-         sitting inside. */
-      { kind: 'painting', position: [-10.4, -10.2] },
+      /* On the stretch of north wall between the two staircases, next to
+         the trainer card. */
+      { kind: 'painting', position: [-4, -10.2] },
 
       /* The kitchen, and the table they actually eat at. */
       { kind: 'stove', position: [2.6, 9.6], rotation: Math.PI },
@@ -72,28 +116,33 @@ export const INTERIORS: Interior[] = [
       /* And the board that never gets put away. */
       { kind: 'chessTable', position: [10.2, -6.4] },
       { kind: 'chair', position: [10.2, -8.4], rotation: Math.PI },
-      { kind: 'chair', position: [8, -6.4], rotation: Math.PI / 2 },
+      { kind: 'chair', position: [8.2, -6.4], rotation: Math.PI / 2 },
     ],
+    /**
+     * Both staircases stand against the north wall, the flight up along the
+     * western end of it and the well down cut into the eastern, with the
+     * trainer card on the wall between them. The two doors face each other
+     * across the room: library west, garage east.
+     */
     links: [
       {
         id: 'house-down',
         kind: 'stairsDown',
         label: 'the stairs to the basement',
-        position: [4.8, -7.6],
+        position: [6, -8.6],
         to: 'house-basement',
-        arrive: [0, 5.4],
         journal: {
           title: 'The basement stairs',
-          body: 'Under Kitsos House: the basement where the family he grew up in still sits round the table, and the garage off it.',
+          body: 'Under Kitsos House: the basement where his mother and father stand, at the table the seven of them grew up round.',
         },
       },
       {
         id: 'house-up',
         kind: 'stairsUp',
         label: 'the stairs to the landing',
-        position: [-5.8, -7.6],
+        position: [-9.5, -8.6],
+        rotation: Math.PI / 2,
         to: 'house-upstairs',
-        arrive: [0, 3.4],
         journal: {
           title: 'Upstairs',
           body: 'The first floor of Kitsos House: the landing, the lab at the end of it, and a door that does not open yet.',
@@ -106,7 +155,16 @@ export const INTERIORS: Interior[] = [
         position: [-13.3, -2],
         rotation: Math.PI / 2,
         to: 'house-library',
-        arrive: [0, 3.4],
+      },
+      /* The garage is off the house, not under it: you go out through the
+         east wall at ground level and the shutter opens onto the street. */
+      {
+        id: 'house-garage',
+        kind: 'door',
+        label: 'the door to the garage',
+        position: [13.3, -2],
+        rotation: -Math.PI / 2,
+        to: 'house-garage',
       },
     ],
     exhibits: [
@@ -122,7 +180,7 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'Kitsos House',
-          body: 'Athens-based senior full stack engineer and technical lead \u2014 Java, Spring Boot, React and AWS, with the teams to match.',
+          body: 'Athens-based senior full stack engineer and technical lead: Java, Spring Boot, React and AWS, with the teams to match.',
         },
       },
       {
@@ -138,10 +196,10 @@ export const INTERIORS: Interior[] = [
   /* ---------------------------- downstairs ---------------------------- */
 
   /**
-   * The basement, and the hub of everything under the house: the table the
-   * family he grew up in still sits round, with the garage, the library and
-   * the lab off it. Three doors and a staircase, which is why the middle of
-   * the floor is kept clear.
+   * The basement: the long table the seven of them grew up round, the wall of
+   * photographs, and the toys nobody threw out. His mother and his father are
+   * down here, standing at either end of the table. Nothing else opens off it
+   * any more — one staircase, and a room kept the way it was.
    */
   {
     id: 'house-basement',
@@ -153,42 +211,104 @@ export const INTERIORS: Interior[] = [
     rug: '#8a5a3c',
     wall: '#e0d6c4',
     accent: '#c2566b',
-    spawn: [0, 5.4],
-    underground: true,
-    exit: { to: 'house', arrive: [3.4, -5.4], label: 'Back up the stairs' },
+    spawn: [13, 5.96],
+    /* Lit like any other room in the house rather than as a cellar: the
+       joists an underground room hangs from its ceiling are drawn right
+       across the one thing you came down here to look at. */
+    links: [
+      /* The flight back up, along the east wall under the living room's
+         well, climbing towards the back of the house. On the east wall
+         rather than the south, which the camera fades out from under it:
+         a flight against a wall you cannot see stands in the room. */
+      {
+        id: 'basement-up',
+        kind: 'stairsUp',
+        label: 'the stairs up to the living room',
+        position: [13, 2.6],
+        to: 'house',
+      },
+    ],
     props: [
-      { kind: 'stairs', position: [0, 7.6], rotation: Math.PI, solid: false },
-
       /* The table, laid for all seven of them. */
       { kind: 'rug', position: [0, -5], scale: 1.5, solid: false },
       { kind: 'longTable', position: [0, -5] },
-      { kind: 'chair', position: [-6.4, -5], rotation: Math.PI / 2 },
-      { kind: 'chair', position: [6.4, -5], rotation: -Math.PI / 2 },
-      { kind: 'chair', position: [-2.6, -7.9] },
-      { kind: 'chair', position: [0, -7.9] },
-      { kind: 'chair', position: [2.6, -7.9] },
-      { kind: 'chair', position: [-1.3, -2.1], rotation: Math.PI },
-      { kind: 'chair', position: [1.3, -2.1], rotation: Math.PI },
+      { kind: 'chair', position: [-4.9, -5], rotation: Math.PI / 2 },
+      { kind: 'chair', position: [4.9, -5], rotation: -Math.PI / 2 },
+      { kind: 'chair', position: [-2.6, -7.2] },
+      { kind: 'chair', position: [0, -7.2] },
+      { kind: 'chair', position: [2.6, -7.2] },
+      { kind: 'chair', position: [-1.3, -2.9], rotation: Math.PI },
+      { kind: 'chair', position: [1.3, -2.9], rotation: Math.PI },
 
-      /* And the wall of them, which is the whole point of the room. */
+      /* And the walls of them, which are the whole point of the room. */
       { kind: 'photoWall', position: [-4, -10.7], solid: false },
+      {
+        kind: 'photoWall',
+        position: [-14.7, -3],
+        rotation: Math.PI / 2,
+        solid: false,
+      },
+
+      /* Nothing down here was ever thrown away. */
+      /* Under the calendar, clear of the head of the stairs. */
+      { kind: 'toyBox', position: [12.6, -2.6] },
+      { kind: 'toyBox', position: [-12.4, -1.4], rotation: -Math.PI / 5 },
       { kind: 'lamp', position: [-12.6, -8.6] },
       { kind: 'plant', position: [12.8, -9.2] },
       { kind: 'shelfUnit', position: [11.8, 9.6] },
       { kind: 'boiler', position: [-13.4, 9.6] },
-      { kind: 'crate', position: [13.2, 6.6] },
-      { kind: 'crate', position: [13.4, 4.6] },
+      /* Stacked against the west wall, where the stairs used to leave room. */
+      { kind: 'crate', position: [-13.4, 1.2] },
+      { kind: 'crate', position: [-13.2, 3.2] },
       { kind: 'plant', position: [-12.8, 6.4] },
     ],
-    links: [
+    /**
+     * What goes up when the calendar on the east wall is turned to the
+     * twenty-fifth of December, and comes down again when it is turned back.
+     * The tree stands clear of the table so ten people can get round it.
+     */
+    festive: [
+      /* The hearth, lit, and most of what the room is lit by on the day. */
+      { kind: 'fireplace', position: [-11.6, -10.5] },
+      { kind: 'christmasTree', position: [-11.6, -5] },
+      /* Laid the moment he reaches the head of it, and cleared when he
+         walks away: the prop reads the live state itself. */
+      { kind: 'feastTable', position: [0, -5], solid: false },
+      /* One over the mantel, where a wreath goes, and one on the bare
+         stretch of wall at the other end. */
+      { kind: 'wreath', position: [-11.6, -10.2], solid: false },
+      { kind: 'wreath', position: [10.6, -10.85], solid: false },
+      /* Strung right round the three walls that stay drawn. Nothing goes on
+         the south one: props sit outside the group that fades the near wall
+         out of your way, so a swag on it would hang in mid air in front of
+         the room. */
+      { kind: 'garland', position: [0, -10.9], solid: false },
+      /* Clear of the chimney breast, which comes forward off this wall. */
+      { kind: 'garland', position: [-6.6, -10.9], solid: false },
+      { kind: 'garland', position: [10.6, -10.9], solid: false },
       {
-        id: 'basement-garage',
-        kind: 'door',
-        label: 'the door to the garage',
-        position: [-14.8, 2.5],
+        kind: 'garland',
+        position: [-14.9, 4],
         rotation: Math.PI / 2,
-        to: 'house-garage',
-        arrive: [0, 4.4],
+        solid: false,
+      },
+      {
+        kind: 'garland',
+        position: [-14.9, -4],
+        rotation: Math.PI / 2,
+        solid: false,
+      },
+      {
+        kind: 'garland',
+        position: [14.9, 7],
+        rotation: -Math.PI / 2,
+        solid: false,
+      },
+      {
+        kind: 'garland',
+        position: [14.9, 0.4],
+        rotation: -Math.PI / 2,
+        solid: false,
       },
     ],
     exhibits: [
@@ -207,6 +327,19 @@ export const INTERIORS: Interior[] = [
           body: 'Father, mother, three brothers, one sister and him. A big family is a small organisation: nobody hands you a role, you find the thing that needs doing.',
         },
       },
+      /**
+       * It says the eighth of April, which is his birthday, and looks like a
+       * thing on a wall. It comes off the nail, and one other date in the
+       * year is worth turning it to. No journal entry here: filing one for
+       * having looked at a calendar would give the whole thing away.
+       */
+      {
+        id: 'basement-calendar',
+        kind: 'calendar',
+        label: 'the calendar',
+        position: [14.8, -4],
+        rotation: -Math.PI / 2,
+      },
     ],
   },
 
@@ -220,22 +353,33 @@ export const INTERIORS: Interior[] = [
     rug: '#8a5a3c',
     wall: '#cfc9bc',
     accent: '#d9853f',
-    spawn: [0, 4.4],
-    underground: true,
-    exit: {
-      to: 'house-basement',
-      arrive: [-13, 2.5],
-      label: 'Back to the basement',
-    },
+    spawn: [-9.8, -2],
+    /* Ground level, off the side of the house — so it gets a window, and the
+       shutter at the back really does open onto the street. */
+    windows: [{ side: 'east', at: 0.3 }],
+    links: [
+      /* The door in from the living room, on the wall the house is on. */
+      {
+        id: 'garage-house',
+        kind: 'door',
+        label: 'the door to the living room',
+        position: [-12.8, -2],
+        rotation: Math.PI / 2,
+        to: 'house',
+      },
+    ],
     props: [
-      /* The shutter it all came in through, with the car nosed at it. */
-      { kind: 'shutter', position: [-5, -9.2], solid: false },
+      /* The shutter it all came in through, with the car nosed at it. It
+         stands clear of the north wall rather than flush against it: flush,
+         the two surfaces fight for the same depth and the door flickers. */
+      { kind: 'shutter', position: [-5, -8.7], solid: false },
       { kind: 'car', position: [-5, -3], rotation: Math.PI / 2 },
-      { kind: 'bicycle', position: [-12.2, 2], rotation: Math.PI / 2 },
+      /* Leant on the wall past the door, where nobody trips over it. */
+      { kind: 'bicycle', position: [-12.2, 4.6], rotation: Math.PI / 2 },
 
       /* The bench along the back wall, and the board over it. */
       { kind: 'workbench', position: [5.6, -8.2] },
-      { kind: 'pegboard', position: [5.6, -8.9], solid: false },
+      { kind: 'pegboard', position: [5.6, -8.82], solid: false },
       { kind: 'toolChest', position: [9.6, -8.2] },
       { kind: 'shelfUnit', position: [-11.4, -8.2] },
       { kind: 'crate', position: [11.6, 4] },
@@ -271,13 +415,19 @@ export const INTERIORS: Interior[] = [
     rug: '#2f4a6b',
     wall: '#c9cdd4',
     accent: '#3fa9d4',
-    spawn: [0, 3.4],
+    spawn: [-7.8, 1],
     windows: [{ side: 'east', at: 0.5 }],
-    exit: {
-      to: 'house-upstairs',
-      arrive: [8.8, 1],
-      label: 'Back to the landing',
-    },
+    links: [
+      /* Back out onto the landing, through the west wall. */
+      {
+        id: 'lab-landing',
+        kind: 'door',
+        label: 'the door to the landing',
+        position: [-10.8, 1],
+        rotation: Math.PI / 2,
+        to: 'house-upstairs',
+      },
+    ],
     props: [
       /* One small server doing far more jobs than it was ever sold for. */
       { kind: 'serverRack', position: [-9.4, -6] },
@@ -299,7 +449,7 @@ export const INTERIORS: Interior[] = [
       { kind: 'shelfUnit', position: [-9.2, 6.4] },
       { kind: 'crate', position: [8.8, 6.4] },
       { kind: 'whiteboard', position: [0, -7.8], solid: false },
-      { kind: 'lamp', position: [-9.6, 2.4] },
+      { kind: 'lamp', position: [-9.6, 3.8] },
     ],
     exhibits: [
       {
@@ -331,13 +481,8 @@ export const INTERIORS: Interior[] = [
     rug: '#5d3f6b',
     wall: '#e8dcc2',
     accent: '#8a7233',
-    spawn: [0, 3.4],
+    spawn: [7.8, -2],
     windows: [{ side: 'west', at: -0.55 }],
-    exit: {
-      to: 'house',
-      arrive: [-11.4, -2],
-      label: 'Back to the living room',
-    },
     props: [
       { kind: 'rug', position: [0, 0], solid: false },
 
@@ -345,26 +490,41 @@ export const INTERIORS: Interior[] = [
       { kind: 'bookshelf', position: [-10.2, -1], rotation: Math.PI / 2 },
       { kind: 'bookshelf', position: [-10.2, 2.4], rotation: Math.PI / 2 },
 
-      /* Verne, east wall, where he has always been. */
-      { kind: 'bookshelf', position: [10.2, -4.4], rotation: -Math.PI / 2 },
-      { kind: 'bookshelf', position: [10.2, -1], rotation: -Math.PI / 2 },
+      /* Verne, east wall, either side of the door in from the living room. */
+      { kind: 'bookshelf', position: [10.2, -5.6], rotation: -Math.PI / 2 },
+      { kind: 'bookshelf', position: [10.2, 2.2], rotation: -Math.PI / 2 },
 
       /* And the run along the back, one panel of which is not a shelf. */
       { kind: 'bookshelf', position: [-4, -7.6] },
       { kind: 'bookshelf', position: [4, -7.6] },
+
+      /* The toys, on their own shelf under the window, well away from the
+         panel they open. Nobody puts the switch next to the door. */
+      { kind: 'toyShelf', position: [-10.2, 5.4], rotation: Math.PI / 2 },
 
       { kind: 'armchair', position: [0, 1.2], rotation: Math.PI },
       { kind: 'table', position: [-2.8, 1.2], scale: 0.7 },
       { kind: 'lamp', position: [3, 2.2] },
     ],
     links: [
+      /* The way in, from the living room next door. */
+      {
+        id: 'library-house',
+        kind: 'door',
+        label: 'the door to the living room',
+        position: [10.8, -2],
+        rotation: -Math.PI / 2,
+        to: 'house',
+      },
       {
         id: 'library-playroom',
         kind: 'hatch',
         label: 'the shelf that swings',
-        position: [0, -7.8],
+        /* Dead in line with the two either side of it: a panel standing even
+           a few centimetres proud of the run is the one thing that would
+           give it away before the helicopter is pressed. */
+        position: [0, -7.6],
         to: 'house-playroom',
-        arrive: [0, 2.6],
         needs: 'playroom',
         lines: ['The shelf swings out on a hinge nobody fitted by accident.'],
         journal: {
@@ -387,19 +547,51 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'The shelf downstairs',
-          body: 'Dostoevsky, Hugo, Feynman, Orwell, Remarque, Steinbeck \u2014 six books he has gone back to, in a room with one shelf that turns out not to be only a shelf.',
+          body: 'Dostoevsky, Hugo, Feynman, Orwell, Remarque, Steinbeck: six books he has gone back to, in a room with one shelf that turns out not to be only a shelf.',
+        },
+      },
+      /*
+       * The toys, and the one of them that is wired to something. Pressing
+       * the helicopter is what opens the panel at the back of the room — the
+       * shelf of books says nothing, because a switch you can find by
+       * reading the obvious thing is not a switch.
+       */
+      {
+        id: 'library-toys',
+        kind: 'toy',
+        label: 'the helicopter on the toy shelf',
+        /* Where you stand to get the prompt: out in the room, off the shelf. */
+        position: [-8.4, 5.4],
+        rotation: Math.PI / 2,
+        /* And where the helicopter actually is, on the middle board of the
+           shelf against the west wall — this is what the pointer hits. */
+        hitbox: { at: [-10.08, 4.98], y: 1.8, size: 0.5 },
+        /*
+         * Pressing Enter at the shelf does not open the wall: it brings you
+         * close enough to see what is on it. The helicopter is one toy among
+         * eight there, and finding it is the easter egg — so the panel is
+         * the puzzle and the reveal lives on the toy itself.
+         */
+        panel: {
+          kicker: 'The library',
+          title: 'The shelf of toys',
+          sections: TOY_SHELF_SECTIONS,
+        },
+        journal: {
+          title: 'The helicopter',
+          body: 'A toy shelf in the library, and one toy on it that is a switch. Press the helicopter and the panel at the back of the room lets go.',
         },
         reveals: {
           id: 'playroom',
           title: 'The shelf moves',
-          body: 'Taking a book off the end of the run, the whole middle shelf shifts a centimetre. There is a hinge behind it. There is a room behind that.',
+          body: 'The helicopter presses down further than a toy should. There is a hinge behind the middle shelf. There is a room behind that.',
         },
       },
       {
         id: 'library-verne',
         kind: 'case',
         label: 'the Verne shelf',
-        position: [8.4, -1],
+        position: [8.4, 2.2],
         rotation: -Math.PI / 2,
         panel: {
           kicker: 'The library',
@@ -408,7 +600,7 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'The Verne shelf',
-          body: 'Five Weeks in a Balloon, Journey to the Centre of the Earth, Twenty Thousand Leagues, The Mysterious Island, A Captain at Fifteen, and A Drama in Livonia. Mostly people somewhere impossible, building their way out \u2014 which turned out to be a career.',
+          body: 'Five Weeks in a Balloon, Journey to the Centre of the Earth, Twenty Thousand Leagues, The Mysterious Island, A Captain at Fifteen, and A Drama in Livonia. Mostly people somewhere impossible, building their way out, which turned out to be a career.',
         },
       },
     ],
@@ -424,12 +616,9 @@ export const INTERIORS: Interior[] = [
     rug: '#4a6b8a',
     wall: '#f4ecdc',
     accent: '#2f6fa8',
-    spawn: [0, 3.4],
+    spawn: [0, 2.8],
     windows: [{ side: 'north', at: 0.55 }],
-    exit: { to: 'house', arrive: [-5.8, -5.2], label: 'Back down the stairs' },
     props: [
-      /* The flight you came up, going back down through the floor. */
-      { kind: 'stairwell', position: [0, 6.2], solid: false },
       { kind: 'rug', position: [-1, -0.6], scale: 1.1, solid: false },
       { kind: 'table', position: [-9.2, -3.4], rotation: Math.PI / 2 },
       { kind: 'plant', position: [-9.4, -6] },
@@ -440,6 +629,17 @@ export const INTERIORS: Interior[] = [
       { kind: 'chair', position: [6.4, 4.4], rotation: Math.PI },
     ],
     links: [
+      /* The well you came up through, against the south wall: the flight
+         below it runs up the living room's north wall, so the landing sits
+         over the back of the house. */
+      {
+        id: 'upstairs-down',
+        kind: 'stairsDown',
+        label: 'the stairs down to the living room',
+        position: [0, 6.1],
+        rotation: Math.PI,
+        to: 'house',
+      },
       {
         id: 'upstairs-lab',
         kind: 'door',
@@ -447,7 +647,6 @@ export const INTERIORS: Interior[] = [
         position: [10.8, 1],
         rotation: -Math.PI / 2,
         to: 'house-lab',
-        arrive: [0, 3.4],
       },
       {
         id: 'upstairs-hall',
@@ -475,13 +674,19 @@ export const INTERIORS: Interior[] = [
     rug: '#3f4a86',
     wall: '#2f2a3d',
     accent: '#ffd166',
-    spawn: [0, 2.6],
+    spawn: [0, 4.8],
     underground: true,
-    exit: {
-      to: 'house-library',
-      arrive: [0, -6],
-      label: 'Back through the shelf',
-    },
+    links: [
+      /* The back of the shelf that let you in, in the wall you came through. */
+      {
+        id: 'playroom-library',
+        kind: 'hatch',
+        label: 'the shelf back to the library',
+        position: [0, 6.8],
+        rotation: Math.PI,
+        to: 'house-library',
+      },
+    ],
     props: [
       { kind: 'rug', position: [0, -0.6], scale: 0.9, solid: false },
       { kind: 'tv', position: [0, -6.4] },
@@ -531,6 +736,14 @@ export const INTERIORS: Interior[] = [
     ],
   },
 
+  /* ----------------------------- the Academy -------------------------- */
+
+  /**
+   * The Polytechnic is the lecture hall, with the programming lab off it to
+   * the west and the council room to the east.
+   *
+   *     [ programming lab ]──east──[ lecture hall ]──east──[ council room ]
+   */
   {
     id: 'university',
     name: 'NTUA',
@@ -559,9 +772,30 @@ export const INTERIORS: Interior[] = [
       { kind: 'bookshelf', position: [-15.7, -8], rotation: Math.PI / 2 },
       { kind: 'bookshelf', position: [-15.7, -3.5], rotation: Math.PI / 2 },
       { kind: 'globe', position: [14.8, -10] },
-      { kind: 'monitor', position: [15, -5], rotation: -Math.PI / 2 },
+      /* The demonstrator's machine, on a desk against the east wall. The
+         monitor stands on the desk, so the desk has to be there. */
+      { kind: 'desk', position: [15.2, -5], rotation: -Math.PI / 2 },
+      { kind: 'monitor', position: [15.2, -5], rotation: -Math.PI / 2 },
       { kind: 'plant', position: [-15.8, 11] },
       { kind: 'plant', position: [15.8, 11] },
+    ],
+    links: [
+      {
+        id: 'university-lab',
+        kind: 'door',
+        label: 'the door to the programming lab',
+        position: [-16.8, 2],
+        rotation: Math.PI / 2,
+        to: 'university-lab',
+      },
+      {
+        id: 'university-council',
+        kind: 'door',
+        label: 'the door to the council room',
+        position: [16.8, 2],
+        rotation: -Math.PI / 2,
+        to: 'university-council',
+      },
     ],
     exhibits: [
       {
@@ -591,18 +825,6 @@ export const INTERIORS: Interior[] = [
         },
       },
       {
-        id: 'uni-student',
-        kind: 'board',
-        label: 'the student council board',
-        position: [-15.8, 2],
-        rotation: Math.PI / 2,
-        panel: {
-          kicker: 'NTUA',
-          title: 'Campus life',
-          sections: STUDENT_LIFE_SECTIONS,
-        },
-      },
-      {
         id: 'uni-publication',
         kind: 'case',
         label: 'the publication case',
@@ -615,7 +837,7 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'Published on arXiv',
-          body: '"An M-Health Algorithmic Approach to Identify and Assess Physiotherapy Exercises in Real Time" — arXiv, Cornell University, December 2025. Pose estimation plus a modified Levenshtein distance, running entirely on the client.',
+          body: '"An M-Health Algorithmic Approach to Identify and Assess Physiotherapy Exercises in Real Time" (arXiv, Cornell University, December 2025). Pose estimation plus a modified Levenshtein distance, running entirely on the client.',
         },
       },
       {
@@ -631,7 +853,7 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'Certifications',
-          body: 'MIT Open Learning — Universal AI Foundational Modules (2026). CITI Program — Biomedical Research Investigators (2026–2029). IBM Docker Essentials (2024). ECPE and ECCE in English, DELF B2 in French.',
+          body: 'MIT Open Learning: Universal AI Foundational Modules (2026). CITI Program: Biomedical Research Investigators (2026–2029). IBM Docker Essentials (2024). ECPE and ECCE in English, DELF B2 in French.',
         },
       },
       {
@@ -660,79 +882,271 @@ export const INTERIORS: Interior[] = [
     ],
   },
 
+  /**
+   * The programming lab: two rows of machines, the whiteboard the first-year
+   * labs were taught off, and on the wall the two things the year below
+   * remembers him for — the transcript, and the hundred and ten pages.
+   */
+  {
+    id: 'university-lab',
+    name: 'NTUA',
+    kicker: 'The programming lab',
+    building: 'university',
+    half: [13, 9],
+    floor: '#5f6470',
+    rug: '#2f4a6b',
+    wall: '#dfe3ea',
+    accent: '#3f7bd6',
+    spawn: [9.8, 2],
+    windows: [{ side: 'north', at: -0.7 }],
+    props: [
+      { kind: 'whiteboard', position: [0, -8.8], solid: false },
+      { kind: 'serverRack', position: [-11.6, -7.8] },
+
+      /* Two rows of four, all facing the board. */
+      { kind: 'desk', position: [-8, -3] },
+      { kind: 'desk', position: [-4, -3] },
+      { kind: 'desk', position: [0, -3] },
+      { kind: 'desk', position: [4, -3] },
+      { kind: 'monitor', position: [-8, -3.4], solid: false },
+      { kind: 'monitor', position: [-4, -3.4], solid: false },
+      { kind: 'monitor', position: [0, -3.4], solid: false },
+      { kind: 'monitor', position: [4, -3.4], solid: false },
+      { kind: 'chair', position: [-8, -1.4], rotation: Math.PI },
+      { kind: 'chair', position: [-4, -1.4], rotation: Math.PI },
+      { kind: 'chair', position: [0, -1.4], rotation: Math.PI },
+      { kind: 'chair', position: [4, -1.4], rotation: Math.PI },
+      { kind: 'desk', position: [-8, 2.6] },
+      { kind: 'desk', position: [-4, 2.6] },
+      { kind: 'desk', position: [0, 2.6] },
+      { kind: 'desk', position: [4, 2.6] },
+      { kind: 'monitor', position: [-8, 2.2], solid: false },
+      { kind: 'monitor', position: [-4, 2.2], solid: false },
+      { kind: 'monitor', position: [0, 2.2], solid: false },
+      { kind: 'monitor', position: [4, 2.2], solid: false },
+      { kind: 'chair', position: [-8, 4.2], rotation: Math.PI },
+      { kind: 'chair', position: [-4, 4.2], rotation: Math.PI },
+      { kind: 'chair', position: [0, 4.2], rotation: Math.PI },
+      { kind: 'chair', position: [4, 4.2], rotation: Math.PI },
+
+      { kind: 'bookshelf', position: [12.4, -5.6], rotation: -Math.PI / 2 },
+      { kind: 'shelfUnit', position: [-12.2, 4], rotation: Math.PI / 2 },
+      { kind: 'plant', position: [11.6, 7.6] },
+      { kind: 'lamp', position: [-11.8, 7.8] },
+    ],
+    links: [
+      {
+        id: 'lab-hall',
+        kind: 'door',
+        label: 'the door to the lecture hall',
+        position: [12.8, 2],
+        rotation: -Math.PI / 2,
+        to: 'university',
+      },
+    ],
+    exhibits: [
+      {
+        id: 'uni-transcript',
+        kind: 'board',
+        label: 'the transcript',
+        position: [-6, -8.5],
+        panel: {
+          kicker: 'NTUA',
+          title: 'The transcript',
+          sections: TRANSCRIPT_SECTIONS,
+        },
+        journal: {
+          title: 'Fifty-five courses',
+          body: 'The transcript, course by course: fifty-five of them at an average of 7.94, tens in every programming course from the first semester to the last, a 10 for the thesis, and 8.35 overall, in the five years the programme is designed for.',
+        },
+      },
+      {
+        id: 'uni-guide',
+        kind: 'case',
+        label: 'the Survival Guide',
+        position: [6, -8.4],
+        panel: {
+          kicker: 'NTUA',
+          title: 'The Survival Guide',
+          sections: GUIDE_SECTIONS,
+        },
+        journal: {
+          title: 'The Survival Guide',
+          body: 'A hundred and ten pages for new students on how to get through every compulsory course in the School, written while he was getting through them himself. Years later the year below still passes it round.',
+        },
+      },
+    ],
+  },
+
+  /**
+   * The council room: the long table the faculty assemblies sat round, the
+   * petition on the wall, and two people who were in the room for it.
+   */
+  {
+    id: 'university-council',
+    name: 'NTUA',
+    kicker: 'The council room',
+    building: 'university',
+    half: [12, 9],
+    floor: '#a98a66',
+    rug: '#3f7bd6',
+    wall: '#efe7d8',
+    accent: '#3f7bd6',
+    spawn: [-8.8, 2],
+    windows: [{ side: 'east', at: -0.3 }],
+    props: [
+      { kind: 'rug', position: [1, -2], scale: 1.4, solid: false },
+      { kind: 'longTable', position: [1, -2] },
+      { kind: 'chair', position: [-1.6, -4.2] },
+      { kind: 'chair', position: [1, -4.2] },
+      { kind: 'chair', position: [3.6, -4.2] },
+      { kind: 'chair', position: [-1.6, 0.2], rotation: Math.PI },
+      { kind: 'chair', position: [1, 0.2], rotation: Math.PI },
+      { kind: 'chair', position: [3.6, 0.2], rotation: Math.PI },
+      { kind: 'chair', position: [-4.2, -2], rotation: Math.PI / 2 },
+      { kind: 'chair', position: [6.2, -2], rotation: -Math.PI / 2 },
+
+      { kind: 'bookshelf', position: [-9, -8.6] },
+      {
+        kind: 'painting',
+        position: [11.8, 4],
+        rotation: -Math.PI / 2,
+        solid: false,
+      },
+      { kind: 'plant', position: [-11.2, 7.6] },
+      { kind: 'lamp', position: [11.4, 7.6] },
+    ],
+    links: [
+      {
+        id: 'council-hall',
+        kind: 'door',
+        label: 'the door to the lecture hall',
+        position: [-11.8, 2],
+        rotation: Math.PI / 2,
+        to: 'university',
+      },
+    ],
+    exhibits: [
+      {
+        id: 'uni-student',
+        kind: 'board',
+        label: 'the petition',
+        position: [1, -8.5],
+        panel: {
+          kicker: 'NTUA',
+          title: 'The Independent movement',
+          sections: STUDENT_LIFE_SECTIONS,
+        },
+        journal: {
+          title: 'Seven hundred signatures',
+          body: 'The Independent movement of ECE students he helped found in his third year: a petition of more than 700 signatures in two days, a speech to 800, and two years as the independent representative the Dean appointed, in the open, always saying what he was doing.',
+        },
+      },
+    ],
+  },
+
+  /* ========================= the Work District ========================= *
+   *
+   * The one building on the island with floors. The ground floor is the
+   * lobby: what he can do, what he is certified in, and the jobs he held
+   * while he was still a student, none of which were software. The first
+   * floor is IBM, the second is Veltiston AI, and the third is whatever
+   * comes next — the lift has a button for it and the button is not lit.
+   *
+   * Both ways up work. The stairs are in the north-west corner of every
+   * floor and the lift is in the north-east, so you can climb it or ride it,
+   * and the ride is the one that takes time.
+   */
   {
     id: 'work',
     name: 'Work District',
-    kicker: 'Office floor',
+    kicker: 'Ground floor',
     half: [17, 13],
     floor: '#48545f',
     rug: '#2fb59a',
     wall: '#e8eef2',
     accent: '#2fb59a',
     spawn: [0, 7.5],
+    links: [
+      {
+        id: 'work-stairs-up',
+        kind: 'stairsUp',
+        label: 'the stairs to the first floor',
+        position: [-11, -12.6],
+        to: 'work-ibm',
+        journal: {
+          title: 'Three floors',
+          body: 'The Work District has a floor per employer: IBM on the first, Veltiston AI on the second, and a third nobody has built yet. Stairs in the north-west corner, lift in the north-east.',
+        },
+      },
+      {
+        id: 'work-lift',
+        kind: 'lift',
+        label: 'the lift',
+        position: [11, -12.6],
+        floor: 0,
+        serves: LIFT_PANEL,
+      },
+    ],
     props: [
-      { kind: 'rug', position: [0, 2], scale: 1.6, solid: false },
-      { kind: 'desk', position: [-8, 5] },
-      { kind: 'monitor', position: [-8, 5.4] },
-      { kind: 'chair', position: [-8, 7], rotation: Math.PI },
-      { kind: 'desk', position: [8, 5] },
-      { kind: 'monitor', position: [8, 5.4] },
-      { kind: 'chair', position: [8, 7], rotation: Math.PI },
-      { kind: 'desk', position: [-8, -5] },
-      { kind: 'monitor', position: [-8, -4.6], rotation: Math.PI },
-      { kind: 'desk', position: [8, -5] },
-      { kind: 'monitor', position: [8, -4.6], rotation: Math.PI },
-      { kind: 'serverRack', position: [-3, -12] },
-      { kind: 'serverRack', position: [3, -12] },
-      { kind: 'sofa', position: [15, 9], rotation: -Math.PI / 2 },
-      { kind: 'table', position: [12.5, 9] },
+      {
+        kind: 'rug',
+        position: [0, 2],
+        scale: 1.6,
+        solid: false,
+        color: '#2a6f63',
+      },
+      /* The reception desk, facing the door. */
+      { kind: 'counter', position: [0, 3.4] },
+      { kind: 'chair', position: [0, 1.6] },
       { kind: 'plant', position: [-15.8, 11] },
-      { kind: 'plant', position: [15.8, -11] },
-      { kind: 'counter', position: [-15, 8], rotation: Math.PI / 2 },
+      { kind: 'plant', position: [15.8, 11] },
+      { kind: 'sofa', position: [15, 6], rotation: -Math.PI / 2 },
+      { kind: 'table', position: [12.5, 6] },
+      { kind: 'sofa', position: [-15, 6], rotation: Math.PI / 2 },
+      /* The certification wall runs the length of the west side. */
+      { kind: 'bookshelf', position: [-15.6, -2], rotation: Math.PI / 2 },
+      { kind: 'bookshelf', position: [-15.6, -6], rotation: Math.PI / 2 },
+      { kind: 'painting', position: [15.8, -2], rotation: -Math.PI / 2 },
+      { kind: 'desk', position: [7, -7] },
+      { kind: 'monitor', position: [7, -6.6], rotation: Math.PI },
+      { kind: 'chair', position: [7, -5], rotation: Math.PI },
     ],
     exhibits: [
       {
-        id: 'work-role',
+        id: 'work-directory',
         kind: 'board',
-        label: 'the team board',
-        position: [-9, -12.3],
+        label: 'the building directory',
+        position: [0, -12.3],
         panel: {
-          kicker: 'Veltiston.AI',
-          title: 'Current role',
-          sections: VELTISTON_SECTIONS,
+          kicker: 'Work District',
+          title: 'What is on which floor',
+          sections: WORK_DIRECTORY_SECTIONS,
         },
         journal: {
           title: 'Work District',
-          body: 'Technical Lead at Veltiston.AI since May 2024, after Dev(Sec)Ops at IBM Consulting in 2023–2024.',
+          body: 'A floor per employer: IBM 2023–2024 on the first, Veltiston AI 2024–present on the second. The third floor is not built yet.',
         },
       },
       {
-        id: 'work-platform',
-        kind: 'terminal',
-        label: 'the platform terminal',
-        position: [9, -12.3],
-        panel: {
-          kicker: 'Veltiston.AI',
-          title: 'The platform',
-          sections: PLATFORM_SECTIONS,
-        },
-      },
-      {
-        id: 'work-ibm',
+        id: 'work-capabilities',
         kind: 'board',
-        label: 'the IBM pinboard',
-        position: [-15.8, -2],
-        rotation: Math.PI / 2,
+        label: 'the capabilities board',
+        position: [-6, -12.3],
         panel: {
-          kicker: 'IBM Consulting',
-          title: 'Hybrid Cloud, 2023–2024',
-          sections: IBM_SECTIONS,
+          kicker: 'Work District',
+          title: 'What he does',
+          sections: CAPABILITIES_SECTIONS,
+        },
+        journal: {
+          title: 'What he does',
+          body: 'Senior full-stack engineer and technical lead: architecture and the hard parts himself, teams of 5–10 across three time zones, security and compliance first, and a production release most weeks.',
         },
       },
       {
         id: 'work-skills',
         kind: 'terminal',
-        label: 'the skills whiteboard',
+        label: 'the skills terminal',
         position: [15.8, 2],
         rotation: -Math.PI / 2,
         panel: {
@@ -742,11 +1156,266 @@ export const INTERIORS: Interior[] = [
         },
       },
       {
+        id: 'work-certs',
+        kind: 'case',
+        label: 'the certification wall',
+        position: [-15.8, 2],
+        rotation: Math.PI / 2,
+        panel: {
+          kicker: 'Work District',
+          title: 'Certifications',
+          sections: CERTIFICATIONS_SECTIONS,
+        },
+        journal: {
+          title: 'Certifications',
+          body: 'MIT Open Learning on foundational AI, CITI Program on biomedical research conduct and HIPAA, IBM Docker Essentials, and the language certificates: ECPE C2, ECCE B2 and DELF B2.',
+        },
+      },
+      /* The small board by the stairs: the student jobs. Kyriakos Oikonomou,
+         who gave him the first of them, stands beside it. */
+      {
+        id: 'work-student-jobs',
+        kind: 'board',
+        label: 'the board of student jobs',
+        position: [-15.8, -9.5],
+        rotation: Math.PI / 2,
+        panel: {
+          kicker: 'While at NTUA',
+          title: 'The jobs he held as a student',
+          sections: STUDENT_JOBS_SECTIONS,
+        },
+        journal: {
+          title: 'Working through the degree',
+          body: 'Director of the "Pantokrator" Foundation 2021–2022, robotics tutor to children at Citylab in Alimos 2020–2021, and a private mathematics tutor throughout — all of it alongside NTUA.',
+        },
+      },
+      {
+        id: 'work-foundation-letter',
+        kind: 'case',
+        label: 'the letter beside the board',
+        position: [-11.5, -12.3],
+        panel: {
+          kicker: 'Reference',
+          title: 'From the Vice-President',
+          sections: REFERENCE_FOUNDATION_SECTIONS,
+        },
+      },
+    ],
+  },
+
+  /* ---------------------------- first floor ---------------------------- */
+
+  /**
+   * IBM, November 2023 to May 2024. The bank floor: the Cosmos Project at the
+   * National Bank of Greece, moving core banking off PL/I and COBOL onto
+   * Finacle, and the fortnight in Hamburg. Blue, because of course it is.
+   *
+   * The server room key is up here rather than in the lobby: it is the floor
+   * with the racks on it.
+   */
+  {
+    id: 'work-ibm',
+    name: 'Work District',
+    kicker: 'First floor · IBM',
+    building: 'work',
+    half: [17, 13],
+    floor: '#3b4653',
+    rug: '#1f4fa0',
+    wall: '#dfe7f2',
+    accent: '#4d8ee0',
+    spawn: [0, 7.5],
+    links: [
+      {
+        id: 'work-ibm-down',
+        kind: 'stairsDown',
+        label: 'the stairs down to the lobby',
+        position: [-11, -12.6],
+        to: 'work',
+      },
+      {
+        id: 'work-ibm-up',
+        kind: 'stairsUp',
+        label: 'the stairs to the second floor',
+        position: [-11, 12.6],
+        rotation: Math.PI,
+        to: 'work-veltiston',
+      },
+      {
+        id: 'work-ibm-lift',
+        kind: 'lift',
+        label: 'the lift',
+        position: [11, -12.6],
+        floor: 1,
+        serves: LIFT_PANEL,
+      },
+    ],
+    props: [
+      {
+        kind: 'rug',
+        position: [0, 0],
+        scale: 1.6,
+        solid: false,
+        color: '#1f4fa0',
+      },
+      /* The integration desks, facing each other across the floor: the calls
+         he ran between the bank's subsystems happened over these. */
+      { kind: 'desk', position: [-8, 4] },
+      { kind: 'monitor', position: [-8, 4.4] },
+      { kind: 'chair', position: [-8, 6], rotation: Math.PI },
+      { kind: 'desk', position: [8, 4] },
+      { kind: 'monitor', position: [8, 4.4] },
+      { kind: 'chair', position: [8, 6], rotation: Math.PI },
+      { kind: 'desk', position: [-8, -4] },
+      { kind: 'monitor', position: [-8, -3.6], rotation: Math.PI },
+      { kind: 'desk', position: [8, -4] },
+      { kind: 'monitor', position: [8, -3.6], rotation: Math.PI },
+      /* The racks along the back wall, and the key on one of them. */
+      { kind: 'serverRack', position: [-3, -12] },
+      { kind: 'serverRack', position: [0, -12] },
+      { kind: 'serverRack', position: [3, -12] },
+      { kind: 'whiteboard', position: [15.6, 6], rotation: -Math.PI / 2 },
+      { kind: 'plant', position: [-15.8, 9] },
+      { kind: 'crate', position: [14, -10] },
+      { kind: 'crate', position: [15, -8], rotation: 0.4 },
+    ],
+    exhibits: [
+      {
+        id: 'work-ibm-board',
+        kind: 'board',
+        label: 'the IBM pinboard',
+        position: [-15.8, 0],
+        rotation: Math.PI / 2,
+        panel: {
+          kicker: 'IBM',
+          title: 'DevOps & integration, 2023–2024',
+          sections: IBM_SECTIONS,
+        },
+        journal: {
+          title: 'IBM, DevOps Engineer',
+          body: 'November 2023 – May 2024 through the IBM Associate Program. The Cosmos Project at the National Bank of Greece: PL/I and COBOL core banking onto Infosys Finacle, integration architecture for the coexistence and target states, and CI/CD with Jenkins, Podman, ELK and Grafana.',
+        },
+      },
+      {
         id: 'work-key',
         kind: 'key',
         label: 'the server rack',
-        position: [0, -11.5],
+        position: [0, -11.3],
         keyId: 'key-work',
+      },
+    ],
+  },
+
+  /* --------------------------- second floor --------------------------- */
+
+  /**
+   * Veltiston AI, May 2024 to today, and the floor the island is really
+   * about: founding engineer, then technical lead of a nurse-scheduling
+   * platform that four American hospitals now run their wards on.
+   *
+   * Four people up here, and between them they cover the whole of it — the
+   * founder on the vision, the stack, the team across three time zones, and
+   * the data-science side he leads the software for.
+   */
+  {
+    id: 'work-veltiston',
+    name: 'Work District',
+    kicker: 'Second floor · Veltiston AI',
+    building: 'work',
+    half: [17, 13],
+    floor: '#414d58',
+    rug: '#2fb59a',
+    wall: '#eef4f3',
+    accent: '#2fb59a',
+    spawn: [0, 7.5],
+    links: [
+      {
+        id: 'work-velt-down',
+        kind: 'stairsDown',
+        label: 'the stairs down to the first floor',
+        position: [-11, 12.6],
+        rotation: Math.PI,
+        to: 'work-ibm',
+      },
+      {
+        id: 'work-velt-lift',
+        kind: 'lift',
+        label: 'the lift',
+        position: [11, -12.6],
+        floor: 2,
+        serves: LIFT_PANEL,
+      },
+    ],
+    props: [
+      {
+        kind: 'rug',
+        position: [0, 1],
+        scale: 1.7,
+        solid: false,
+        color: '#27695e',
+      },
+      /* An open floor: four desks in a block in the middle, the way a startup
+         that outgrew its first room actually sits. */
+      { kind: 'desk', position: [-3.2, 2] },
+      { kind: 'monitor', position: [-3.2, 2.4] },
+      { kind: 'chair', position: [-3.2, 4], rotation: Math.PI },
+      { kind: 'desk', position: [3.2, 2] },
+      { kind: 'monitor', position: [3.2, 2.4] },
+      { kind: 'chair', position: [3.2, 4], rotation: Math.PI },
+      { kind: 'desk', position: [-3.2, -3] },
+      { kind: 'monitor', position: [-3.2, -2.6], rotation: Math.PI },
+      { kind: 'desk', position: [3.2, -3] },
+      { kind: 'monitor', position: [3.2, -2.6], rotation: Math.PI },
+      /* The wall the architecture gets drawn on, and redrawn. */
+      { kind: 'whiteboard', position: [-15.6, 4], rotation: Math.PI / 2 },
+      { kind: 'whiteboard', position: [-15.6, -4], rotation: Math.PI / 2 },
+      { kind: 'sofa', position: [14.8, 8], rotation: -Math.PI / 2 },
+      { kind: 'table', position: [12.3, 8] },
+      { kind: 'plant', position: [-15.8, 11] },
+      { kind: 'plant', position: [15.8, 11] },
+      { kind: 'serverRack', position: [-14, -11.5], rotation: 0.2 },
+    ],
+    exhibits: [
+      {
+        id: 'work-role',
+        kind: 'board',
+        label: 'the team board',
+        position: [-6, -12.3],
+        panel: {
+          kicker: 'Veltiston AI',
+          title: 'Current role',
+          sections: VELTISTON_SECTIONS,
+        },
+        journal: {
+          title: 'Veltiston AI',
+          body: 'One of the first engineers from May 2024, then Senior Software Engineer from May 2026 and project lead on three projects. Technical lead of the Nurse Scheduling platform, concept to production.',
+        },
+      },
+      {
+        id: 'work-platform',
+        kind: 'terminal',
+        label: 'the platform terminal',
+        position: [6, -12.3],
+        panel: {
+          kicker: 'Veltiston AI',
+          title: 'The platform',
+          sections: PLATFORM_SECTIONS,
+        },
+      },
+      {
+        id: 'work-stack',
+        kind: 'case',
+        label: 'the technology wall',
+        position: [15.8, 0],
+        rotation: -Math.PI / 2,
+        panel: {
+          kicker: 'Veltiston AI',
+          title: 'The stack, and the pace',
+          sections: VELTISTON_STACK_SECTIONS,
+        },
+        journal: {
+          title: 'The stack, and the pace',
+          body: 'Java 17–25, Spring Boot and Spring AI, React, MySQL, AWS, Docker, Jenkins and GitLab CI, watched with Grafana, Graylog and Sentry — shipped to production most weeks, into four major U.S. hospitals.',
+        },
       },
     ],
   },
@@ -793,7 +1462,7 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'Army Camp',
-          body: 'Reservist Second Lieutenant, Marine Special Forces, 2022–2023 — a unit to plan for, train and look after.',
+          body: 'Reservist Second Lieutenant, Marine Special Forces, 2022–2023, a unit to plan for, train and look after.',
         },
       },
       {
@@ -822,53 +1491,84 @@ export const INTERIORS: Interior[] = [
     ],
   },
 
+  /* ------------------------------ the school ------------------------- */
+
+  /**
+   * The Town School is three schools in one building. The hall behind the
+   * front door is the elementary years — his first teacher, and the two cups
+   * — with the volunteering he came back to as an adult on the same walls.
+   * Evangeliki, the junior high, is the classroom through the west door, and
+   * Ionidios, the high school, the one through the east.
+   *
+   *     [ Evangeliki ]──east──[ the hall ]──east──[ Ionidios ]
+   */
   {
     id: 'school',
     name: 'Town School',
-    kicker: 'Classroom',
-    half: [13.5, 10.5],
+    kicker: 'The hall',
+    half: [12, 8],
     floor: '#c08a52',
     rug: '#e6a63c',
     wall: '#f2e2c4',
     accent: '#e6a63c',
-    spawn: [0, 5],
+    spawn: [0, 4],
+    windows: [{ side: 'north', at: 0 }],
     props: [
-      { kind: 'blackboard', position: [0, -9.9] },
-      { kind: 'lectern', position: [0, -6.5] },
-      { kind: 'schoolDesk', position: [-5, -1] },
-      { kind: 'schoolDesk', position: [-1, -1] },
-      { kind: 'schoolDesk', position: [3, -1] },
-      { kind: 'schoolDesk', position: [-5, 3] },
-      { kind: 'schoolDesk', position: [-1, 3] },
-      { kind: 'schoolDesk', position: [3, 3] },
-      { kind: 'bookshelf', position: [-12.2, -6], rotation: Math.PI / 2 },
-      { kind: 'bookshelf', position: [-12.2, -2], rotation: Math.PI / 2 },
-      { kind: 'globe', position: [11.5, -8] },
-      { kind: 'plant', position: [12.3, 8.5] },
-      { kind: 'plant', position: [-12.3, 8.5] },
-      { kind: 'table', position: [10.5, 3], rotation: -Math.PI / 2 },
+      { kind: 'rug', position: [0, 0], scale: 1.2, solid: false },
+      { kind: 'bookshelf', position: [-8.5, -7.6] },
+      { kind: 'bookshelf', position: [8, -7.6] },
+      { kind: 'table', position: [7, 3.2] },
+      { kind: 'lamp', position: [7, 5.4] },
+      { kind: 'plant', position: [-11.2, 6.4] },
+      { kind: 'plant', position: [11.2, 6.4] },
+    ],
+    links: [
+      {
+        id: 'school-evangeliki',
+        kind: 'door',
+        label: 'the door to the Evangeliki classroom',
+        position: [-11.8, -1],
+        rotation: Math.PI / 2,
+        to: 'school-evangeliki',
+        journal: {
+          title: 'Evangeliki',
+          body: 'The Model Junior High School of Evangeliki in Nea Smyrni, through the west door of the Town School: one of four public Model schools in Greece, and he ranked 1st in the exam to get in.',
+        },
+      },
+      {
+        id: 'school-ionidios',
+        kind: 'door',
+        label: 'the door to the Ionidios classroom',
+        position: [11.8, -3.5],
+        rotation: -Math.PI / 2,
+        to: 'school-ionidios',
+        journal: {
+          title: 'Ionidios',
+          body: 'The Model High School of Ionidios in Piraeus, through the east door of the Town School: the oldest school in Piraeus, founded in 1847, a second entrance exam ranked 1st, and the Piraeus prize for the top graduating grade of 2017.',
+        },
+      },
     ],
     exhibits: [
       {
-        id: 'school-record',
-        kind: 'board',
-        label: 'the school record',
-        position: [-6.5, -10.3],
+        id: 'school-trophies',
+        kind: 'case',
+        label: 'the trophy case',
+        position: [-4, -7.4],
         panel: {
           kicker: 'Town School',
-          title: 'Early education',
-          sections: SCHOOL_SECTIONS,
+          title: 'Elementary school',
+          sections: ELEMENTARY_SECTIONS,
         },
         journal: {
-          title: 'Town School',
-          body: 'Model High School of Ionidios (GPA 19.9) and Evaggeliki in Nea Smyrni — ranked 1st in the 2014 admission exam.',
+          title: 'Two cups in the hall',
+          body: 'Captain of the elementary school chess team, 1st in the city tournament; captain of the basketball team for two years, 3rd in the local tournament.',
         },
       },
       {
         id: 'school-volunteer',
         kind: 'case',
-        label: 'the trophy case',
-        position: [6.5, -10.3],
+        label: 'the volunteering case',
+        position: [4, -7.4],
         panel: {
           kicker: 'Town School',
           title: 'Teaching & volunteering',
@@ -879,8 +1579,8 @@ export const INTERIORS: Interior[] = [
         id: 'school-reference',
         kind: 'board',
         label: 'the foundation’s letter',
-        position: [-13, 2.5],
-        rotation: Math.PI / 2,
+        position: [11.6, 2],
+        rotation: -Math.PI / 2,
         panel: {
           kicker: 'Town School',
           title: 'The foundation’s letter',
@@ -888,15 +1588,245 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'Foundation reference',
-          body: 'Kyriakos Oikonomou, retired Justice of the Hellenic Supreme Court and Vice-President of the "Pantokrator" Foundation, who appointed him Director at 2021: his contribution "had far exceeded our expectations" — renovation, events, volunteers and digital media.',
+          body: 'Kyriakos Oikonomou, retired Justice of the Hellenic Supreme Court and Vice-President of the "Pantokrator" Foundation, who appointed him Director at 2021: his contribution "had far exceeded our expectations": renovation, events, volunteers and digital media.',
         },
       },
       {
         id: 'school-key',
         kind: 'key',
         label: 'the trophy case shelf',
-        position: [8.8, -9],
+        position: [-1.4, -7.6],
         keyId: 'key-school',
+      },
+    ],
+  },
+
+  /**
+   * Evangeliki: the classroom, with the after-school clubs round its walls.
+   * Pascal on the machine by the west window, the robotics bench behind it
+   * with the bicycle that ran on twelve volts, the planetarium in the far
+   * corner, and the chessboard where the chess team met.
+   */
+  {
+    id: 'school-evangeliki',
+    name: 'Town School',
+    kicker: 'Evangeliki',
+    building: 'school',
+    half: [14.5, 10.5],
+    floor: '#b98a5a',
+    rug: '#2f6fa8',
+    wall: '#efe4cc',
+    accent: '#2f6fa8',
+    spawn: [11.3, -1],
+    windows: [
+      { side: 'north', at: 0.6 },
+      { side: 'west', at: -0.5 },
+    ],
+    props: [
+      /* The lesson. */
+      { kind: 'blackboard', position: [0, -9.9] },
+      { kind: 'lectern', position: [0, -6.5] },
+      { kind: 'schoolDesk', position: [-5, -1] },
+      { kind: 'schoolDesk', position: [-1, -1] },
+      { kind: 'schoolDesk', position: [3, -1] },
+      { kind: 'schoolDesk', position: [-5, 3] },
+      { kind: 'schoolDesk', position: [-1, 3] },
+      { kind: 'schoolDesk', position: [3, 3] },
+
+      /* Pascal, on the machine under the west window. */
+      { kind: 'desk', position: [-12.4, -5], rotation: Math.PI / 2 },
+      {
+        kind: 'monitor',
+        position: [-13, -5],
+        rotation: Math.PI / 2,
+        solid: false,
+      },
+      { kind: 'chair', position: [-10.8, -5], rotation: Math.PI / 2 },
+
+      /* Robotics, along the rest of the west wall: the bench, the board over
+         it, and the bicycle that ran on twelve volts. */
+      { kind: 'workbench', position: [-13.2, 5], rotation: Math.PI / 2 },
+      {
+        kind: 'pegboard',
+        position: [-14.2, 5],
+        rotation: Math.PI / 2,
+        solid: false,
+      },
+      { kind: 'toolChest', position: [-13.2, 8.4] },
+      /* Leant against the west wall past the bench, on its wheels. */
+      { kind: 'bicycle', position: [-13.4, 1.6], rotation: Math.PI / 2 },
+      { kind: 'crate', position: [-13.2, -1.4] },
+
+      /* Astronomy in the far corner: the planetarium, and the sun it went
+         round. */
+      { kind: 'globe', position: [12.6, -8.6] },
+      { kind: 'lamp', position: [10.6, -8.6] },
+      { kind: 'table', position: [11.5, -6], rotation: -Math.PI / 2 },
+
+      /* And the board the chess team met over. */
+      { kind: 'chessTable', position: [12, 6.4] },
+      { kind: 'chair', position: [12, 4.6], rotation: Math.PI },
+      { kind: 'chair', position: [12, 8.2] },
+      { kind: 'plant', position: [-6.8, 8.8] },
+    ],
+    links: [
+      {
+        id: 'evangeliki-hall',
+        kind: 'door',
+        label: 'the door to the hall',
+        position: [14.3, -1],
+        rotation: -Math.PI / 2,
+        to: 'school',
+      },
+    ],
+    exhibits: [
+      {
+        id: 'evangeliki-board',
+        kind: 'board',
+        label: 'the honours board',
+        position: [5.8, -10.1],
+        panel: {
+          kicker: 'Evangeliki',
+          title: 'Model Junior High School of Evangeliki',
+          sections: EVANGELIKI_SECTIONS,
+        },
+        journal: {
+          title: 'First of the class',
+          body: 'Evangeliki, 2011–2015: first of the class every year with the prize of excellence, class president and school representative, and a fifteen-page report handed to the principal at the end of it.',
+        },
+      },
+      {
+        id: 'evangeliki-terminal',
+        kind: 'terminal',
+        label: 'the Pascal machine',
+        position: [-13.9, -1.4],
+        rotation: Math.PI / 2,
+        panel: {
+          kicker: 'Evangeliki',
+          title: 'The extra classes',
+          sections: EVANGELIKI_CLUBS_SECTIONS,
+        },
+        journal: {
+          title: 'The extra classes',
+          body: 'Pascal from the age of thirteen, a sundial and a planetarium to scale, a submarine drone with the robotics class and an electric bicycle on his own, and the chess team to captain.',
+        },
+      },
+    ],
+  },
+
+  /**
+   * Ionidios: the classroom for the last two years, with the labs he lived
+   * in round its walls. The biology bench by the east window, the physics
+   * bench the EUSO team worked at on the west, the machine he learned C++ on
+   * in the south-east corner, and the three scholarship letters his teachers
+   * wrote framed beside the blackboard.
+   */
+  {
+    id: 'school-ionidios',
+    name: 'Town School',
+    kicker: 'Ionidios',
+    building: 'school',
+    half: [14.5, 10.5],
+    floor: '#b3835a',
+    rug: '#8a2f3a',
+    wall: '#f1e6d2',
+    accent: '#8a2f3a',
+    spawn: [-11.3, -3.5],
+    windows: [
+      { side: 'north', at: -0.65 },
+      { side: 'east', at: -0.1 },
+    ],
+    props: [
+      /* The lesson, at the front of the room. */
+      { kind: 'blackboard', position: [0, -9.9] },
+      { kind: 'lectern', position: [0, -6.5] },
+      { kind: 'schoolDesk', position: [-5, -1] },
+      { kind: 'schoolDesk', position: [-1, -1] },
+      { kind: 'schoolDesk', position: [3, -1] },
+      { kind: 'schoolDesk', position: [-5, 3] },
+      { kind: 'schoolDesk', position: [-1, 3] },
+      { kind: 'schoolDesk', position: [3, 3] },
+
+      /* Biology, under the east window: the bench, and the shelf of
+         specimens nobody is allowed to open. */
+      { kind: 'desk', position: [12.4, -6], rotation: -Math.PI / 2 },
+      { kind: 'shelfUnit', position: [11.2, -9.6] },
+      { kind: 'plant', position: [13.4, -2.4] },
+
+      /* Physics, along the west wall: the bench the EUSO team worked at,
+         the board over it, and the crate the experiments came in. */
+      { kind: 'workbench', position: [-13.2, 5], rotation: Math.PI / 2 },
+      {
+        kind: 'pegboard',
+        position: [-14.2, 5],
+        rotation: Math.PI / 2,
+        solid: false,
+      },
+      {
+        kind: 'whiteboard',
+        position: [-14.2, 1.2],
+        rotation: Math.PI / 2,
+        solid: false,
+      },
+      { kind: 'crate', position: [-13.2, 8.4] },
+
+      /* Informatics, in the south-east corner: one machine, and a rack that
+         was doing more than a school needed. */
+      { kind: 'desk', position: [12.4, 5], rotation: -Math.PI / 2 },
+      {
+        kind: 'monitor',
+        position: [13, 5],
+        rotation: -Math.PI / 2,
+        solid: false,
+      },
+      { kind: 'chair', position: [10.8, 5], rotation: -Math.PI / 2 },
+      { kind: 'serverRack', position: [12.8, 8.8] },
+
+      /* And the tool chest that was never officially his. */
+      { kind: 'toolChest', position: [-11, -8.6] },
+      { kind: 'lamp', position: [-13.2, -8.6] },
+      { kind: 'plant', position: [-6.8, 8.8] },
+    ],
+    links: [
+      {
+        id: 'ionidios-hall',
+        kind: 'door',
+        label: 'the door to the hall',
+        position: [-14.3, -3.5],
+        rotation: Math.PI / 2,
+        to: 'school',
+      },
+    ],
+    exhibits: [
+      {
+        id: 'ionidios-board',
+        kind: 'board',
+        label: 'the honours board',
+        position: [5.8, -10.1],
+        panel: {
+          kicker: 'Ionidios',
+          title: 'Model High School of Ionidios',
+          sections: IONIDIOS_SECTIONS,
+        },
+        journal: {
+          title: 'The Piraeus prize',
+          body: 'Ionidios, 2015–2017: 1st in the entrance exam, the excellence award every year, the Piraeus prize for the top graduating grade of 2017 at 19.9 out of 20, 2nd of about 1,650 in the national Biology competition, awards in Mathematics and Programming, and captain of the EUSO team.',
+        },
+      },
+      {
+        id: 'ionidios-letters',
+        kind: 'board',
+        label: 'the scholarship letters',
+        position: [-6, -10.1],
+        panel: {
+          kicker: 'Ionidios',
+          title: 'Three letters from his teachers',
+          sections: REFERENCE_IONIDIOS_SECTIONS,
+        },
+        journal: {
+          title: 'Three letters from Ionidios',
+          body: 'His biology, physics and chemistry teachers, each on a scholarship recommendation form in September 2017: first in his class year after year, excellent throughout, in every event the school ran, and "without doubt among the best students I have had".',
+        },
       },
     ],
   },
@@ -914,7 +1844,9 @@ export const INTERIORS: Interior[] = [
     props: [
       { kind: 'console', position: [-4, -7], rotation: 0 },
       { kind: 'console', position: [4, -7], rotation: 0 },
-      { kind: 'monitor', position: [-7.5, -4], rotation: Math.PI / 2 },
+      /* The monitoring station down the west side, monitor on its desk. */
+      { kind: 'desk', position: [-9, -4], rotation: Math.PI / 2 },
+      { kind: 'monitor', position: [-9, -4], rotation: Math.PI / 2 },
       { kind: 'chair', position: [0, -4], rotation: Math.PI },
       { kind: 'bookshelf', position: [-9.8, 1], rotation: Math.PI / 2 },
       { kind: 'table', position: [8, 2] },
@@ -934,7 +1866,7 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'Radio Center',
-          body: 'The message desk composes an email straight to Kitsos — no operator in between.',
+          body: 'The message desk composes an email straight to Kitsos, with no operator in between.',
         },
       },
     ],

@@ -1,8 +1,8 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { BackSide } from 'three'
-import type { Group } from 'three'
+import type { Group, PointLight } from 'three'
 import type { InteriorProp, PropKind } from '../types'
+import { FEAST } from '../game/feast'
 
 const WOOD = '#a97c4e'
 const DARK_WOOD = '#7d5a3a'
@@ -124,7 +124,7 @@ function Piece({ kind, color }: { kind: PropKind; color?: string }) {
             Array.from({ length: 9 }, (_, i) => (
               <mesh
                 key={`${y}-${i}`}
-                position={[-1.25 + i * 0.3, y, 0.2]}
+                position={[-1.25 + i * 0.3, y, 0.26]}
                 scale={[1, 0.6 + ((i * 7 + row * 3) % 5) * 0.14, 1]}
               >
                 <boxGeometry args={[0.2, 0.6, 0.3]} />
@@ -897,6 +897,27 @@ function Piece({ kind, color }: { kind: PropKind; color?: string }) {
     case 'photoWall':
       return <PhotoWall />
 
+    case 'toyBox':
+      return <ToyBox color={color} />
+
+    case 'toyShelf':
+      return <ToyShelf color={color} />
+
+    case 'fireplace':
+      return <Fireplace />
+
+    case 'christmasTree':
+      return <ChristmasTree />
+
+    case 'wreath':
+      return <Wreath />
+
+    case 'garland':
+      return <Garland />
+
+    case 'feastTable':
+      return <FeastTable />
+
     case 'armchair':
       return (
         <group>
@@ -993,9 +1014,13 @@ function Piece({ kind, color }: { kind: PropKind; color?: string }) {
         </group>
       )
 
-    case 'stairwell':
-      return <Stairwell />
-
+    /**
+     * The roller shutter. The slats stand a clear centimetre and a half off
+     * the panel behind them: any closer and the two faces land on the same
+     * depth values, and the whole door flickers in bands as the camera
+     * moves. The same goes for the panel and the wall it hangs on, which is
+     * why the prop is placed a little inside the room rather than flush.
+     */
     case 'shutter':
       return (
         <group>
@@ -1004,8 +1029,8 @@ function Piece({ kind, color }: { kind: PropKind; color?: string }) {
             <meshStandardMaterial color="#5a6068" flatShading roughness={0.7} />
           </mesh>
           {Array.from({ length: 9 }, (_, i) => (
-            <mesh key={i} position={[0, 0.26 + i * 0.38, 0.11]}>
-              <boxGeometry args={[5, 0.3, 0.06]} />
+            <mesh key={i} position={[0, 0.26 + i * 0.38, 0.145]}>
+              <boxGeometry args={[5, 0.3, 0.09]} />
               <meshStandardMaterial
                 color={i % 2 ? '#7b828b' : '#6b727a'}
                 flatShading
@@ -1014,8 +1039,8 @@ function Piece({ kind, color }: { kind: PropKind; color?: string }) {
               />
             </mesh>
           ))}
-          <mesh position={[0, 3.56, 0]}>
-            <boxGeometry args={[5.5, 0.34, 0.4]} />
+          <mesh position={[0, 3.56, 0.02]}>
+            <boxGeometry args={[5.5, 0.34, 0.44]} />
             <meshStandardMaterial color="#464c53" flatShading />
           </mesh>
         </group>
@@ -1310,49 +1335,93 @@ function Car({ color }: { color?: string }) {
   )
 }
 
-/** The bicycle, leaning against whatever is behind it. */
+/**
+ * The bicycle, stood against whatever is behind it.
+ *
+ * It is drawn in side view: the wheels are rings in the XY plane and every
+ * tube of the frame is a bar between two of the four points a diamond frame
+ * is hung from, so the triangles close the way they do on a real one. The
+ * whole thing then leans back a few degrees, the way a bicycle does when it
+ * is propped up rather than ridden.
+ */
 function Bicycle({ color }: { color?: string }) {
   const frame = color ?? '#2fb59a'
+  const R = 0.58
+  /** Hub height, which is the wheel's radius off the floor. */
+  const rear: [number, number] = [-0.68, R]
+  const front: [number, number] = [0.68, R]
+  /** Bottom bracket, saddle top, and the head tube's two ends. */
+  const crank: [number, number] = [-0.08, 0.34]
+  const seat: [number, number] = [-0.34, 1.06]
+  const headLow: [number, number] = [0.52, 0.72]
+  const headTop: [number, number] = [0.38, 1.08]
+
+  /** A tube between two points, as a box rotated onto the line. */
+  const tube = (
+    a: [number, number],
+    b: [number, number],
+    thickness = 0.07,
+    tone = frame,
+  ) => {
+    const dx = b[0] - a[0]
+    const dy = b[1] - a[1]
+    return (
+      <mesh
+        position={[(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, 0]}
+        rotation={[0, 0, Math.atan2(dy, dx)]}
+        castShadow
+      >
+        <boxGeometry args={[Math.hypot(dx, dy), thickness, thickness]} />
+        <meshStandardMaterial color={tone} flatShading roughness={0.5} />
+      </mesh>
+    )
+  }
+
   return (
-    <group rotation={[0, 0, 0.09]}>
-      {[-0.62, 0.62].map((x) => (
-        <group key={x} position={[x, 0.62, 0]} rotation={[Math.PI / 2, 0, 0]}>
+    <group rotation={[0, 0, 0.05]}>
+      {[rear, front].map(([x, y]) => (
+        <group key={x} position={[x, y, 0]}>
           <mesh castShadow>
-            <torusGeometry args={[0.6, 0.055, 6, 18]} />
+            <torusGeometry args={[R, 0.05, 6, 20]} />
             <meshStandardMaterial color="#23262c" flatShading roughness={0.9} />
           </mesh>
+          {/* Spokes, as three bars across the hub. */}
           {[0, Math.PI / 3, (2 * Math.PI) / 3].map((a) => (
             <mesh key={a} rotation={[0, 0, a]}>
-              <boxGeometry args={[1.14, 0.025, 0.025]} />
+              <boxGeometry args={[R * 2 - 0.04, 0.02, 0.02]} />
               <meshStandardMaterial color={METAL} metalness={0.55} />
             </mesh>
           ))}
+          <mesh>
+            <sphereGeometry args={[0.07, 8, 6]} />
+            <meshStandardMaterial color={METAL} metalness={0.6} />
+          </mesh>
         </group>
       ))}
-      {/* Frame: two triangles and a fork, which is all a bicycle really is. */}
-      {[
-        { p: [-0.16, 0.98, 0], r: 0.5, l: 1.02 },
-        { p: [-0.3, 0.66, 0], r: -0.36, l: 0.86 },
-        { p: [0.28, 0.82, 0], r: 1.16, l: 0.92 },
-        { p: [0.5, 0.94, 0], r: 1.32, l: 0.78 },
-      ].map((bar, i) => (
-        <mesh
-          key={i}
-          position={bar.p as [number, number, number]}
-          rotation={[0, 0, bar.r]}
-          castShadow
-        >
-          <boxGeometry args={[bar.l, 0.07, 0.07]} />
-          <meshStandardMaterial color={frame} flatShading roughness={0.5} />
-        </mesh>
-      ))}
-      <mesh position={[-0.42, 1.16, 0]} castShadow>
-        <boxGeometry args={[0.42, 0.1, 0.16]} />
+
+      {/* The main triangle: seat tube, down tube, top tube. */}
+      {tube(crank, seat)}
+      {tube(crank, headLow)}
+      {tube(seat, headTop)}
+      {/* Chainstay and seatstay back to the rear hub. */}
+      {tube(crank, rear, 0.05)}
+      {tube(seat, rear, 0.05)}
+      {/* Head tube, and the fork down to the front hub. */}
+      {tube(headLow, headTop, 0.08)}
+      {tube(headLow, front, 0.05, '#1b1d22')}
+
+      {/* Saddle, handlebars and the crank arm. */}
+      <mesh position={[seat[0] - 0.04, seat[1] + 0.09, 0]} castShadow>
+        <boxGeometry args={[0.36, 0.09, 0.14]} />
         <meshStandardMaterial color="#1b1d22" flatShading roughness={0.95} />
       </mesh>
-      <mesh position={[0.56, 1.2, 0]} castShadow>
-        <boxGeometry args={[0.07, 0.07, 0.62]} />
+      <mesh position={[headTop[0], headTop[1] + 0.06, 0]} castShadow>
+        <boxGeometry args={[0.07, 0.07, 0.56]} />
         <meshStandardMaterial color="#1b1d22" flatShading />
+      </mesh>
+      <mesh position={[crank[0], crank[1], 0]} rotation={[0, 0, 0.6]}>
+        <boxGeometry args={[0.34, 0.05, 0.05]} />
+        <meshStandardMaterial color={METAL} metalness={0.6} />
       </mesh>
     </group>
   )
@@ -1476,6 +1545,819 @@ function PhotoWall() {
   )
 }
 
+/**
+ * An open crate of toys against the basement wall, with the lid back and
+ * enough spilling over the edge to say what is in it: blocks, a ball, and the
+ * wooden animal on wheels that every one of the five of them dragged around.
+ */
+function ToyBox({ color }: { color?: string }) {
+  /* Primary colours, because that is what toys of that vintage were. */
+  const blocks: [number, number, number, string][] = [
+    [-0.3, 0.68, 0.12, '#d94f4f'],
+    [0.02, 0.66, -0.2, '#3f7fd4'],
+    [0.34, 0.7, 0.16, '#f0c020'],
+    [-0.12, 0.94, -0.04, '#4f9d5a'],
+  ]
+  return (
+    <group>
+      {/* The crate: four sides, no lid on it. */}
+      {[
+        [0, 0.3, -0.52, 1.4, 0.6, 0.1],
+        [0, 0.3, 0.52, 1.4, 0.6, 0.1],
+        [-0.65, 0.3, 0, 0.1, 0.6, 1.14],
+        [0.65, 0.3, 0, 0.1, 0.6, 1.14],
+      ].map(([x, y, z, w, h, d], i) => (
+        <mesh key={i} position={[x, y, z]} castShadow receiveShadow>
+          <boxGeometry args={[w, h, d]} />
+          <meshStandardMaterial
+            color={color ?? DARK_WOOD}
+            flatShading
+            roughness={0.95}
+          />
+        </mesh>
+      ))}
+      {/* The lid, leaning against the front of it. */}
+      <mesh
+        position={[0, 0.28, 0.68]}
+        rotation={[0.32, 0, 0]}
+        castShadow
+        receiveShadow
+      >
+        <boxGeometry args={[1.34, 0.08, 0.98]} />
+        <meshStandardMaterial color={WOOD} flatShading roughness={0.95} />
+      </mesh>
+
+      {blocks.map(([x, y, z, c], i) => (
+        <mesh
+          key={i}
+          position={[x, y, z]}
+          rotation={[0, i * 0.7, 0]}
+          castShadow
+        >
+          <boxGeometry args={[0.26, 0.26, 0.26]} />
+          <meshStandardMaterial color={c} flatShading roughness={0.85} />
+        </mesh>
+      ))}
+
+      {/* A football, because of course there is one. */}
+      <mesh position={[0.74, 0.22, 0.9]} castShadow>
+        <sphereGeometry args={[0.22, 10, 8]} />
+        <meshStandardMaterial color="#f2efe6" flatShading roughness={0.9} />
+      </mesh>
+
+      {/* The pull-along animal, parked where it was left. */}
+      <group position={[-0.94, 0, 0.86]} rotation={[0, 0.5, 0]}>
+        <mesh position={[0, 0.26, 0]} castShadow>
+          <boxGeometry args={[0.52, 0.22, 0.24]} />
+          <meshStandardMaterial color="#c9742f" flatShading roughness={0.9} />
+        </mesh>
+        <mesh position={[0.2, 0.46, 0]} castShadow>
+          <boxGeometry args={[0.2, 0.26, 0.2]} />
+          <meshStandardMaterial color="#c9742f" flatShading roughness={0.9} />
+        </mesh>
+        {[
+          [-0.18, -0.13],
+          [-0.18, 0.13],
+          [0.18, -0.13],
+          [0.18, 0.13],
+        ].map(([x, z], i) => (
+          <mesh key={i} position={[x, 0.11, z]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.11, 0.11, 0.06, 8]} />
+            <meshStandardMaterial color="#3a3f4a" flatShading roughness={1} />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  )
+}
+
+/**
+ * The low shelf of toys in the library, at the end of the run of books. Four
+ * boards of things that were never put away: bricks, a rocket, a robot, a
+ * dinosaur, a car, a boat, a stack of board games — and on the middle board,
+ * front and centre where a small hand could reach it, the helicopter.
+ *
+ * The helicopter is the switch. It stands proud of everything beside it, its
+ * rotor turns on its own, and it is the only thing on the shelf with a light
+ * of its own, so the eye goes to it before anything has been said.
+ */
+function ToyShelf({ color }: { color?: string }) {
+  const rotor = useRef<Group>(null)
+  /* Slow enough to read as a toy being idly spun, not as an aircraft. */
+  useFrame((_, delta) => {
+    if (rotor.current) rotor.current.rotation.y += delta * 2.2
+  })
+
+  /* Bricks along the top board, in the colours bricks come in. */
+  const bricks: [number, string][] = [
+    [-1.1, '#d94f4f'],
+    [-0.78, '#3f7fd4'],
+    [-0.46, '#f0c020'],
+    [-0.14, '#4f9d5a'],
+  ]
+
+  return (
+    <group>
+      {/* The carcass: two ends, a back, and four boards across it. */}
+      {[-1.5, 1.5].map((x) => (
+        <mesh key={x} position={[x, 1.1, 0]} castShadow receiveShadow>
+          <boxGeometry args={[0.14, 2.2, 0.7]} />
+          <meshStandardMaterial
+            color={color ?? DARK_WOOD}
+            flatShading
+            roughness={0.95}
+          />
+        </mesh>
+      ))}
+      <mesh position={[0, 1.1, -0.32]} receiveShadow>
+        <boxGeometry args={[3, 2.2, 0.08]} />
+        <meshStandardMaterial
+          color={color ?? DARK_WOOD}
+          flatShading
+          roughness={0.95}
+        />
+      </mesh>
+      {[0.08, 0.78, 1.48, 2.18].map((y) => (
+        <mesh key={y} position={[0, y, 0]} castShadow receiveShadow>
+          <boxGeometry args={[3, 0.1, 0.7]} />
+          <meshStandardMaterial color={WOOD} flatShading roughness={0.9} />
+        </mesh>
+      ))}
+
+      {/* Top board: bricks in a row, a rocket on its fins, and the ball that
+          never once made it back into the box. */}
+      {bricks.map(([x, c], i) => (
+        <mesh key={i} position={[x, 2.36, 0.04]} castShadow>
+          <boxGeometry args={[0.28, 0.24, 0.28]} />
+          <meshStandardMaterial color={c} flatShading roughness={0.85} />
+        </mesh>
+      ))}
+      <group position={[0.7, 2.24, 0.02]}>
+        <mesh position={[0, 0.3, 0]} castShadow>
+          <cylinderGeometry args={[0.16, 0.16, 0.56, 10]} />
+          <meshStandardMaterial color="#f2efe6" flatShading roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 0.68, 0]} castShadow>
+          <coneGeometry args={[0.16, 0.3, 10]} />
+          <meshStandardMaterial color="#d94f4f" flatShading roughness={0.9} />
+        </mesh>
+        {[-0.16, 0.16].map((x) => (
+          <mesh key={x} position={[x, 0.1, 0]} castShadow>
+            <boxGeometry args={[0.1, 0.24, 0.22]} />
+            <meshStandardMaterial color="#d94f4f" flatShading roughness={0.9} />
+          </mesh>
+        ))}
+      </group>
+      <mesh position={[1.2, 2.42, 0.06]} castShadow>
+        <sphereGeometry args={[0.19, 10, 8]} />
+        <meshStandardMaterial color="#e8843c" flatShading roughness={0.9} />
+      </mesh>
+
+      {/* --------------------- the middle board --------------------- */}
+
+      {/* The robot, squared off, one shoulder against the end panel. */}
+      <group position={[-1.05, 1.53, 0.02]} rotation={[0, 0.3, 0]}>
+        <mesh position={[0, 0.26, 0]} castShadow>
+          <boxGeometry args={[0.3, 0.34, 0.22]} />
+          <meshStandardMaterial color="#8d979d" flatShading metalness={0.4} />
+        </mesh>
+        <mesh position={[0, 0.54, 0]} castShadow>
+          <boxGeometry args={[0.24, 0.22, 0.2]} />
+          <meshStandardMaterial color="#b6c0c6" flatShading metalness={0.4} />
+        </mesh>
+        <mesh position={[0, 0.56, 0.11]}>
+          <boxGeometry args={[0.14, 0.06, 0.02]} />
+          <meshStandardMaterial
+            color="#e05a3c"
+            emissive="#e05a3c"
+            emissiveIntensity={0.6}
+          />
+        </mesh>
+        {[-0.21, 0.21].map((x) => (
+          <mesh key={x} position={[x, 0.26, 0]} castShadow>
+            <boxGeometry args={[0.1, 0.3, 0.1]} />
+            <meshStandardMaterial color="#6d777d" flatShading />
+          </mesh>
+        ))}
+        {[-0.09, 0.09].map((x) => (
+          <mesh key={x} position={[x, 0.05, 0]} castShadow>
+            <boxGeometry args={[0.11, 0.16, 0.12]} />
+            <meshStandardMaterial color="#6d777d" flatShading />
+          </mesh>
+        ))}
+      </group>
+
+      {/* The dinosaur: a body, a tail, a neck and four stumps. Green, as it
+          was always going to be. */}
+      <group position={[-0.5, 1.53, 0.04]} rotation={[0, -0.35, 0]}>
+        <mesh position={[0, 0.26, 0]} castShadow>
+          <boxGeometry args={[0.42, 0.2, 0.18]} />
+          <meshStandardMaterial color="#4f9d5a" flatShading roughness={0.9} />
+        </mesh>
+        <mesh position={[-0.28, 0.3, 0]} rotation={[0, 0, 0.5]} castShadow>
+          <boxGeometry args={[0.24, 0.1, 0.12]} />
+          <meshStandardMaterial color="#4f9d5a" flatShading roughness={0.9} />
+        </mesh>
+        <mesh position={[0.2, 0.44, 0]} castShadow>
+          <boxGeometry args={[0.12, 0.26, 0.13]} />
+          <meshStandardMaterial color="#4f9d5a" flatShading roughness={0.9} />
+        </mesh>
+        <mesh position={[0.26, 0.58, 0]} castShadow>
+          <boxGeometry args={[0.2, 0.12, 0.14]} />
+          <meshStandardMaterial color="#458d50" flatShading roughness={0.9} />
+        </mesh>
+        {[
+          [-0.14, -0.07],
+          [-0.14, 0.07],
+          [0.12, -0.07],
+          [0.12, 0.07],
+        ].map(([x, z], i) => (
+          <mesh key={i} position={[x, 0.09, z]} castShadow>
+            <boxGeometry args={[0.09, 0.18, 0.09]} />
+            <meshStandardMaterial color="#458d50" flatShading roughness={0.9} />
+          </mesh>
+        ))}
+      </group>
+
+      {/*
+        The helicopter, front and centre of the middle board and standing
+        clear of its neighbours: skids, a cabin, a tail with a fin on it, and
+        a rotor that turns. This is the thing you press.
+      */}
+      <group position={[0.42, 1.53, 0.12]} rotation={[0, -0.22, 0]}>
+        {/* Skids. */}
+        {[-0.13, 0.13].map((z) => (
+          <mesh key={z} position={[0, 0.03, z]} castShadow>
+            <boxGeometry args={[0.46, 0.05, 0.05]} />
+            <meshStandardMaterial color="#3a3f4a" flatShading />
+          </mesh>
+        ))}
+        {[-0.14, 0.14].map((x) =>
+          [-0.13, 0.13].map((z) => (
+            <mesh key={`${x}${z}`} position={[x, 0.1, z]}>
+              <boxGeometry args={[0.04, 0.12, 0.04]} />
+              <meshStandardMaterial color="#3a3f4a" flatShading />
+            </mesh>
+          )),
+        )}
+        {/* Cabin, with a windscreen on the front of it. */}
+        <mesh position={[0, 0.27, 0]} castShadow>
+          <boxGeometry args={[0.44, 0.28, 0.3]} />
+          <meshStandardMaterial color="#e0a33c" flatShading roughness={0.75} />
+        </mesh>
+        <mesh position={[0.2, 0.29, 0]} castShadow>
+          <boxGeometry args={[0.1, 0.2, 0.26]} />
+          <meshStandardMaterial
+            color="#9fd4e8"
+            flatShading
+            roughness={0.3}
+            metalness={0.2}
+          />
+        </mesh>
+        {/* Tail boom, and the fin standing on the end of it. */}
+        <mesh position={[-0.36, 0.3, 0]} castShadow>
+          <boxGeometry args={[0.36, 0.09, 0.09]} />
+          <meshStandardMaterial color="#e0a33c" flatShading roughness={0.75} />
+        </mesh>
+        <mesh position={[-0.52, 0.38, 0]} castShadow>
+          <boxGeometry args={[0.1, 0.18, 0.05]} />
+          <meshStandardMaterial color="#c9862c" flatShading roughness={0.75} />
+        </mesh>
+        {/* Tail rotor, which does not turn: one moving thing on a toy this
+            size is plenty. */}
+        <mesh position={[-0.52, 0.38, 0.05]} rotation={[0, 0, 0.7]}>
+          <boxGeometry args={[0.02, 0.18, 0.02]} />
+          <meshStandardMaterial color="#3a3f4a" flatShading />
+        </mesh>
+        {/* Mast, and the main rotor over it. */}
+        <mesh position={[0, 0.45, 0]}>
+          <cylinderGeometry args={[0.025, 0.025, 0.09, 6]} />
+          <meshStandardMaterial color="#3a3f4a" flatShading />
+        </mesh>
+        <group ref={rotor} position={[0, 0.5, 0]}>
+          {[0, Math.PI / 2].map((a) => (
+            <mesh key={a} rotation={[0, a, 0]} castShadow>
+              <boxGeometry args={[0.78, 0.02, 0.07]} />
+              <meshStandardMaterial color="#3a3f4a" flatShading />
+            </mesh>
+          ))}
+          <mesh>
+            <boxGeometry args={[0.07, 0.05, 0.07]} />
+            <meshStandardMaterial color="#8d979d" flatShading metalness={0.4} />
+          </mesh>
+        </group>
+      </group>
+
+      {/* The one light on the shelf, over the helicopter. Nothing says this is
+          the switch; it is only the toy you can see properly. */}
+      <pointLight
+        position={[0.42, 1.85, 0.5]}
+        intensity={2.4}
+        distance={2.6}
+        color="#ffd79a"
+      />
+
+      {/* --------------------- the bottom board --------------------- */}
+
+      {/* The car, parked nose out. */}
+      <group position={[-0.95, 0.13, 0.06]} rotation={[0, 0.42, 0]}>
+        <mesh position={[0, 0.13, 0]} castShadow>
+          <boxGeometry args={[0.5, 0.16, 0.26]} />
+          <meshStandardMaterial color="#d94f4f" flatShading roughness={0.85} />
+        </mesh>
+        <mesh position={[-0.04, 0.27, 0]} castShadow>
+          <boxGeometry args={[0.26, 0.14, 0.22]} />
+          <meshStandardMaterial color="#b83f3f" flatShading roughness={0.85} />
+        </mesh>
+        {[
+          [-0.16, -0.14],
+          [-0.16, 0.14],
+          [0.16, -0.14],
+          [0.16, 0.14],
+        ].map(([x, z], i) => (
+          <mesh key={i} position={[x, 0.07, z]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.08, 0.08, 0.05, 8]} />
+            <meshStandardMaterial color="#2b2f38" flatShading />
+          </mesh>
+        ))}
+      </group>
+
+      {/* The boat, with a mast and one square of sail left on it. */}
+      <group position={[-0.2, 0.13, 0.04]} rotation={[0, -0.25, 0]}>
+        <mesh position={[0, 0.1, 0]} castShadow>
+          <boxGeometry args={[0.44, 0.14, 0.2]} />
+          <meshStandardMaterial color="#3f7fd4" flatShading roughness={0.85} />
+        </mesh>
+        <mesh position={[0, 0.32, 0]}>
+          <cylinderGeometry args={[0.02, 0.02, 0.32, 6]} />
+          <meshStandardMaterial color={WOOD} flatShading />
+        </mesh>
+        <mesh position={[0.07, 0.34, 0]}>
+          <boxGeometry args={[0.14, 0.2, 0.01]} />
+          <meshStandardMaterial color="#f2efe6" flatShading roughness={0.9} />
+        </mesh>
+      </group>
+
+      {/* And the board games, stacked the way they end up rather than the way
+          they are meant to be. */}
+      {[
+        [0.7, 0.19, '#6b4a72'],
+        [0.7, 0.3, '#8a7233'],
+        [0.74, 0.41, '#5c8a3a'],
+      ].map(([x, y, c], i) => (
+        <mesh
+          key={i}
+          position={[x as number, y as number, 0.02]}
+          rotation={[0, i * 0.16 - 0.1, 0]}
+          castShadow
+        >
+          <boxGeometry args={[0.62, 0.1, 0.44]} />
+          <meshStandardMaterial
+            color={c as string}
+            flatShading
+            roughness={0.9}
+          />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+/**
+ * The hearth in the corner of the basement, lit. Out on the twenty-fifth and
+ * on no other day, like everything else down there that is worth seeing.
+ *
+ * A brick surround with a stone mantel, three logs, and a fire that moves:
+ * four flame cones on their own phases so no two rise together, and a light
+ * that flickers with them rather than on a clock of its own. It is the
+ * warmest thing in the room and does most of the lighting at that end of it.
+ *
+ * The flicker is two sines at unrelated rates plus a small random walk. Pure
+ * noise reads as a fault in the renderer; pure sine reads as a pulsing lamp.
+ */
+function Fireplace() {
+  const flames = useRef<Group>(null)
+  const glow = useRef<PointLight>(null)
+  const drift = useRef(1)
+
+  useFrame((state, rawDelta) => {
+    const t = state.clock.elapsedTime
+    const delta = Math.min(rawDelta, 0.05)
+    // A slow wander either side of full, so the room never settles.
+    drift.current +=
+      (1 - drift.current) * Math.min(1, delta * 2) + (Math.random() - 0.5) * 0.1
+    const lick = 0.82 + Math.sin(t * 7.3) * 0.08 + Math.sin(t * 2.9) * 0.06
+    if (glow.current) glow.current.intensity = 26 * lick * drift.current
+    if (flames.current) {
+      flames.current.children.forEach((flame, i) => {
+        const own = 0.72 + Math.abs(Math.sin(t * (4.1 + i * 0.9) + i)) * 0.5
+        flame.scale.set(1, own, 1)
+      })
+    }
+  })
+
+  return (
+    <group>
+      {/* The brick surround: two legs, a lintel over them, and the breast
+          carrying on up out of shot. */}
+      {[-1.05, 1.05].map((x) => (
+        <mesh key={x} position={[x, 1.1, 0]} castShadow receiveShadow>
+          <boxGeometry args={[0.6, 2.2, 0.9]} />
+          <meshStandardMaterial color="#8a5c46" flatShading roughness={1} />
+        </mesh>
+      ))}
+      <mesh position={[0, 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[2.7, 0.4, 0.9]} />
+        <meshStandardMaterial color="#8a5c46" flatShading roughness={1} />
+      </mesh>
+      <mesh position={[0, 3.2, -0.15]} castShadow>
+        <boxGeometry args={[1.9, 2, 0.6]} />
+        <meshStandardMaterial color="#7d5340" flatShading roughness={1} />
+      </mesh>
+      {/* The mantel, which is the one bit of dressed stone in the room. */}
+      <mesh position={[0, 2.28, 0.1]} castShadow receiveShadow>
+        <boxGeometry args={[3, 0.18, 1.2]} />
+        <meshStandardMaterial color="#cfc3ad" flatShading roughness={0.9} />
+      </mesh>
+
+      {/* The firebox: dark, so the flames have something to read against. */}
+      <mesh position={[0, 0.9, -0.12]}>
+        <boxGeometry args={[1.5, 1.8, 0.62]} />
+        <meshStandardMaterial color="#241c18" flatShading roughness={1} />
+      </mesh>
+      <mesh position={[0, 0.08, 0.2]} receiveShadow>
+        <boxGeometry args={[1.5, 0.16, 1]} />
+        <meshStandardMaterial color="#4a413a" flatShading roughness={1} />
+      </mesh>
+
+      {/* Three logs, crossed the way somebody who lights fires stacks them. */}
+      {(
+        [
+          [-0.3, 0.22, 0.12, 0.25],
+          [0.3, 0.22, 0.05, -0.32],
+          [0, 0.42, 0.02, 0.1],
+        ] as [number, number, number, number][]
+      ).map(([x, y, z, spin], i) => (
+        <mesh key={i} position={[x, y, z]} rotation={[0, spin, Math.PI / 2]}>
+          <cylinderGeometry args={[0.11, 0.1, 1.05, 7]} />
+          <meshStandardMaterial color="#54382a" flatShading roughness={1} />
+        </mesh>
+      ))}
+      {/* Embers under them. */}
+      <mesh position={[0, 0.17, 0.08]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.55, 10]} />
+        <meshStandardMaterial
+          color="#c9491f"
+          emissive="#ff6a24"
+          emissiveIntensity={1.3}
+          toneMapped={false}
+        />
+      </mesh>
+
+      <group ref={flames} position={[0, 0.3, 0.06]}>
+        {(
+          [
+            [-0.3, 0.44, '#ff7a1f'],
+            [0.28, 0.5, '#ff9a2b'],
+            [0, 0.72, '#ffc047'],
+            [0.06, 0.34, '#ffe08a'],
+          ] as [number, number, string][]
+        ).map(([x, height, color], i) => (
+          <mesh key={i} position={[x, height / 2, 0]}>
+            <coneGeometry args={[0.2 - i * 0.02, height, 6]} />
+            <meshStandardMaterial
+              color={color}
+              emissive={color}
+              emissiveIntensity={1.5}
+              transparent
+              opacity={0.88}
+              toneMapped={false}
+            />
+          </mesh>
+        ))}
+      </group>
+
+      <pointLight
+        ref={glow}
+        position={[0, 0.85, 1]}
+        intensity={26}
+        distance={17}
+        decay={1.6}
+        color="#ff9a4a"
+      />
+    </group>
+  )
+}
+
+/* ------------------------- the twenty-fifth --------------------------- */
+
+/** The lights on everything festive, in the order they were strung. */
+const FAIRY = ['#ff5a4e', '#ffd166', '#5fd08a', '#63b8ff', '#ff8ad0']
+
+/**
+ * The tree, in four cones with a star on top and a pile of boxes round the
+ * foot of it.
+ *
+ * The lights blink on a slow phase offset per bulb rather than all together,
+ * which is what a real string of them does and costs one sine call each.
+ */
+function ChristmasTree() {
+  const lights = useRef<Group>(null)
+  useFrame((state) => {
+    if (!lights.current) return
+    const t = state.clock.elapsedTime
+    lights.current.children.forEach((bulb, i) => {
+      const on = 0.55 + 0.45 * Math.sin(t * 1.6 + i * 1.1)
+      bulb.scale.setScalar(0.8 + on * 0.45)
+    })
+  })
+
+  /** Radius and height of each tier, bottom to top. */
+  const tiers: [number, number, number][] = [
+    [1.5, 1.5, 0.55],
+    [1.25, 1.4, 1.5],
+    [0.95, 1.25, 2.4],
+    [0.62, 1.05, 3.2],
+  ]
+
+  return (
+    <group>
+      {/* Bucket and trunk. */}
+      <mesh position={[0, 0.26, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.46, 0.36, 0.52, 10]} />
+        <meshStandardMaterial color="#b5442f" flatShading roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 0.7, 0]} castShadow>
+        <cylinderGeometry args={[0.14, 0.16, 0.6, 8]} />
+        <meshStandardMaterial color="#6b4a2e" flatShading roughness={1} />
+      </mesh>
+
+      {tiers.map(([radius, height, y], i) => (
+        <mesh key={i} position={[0, y, 0]} castShadow receiveShadow>
+          <coneGeometry args={[radius, height, 9]} />
+          <meshStandardMaterial
+            color={i % 2 === 0 ? '#2f6b3f' : '#37784a'}
+            flatShading
+            roughness={0.95}
+          />
+        </mesh>
+      ))}
+
+      {/* The star, which is two crossed plates and reads as one from here. */}
+      <group position={[0, 3.86, 0]}>
+        {[0, Math.PI / 2].map((r) => (
+          <mesh key={r} rotation={[0, r, Math.PI / 4]}>
+            <boxGeometry args={[0.34, 0.34, 0.04]} />
+            <meshStandardMaterial
+              color="#ffd166"
+              emissive="#ffb02e"
+              emissiveIntensity={0.8}
+              flatShading
+            />
+          </mesh>
+        ))}
+      </group>
+
+      {/* One bulb per position, spiralling down the way you actually hang
+          them: round and round, not in neat rings. */}
+      <group ref={lights}>
+        {Array.from({ length: 26 }, (_, i) => {
+          const down = i / 25
+          const y = 3.25 - down * 2.55
+          const radius = 0.42 + down * 1.02
+          const angle = i * 2.05
+          return (
+            <mesh
+              key={i}
+              position={[Math.cos(angle) * radius, y, Math.sin(angle) * radius]}
+            >
+              <sphereGeometry args={[0.085, 6, 5]} />
+              <meshStandardMaterial
+                color={FAIRY[i % FAIRY.length]}
+                emissive={FAIRY[i % FAIRY.length]}
+                emissiveIntensity={1.1}
+                flatShading
+              />
+            </mesh>
+          )
+        })}
+      </group>
+
+      {/* Presents, stacked the way they end up rather than the way they were
+          put down. */}
+      {(
+        [
+          [-0.95, 0.18, 0.7, 0.62, '#c0392b', 0.3],
+          [0.85, 0.15, 0.85, 0.52, '#2f6f9d', -0.5],
+          [0.2, 0.13, 1.15, 0.44, '#b9974a', 0.15],
+          [-0.5, 0.42, 1.0, 0.4, '#5f8f6a', 0.7],
+        ] as [number, number, number, number, string, number][]
+      ).map(([x, y, z, size, color, spin], i) => (
+        <group key={i} position={[x, y, z]} rotation={[0, spin, 0]}>
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[size, size * 0.75, size]} />
+            <meshStandardMaterial color={color} flatShading roughness={0.9} />
+          </mesh>
+          {/* Ribbon, both ways over the lid. */}
+          <mesh>
+            <boxGeometry args={[size * 0.16, size * 0.78, size * 1.02]} />
+            <meshStandardMaterial color="#f5ead2" flatShading />
+          </mesh>
+          <mesh>
+            <boxGeometry args={[size * 1.02, size * 0.78, size * 0.16]} />
+            <meshStandardMaterial color="#f5ead2" flatShading />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  )
+}
+
+/** A wreath on the wall: a ring of needles, a bow, and four berries. */
+function Wreath() {
+  return (
+    <group position={[0, 3.1, 0.08]}>
+      <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <torusGeometry args={[0.62, 0.17, 6, 14]} />
+        <meshStandardMaterial color="#2f6b3f" flatShading roughness={0.95} />
+      </mesh>
+      {[0, 1, 2, 3, 4].map((i) => {
+        const angle = i * 1.3 + 0.4
+        return (
+          <mesh
+            key={i}
+            position={[Math.cos(angle) * 0.62, Math.sin(angle) * 0.62, 0.14]}
+          >
+            <sphereGeometry args={[0.09, 6, 5]} />
+            <meshStandardMaterial color="#c0392b" flatShading />
+          </mesh>
+        )
+      })}
+      {/* The bow at the bottom, two loops and a knot. */}
+      {[-0.22, 0.22].map((x) => (
+        <mesh key={x} position={[x, -0.7, 0.06]} rotation={[0, 0, x * 1.6]}>
+          <boxGeometry args={[0.34, 0.2, 0.05]} />
+          <meshStandardMaterial color="#b5442f" flatShading />
+        </mesh>
+      ))}
+      <mesh position={[0, -0.7, 0.09]}>
+        <boxGeometry args={[0.14, 0.14, 0.06]} />
+        <meshStandardMaterial color="#8f2f22" flatShading />
+      </mesh>
+    </group>
+  )
+}
+
+/**
+ * A swag of greenery along a wall with lights in it, hung from two nails so
+ * it dips in the middle. Nine segments is enough for the curve to read.
+ */
+function Garland() {
+  const SPAN = 3.2
+  const DIP = 0.55
+  const segments = 9
+  return (
+    <group position={[0, 4.1, 0.1]}>
+      {Array.from({ length: segments }, (_, i) => {
+        const along = i / (segments - 1)
+        const x = (along - 0.5) * SPAN * 2
+        // A parabola, which is close enough to a hanging chain at this size.
+        const sag = -DIP * (1 - (along * 2 - 1) ** 2)
+        return (
+          <group key={i} position={[x, sag, 0]}>
+            <mesh castShadow>
+              <sphereGeometry args={[0.19, 6, 5]} />
+              <meshStandardMaterial
+                color={i % 2 === 0 ? '#2f6b3f' : '#3a7d4c'}
+                flatShading
+                roughness={0.95}
+              />
+            </mesh>
+            <mesh position={[0, -0.16, 0.07]}>
+              <sphereGeometry args={[0.075, 6, 5]} />
+              <meshStandardMaterial
+                color={FAIRY[i % FAIRY.length]}
+                emissive={FAIRY[i % FAIRY.length]}
+                emissiveIntensity={1}
+                flatShading
+              />
+            </mesh>
+          </group>
+        )
+      })}
+    </group>
+  )
+}
+
+/**
+ * The meal itself, laid along the long table.
+ *
+ * It is not there until the host calls it. The plates, the glasses, the
+ * platter down the middle and the two candles all appear when he walks up to
+ * the head of the table, and go again when he wanders off — so the state is
+ * read off `FEAST` every frame rather than through React, the same way the
+ * people round it are moved.
+ *
+ * It swells in over a fifth of a second instead of blinking into existence,
+ * which is the difference between a table being laid and a bug.
+ */
+function FeastTable() {
+  const laid = useRef<Group>(null)
+  const grown = useRef(0)
+  useFrame((_, rawDelta) => {
+    if (!laid.current) return
+    const delta = Math.min(rawDelta, 0.05)
+    grown.current +=
+      ((FEAST.seated ? 1 : 0) - grown.current) * Math.min(1, delta * 6)
+    laid.current.visible = grown.current > 0.02
+    // Rises out of the tabletop rather than scaling from its own middle.
+    laid.current.scale.set(1, grown.current, 1)
+    laid.current.position.y = 0.85
+  })
+
+  /**
+   * Five places against the chairs down the two sides, and the sixth at the
+   * west end of the cloth — which is the host's, and the one place nobody
+   * else is ever given.
+   */
+  const places: [number, number][] = [
+    [-2.6, -0.95],
+    [0, -0.95],
+    [2.6, -0.95],
+    [-1.3, 0.95],
+    [1.3, 0.95],
+    [-3.85, 0],
+  ]
+
+  return (
+    <group ref={laid} visible={false}>
+      {places.map(([x, z], i) => (
+        <group key={i} position={[x, 0, z]}>
+          {/* Plate. */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <circleGeometry args={[0.3, 12]} />
+            <meshStandardMaterial color="#f7f1e2" roughness={0.6} />
+          </mesh>
+          <mesh position={[0, 0.02, 0]}>
+            <cylinderGeometry args={[0.3, 0.26, 0.05, 12]} />
+            <meshStandardMaterial color="#efe6d2" flatShading roughness={0.6} />
+          </mesh>
+          {/* Something on it. */}
+          <mesh position={[0, 0.07, 0]}>
+            <sphereGeometry args={[0.14, 7, 5]} />
+            <meshStandardMaterial color="#c07a3a" flatShading roughness={0.8} />
+          </mesh>
+          {/* Glass, to the right of the plate from where they stand. */}
+          <mesh position={[z > 0 ? -0.34 : 0.34, 0.12, -0.06]}>
+            <cylinderGeometry args={[0.07, 0.055, 0.24, 8]} />
+            <meshStandardMaterial
+              color="#b9433f"
+              transparent
+              opacity={0.85}
+              roughness={0.25}
+            />
+          </mesh>
+        </group>
+      ))}
+
+      {/* The platter down the middle, and the bread beside it. */}
+      <mesh position={[0, 0.04, 0]}>
+        <cylinderGeometry args={[0.62, 0.56, 0.09, 14]} />
+        <meshStandardMaterial color="#e8dcc0" flatShading roughness={0.65} />
+      </mesh>
+      <mesh position={[0, 0.2, 0]} scale={[1.5, 0.9, 1]}>
+        <sphereGeometry args={[0.32, 9, 7]} />
+        <meshStandardMaterial color="#b5763a" flatShading roughness={0.85} />
+      </mesh>
+      {[-1.5, 1.5].map((x) => (
+        <mesh key={x} position={[x, 0.12, 0]} scale={[1.7, 0.8, 1]}>
+          <sphereGeometry args={[0.22, 8, 6]} />
+          <meshStandardMaterial color="#cf9c54" flatShading roughness={0.9} />
+        </mesh>
+      ))}
+
+      {/* Two candles, because it is the twenty-fifth. */}
+      {[-2.8, 2.8].map((x) => (
+        <group key={x} position={[x, 0, 0]}>
+          <mesh position={[0, 0.16, 0]}>
+            <cylinderGeometry args={[0.06, 0.09, 0.32, 8]} />
+            <meshStandardMaterial color="#f2e8d0" flatShading />
+          </mesh>
+          <mesh position={[0, 0.38, 0]}>
+            <sphereGeometry args={[0.055, 6, 5]} />
+            <meshStandardMaterial
+              color="#ffd166"
+              emissive="#ffb02e"
+              emissiveIntensity={1.4}
+              toneMapped={false}
+            />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  )
+}
+
 /** The television, and the console docked under it. */
 function Television({ color }: { color?: string }) {
   const glow = useRef<Group>(null)
@@ -1545,59 +2427,6 @@ function Television({ color }: { color?: string }) {
         intensity={9}
         distance={11}
         color={color ?? '#6f9ee8'}
-      />
-    </group>
-  )
-}
-
-/**
- * A flight going down through the floor, for the landing at the top of it.
- *
- * The shaft is drawn inside out. A plain box has a lid, and a lid sitting
- * flush over the opening hides every tread underneath it — which is exactly
- * how the first one of these ended up looking like a dark rug.
- */
-function Stairwell() {
-  return (
-    <group>
-      <mesh position={[0, -1.5, 0]}>
-        <boxGeometry args={[3.2, 3, 3.6]} />
-        <meshStandardMaterial
-          color="#241e2a"
-          flatShading
-          roughness={1}
-          side={BackSide}
-        />
-      </mesh>
-      {Array.from({ length: 5 }, (_, i) => (
-        <mesh key={i} position={[0, -0.26 - i * 0.36, 1.4 - i * 0.56]}>
-          <boxGeometry args={[3.1, 0.22, 0.6]} />
-          <meshStandardMaterial color="#c3b393" flatShading roughness={0.95} />
-        </mesh>
-      ))}
-      {/* The newels and the rail round the opening, so nobody walks into it
-          by accident and it reads as a stairwell rather than a trapdoor. */}
-      {[-1.7, 1.7].map((x) => (
-        <group key={x}>
-          <mesh position={[x, 0.55, 1.75]} castShadow>
-            <boxGeometry args={[0.16, 1.1, 0.16]} />
-            <meshStandardMaterial color={DARK_WOOD} flatShading />
-          </mesh>
-          <mesh position={[x, 0.55, -1.75]} castShadow>
-            <boxGeometry args={[0.16, 1.1, 0.16]} />
-            <meshStandardMaterial color={DARK_WOOD} flatShading />
-          </mesh>
-          <mesh position={[x, 1.02, 0]}>
-            <boxGeometry args={[0.12, 0.12, 3.5]} />
-            <meshStandardMaterial color={DARK_WOOD} flatShading />
-          </mesh>
-        </group>
-      ))}
-      <pointLight
-        position={[0, -1, 0]}
-        intensity={7}
-        distance={7}
-        color="#ffca7a"
       />
     </group>
   )

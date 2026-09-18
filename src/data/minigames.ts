@@ -61,7 +61,7 @@ export const MINIGAMES: MinigameEntry[] = [
       'The island splits in two for an afternoon. Two locals stand with you; everyone else wants you painted.',
     rules: [
       'Five rounds per hopper, then a six-second refill.',
-      'Three lives — a ball to the chest costs one.',
+      'Three lives. A ball to the chest costs one.',
       'Get down and their paint sails over you, but you cannot fire back.',
     ],
     accent: '#e63c58',
@@ -74,7 +74,7 @@ export const MINIGAMES: MinigameEntry[] = [
     blurb:
       'A boat went down in the night. Find the flares and get her people out of the water before the flares burn out.',
     rules: [
-      'Get alongside a raft and take the way off her — nobody climbs a net at speed.',
+      'Get alongside a raft and take the way off her. Nobody climbs a net at speed.',
       'Every flare burns down on its own clock, so the order you pick is the game.',
       'Let one burn out and the run is over.',
     ],
@@ -100,7 +100,7 @@ export const MINIGAMES: MinigameEntry[] = [
     emoji: '🎈',
     title: 'Balloon drop',
     blurb:
-      'Fourteen gatherings are waiting on something from the sky — half a water bomb, half confetti.',
+      'Fourteen gatherings are waiting on something from the sky: half a water bomb, half confetti.',
     rules: [
       'Water for the ones out in the sun, confetti for the ones celebrating.',
       'Confetti floats, so it lands further downwind than a bomb does.',

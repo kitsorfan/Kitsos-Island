@@ -3,6 +3,7 @@ import { downloadCv } from './downloadCv'
 import { useGame } from '../state/store'
 import * as sfx from '../game/audio'
 import { RadioConsole } from './RadioConsole'
+import { ToyShelfCase } from './ToyShelfCase'
 import type { Letter, PanelBlock } from '../types'
 import { useT } from '../i18n/useT'
 
@@ -67,6 +68,8 @@ export function Panel() {
 
           {panel.kind === 'radio' && <RadioConsole />}
 
+          {panel.kind === 'toy' && <ToyShelfCase />}
+
           {panel.kind === 'cv' && (
             <div className="panel__cta">
               <button className="button button--primary" onClick={save}>
@@ -75,7 +78,7 @@ export function Panel() {
               <p className="panel__note">
                 {t(
                   saved
-                    ? 'Saved as Markdown — the same content you have been walking through.'
+                    ? 'Saved as Markdown, the same content you have been walking through.'
                     : 'Written out as Markdown, generated from everything on this island.',
                 )}
               </p>

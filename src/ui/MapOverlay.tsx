@@ -171,7 +171,7 @@ export function MapOverlay() {
                   <p>
                     {lighthouseOpen
                       ? t('Open. The keeper’s logbook is at the top.')
-                      : `${t('Sealed with five locks —')} ${keyCount(keys)} ${t('of')} ${TOTAL_KEYS} ${t('turned.')}`}
+                      : `${t('Sealed with five locks.')} ${keyCount(keys)} ${t('of')} ${TOTAL_KEYS} ${t('turned.')}`}
                   </p>
                 </div>
               </li>

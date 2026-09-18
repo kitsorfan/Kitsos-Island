@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import type { RefObject } from 'react'
-import type { HandLight } from '../types'
+import type { HandLight, Interior, InteriorLink } from '../types'
 import { useFrame, useThree } from '@react-three/fiber'
 import { type Group, type Mesh } from 'three'
 import { INTERIOR_BY_ID } from '../data/interiors'
@@ -13,7 +13,6 @@ import {
   ISLAND_WALK_RADIUS,
   KEY_BY_ID,
   MISSION_BY_ID,
-  NPCS,
   PLAYER_COLORS,
   PLAYER_START,
   SIGNS,
@@ -27,13 +26,36 @@ import {
 } from '../game/terrain'
 import type { Collider } from '../game/terrain'
 import { resolveCollisions, type Bounds } from '../game/collision'
+import { examine } from '../game/examine'
 import {
   INTERIOR_MARGIN,
-  flightTop,
+  doorwayReached,
   interiorColliders,
   interiorFloor,
+  linkArrival,
+  linkFacing,
+  linkReached,
+  wayBack,
 } from '../game/interior'
 import { ACTOR_POS } from '../game/actors'
+import {
+  FEAST,
+  FEAST_AREA,
+  HOST_BOW_TIE,
+  HOST_BUTTONHOLE,
+  HOST_SUIT,
+  clearFeast,
+  residentsOf,
+  stepFeast,
+  wholeTable,
+} from '../game/feast'
+import {
+  LECTURE,
+  LECTURE_AREA,
+  LECTURE_LOOK,
+  emptyHall,
+  stepLecture,
+} from '../game/lecture'
 import { PLAYER_POS, PLAYER_VIEW } from '../game/player'
 import {
   cameraZoom,
@@ -174,8 +196,61 @@ interface Target extends Nearby {
   trigger: () => void
 }
 
+/**
+ * Through a link into the next room. You arrive just inside the link on the
+ * far side that points back here, facing into the room — or, when the far
+ * room has no such link, wherever this one says, or failing that its spawn.
+ */
+function takeLink(interior: Interior, link: InteriorLink) {
+  const state = useGame.getState()
+  /* A lift is the exception to every other way through: it has no single
+     destination, because the panel inside it serves the whole building. */
+  if (link.kind !== 'lift') {
+    if (!link.to) return
+    if (!INTERIOR_BY_ID.has(link.to)) return
+  }
+  sfx.confirm()
+  /* A lift does not go anywhere on its own: walking in puts him in the car
+     with the panel up, and the floor he presses is what starts the ride —
+     see ui/LiftPanel.tsx and ui/LiftRide.tsx, which own the two halves. */
+  if (link.kind === 'lift') {
+    if (link.journal) {
+      state.record({
+        id: link.id,
+        title: link.journal.title,
+        body: link.journal.body,
+        source: interior.name,
+      })
+    }
+    state.callLift({
+      linkId: link.id,
+      room: interior.id,
+      floor: link.floor ?? 0,
+      stops: link.serves ?? [],
+    })
+    return
+  }
+  if (link.journal) {
+    state.record({
+      id: link.id,
+      title: link.journal.title,
+      body: link.journal.body,
+      source: interior.name,
+    })
+  }
+  if (!link.to) return
+  const dest = INTERIOR_BY_ID.get(link.to)
+  if (!dest) return
+  const back = wayBack(dest, interior.id)
+  if (link.arrive) state.goRoom(link.to, link.arrive)
+  else if (back) state.goRoom(link.to, linkArrival(back), linkFacing(back))
+  else state.goRoom(link.to, dest.spawn)
+}
+
 export function Player() {
   const group = useRef<Group>(null)
+  /** Whether he has stepped clear of every threshold since he last arrived. */
+  const offThreshold = useRef(false)
   const camera = useThree((s) => s.camera)
   const viewport = useThree((s) => s.size)
   const area = useGame((s) => s.area)
@@ -189,10 +264,22 @@ export function Player() {
   /** The knee he is on and the ring in his hand are both renders, not frames. */
   const proposal = useGame((s) => s.proposal)
   const outfit = useGame((s) => s.outfit)
-  /** A shelf that swings is furniture until it is not, so this is subscribed. */
-  const secrets = useGame((s) => s.secrets)
   /** Nothing stays alight out there, so the hand it was in is a render. */
   const swimming = useGame((s) => s.swimming)
+  /** Who is in the room, and what is in it to walk into, both turn on it. */
+  const christmas = useGame((s) => s.christmas)
+  /**
+   * In the decorated basement: the only place the meal can be called, and
+   * the only place he is in a dinner jacket without having proposed to
+   * anybody. Read by the clothes, the colliders, the roster and the frame.
+   */
+  const feasting = christmas && area === FEAST_AREA
+  /**
+   * In the lecture hall, where stepping up to the lectern gives the defence.
+   * Read by the frame, which owns the slides, and by the roster, which is
+   * where the class comes from.
+   */
+  const lecturing = area === LECTURE_AREA
 
   const position = useRef<[number, number]>([...PLAYER_START])
   const facing = useRef(Math.PI)
@@ -200,6 +287,8 @@ export function Player() {
   const motion = useRef<CharacterMotion>({ moving: false, speed: 0 })
   const camReady = useRef(false)
   const boom = useRef(1)
+  /** Eased 0 to 1: how much of the shot belongs to the defence. */
+  const podium = useRef(0)
   const spawnToken = useRef(-1)
   /** Height above the ground, and its rate of change. */
   const hop = useRef({ y: 0, vy: 0 })
@@ -216,14 +305,44 @@ export function Player() {
   const dryGap = useRef(0)
   const shadow = useRef<Mesh>(null)
 
-  /** What he is carrying to see by, if anything. Both views read this. */
-  const carrying =
-    night && outfit !== 'tuxedo' && !swimming && handLight !== 'none'
-      ? handLight
-      : undefined
+  /**
+   * What he is wearing.
+   *
+   * The tuxedo belongs to the proposal and wins over everything. On Christmas
+   * Day in the decorated basement he is in the good suit — bottle green, red
+   * bow tie, holly in the buttonhole — because he is the one hosting it, and
+   * he is back in the red shirt the moment he leaves the room.
+   */
+  const wearing =
+    outfit === 'tuxedo'
+      ? { colors: TUXEDO, suit: true }
+      : feasting
+        ? {
+            colors: HOST_SUIT,
+            suit: true,
+            bowTie: HOST_BOW_TIE,
+            buttonhole: HOST_BUTTONHOLE,
+          }
+        : { colors: PLAYER_COLORS, suit: false }
 
   const indoors = area !== 'island'
   const interior = indoors ? INTERIOR_BY_ID.get(area) : undefined
+
+  /**
+   * What he is carrying to see by, if anything. Both views read this.
+   *
+   * Nothing at all indoors: every room has its own lamps on after dark, and
+   * a man who walks into his own kitchen holding a burning stick over his
+   * head is a man with a problem no amount of light will fix.
+   */
+  const carrying =
+    night &&
+    !indoors &&
+    outfit !== 'tuxedo' &&
+    !swimming &&
+    handLight !== 'none'
+      ? handLight
+      : undefined
 
   /** Rooms vary a lot in size, so the indoor lens scales with the floor. */
   const indoorCam = useMemo(() => {
@@ -249,9 +368,36 @@ export function Player() {
   /* ----------------------------- colliders ---------------------------- */
 
   const staticColliders = useMemo<Collider[]>(() => {
-    if (interior) return interiorColliders(interior)
+    if (interior) return interiorColliders(interior, christmas)
     return [...STATIC_COLLIDERS, ...PROP_COLLIDERS, ...TREE_COLLIDERS]
-  }, [interior])
+  }, [interior, christmas])
+
+  /**
+   * The day lasts as long as he is standing in the room. Walk out of the
+   * basement and the calendar goes back to his birthday, so the egg is
+   * something you find rather than something you leave switched on — and so
+   * the rest of the house is never quietly empty because everybody is
+   * downstairs at a meal you walked away from.
+   */
+  useEffect(() => {
+    if (feasting) return
+    clearFeast()
+    const state = useGame.getState()
+    if (state.christmas) state.resetCalendar()
+  }, [feasting])
+
+  /**
+   * And the defence only lasts as long as he is in the hall. Walk out of it
+   * mid-slide and the room empties, so coming back is giving it again from
+   * the top rather than picking a lecture up halfway through.
+   */
+  useEffect(() => {
+    if (lecturing) return
+    // Out of the room altogether: nobody files anywhere, the hall is simply
+    // empty again the next time it is walked into.
+    emptyHall()
+    useGame.getState().endLecture()
+  }, [lecturing])
 
   const bounds = useMemo<Bounds>(
     () =>
@@ -272,19 +418,19 @@ export function Player() {
 
   /** Characters standing in this area, so you cannot walk through them. */
   const actorIds = useMemo(
-    () => NPCS.filter((n) => n.area === area).map((n) => n.id),
-    [area],
+    () => residentsOf(area, christmas).map((n) => n.id),
+    [area, christmas],
   )
   const actorColliders = useRef<Collider[]>([])
   /** Anyone on a night shift, who stops being solid while they square up. */
   const onWatch = useMemo(
     () =>
       new Set(
-        NPCS.filter((n) => n.area === area && n.shift === 'night').map(
-          (n) => n.id,
-        ),
+        residentsOf(area, christmas)
+          .filter((n) => n.shift === 'night')
+          .map((n) => n.id),
       ),
-    [area],
+    [area, christmas],
   )
 
   /* --------------------------- interactions --------------------------- */
@@ -293,8 +439,7 @@ export function Player() {
     const store = useGame.getState()
     const list: Target[] = []
 
-    for (const npc of NPCS) {
-      if (npc.area !== area) continue
+    for (const npc of residentsOf(area, christmas)) {
       if (npc.shift && npc.shift !== (night ? 'night' : 'day')) continue
       list.push({
         id: npc.id,
@@ -317,10 +462,39 @@ export function Player() {
             state.missions[mission.id] === 'active' &&
             npc.missionLines
 
+          // Somebody with a question asks it after their lines, until it is
+          // answered right; from then on they go straight to the answer.
+          const quiz = npc.quiz
+          const settled = quiz && state.secrets[quiz.id]
+          const asking = quiz && !settled && !ongoing
+          const lines = ongoing
+            ? npc.missionLines!
+            : settled
+              ? quiz.right
+              : asking
+                ? [...npc.lines, quiz.question]
+                : npc.lines
+
           state.talk({
             speaker: npc.name,
             role: npc.role,
-            lines: ongoing ? npc.missionLines! : npc.lines,
+            lines,
+            choices: asking
+              ? quiz.choices.map((c) => ({
+                  text: c.text,
+                  lines: c.right ? quiz.right : quiz.wrong,
+                  reveals:
+                    c.right && quiz.journal
+                      ? { id: quiz.id, ...quiz.journal }
+                      : c.right
+                        ? { id: quiz.id, title: npc.name, body: c.text }
+                        : undefined,
+                  journal:
+                    c.right && quiz.journal
+                      ? { id: quiz.id, ...quiz.journal, source: npc.name }
+                      : undefined,
+                }))
+              : undefined,
           })
           if (npc.journal) {
             state.record({
@@ -541,112 +715,63 @@ export function Player() {
           continue
         }
 
+        // The calendar is not read, it is turned: taking it off the wall
+        // opens the card that sets the day, and nothing else happens here.
+        if (exhibit.kind === 'calendar') {
+          list.push({
+            id: exhibit.id,
+            kind: 'exhibit',
+            label: exhibit.label,
+            verb: 'Check',
+            x: exhibit.position[0],
+            z: exhibit.position[1],
+            range: 2.9,
+            trigger: () => useGame.getState().openCalendar(),
+          })
+          continue
+        }
+
+        const toy = exhibit.kind === 'toy'
         list.push({
           id: exhibit.id,
-          kind: 'exhibit',
+          kind: toy ? 'toy' : 'exhibit',
           label: exhibit.label,
-          verb: 'Examine',
+          verb: toy ? 'Look at' : 'Examine',
           x: exhibit.position[0],
           z: exhibit.position[1],
           range: 2.9,
-          trigger: () => {
-            const state = useGame.getState()
-            sfx.confirm()
-            if (exhibit.panel) {
-              state.openPanel({
-                kicker: exhibit.panel.kicker,
-                title: exhibit.panel.title,
-                sections: exhibit.panel.sections,
-                accent,
-                kind: exhibit.kind,
-              })
-            } else if (exhibit.lines) {
-              state.talk({ speaker: exhibit.label, lines: exhibit.lines })
-            }
-            if (exhibit.journal) {
-              state.record({
-                id: exhibit.id,
-                title: exhibit.journal.title,
-                body: exhibit.journal.body,
-                source: interior.name,
-              })
-            }
-            if (exhibit.reveals) {
-              const { id, title, body } = exhibit.reveals
-              state.revealSecret(id, { title, body })
-            }
-          },
+          trigger: () => examine(exhibit, accent, interior.name),
         })
       }
 
-      /* Stairs and doors to the other rooms of this building. */
+      // Doors and stairs are walked through rather than pressed — see the
+      // thresholds in the frame loop. The one that does not open is the one
+      // thing here worth a prompt: you try the handle.
       for (const link of interior.links ?? []) {
-        // One that needs a secret is not there at all until the secret is
-        // out — no prompt, no halo, nothing to tip the player off.
-        if (link.needs && !secrets[link.needs]) continue
-
-        const shut = link.kind === 'locked'
-        // A staircase is walked up, not pressed from the bottom: its prompt
-        // waits at the head of the flight, so you take the stairs by taking
-        // the stairs.
-        const climb = link.kind === 'stairsUp'
-        const [ax, az] = climb ? flightTop(link) : link.position
+        if (link.kind !== 'locked') continue
         list.push({
           id: link.id,
-          kind: shut ? 'door' : 'exit',
+          kind: 'door',
           label: link.label,
-          verb: shut ? 'Try' : 'Take',
-          x: ax,
-          z: az,
-          range: climb ? 1.8 : 2.9,
+          verb: 'Try',
+          x: link.position[0],
+          z: link.position[1],
+          range: 2.9,
           trigger: () => {
-            const state = useGame.getState()
-            if (shut || !link.to || !link.arrive) {
-              sfx.cancel()
-              state.talk({
-                speaker: 'Locked',
-                role: interior.name,
-                lines: link.lines ?? ['It does not open.'],
-              })
-              return
-            }
-            sfx.confirm()
-            if (link.journal) {
-              state.record({
-                id: link.id,
-                title: link.journal.title,
-                body: link.journal.body,
-                source: interior.name,
-              })
-            }
-            state.goRoom(link.to, link.arrive)
+            sfx.cancel()
+            useGame.getState().talk({
+              speaker: 'Locked',
+              role: interior.name,
+              lines: link.lines ?? ['It does not open.'],
+            })
           },
         })
       }
-
-      list.push({
-        id: 'exit',
-        kind: 'exit',
-        label: interior.exit?.label ?? 'Step outside',
-        verb: '',
-        x: 0,
-        z: interior.half[1] - 1.8,
-        range: 2.4,
-        trigger: () => {
-          const state = useGame.getState()
-          sfx.cancel()
-          // A room with no front door of its own leads back into the house
-          // rather than straight out onto the island.
-          if (interior.exit)
-            state.goRoom(interior.exit.to, interior.exit.arrive)
-          else state.leaveBuilding()
-        },
-      })
     }
 
     void store
     return list
-  }, [area, indoors, interior, amaliaHere, night, secrets])
+  }, [area, indoors, interior, amaliaHere, night, christmas])
 
   /* ------------------------------- frame ------------------------------ */
 
@@ -667,9 +792,11 @@ export function Player() {
       boom.current = 1
       // However he got somewhere else — a door, the map — he arrives dry.
       dryOff()
+      // And on a threshold he has to step off before it can take him back.
+      offThreshold.current = false
       if (store.area !== 'island') {
         yaw.current = 0
-        facing.current = Math.PI
+        facing.current = store.spawn.facing ?? Math.PI
       }
     }
 
@@ -764,6 +891,29 @@ export function Player() {
     // after dark and they whistle; keep pushing and they keep pushing back.
     if (!indoors && holdTheLine(position.current, delta, store.night)) {
       sfx.whistle()
+    }
+
+    // He hosts the Christmas meal, so he is the one who starts it: walking up
+    // to the head of the table calls everybody out of their conversations and
+    // lays it. Walking away puts the room back to people talking.
+    if (feasting) {
+      if (stepFeast(position.current[0], position.current[1])) {
+        if (!FEAST.seated) sfx.blip()
+      }
+      // And once the last of them is actually standing at their place, the
+      // toast. Both of these guard themselves, so asking every frame is free.
+      if (wholeTable()) store.cheerFeast()
+      else store.endCheer()
+    }
+
+    // The thesis defence. Stepping up behind the lectern brings the class in
+    // and starts the slides; stepping away from it empties the hall again.
+    if (lecturing) {
+      if (stepLecture(position.current[0], position.current[1], delta)) {
+        if (LECTURE.active) sfx.confirm()
+        else store.endLecture()
+      }
+      if (LECTURE.active) store.setLecture(LECTURE.slide, LECTURE.applauding)
     }
 
     // Stand still on the floor with the music on and he joins in.
@@ -1050,12 +1200,28 @@ export function Player() {
       const aspect = viewport.width / Math.max(1, viewport.height)
       const framing = Math.min(1.32, Math.max(1, 1 + (1.15 - aspect) * 0.42))
 
-      const reach = dolly * framing * boom.current
+      // Giving the defence, the camera stops being about him.
+      //
+      // The whole of what is happening is in front of him — a class at its
+      // desks, and at the end of it a room on its feet — and a lens trained
+      // on the back of the speaker's head puts all of it off the bottom of
+      // the screen. So while he is at the lectern the camera pulls back and
+      // looks at the middle of the room instead, far enough up the hall to
+      // hold the board behind him and the back row in the same frame. It
+      // eases in and out with everything else, so stepping up to the lectern
+      // is a shot opening out rather than a cut.
+      const stage = LECTURE.active ? 1 : 0
+      podium.current += (stage - podium.current) * Math.min(1, delta * 2)
+      const show = podium.current
+
+      const reach = dolly * framing * boom.current * (1 + show * 0.5)
       const targetX = px + Math.sin(yaw.current) * reach
       const targetZ = pz + Math.cos(yaw.current) * reach
       // Track the ground, not the hop, so the camera does not bounce.
       const targetY =
-        py - hop.current.y + rise * framing * (0.72 + 0.28 * boom.current)
+        py -
+        hop.current.y +
+        rise * framing * (0.72 + 0.28 * boom.current) * (1 + show * 0.34)
 
       if (!camReady.current) {
         camera.position.set(targetX, targetY, targetZ)
@@ -1065,7 +1231,42 @@ export function Player() {
       camera.position.x += (targetX - camera.position.x) * ease
       camera.position.y += (targetY - camera.position.y) * ease
       camera.position.z += (targetZ - camera.position.z) * ease
-      camera.lookAt(px, py - hop.current.y + 1.4, pz)
+      // And what it is pointed at slides off him and down the hall, to a
+      // point between the lectern and the back of the class.
+      const aimZ = pz + show * (LECTURE_LOOK - pz)
+      camera.lookAt(px, py - hop.current.y + 1.4, aimZ)
+    }
+
+    /* -------------------------- thresholds -------------------------- */
+
+    // Indoors, doors and stairs are taken by walking into them: into the
+    // reveal of a door, onto the head of a flight, into the well of a
+    // stairwell, or out through the front doorway. A threshold only fires
+    // once he has stepped clear of every threshold since he arrived, so
+    // coming out of one door never drops him straight back through it.
+    if (interior && active && !fight && !hunting) {
+      let through: InteriorLink | 'out' | null = null
+      for (const link of interior.links ?? []) {
+        if (link.needs && !store.secrets[link.needs]) continue
+        if (linkReached(link, px, pz)) {
+          through = link
+          break
+        }
+      }
+      if (!through && !interior.building && doorwayReached(interior, px, pz))
+        through = 'out'
+
+      if (!through) offThreshold.current = true
+      else if (offThreshold.current) {
+        offThreshold.current = false
+        if (through === 'out') {
+          sfx.cancel()
+          store.leaveBuilding()
+        } else {
+          takeLink(interior, through)
+        }
+        return
+      }
     }
 
     /* -------------------------- interaction ------------------------- */
@@ -1114,7 +1315,7 @@ export function Player() {
     <>
       <group ref={group}>
         <Character
-          colors={outfit === 'tuxedo' ? TUXEDO : PLAYER_COLORS}
+          {...wearing}
           motion={motion}
           // Down on one knee from the moment she arrives until she has
           // answered; the ring is in his hand until it is on hers.
@@ -1125,7 +1326,6 @@ export function Player() {
           gun={armed}
           gunColor={PAINT.player}
           kit={armed ? PAINT.player : undefined}
-          suit={outfit === 'tuxedo'}
           bouquet={outfit === 'tuxedo'}
           // Happy, from the moment she is called down.
           smile={amaliaHere}

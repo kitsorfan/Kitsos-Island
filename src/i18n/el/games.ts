@@ -8,8 +8,8 @@ export const GAMES: Record<string, string> = {
     'Το νησί χωρίζεται στα δύο για ένα απόγευμα. Δύο ντόπιοι είναι μαζί σου· όλοι οι άλλοι σε θέλουν βαμμένο.',
   'Five rounds per hopper, then a six-second refill.':
     'Πέντε βολές ανά γεμιστήρα, μετά έξι δευτερόλεπτα γέμισμα.',
-  'Three lives — a ball to the chest costs one.':
-    'Τρεις ζωές — μια μπάλα στο στήθος κοστίζει μία.',
+  'Three lives. A ball to the chest costs one.':
+    'Τρεις ζωές. Μια μπάλα στο στήθος κοστίζει μία.',
   'Get down and their paint sails over you, but you cannot fire back.':
     'Σκύψε και η μπογιά τους περνάει από πάνω σου, αλλά δεν μπορείς να απαντήσεις.',
 
@@ -17,8 +17,8 @@ export const GAMES: Record<string, string> = {
   'Sea Rescue': 'Θαλάσσια Διάσωση',
   'A boat went down in the night. Find the flares and get her people out of the water before the flares burn out.':
     'Ένα σκάφος βούλιαξε μέσα στη νύχτα. Βρες τις φωτοβολίδες και βγάλε τους ανθρώπους του από το νερό προτού σβήσουν.',
-  'Get alongside a raft and take the way off her — nobody climbs a net at speed.':
-    'Πλεύρισε τη σχεδία και κόψε ταχύτητα — κανείς δεν ανεβαίνει δίχτυ με τη μηχανή ανοιχτή.',
+  'Get alongside a raft and take the way off her. Nobody climbs a net at speed.':
+    'Πλεύρισε τη σχεδία και κόψε ταχύτητα. Κανείς δεν ανεβαίνει δίχτυ με τη μηχανή ανοιχτή.',
   'Every flare burns down on its own clock, so the order you pick is the game.':
     'Κάθε φωτοβολίδα καίγεται με το δικό της ρολόι, οπότε η σειρά που διαλέγεις είναι όλο το παιχνίδι.',
   'Let one burn out and the run is over.':
@@ -35,8 +35,8 @@ export const GAMES: Record<string, string> = {
     'Πρέπει να περάσεις από κάθε τομέα, οπότε το να κόψεις από τη μέση δεν κερδίζει τίποτα.',
 
   /* ------------------------------ Balloon ----------------------------- */
-  'Fourteen gatherings are waiting on something from the sky — half a water bomb, half confetti.':
-    'Δεκατέσσερις παρέες περιμένουν κάτι από τον ουρανό — οι μισές βόμβα νερού, οι μισές κομφετί.',
+  'Fourteen gatherings are waiting on something from the sky: half a water bomb, half confetti.':
+    'Δεκατέσσερις παρέες περιμένουν κάτι από τον ουρανό: οι μισές βόμβα νερού, οι μισές κομφετί.',
   'Water for the ones out in the sun, confetti for the ones celebrating.':
     'Νερό για όσους είναι στον ήλιο, κομφετί για όσους γιορτάζουν.',
   'Confetti floats, so it lands further downwind than a bomb does.':
@@ -59,8 +59,8 @@ export const GAMES: Record<string, string> = {
   'The Big Red Button': 'Το Μεγάλο Κόκκινο Κουμπί',
   Amalia: 'Αμαλία',
   'The dancing queen': 'Η βασίλισσα του χορού',
-  'There you are. They can all wait — this one is ours.':
-    'Να σου. Όλοι οι άλλοι μπορούν να περιμένουν — αυτό το κομμάτι είναι δικό μας.',
+  'There you are. They can all wait. This one is ours.':
+    'Να σου. Όλοι οι άλλοι μπορούν να περιμένουν. Αυτό το κομμάτι είναι δικό μας.',
   'You built a whole island, and put a dancefloor in the middle of it.':
     'Έχτισες ολόκληρο νησί, και έβαλες πίστα στη μέση του.',
   'Come on, Kitso. Dance with me.': 'Έλα, Κίτσο. Χόρεψε μαζί μου.',

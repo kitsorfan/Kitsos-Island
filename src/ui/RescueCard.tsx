@@ -102,7 +102,7 @@ export function RescueCard() {
               </li>
               <li>
                 {t(
-                  'The panel lists every flare in the water, shortest first — and that order is the only real decision in the game. Let one burn out and the run is over.',
+                  'The panel lists every flare in the water, shortest first, and that order is the only real decision in the game. Let one burn out and the run is over.',
                 )}
               </li>
             </ul>

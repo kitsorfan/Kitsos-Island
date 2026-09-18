@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { PATHS, PLAZA_RADIUS } from '../data/world'
-import { PATH_WIDTH } from '../game/terrain'
+import { GARAGE_APRON, PATH_WIDTH } from '../game/terrain'
 
 const PATH_COLOR = '#dcc394'
 const PLAZA_COLOR = '#e8d8b2'
@@ -56,6 +56,32 @@ export function Paths() {
           roughness={1}
           polygonOffset
           polygonOffsetFactor={-2}
+        />
+      </mesh>
+
+      {/* The drive out of the garage. It is concrete rather than the gravel
+          the footpaths are, because a car has been over it, and it runs from
+          the apron at the mouth out through the gap in the fence. */}
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[
+          (GARAGE_APRON.mouth + GARAGE_APRON.end) / 2,
+          0.012,
+          GARAGE_APRON.z,
+        ]}
+        receiveShadow
+      >
+        <planeGeometry
+          args={[
+            GARAGE_APRON.mouth - GARAGE_APRON.end,
+            GARAGE_APRON.halfWidth * 2,
+          ]}
+        />
+        <meshStandardMaterial
+          color="#b0a894"
+          roughness={1}
+          polygonOffset
+          polygonOffsetFactor={-1}
         />
       </mesh>
 

@@ -51,7 +51,7 @@ export const AMALIA = {
   dress: '#fbf6ec',
   trim: '#ffd166',
   lines: [
-    'There you are. They can all wait — this one is ours.',
+    'There you are. They can all wait. This one is ours.',
     'You built a whole island, and put a dancefloor in the middle of it.',
     'Come on, Kitso. Dance with me.',
   ],

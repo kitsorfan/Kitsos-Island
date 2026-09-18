@@ -57,7 +57,7 @@ export function HideCard() {
           <>
             <p className="hd-card__lead">
               {t(
-                'Every lamp on the island goes out — the windows, the lighthouse, the searchlight over the camp. The only light left anywhere is whatever somebody is carrying.',
+                'Every lamp on the island goes out: the windows, the lighthouse, the searchlight over the camp. The only light left anywhere is whatever somebody is carrying.',
               )}
             </p>
 
@@ -84,7 +84,7 @@ export function HideCard() {
                   <li>
                     Keep the torch <strong>{t('lit')}</strong>, or you will walk
                     past every one of them in the dark. Nothing tells you where
-                    they are — they are behind things.
+                    they are. They are behind things.
                   </li>
                   <li>
                     Nothing is timed against you. The clock only says how long
@@ -100,8 +100,8 @@ export function HideCard() {
                   <li>
                     Stay out of their hands for{' '}
                     <strong>{HOLD_OUT} seconds</strong> and you have won the
-                    night. Being seen is not being caught — somebody has to
-                    reach you, the same rule you play by the other way round.
+                    night. Being seen is not being caught. Somebody has to reach
+                    you, the same rule you play by the other way round.
                   </li>
                   <li>
                     <strong>{t('They run when they see you')}</strong>, and a
@@ -111,7 +111,7 @@ export function HideCard() {
                   <li>
                     <strong>{t('Anything you do draws them.')}</strong> Walking
                     is heard from a good way off, crouch-walking from barely
-                    any, and a lit torch is seen right across the town —
+                    any, and a lit torch is seen right across the town, so
                     everyone inside that range stops looking where they were and
                     comes to look at you.
                   </li>

@@ -8,6 +8,11 @@ import { Hud } from './ui/Hud'
 import { Journal } from './ui/Journal'
 import { MapOverlay } from './ui/MapOverlay'
 import { ArcadeCard } from './ui/ArcadeCard'
+import { CalendarCard } from './ui/CalendarCard'
+import { FeastCheer } from './ui/FeastCheer'
+import { LectureHud } from './ui/LectureHud'
+import { LiftPanel } from './ui/LiftPanel'
+import { LiftRide } from './ui/LiftRide'
 import { BalloonCard } from './ui/BalloonCard'
 import { HideCard } from './ui/HideCard'
 import { MotoCard } from './ui/MotoCard'
@@ -22,6 +27,7 @@ import { useGame } from './state/store'
 import { setMuted, setSfxLevel } from './game/audio'
 import type { Mood } from './game/music'
 import { setMood, setMusicEnabled, setMusicLevel } from './game/music'
+import { FEAST_AREA } from './game/feast'
 
 /** Covers the canvas while a new area builds its scene graph. */
 function Curtain() {
@@ -40,6 +46,7 @@ export default function App() {
   const sfxLevel = useGame((s) => s.sfxLevel)
   const night = useGame((s) => s.night)
   const party = useGame((s) => s.party)
+  const christmas = useGame((s) => s.christmas)
   const paintball = useGame((s) => s.paintball?.status)
   const moto = useGame((s) => s.moto?.status)
   const balloon = useGame((s) => s.balloon?.status)
@@ -106,9 +113,12 @@ export default function App() {
               : 'island'
           : area === 'lighthouse'
             ? 'lighthouse'
-            : 'indoor'),
+            : // The one room on the island with a date attached to it.
+              area === FEAST_AREA && christmas
+              ? 'christmas'
+              : 'indoor'),
     )
-  }, [area, night, party, paintball, moto, balloon, hide, rescue])
+  }, [area, night, party, christmas, paintball, moto, balloon, hide, rescue])
 
   return (
     <div className="app">
@@ -138,11 +148,16 @@ export default function App() {
           {mode === 'map' && <MapOverlay />}
           {mode === 'paintball' && <PaintballCard />}
           {mode === 'arcade' && <ArcadeCard />}
+          {mode === 'calendar' && <CalendarCard />}
           {mode === 'moto' && <MotoCard />}
           {mode === 'balloon' && <BalloonCard />}
           {mode === 'hide' && <HideCard />}
           {mode === 'rescue' && <RescueCard />}
           <TouchControls />
+          <FeastCheer />
+          <LectureHud />
+          <LiftPanel />
+          <LiftRide />
           <Toast />
         </>
       )}

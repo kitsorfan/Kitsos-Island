@@ -3,6 +3,8 @@ import { WORLD } from './world'
 import { INTERIORS } from './interiors'
 import { PROFILE } from './profile'
 import { FAMILY } from './family'
+import { FEAST } from './feast'
+import { LECTURE } from './lecture'
 import { GAMES } from './games'
 
 /**
@@ -16,5 +18,7 @@ export const EL: Record<string, string> = {
   ...INTERIORS,
   ...PROFILE,
   ...FAMILY,
+  ...FEAST,
+  ...LECTURE,
   ...GAMES,
 }

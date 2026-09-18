@@ -426,7 +426,7 @@ export function stepHide(delta: number, player: HidePlayer): HideEvents {
         HIDE.found++
         events.found++
         HIDE.feed = {
-          text: `Found — ${COUNT - HIDE.found} still out there`,
+          text: `Found. ${COUNT - HIDE.found} still out there`,
           kind: 'good',
           at: Date.now(),
         }

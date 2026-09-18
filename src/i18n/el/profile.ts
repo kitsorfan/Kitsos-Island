@@ -65,8 +65,8 @@ export const PROFILE: Record<string, string> = {
   'Senior Software Engineer & Technical Lead':
     'Senior Software Engineer & Technical Lead',
   'Trainer card': 'Κάρτα εκπαιδευτή',
-  'Senior Software Engineer and Technical Lead based in Athens, Greece. I build cloud-native healthcare products end to end — Java and Spring Boot on the backend, React on the front, AWS underneath — and I lead the teams that ship them into hospitals.':
-    'Senior Software Engineer και Technical Lead με έδρα την Αθήνα. Φτιάχνω cloud-native προϊόντα υγείας από άκρη σε άκρη — Java και Spring Boot στο backend, React μπροστά, AWS από κάτω — και ηγούμαι των ομάδων που τα βγάζουν στα νοσοκομεία.',
+  'Senior Software Engineer and Technical Lead based in Athens, Greece. I build cloud-native healthcare products end to end, Java and Spring Boot on the backend, React on the front, AWS underneath, and I lead the teams that ship them into hospitals.':
+    'Senior Software Engineer και Technical Lead με έδρα την Αθήνα. Φτιάχνω cloud-native προϊόντα υγείας από άκρη σε άκρη, Java και Spring Boot στο backend, React μπροστά, AWS από κάτω, και ηγούμαι των ομάδων που τα βγάζουν στα νοσοκομεία.',
   'Athens, Greece': 'Αθήνα, Ελλάδα',
   Nationality: 'Υπηκοότητα',
   Greek: 'Ελληνική',
@@ -78,10 +78,10 @@ export const PROFILE: Record<string, string> = {
   'Off the clock': 'Εκτός ωραρίου',
   'Leading volunteer at the Christian Youth Foundation "Pantokrator" in Paleo Faliro, and a blood donor since 2017.':
     'Επικεφαλής εθελοντής στο Χριστιανικό Ίδρυμα Νεότητας «Παντοκράτωρ» στο Παλαιό Φάληρο, και αιμοδότης από το 2017.',
-  'Greek — native speaker': 'Ελληνικά — μητρική γλώσσα',
-  'English — proficiency, ECPE (University of Michigan, 2016)':
-    'Αγγλικά — proficiency, ECPE (University of Michigan, 2016)',
-  'French — B2, DELF (2019)': 'Γαλλικά — B2, DELF (2019)',
+  'Greek, native speaker': 'Ελληνικά, μητρική γλώσσα',
+  'English, proficiency (ECPE, University of Michigan, 2016)':
+    'Αγγλικά, proficiency (ECPE, University of Michigan, 2016)',
+  'French, B2 (DELF, 2019)': 'Γαλλικά, B2 (DELF, 2019)',
   Cycling: 'Ποδήλατο',
   Theater: 'Θέατρο',
   'DIY & handiwork': 'Μαστορέματα & κατασκευές',
@@ -97,10 +97,8 @@ export const PROFILE: Record<string, string> = {
     'Εθνικό Μετσόβιο Πολυτεχνείο (ΕΜΠ)',
   '2017 – 2022 · GPA 8.4': '2017 – 2022 · βαθμός 8,4',
   'Seminars & workshops': 'Σεμινάρια & εργαστήρια',
-  'Five-year integrated Master of Engineering in the School of Electrical and Computer Engineering.':
-    'Πενταετές ενιαίο δίπλωμα μηχανικού στη Σχολή Ηλεκτρολόγων Μηχανικών και Μηχανικών Υπολογιστών.',
-  'Thesis: compliance analysis of movement exercises using machine learning, supervised by Prof. Panagiotis Tsanakas, Dean of the School — graded with distinction, and later published on arXiv.':
-    'Διπλωματική: ανάλυση συμμόρφωσης ασκήσεων κίνησης με μηχανική μάθηση, με επιβλέποντα τον καθηγητή Παναγιώτη Τσανάκα, Κοσμήτορα της Σχολής — βαθμολογήθηκε με άριστα, και αργότερα δημοσιεύτηκε στο arXiv.',
+  'Thesis: compliance analysis of movement exercises using machine learning, supervised by Prof. Panagiotis Tsanakas, Dean of the School, graded with distinction, and later published on arXiv.':
+    'Διπλωματική: ανάλυση συμμόρφωσης ασκήσεων κίνησης με μηχανική μάθηση, με επιβλέποντα τον καθηγητή Παναγιώτη Τσανάκα, Κοσμήτορα της Σχολής, βαθμολογήθηκε με άριστα, και αργότερα δημοσιεύτηκε στο arXiv.',
   'Coursework with the Dean included Operating Systems and Software Service Technologies.':
     'Στα μαθήματα με τον Κοσμήτορα περιλαμβάνονταν τα Λειτουργικά Συστήματα και οι Τεχνολογίες Υπηρεσιών Λογισμικού.',
   'IBM graduate program (2024)': 'Πρόγραμμα αποφοίτων IBM (2024)',
@@ -109,20 +107,156 @@ export const PROFILE: Record<string, string> = {
   'Arduino IEEE Workshop at NTUA (2018)':
     'Εργαστήριο Arduino IEEE στο ΕΜΠ (2018)',
   'Model High School of Ionidios, Piraeus':
-    'Πρότυπο Λύκειο Ιωνιδείου, Πειραιάς',
+    'Ιωνίδειος Πρότυπο Λύκειο, Πειραιάς',
   '2015 – 2017 · GPA 19.9 / 20': '2015 – 2017 · βαθμός 19,9 / 20',
-  'Model Experimental High School of Evaggeliki, Nea Smyrni':
-    'Πρότυπο Πειραματικό Γυμνάσιο Ευαγγελικής Σχολής, Νέα Σμύρνη',
+  'Ranked 1st in the entrance exam to the oldest school in Piraeus, founded in 1847, and one of the four public Model schools in Greece.':
+    '1ος στις εισαγωγικές εξετάσεις για το παλαιότερο σχολείο του Πειραιά, από το 1847, και ένα από τα τέσσερα δημόσια Πρότυπα σχολεία της Ελλάδας.',
+  'Excellence award every year, and the Piraeus prize for the top graduating grade of 2017.':
+    'Αριστείο κάθε χρόνο, και το βραβείο του Πειραιά για το πρώτο απολυτήριο του 2017.',
+  '2nd among about 1,650 entrants in the Panhellenic Biology Competition (2016); awards in Mathematics and Programming; captain of the school’s EUSO science team.':
+    '2ος σε περίπου 1.650 συμμετέχοντες στον Πανελλήνιο Διαγωνισμό Βιολογίας (2016)· βραβεία σε Μαθηματικά και Προγραμματισμό· αρχηγός της ομάδας EUSO του σχολείου.',
+  'Summer School of the University of Piraeus; self-taught C++ from the age of sixteen.':
+    'Θερινό Σχολείο του Πανεπιστημίου Πειραιώς· αυτοδίδακτος στη C++ από τα δεκαέξι.',
+
+  /* ------------------------------ Ionidios ---------------------------- */
+  'The oldest school in Piraeus, founded in 1847, and one of the four public Model schools in Greece. Evangeliki, which he had just left, is another. Another entrance exam, and he ranked 1st in it again.':
+    'Το παλαιότερο σχολείο του Πειραιά, από το 1847, και ένα από τα τέσσερα δημόσια Πρότυπα σχολεία της Ελλάδας. Η Ευαγγελική, από την οποία μόλις είχε φύγει, είναι ένα ακόμη. Άλλες μία εισαγωγικές εξετάσεις, και βγήκε ξανά 1ος.',
+  'Graduating grade': 'Βαθμός απολυτηρίου',
+  'Excellence award': 'Αριστείο',
+  Honours: 'Διακρίσεις',
+  'The excellence award in every year.': 'Το αριστείο κάθε χρόνο.',
+  'The Piraeus prize for the top graduating grade of the year, on leaving in 2017 with 19.9 out of 20.':
+    'Το βραβείο του Πειραιά για το πρώτο απολυτήριο της χρονιάς, αποφοιτώντας το 2017 με 19,9 στα 20.',
+  'First in performance in his class, year after year. His biology teacher put it in writing.':
+    'Πρώτος σε επίδοση στο τμήμα του, χρόνο με τον χρόνο. Η καθηγήτριά του στη Βιολογία το έβαλε γραπτώς.',
+  'Contests and the bench': 'Διαγωνισμοί και ο πάγκος',
+  '2nd among about 1,650 entrants in the Panhellenic Biology Competition, 2016.':
+    '2ος σε περίπου 1.650 συμμετέχοντες στον Πανελλήνιο Διαγωνισμό Βιολογίας, 2016.',
+  'Notable awards in Mathematics and Programming.':
+    'Αξιοσημείωτα βραβεία σε Μαθηματικά και Προγραμματισμό.',
+  'Captain of the school’s EUSO team, the European Union Science Olympiad, where three students share one bench of experiments.':
+    'Αρχηγός της ομάδας EUSO του σχολείου, της Ολυμπιάδας Φυσικών Επιστημών της Ευρωπαϊκής Ένωσης, όπου τρεις μαθητές μοιράζονται έναν πάγκο πειραμάτων.',
+  'Summer School of the University of Piraeus, on his informatics teacher’s recommendation, and C++ on his own from the age of sixteen.':
+    'Θερινό Σχολείο του Πανεπιστημίου Πειραιώς, με σύσταση του καθηγητή Πληροφορικής του, και C++ μόνος του από τα δεκαέξι.',
+
+  /* --------------------------- Ionidios letters ----------------------- */
+  'Dr Dimitra Pantou': 'Δρ Δήμητρα Πάντου',
+  'Biologist, PhD, MSc · Model General Lyceum of the Ionidios School of Piraeus':
+    'Βιολόγος, PhD, MSc · Πρότυπο Γενικό Λύκειο της Ιωνιδείου Σχολής Πειραιά',
+  'Biology teacher for both lyceum years · Scholarship recommendation · 29 September 2017 · translated from Greek':
+    'Καθηγήτρια Βιολογίας και τις δύο χρονιές του Λυκείου · Συστατική επιστολή για υποτροφία · 29 Σεπτεμβρίου 2017 · πρωτότυπο κείμενο',
+  'Christos Orfanopoulos was my student at the Model General Lyceum of the Ionidios School of Piraeus for two school years (2015–2016 and 2016–2017). He attended the courses "General Biology, 2nd year of Lyceum", "General Biology, 3rd year of Lyceum" and "Biology, Science stream, 3rd year of Lyceum" with me as his teacher.':
+    'Ο Ορφανόπουλος Χρήστος υπήρξε μαθητής μου στο Πρότυπο Γενικό Λύκειο της Ιωνιδείου Σχολής Πειραιά για δύο σχολικά έτη (2015-2016 και 2016-2017). Παρακολούθησε τα μαθήματα «Βιολογία Γεν. Παιδείας Β΄ Λυκείου», «Βιολογία Γεν. Παιδείας Γ΄ Λυκείου» και «Βιολογία Θετικής Κατεύθυνσης Γ΄ Λυκείου» με διδάσκουσα εμένα.',
+  'Christos Orfanopoulos was an excellent student. In all three years of Lyceum he was consistently first in performance in his class. He is able to grasp new concepts quickly and to apply that knowledge in practice, which I concluded through the Biology laboratory lessons. He is intelligent, cooperative, and works hard and methodically to achieve his goals.':
+    'Ο Ορφανόπουλος Χρήστος ήταν ένας άριστος μαθητής. Και στις τρεις τάξεις του Λυκείου ήταν σταθερά ο πρώτος σε επίδοση στο τμήμα του (απουσιολόγος). Είναι ικανός να συλλαμβάνει γρήγορα νέες έννοιες και να εφαρμόζει τη γνώση αυτή στην πρακτική, γεγονός το οποίο συμπέρανα μέσα από τα εργαστηριακά μαθήματα Βιολογίας. Είναι ευφυής, συνεργάσιμος και εργάζεται σκληρά και μεθοδικά ώστε να πετύχει τους στόχους του.',
+  'Christos Orfanopoulos is a particularly interesting personality, with rare qualities and a bright character. He is an honest person, with faith in his abilities, consistency in his relationships with others and a strongly creative disposition. He is characterised by positive thinking, emotional maturity and adaptability, and he is extremely well liked among the people he keeps company with. He is without doubt among the best students I have had in recent years.':
+    'Ο Ορφανόπουλος Χρήστος είναι μία ιδιαίτερα ενδιαφέρουσα προσωπικότητα με σπάνια χαρακτηριστικά και λαμπρό ήθος. Είναι άτομο ειλικρινές, με πίστη στις δυνατότητές του, συνέπεια στις σχέσεις του με τους άλλους και έντονα δημιουργική διάθεση. Χαρακτηρίζεται από θετική σκέψη, συναισθηματική ωριμότητα, προσαρμοστικότητα, ενώ είναι εξαιρετικά αγαπητός μεταξύ των ατόμων με τα οποία συναναστρέφεται. Είναι αναμφίβολα από τους καλύτερους μαθητές που είχα τα τελευταία χρόνια.',
+  'Christos Orfanopoulos, as I mentioned, has analytical judgement and constantly sets himself clear goals, which he works hard to achieve. He is also an excellent computer user. I am certain that all these qualities will help him develop into an excellent student and a future scientist, on the one condition that he can devote himself to his school without the anxiety of covering his student expenses. I therefore recommend Christos Orfanopoulos unreservedly for the scholarship.':
+    'Ο Ορφανόπουλος Χρήστος, όπως προανέφερα, έχει ικανότητα αναλυτικής κρίσης και θέτει διαρκώς σαφείς στόχους τους οποίους εργάζεται σκληρά για να τους πετύχει. Παράλληλα είναι εξαιρετικός χρήστης των Η/Υ. Είμαι σίγουρη πως όλα αυτά τα χαρακτηριστικά θα τον βοηθήσουν να εξελιχθεί σε άριστο φοιτητή και μελλοντικό επιστήμονα, με βασική προϋπόθεση ότι θα αφοσιωθεί στη σχολή του χωρίς να τον απασχολεί το άγχος για την κάλυψη των φοιτητικών του εξόδων. Γι’ αυτό λοιπόν συνιστώ ανεπιφύλακτα τον Ορφανόπουλο Χρήστο για την υποτροφία.',
+  'Christos Orfanopoulos took second (2nd) place among approximately 1,650 participants in the Panhellenic Biology Competition (www.pdbio.gr) in the 2nd year of Lyceum, in 2016.':
+    'Ο Ορφανόπουλος Χρήστος κατέλαβε τη δεύτερη (2η) θέση μεταξύ 1650 περίπου συμμετεχόντων στον Πανελλήνιο Διαγωνισμό Βιολογίας (www.pdbio.gr) στη Β΄ Λυκείου το 2016.',
+  'Athina Mitsopoulou': 'Αθηνά Μητσοπούλου',
+  'Chemist, MSc, PhD candidate · Lyceum of the Ionidios School of Piraeus':
+    'Χημικός, MSc, υποψήφια διδάκτωρ · Λύκειο Ιωνιδείου Σχολής Πειραιά',
+  'Chemistry teacher for both lyceum years · Scholarship recommendation · 28 September 2017 · translated from Greek':
+    'Καθηγήτρια Χημείας και τις δύο χρονιές του Λυκείου · Συστατική επιστολή για υποτροφία · 28 Σεπτεμβρίου 2017 · πρωτότυπο κείμενο',
+  'The candidate, Mr Christos Orfanopoulos, was my student in Chemistry for the last two years at the Model Lyceum of the Ionidios School of Piraeus.':
+    'Ο υποψήφιος κ. Ορφανόπουλος Χρήστος υπήρξε μαθητής μου στο μάθημα της Χημείας τα δύο τελευταία χρόνια στο Πρότυπο Λύκειο της Ιωνιδείου Σχολής Πειραιά.',
+  'Throughout those years he achieved outstanding results in my subject, showed an excellent grasp of new material, and confirmed his title of excellence.':
+    'Όλα αυτά τα χρόνια σημείωσε εξαιρετικές επιδόσεις στο μάθημά μου, επέδειξε άριστη αντιληπτική ικανότητα και επιβεβαίωσε τον τίτλο της αριστείας.',
+  'Besides his excellent performance in his lessons, the candidate also showed an outstanding character. He was always cooperative, willing to help, polite, disciplined, and friendly with his classmates.':
+    'Εκτός από την άριστη επίδοσή του στα μαθήματα, ο συγκεκριμένος υποψήφιος επέδειξε και εξαιρετικό ήθος. Ήταν πάντα συνεργάσιμος, πρόθυμος να βοηθήσει, ευγενικός, πειθαρχημένος, φιλικός με τους συμμαθητές του.',
+  'For this particular person, I am sure, studies will not only be the means of enriching his knowledge; they will be the springboard for his usefulness to society and his contribution to research and to science in general.':
+    'Οι σπουδές για το συγκεκριμένο άτομο, είμαι σίγουρη ότι δεν αποτελούν μόνο το μέσο για τον εμπλουτισμό των γνώσεών του αλλά θα αποτελέσουν και το εφαλτήριο για την κοινωνική χρησιμότητά του, την προσφορά του στην έρευνα και την επιστήμη γενικότερα.',
+  'The candidate took part in a great many of our school’s programmes, activities and events. He was my student in the "Physics and Chemistry" Club, where he showed particular ability in handling instruments and laboratory equipment, in taking accurate measurements and in processing the results correctly. He showed initiative and consistency, qualities a future scientist cannot do without.':
+    'Ο υποψήφιος συμμετείχε σε πληθώρα Προγραμμάτων, δράσεων και εκδηλώσεων του Σχολείου μας. Υπήρξε μαθητής μου στον Όμιλο «Φυσικοχημείας» όπου επέδειξε ιδιαίτερες ικανότητες στο χειρισμό των οργάνων και του εργαστηριακού εξοπλισμού, στη λήψη ακριβών μετρήσεων και στη σωστή επεξεργασία των αποτελεσμάτων. Ανέπτυξε πρωτοβουλία και συνέπεια, χαρακτηριστικά απαραίτητα για έναν μελλοντικό επιστήμονα.',
+  'Nikolaos Papadakis': 'Νικόλαος Παπαδάκης',
+  'Physics teacher · Model General Lyceum of the Ionidios School of Piraeus':
+    'Καθηγητής Φυσικής · Πρότυπο Γενικό Λύκειο Ιωνιδείου Σχολής Πειραιά',
+  'Physics teacher for both lyceum years · Scholarship recommendation · 27 September 2017 · translated from Greek':
+    'Καθηγητής Φυσικής και τις δύο χρονιές του Λυκείου · Συστατική επιστολή για υποτροφία · 27 Σεπτεμβρίου 2017 · πρωτότυπο κείμενο',
+  'I was the candidate’s teacher in general Physics and science-stream Physics in the 2nd and 3rd years of Lyceum.':
+    'Ήμουν καθηγητής του υποψηφίου στη Φυσική Γενικής Παιδείας και Κατεύθυνσης στη Β΄ και Γ΄ τάξη του Λυκείου.',
+  'His performance was excellent throughout the two years I had him as a student.':
+    'Η επίδοσή του ήταν άριστη σε όλη τη διάρκεια των 2 ετών που τον είχα μαθητή.',
+  'Very hard-working, with an excellent character. He also took part in every event, competition and presentation our school put on, and did so with particular effectiveness.':
+    'Πολύ εργατικός με εξαιρετικό ήθος. Συμμετείχε επίσης σε όλες τις εκδηλώσεις, διαγωνισμούς και παρουσιάσεις που έγιναν από το σχολείο μας με ιδιαίτερη αποτελεσματικότητα.',
+  'His interest in the physical sciences, and in their practical applications too, is such that his studies will give him a deep understanding of every subject that concerns him.':
+    'Το ενδιαφέρον του για τις φυσικές επιστήμες αλλά και τις πρακτικές εφαρμογές τους είναι τέτοιο ώστε η φοίτησή του θα του εξασφαλίσει την εμβάθυνση σε όλα τα θέματα που τον αφορούν.',
+  'I would describe him as very hard-working, a pleasant personality with a particular sense of humour, and a very good conversationalist with clear arguments.':
+    'Θα τον χαρακτήριζα πολύ εργατικό, ευχάριστη προσωπικότητα με ιδιαίτερο χιούμορ, πολύ καλό συνομιλητή με ξεκάθαρα επιχειρήματα.',
+  'Model Junior High School of Evangeliki, Nea Smyrni':
+    'Πρότυπο Γυμνάσιο Ευαγγελικής Σχολής, Νέα Σμύρνη',
+  'Ranked 1st in the entrance exam to one of only four public Model schools in Greece.':
+    '1ος στις εισαγωγικές εξετάσεις σε ένα από τα μόλις τέσσερα δημόσια Πρότυπα σχολεία της Ελλάδας.',
+  'First of the class every year, with the prize of excellence; class president and representative of the school.':
+    'Πρώτος της τάξης κάθε χρόνο, με το αριστείο· πρόεδρος της τάξης και εκπρόσωπος του σχολείου.',
+  'After-school programming in Pascal, astronomy and robotics; captain of the chess team.':
+    'Απογευματινά μαθήματα προγραμματισμού σε Pascal, αστρονομίας και ρομποτικής· αρχηγός της ομάδας σκακιού.',
+  'Placings in mathematics, programming and literature contests.':
+    'Διακρίσεις σε διαγωνισμούς μαθηματικών, προγραμματισμού και λογοτεχνίας.',
+  'Elementary school': 'Δημοτικό',
+  'Chess and basketball captain': 'Αρχηγός σκακιού και μπάσκετ',
+  '1st place in the city chess tournament; 3rd in the local basketball tournament.':
+    '1η θέση στο τουρνουά σκακιού της πόλης· 3η στο τοπικό τουρνουά μπάσκετ.',
+
+  /* ---------------------------- Town School --------------------------- */
+  'A charismatic child with a good heart, always doing his homework and always participating. He will have a bright future. (Ms. Maria, his first teacher)':
+    'Ένα χαρισματικό παιδί με καλή καρδιά, που κάνει πάντα τα μαθήματά του και συμμετέχει πάντα. Θα έχει λαμπρό μέλλον. (Κυρία Μαρία, η πρώτη του δασκάλα)',
+  'Captain of the school chess team, 1st place in the city tournament.':
+    'Αρχηγός της σχολικής ομάδας σκακιού, 1η θέση στο τουρνουά της πόλης.',
+  'Captain of the school basketball team for two years, 3rd in the local tournament.':
+    'Αρχηγός της σχολικής ομάδας μπάσκετ για δύο χρόνια, 3η θέση στο τοπικό τουρνουά.',
+  'A historic school, founded in 1733, and one of only four public Model schools in the whole of Greece: you sit an entrance exam to get in. He ranked 1st.':
+    'Ιστορικό σχολείο, με ρίζες στο 1733, και ένα από τα μόλις τέσσερα δημόσια Πρότυπα σχολεία σε όλη την Ελλάδα: μπαίνεις με εισαγωγικές εξετάσεις. Βγήκε 1ος.',
+  Founded: 'Ίδρυση',
+  'Public Model schools in Greece': 'Δημόσια Πρότυπα σχολεία στην Ελλάδα',
+  'Entrance exam': 'Εισαγωγικές εξετάσεις',
+  'Prize of excellence': 'Αριστείο',
+  'Every year': 'Κάθε χρόνο',
+  'First of the class': 'Πρώτος της τάξης',
+  'First student of the class in every year, taking the prize of excellence each time.':
+    'Πρώτος μαθητής της τάξης κάθε χρονιά, παίρνοντας κάθε φορά το αριστείο.',
+  'Class president for a year, and representative of the school.':
+    'Πρόεδρος της τάξης για έναν χρόνο, και εκπρόσωπος του σχολείου.',
+  'Closed the presidency with a fifteen-page report to the principal on what the class had achieved, and returned every unspent cent of the class funds, as the law required and nobody expected.':
+    'Έκλεισε την προεδρία με έναν απολογισμό δεκαπέντε σελίδων προς τον διευθυντή για όσα είχε πετύχει η τάξη, και επέστρεψε κάθε αδιάθετο ευρώ από το ταμείο της τάξης, όπως όριζε ο νόμος και δεν περίμενε κανείς.',
+  Contests: 'Διαγωνισμοί',
+  'Notable placings in Mathematics and Programming competitions.':
+    'Αξιοσημείωτες θέσεις σε διαγωνισμούς Μαθηματικών και Προγραμματισμού.',
+  '2nd prize in two school literature contests.':
+    '2ο βραβείο σε δύο σχολικούς διαγωνισμούς λογοτεχνίας.',
+  '7th prize in an open literature contest, the only entrant under eighteen to place.':
+    '7ο βραβείο σε ανοιχτό διαγωνισμό λογοτεχνίας, ο μόνος ανήλικος που βραβεύτηκε.',
+  'The extra classes': 'Τα επιπλέον μαθήματα',
+  'A Model school keeps going after the timetable ends. He took four of the extra classes, and the habit never left him.':
+    'Ένα Πρότυπο σχολείο συνεχίζει και μετά το πρόγραμμα. Παρακολούθησε τέσσερα από τα επιπλέον μαθήματα, και η συνήθεια δεν τον άφησε ποτέ.',
+  'Programming, in Pascal': 'Προγραμματισμός, σε Pascal',
+  'From the age of 13': 'Από τα 13',
+  'Every extra exercise set, and then small games of his own, with graphics.':
+    'Κάθε έξτρα άσκηση, και μετά μικρά παιχνίδια δικά του, με γραφικά.',
+  Astronomy: 'Αστρονομία',
+  'After-school class': 'Απογευματινό μάθημα',
+  'Built a sundial and a small planetarium, both to correct scale.':
+    'Έφτιαξε ένα ηλιακό ρολόι και ένα μικρό πλανητάριο, και τα δύο σε σωστή κλίμακα.',
+  Robotics: 'Ρομποτική',
+  'The class built a submarine drone.': 'Η τάξη έφτιαξε ένα υποβρύχιο drone.',
+  'On his own: a proof-of-concept electric bicycle running on 12 V.':
+    'Μόνος του: ένα πρωτότυπο ηλεκτρικού ποδηλάτου που δούλευε στα 12 V.',
+  'Chess team': 'Ομάδα σκακιού',
+  Captain: 'Αρχηγός',
+  'Led the school team, as he had in elementary school.':
+    'Ηγήθηκε της σχολικής ομάδας, όπως και στο δημοτικό.',
 
   /* ----------------------------- Publication -------------------------- */
   'An M-Health Algorithmic Approach to Identify and Assess Physiotherapy Exercises in Real Time':
     'An M-Health Algorithmic Approach to Identify and Assess Physiotherapy Exercises in Real Time',
   '11 December 2025': '11 Δεκεμβρίου 2025',
-  'Applicable to remote physiotherapy supervision — the patient’s own phone does the assessment, so nothing leaves the device.':
-    'Εφαρμόσιμο σε απομακρυσμένη επίβλεψη φυσικοθεραπείας — την αξιολόγηση την κάνει το ίδιο το κινητό του ασθενούς, οπότε τίποτα δεν φεύγει από τη συσκευή.',
+  'Applicable to remote physiotherapy supervision: the patient’s own phone does the assessment, so nothing leaves the device.':
+    'Εφαρμόσιμο σε απομακρυσμένη επίβλεψη φυσικοθεραπείας: την αξιολόγηση την κάνει το ίδιο το κινητό του ασθενούς, οπότε τίποτα δεν φεύγει από τη συσκευή.',
   'Diploma thesis, 2022': 'Διπλωματική εργασία, 2022',
-  'Compliance analysis of movement exercises using machine learning — a system that watches how a movement is performed and judges it against how it should be performed. Supervised by Prof. Panagiotis Tsanakas, Dean of the School of ECE, who called it "marked by scientific soundness and technological originality" and graded it with distinction. Three years later it became a published paper.':
-    'Ανάλυση συμμόρφωσης ασκήσεων κίνησης με μηχανική μάθηση — ένα σύστημα που παρακολουθεί πώς εκτελείται μια κίνηση και την κρίνει απέναντι στο πώς θα έπρεπε να εκτελεστεί. Με επιβλέποντα τον καθηγητή Παναγιώτη Τσανάκα, Κοσμήτορα της Σχολής ΗΜΜΥ, ο οποίος την χαρακτήρισε «άρτια επιστημονικά και τεχνολογικά πρωτότυπη» και τη βαθμολόγησε με άριστα. Τρία χρόνια αργότερα έγινε δημοσιευμένη εργασία.',
+  'Compliance analysis of movement exercises using machine learning: a system that watches how a movement is performed and judges it against how it should be performed. Supervised by Prof. Panagiotis Tsanakas, Dean of the School of ECE, who called it "marked by scientific soundness and technological originality" and graded it with distinction. Three years later it became a published paper.':
+    'Ανάλυση συμμόρφωσης ασκήσεων κίνησης με μηχανική μάθηση: ένα σύστημα που παρακολουθεί πώς εκτελείται μια κίνηση και την κρίνει απέναντι στο πώς θα έπρεπε να εκτελεστεί. Με επιβλέποντα τον καθηγητή Παναγιώτη Τσανάκα, Κοσμήτορα της Σχολής ΗΜΜΥ, ο οποίος την χαρακτήρισε «άρτια επιστημονικά και τεχνολογικά πρωτότυπη» και τη βαθμολόγησε με άριστα. Τρία χρόνια αργότερα έγινε δημοσιευμένη εργασία.',
   'Grew out of the NTUA thesis: judging how a physiotherapy movement is actually performed against how it should be.':
     'Προέκυψε από τη διπλωματική στο ΕΜΠ: να κρίνεις πώς εκτελείται στην πράξη μια κίνηση φυσικοθεραπείας απέναντι στο πώς θα έπρεπε.',
   'Reads a movement as a sequence of static poses, estimated from a phone camera by a pose-estimation neural network.':
@@ -147,8 +281,8 @@ export const PROFILE: Record<string, string> = {
 
   /* --------------------------- Contests & certs ----------------------- */
   'Contests & awards': 'Διαγωνισμοί & διακρίσεις',
-  'National Biology Competition 2016 — ranked 2nd':
-    'Πανελλήνιος Διαγωνισμός Βιολογίας 2016 — 2η θέση',
+  'National Biology Competition 2016, ranked 2nd':
+    'Πανελλήνιος Διαγωνισμός Βιολογίας 2016, 2η θέση',
   'Awards in Physics, Mathematics, Informatics and Literature contests':
     'Διακρίσεις σε διαγωνισμούς Φυσικής, Μαθηματικών, Πληροφορικής και Λογοτεχνίας',
   'AI, research & engineering': 'Τεχνητή νοημοσύνη, έρευνα & μηχανική',
@@ -163,21 +297,21 @@ export const PROFILE: Record<string, string> = {
     'Docker Essentials: A Developer Introduction',
   'May 2024': 'Μάιος 2024',
   'Language certificates': 'Πιστοποιητικά γλωσσομάθειας',
-  'ECPE — Certificate of Proficiency in English (C2)':
-    'ECPE — Certificate of Proficiency in English (C2)',
+  'ECPE, Certificate of Proficiency in English (C2)':
+    'ECPE, Certificate of Proficiency in English (C2)',
   'May 2016': 'Μάιος 2016',
-  'ECCE — Certificate of Competency in English (B2)':
-    'ECCE — Certificate of Competency in English (B2)',
+  'ECCE, Certificate of Competency in English (B2)':
+    'ECCE, Certificate of Competency in English (B2)',
   'May 2015': 'Μάιος 2015',
-  'DELF B2 — Diplôme d’études en langue française':
-    'DELF B2 — Diplôme d’études en langue française',
+  'DELF B2, Diplôme d’études en langue française':
+    'DELF B2, Diplôme d’études en langue française',
   'Centre international d’études pédagogiques':
     'Centre international d’études pédagogiques',
   'February 2019': 'Φεβρουάριος 2019',
   'Foundations of modern AI, including artificial neural networks.':
     'Θεμέλια της σύγχρονης τεχνητής νοημοσύνης, συμπεριλαμβανομένων των τεχνητών νευρωνικών δικτύων.',
-  'Human-subjects research conduct and ethics, and HIPAA — the compliance side of building for hospitals.':
-    'Δεοντολογία και ηθική στην έρευνα με ανθρώπους, και HIPAA — η πλευρά της συμμόρφωσης όταν χτίζεις για νοσοκομεία.',
+  'Human-subjects research conduct and ethics, and HIPAA, the compliance side of building for hospitals.':
+    'Δεοντολογία και ηθική στην έρευνα με ανθρώπους, και HIPAA, η πλευρά της συμμόρφωσης όταν χτίζεις για νοσοκομεία.',
   'Artificial neural networks': 'Τεχνητά νευρωνικά δίκτυα',
 
   /* ------------------------------ References -------------------------- */
@@ -222,40 +356,139 @@ export const PROFILE: Record<string, string> = {
     'Αναμφίβολα, ο Χρήστος Β. Ορφανόπουλος διαθέτει υψηλά επαγγελματικά, ηγετικά και ηθικά προσόντα. Είμαι υπερήφανος που υπήρξε Αξιωματικός στη Μονάδα μου· τίμησε τον πράσινο μπερέ και το ιδεώδες του, και με απόλυτη εμπιστοσύνη τον συστήνω ως πολύτιμο και αξιόπιστο συνεργάτη σε κάθε επαγγελματικό πεδίο που θα επιλέξει.',
   'Christos (Kitsos) Orfanopoulos has for a number of years been a volunteer at the Christian Youth Foundation "Pantokrator" of Paleo Faliro, of which I happen to be Vice-President since 2020. During 2021 and 2022 he served as Director of the Foundation, a post he filled in exemplary fashion, leaving behind him significant work and a valuable legacy for those who followed, through the steps he took towards the renovation, upgrading and modernisation of the building infrastructure and of the Foundation’s operations in general.':
     'Ο Χρήστος (Κίτσος) Ορφανόπουλος υπήρξε επί σειρά ετών εθελοντής στο Χριστιανικό Ίδρυμα Νεότητας «Παντοκράτωρ» του Παλαιού Φαλήρου, του οποίου τυγχάνω Αντιπρόεδρος από το 2020. Κατά τα έτη 2021 και 2022 διετέλεσε Διευθυντής του Ιδρύματος, θέση την οποία κάλυψε με υποδειγματικό τρόπο, αφήνοντας πίσω του σημαντικό έργο και πολύτιμη παρακαταθήκη για τους επόμενους, μέσα από τα βήματα που έκανε για την ανακαίνιση, την αναβάθμιση και τον εκσυγχρονισμό των κτιριακών υποδομών και της λειτουργίας του Ιδρύματος γενικότερα.',
-  'Specifically, when a vacancy arose in the Foundation’s Directorship in 2021, I turned to young Christos, then a student at the National Technical University of Athens, and proposed that he take on the Director’s post — because we considered that his bearing, the traits of his character, the particular quality of his personality, his abilities and above all his warm love for the Foundation made him right for the role. Indeed, when after a year and a half he had to end his work with us, because he had completed his studies and had to fulfil his military obligations, his overall contribution had far exceeded our expectations. The field of his activities was broad, running from the maintenance and management of the premises through to the organisation of events, making the most of the volunteers, and the management of digital media.':
-    'Συγκεκριμένα, όταν το 2021 κενώθηκε η θέση της Διεύθυνσης του Ιδρύματος, απευθύνθηκα στον νεαρό Χρήστο, τότε φοιτητή του Εθνικού Μετσοβίου Πολυτεχνείου, και του πρότεινα να αναλάβει τη θέση του Διευθυντή — διότι θεωρήσαμε ότι το παράστημά του, τα γνωρίσματα του χαρακτήρα του, η ιδιαίτερη ποιότητα της προσωπικότητάς του, οι ικανότητές του και πάνω από όλα η θερμή του αγάπη για το Ίδρυμα τον καθιστούσαν κατάλληλο για τον ρόλο. Πράγματι, όταν μετά από ενάμιση χρόνο χρειάστηκε να τερματίσει τη συνεργασία του μαζί μας, επειδή είχε ολοκληρώσει τις σπουδές του και όφειλε να εκπληρώσει τις στρατιωτικές του υποχρεώσεις, η συνολική του συνεισφορά είχε ξεπεράσει κατά πολύ τις προσδοκίες μας. Το πεδίο των δραστηριοτήτων του υπήρξε ευρύ, από τη συντήρηση και τη διαχείριση των εγκαταστάσεων μέχρι την οργάνωση εκδηλώσεων, την αξιοποίηση των εθελοντών και τη διαχείριση των ψηφιακών μέσων.',
+  'Specifically, when a vacancy arose in the Foundation’s Directorship in 2021, I turned to young Christos, then a student at the National Technical University of Athens, and proposed that he take on the Director’s post, because we considered that his bearing, the traits of his character, the particular quality of his personality, his abilities and above all his warm love for the Foundation made him right for the role. Indeed, when after a year and a half he had to end his work with us, because he had completed his studies and had to fulfil his military obligations, his overall contribution had far exceeded our expectations. The field of his activities was broad, running from the maintenance and management of the premises through to the organisation of events, making the most of the volunteers, and the management of digital media.':
+    'Συγκεκριμένα, όταν το 2021 κενώθηκε η θέση της Διεύθυνσης του Ιδρύματος, απευθύνθηκα στον νεαρό Χρήστο, τότε φοιτητή του Εθνικού Μετσοβίου Πολυτεχνείου, και του πρότεινα να αναλάβει τη θέση του Διευθυντή, διότι θεωρήσαμε ότι το παράστημά του, τα γνωρίσματα του χαρακτήρα του, η ιδιαίτερη ποιότητα της προσωπικότητάς του, οι ικανότητές του και πάνω από όλα η θερμή του αγάπη για το Ίδρυμα τον καθιστούσαν κατάλληλο για τον ρόλο. Πράγματι, όταν μετά από ενάμιση χρόνο χρειάστηκε να τερματίσει τη συνεργασία του μαζί μας, επειδή είχε ολοκληρώσει τις σπουδές του και όφειλε να εκπληρώσει τις στρατιωτικές του υποχρεώσεις, η συνολική του συνεισφορά είχε ξεπεράσει κατά πολύ τις προσδοκίες μας. Το πεδίο των δραστηριοτήτων του υπήρξε ευρύ, από τη συντήρηση και τη διαχείριση των εγκαταστάσεων μέχρι την οργάνωση εκδηλώσεων, την αξιοποίηση των εθελοντών και τη διαχείριση των ψηφιακών μέσων.',
   'He was highly organised, focused on his duties, hard-working and conscientious, and kept us regularly informed of everything he did. He continually took on new initiatives and always tried to address the cause of whatever problems he found in the Foundation’s running. He kept good relations with the children of the Foundation, whom he had been called to educate and look after during their time on the premises. He talked with them and took an interest in their problems, and moreover guided them with useful advice, and had succeeded in being trusted and heeded by them. By character he was approachable, welcoming, friendly and particularly likeable.':
     'Υπήρξε άκρως οργανωτικός, προσηλωμένος στα καθήκοντά του, εργατικός και ευσυνείδητος, και μας κρατούσε τακτικά ενήμερους για καθετί που έκανε. Αναλάμβανε συνεχώς νέες πρωτοβουλίες και προσπαθούσε πάντοτε να αντιμετωπίσει την αιτία όποιων προβλημάτων εντόπιζε στη λειτουργία του Ιδρύματος. Διατηρούσε καλές σχέσεις με τα παιδιά του Ιδρύματος, τα οποία είχε κληθεί να εκπαιδεύσει και να φροντίσει κατά την παραμονή τους στις εγκαταστάσεις. Συνομιλούσε μαζί τους και ενδιαφερόταν για τα προβλήματά τους, τα καθοδηγούσε δε με χρήσιμες συμβουλές, και είχε καταφέρει να τον εμπιστεύονται και να τον ακούν. Ως χαρακτήρας ήταν προσιτός, φιλόξενος, φιλικός και ιδιαίτερα συμπαθής.',
   'Christos is distinguished by his sincerity, his discipline and his dedication to every task he undertakes to see through. He is modest, serious, dignified, and a person who inspires trust. I consider Christos Orfanopoulos to be a worthy scientist and a capable professional, and I judge that he will prove useful, effective and indispensable, bringing significant benefit to any business working environment.':
     'Ο Χρήστος διακρίνεται για την ειλικρίνειά του, την πειθαρχία του και την αφοσίωσή του σε κάθε έργο που αναλαμβάνει να φέρει εις πέρας. Είναι μετριόφρων, σοβαρός, αξιοπρεπής, και άνθρωπος που εμπνέει εμπιστοσύνη. Θεωρώ τον Χρήστο Ορφανόπουλο άξιο επιστήμονα και ικανό επαγγελματία, και κρίνω ότι θα αποδειχθεί χρήσιμος, αποτελεσματικός και αναντικατάστατος, προσφέροντας σημαντικό όφελος σε κάθε επιχειρησιακό εργασιακό περιβάλλον.',
 
   /* ----------------------------- Campus life -------------------------- */
-  'Students’ representative and leader of the Independent ECE Students.':
-    'Εκπρόσωπος φοιτητών και επικεφαλής των Ανεξάρτητων Φοιτητών ΗΜΜΥ.',
-  'Teaching the year below': 'Διδασκαλία στο μικρότερο έτος',
+  'Five-year integrated Master of Engineering in the School of Electrical and Computer Engineering, the most competitive school in Greece to get into, where only the top entrance-exam grades make it.':
+    'Πενταετές ενιαίο δίπλωμα Master of Engineering στη Σχολή Ηλεκτρολόγων Μηχανικών και Μηχανικών Υπολογιστών, η πιο ανταγωνιστική σχολή της Ελλάδας στην εισαγωγή, όπου περνούν μόνο οι κορυφαίες βαθμολογίες των πανελληνίων.',
+  'Finished in the five years the programme is designed for; the average student takes about seven and a half.':
+    'Ολοκληρώθηκε στα πέντε χρόνια που προβλέπει το πρόγραμμα· ο μέσος φοιτητής χρειάζεται περίπου εφτάμισι.',
+  'Worked alongside the degree from the third year: part-time at first, then full-time as Director of the "Pantokrator" Foundation through the fourth and fifth.':
+    'Δούλευε παράλληλα με τις σπουδές από το τρίτο έτος: μερική απασχόληση στην αρχή, μετά πλήρης ως Διευθυντής του Ιδρύματος «Παντοκράτωρ» στο τέταρτο και το πέμπτο.',
+  'The Independent movement': 'Το Ανεξάρτητο κίνημα',
+  'In his third year the faculty assemblies were being run by party-political groups with their own interests, and the students’ own problems were not getting a hearing. He and a few others founded an independent movement of ECE students, to get real representation by democratic means and to solve students’ issues rather than political ones.':
+    'Στο τρίτο του έτος οι Γενικές Συνελεύσεις της Σχολής κυριαρχούνταν από κομματικές παρατάξεις με δικά τους συμφέροντα, και τα πραγματικά προβλήματα των φοιτητών δεν ακούγονταν. Μαζί με λίγους ακόμη ίδρυσε ένα ανεξάρτητο κίνημα φοιτητών ΗΜΜΥ, για πραγματική εκπροσώπηση με δημοκρατικά μέσα και για λύσεις σε φοιτητικά ζητήματα, όχι πολιτικά.',
+  'Petition signatures': 'Υπογραφές στο ψήφισμα',
+  'Collected in': 'Μαζεύτηκαν σε',
+  '2 days': '2 μέρες',
+  'Spoke in front of': 'Μίλησε μπροστά σε',
+  '800 people': '800 άτομα',
+  'Independent representative': 'Ανεξάρτητος εκπρόσωπος',
+  '2 years': '2 χρόνια',
+  'Ran a petition that more than 700 students signed in two days.':
+    'Οργάνωσε ψήφισμα που υπέγραψαν πάνω από 700 φοιτητές σε δύο μέρες.',
+  'Spoke at the councils and at a general meeting of 800.':
+    'Μίλησε στα συμβούλια και σε γενική συνέλευση 800 ατόμων.',
+  'Appointed by the Dean of the School as independent students’ representative, and served two years in the open, always saying what he was doing, and why.':
+    'Ορίστηκε από τον Κοσμήτορα της Σχολής ανεξάρτητος εκπρόσωπος των φοιτητών, και υπηρέτησε δύο χρόνια με διαφάνεια, λέγοντας πάντα τι έκανε, και γιατί.',
+  'Campaigned for e-voting and for keeping party politics out of the assembly; took real hostility from groups outside the student body, and kept going anyway.':
+    'Αγωνίστηκε για ηλεκτρονική ψηφοφορία και για να μείνουν τα κόμματα έξω από τη συνέλευση· δέχτηκε πραγματική εχθρότητα από ομάδες εκτός της φοιτητικής κοινότητας, και συνέχισε παρ’ όλα αυτά.',
   'Volunteering on campus': 'Εθελοντισμός στη σχολή',
-  'Campaigned for the establishment of e-voting':
-    'Αγωνίστηκε για την καθιέρωση της ηλεκτρονικής ψηφοφορίας',
-  'Pushed for the depoliticization of the university':
-    'Πίεσε για την απο-κομματικοποίηση του πανεπιστημίου',
-  'Represented fellow students in faculty assemblies — listening to all sides and reporting back continuously':
-    'Εκπροσώπησε τους συμφοιτητές του στις συνελεύσεις της Σχολής — ακούγοντας όλες τις πλευρές και ενημερώνοντας διαρκώς',
-  'Took real hostility from groups outside the student body, and kept going anyway':
-    'Δέχτηκε πραγματική εχθρότητα από ομάδες εκτός της φοιτητικής κοινότητας, και συνέχισε παρ’ όλα αυτά',
-  'Assisted in the first-year programming laboratories':
-    'Βοήθησε στα εργαστήρια προγραμματισμού του πρώτου έτους',
-  'Answered younger students’ questions and published his own notes online':
-    'Απαντούσε στις απορίες των νεότερων φοιτητών και δημοσίευσε τις σημειώσεις του διαδικτυακά',
-  'Wrote a many-page "survival guide" covering every compulsory course in the School':
-    'Έγραψε έναν πολυσέλιδο «οδηγό επιβίωσης» για κάθε υποχρεωτικό μάθημα της Σχολής',
+
+  /* --------------------------- The Survival Guide --------------------- */
+  'The Survival Guide': 'Ο Οδηγός Επιβίωσης',
+  'A hundred and ten pages for new students: what each compulsory course is, how it is run, how it is examined, and how to get through it, written while he was getting through it himself. Years later it is still passed from year to year, and some of the students reading it are not sure the author was real.':
+    'Εκατόν δέκα σελίδες για τους νέους φοιτητές: τι είναι κάθε υποχρεωτικό μάθημα, πώς γίνεται, πώς εξετάζεται, και πώς το περνάς, γραμμένες όσο το περνούσε ο ίδιος. Χρόνια μετά δίνεται ακόμη από έτος σε έτος, και κάποιοι από όσους τον διαβάζουν δεν είναι σίγουροι ότι ο συγγραφέας υπήρξε.',
+  Pages: 'Σελίδες',
+  Courses: 'Μαθήματα',
+  'Every compulsory one': 'Κάθε υποχρεωτικό',
+  'Still in use': 'Σε χρήση ακόμη',
+  'Years later': 'Χρόνια μετά',
+  'Teaching the year below': 'Διδασκαλία στο μικρότερο έτος',
+  'Assisted in the first-year programming laboratories as a lab instructor.':
+    'Βοήθησε στα εργαστήρια προγραμματισμού του πρώτου έτους ως βοηθός εργαστηρίου.',
+  'Took part in class, uploaded his notes, and posted worked solutions on the student forums.':
+    'Συμμετείχε στα μαθήματα, ανέβαζε τις σημειώσεις του, και δημοσίευε λυμένες ασκήσεις στα φοιτητικά forum.',
+  'Many projects along the way, and the diploma thesis: a phone application that watches a movement through a neural network, recognises it and assesses how well it was performed.':
+    'Πολλές εργασίες στη διαδρομή, και η διπλωματική: μια εφαρμογή για κινητό που παρακολουθεί μια κίνηση μέσα από νευρωνικό δίκτυο, την αναγνωρίζει και αξιολογεί πόσο καλά εκτελέστηκε.',
+
+  /* ----------------------------- The transcript ----------------------- */
+  'The transcript': 'Η αναλυτική βαθμολογία',
+  'Course average': 'Μέσος όρος μαθημάτων',
+  'Diploma thesis': 'Διπλωματική',
+  Overall: 'Γενικός μέσος όρος',
+  'Time to finish': 'Χρόνος ολοκλήρωσης',
+  '5 years': '5 χρόνια',
+  'Semester 1': 'Εξάμηνο 1',
+  'Semester 2': 'Εξάμηνο 2',
+  'Semester 3': 'Εξάμηνο 3',
+  'Semester 4': 'Εξάμηνο 4',
+  'Semester 5': 'Εξάμηνο 5',
+  'Semester 6': 'Εξάμηνο 6',
+  'Semester 7': 'Εξάμηνο 7',
+  'Semester 8': 'Εξάμηνο 8',
+  'Semester 9': 'Εξάμηνο 9',
+  'Introduction to Programming · 10': 'Εισαγωγή στον Προγραμματισμό · 10',
+  'Logic Design · 10': 'Λογική Σχεδίαση Ψηφιακών Συστημάτων · 10',
+  'Linear Algebra · 10': 'Γραμμική Άλγεβρα · 10',
+  'Physics · 8': 'Φυσική · 8',
+  'Calculus I · 7': 'Μαθηματική Ανάλυση Ι · 7',
+  'History · 10': 'Ιστορία · 10',
+  'Programming Techniques · 10': 'Τεχνικές Προγραμματισμού · 10',
+  'Electric Circuits · 10': 'Ηλεκτρικά Κυκλώματα · 10',
+  'Electrical Engineering Materials · 10': 'Ηλεκτροτεχνικά Υλικά · 10',
+  'Differential Equations · 9': 'Διαφορικές Εξισώσεις · 9',
+  'Calculus II · 6': 'Μαθηματική Ανάλυση ΙΙ · 6',
+  'Engineering Mechanics · 10': 'Τεχνική Μηχανική · 10',
+  'Electrical Measurements · 10': 'Ηλεκτρικές Μετρήσεις · 10',
+  'Logic Design Lab · 9': 'Εργαστήριο Λογικής Σχεδίασης · 9',
+  'Foundations of Computer Science · 7':
+    'Θεμελιώσεις Επιστήμης Υπολογιστών · 7',
+  'Signals & Systems · 7': 'Σήματα και Συστήματα · 7',
+  'Probability & Statistics · 6': 'Πιθανότητες και Στατιστική · 6',
+  'Computer Organisation · 9': 'Οργάνωση Υπολογιστών · 9',
+  'Communication Networks · 10': 'Δίκτυα Επικοινωνιών · 10',
+  'Waves & Quantum Physics · 6': 'Κυματική και Κβαντική Φυσική · 6',
+  'Stochastic Processes · Pass': 'Στοχαστικές Διαδικασίες · Επιτυχώς',
+  'Electronics I · 7': 'Ηλεκτρονική Ι · 7',
+  'Electromagnetic Fields A · 5': 'Ηλεκτρομαγνητικά Πεδία Α · 5',
+  'Discrete Mathematics · 7': 'Διακριτά Μαθηματικά · 7',
+  'English · 10': 'Αγγλικά · 10',
+  'Industrial Electronics · 6': 'Βιομηχανική Ηλεκτρονική · 6',
+  'Telecommunications · 5': 'Τηλεπικοινωνίες · 5',
+  'Computer Architecture · 7': 'Αρχιτεκτονική Υπολογιστών · 7',
+  'Control Systems · 6': 'Συστήματα Αυτομάτου Ελέγχου · 6',
+  'Electric Power Systems · 5': 'Συστήματα Ηλεκτρικής Ενέργειας · 5',
+  'Electromagnetic Fields B · 5': 'Ηλεκτρομαγνητικά Πεδία Β · 5',
+  'Network & Circuit Theory · 6': 'Θεωρία Δικτύων και Κυκλωμάτων · 6',
+  'Operating Systems · 10': 'Λειτουργικά Συστήματα · 10',
+  'Microcomputers · 8': 'Μικροϋπολογιστές · 8',
+  'Programming Languages I · 6': 'Γλώσσες Προγραμματισμού Ι · 6',
+  'Databases · Pass': 'Βάσεις Δεδομένων · Επιτυχώς',
+  'Queueing Systems · 5': 'Συστήματα Αναμονής · 5',
+  'Management Systems · 9': 'Συστήματα Διοίκησης · 9',
+  'Electrical Drawing · Pass': 'Ηλεκτρολογικό Σχέδιο · Επιτυχώς',
+  'Human–Computer Interaction · 10': 'Αλληλεπίδραση Ανθρώπου–Υπολογιστή · 10',
+  'Multimedia · 10': 'Πολυμέσα · 10',
+  'Operating Systems Lab · 6': 'Εργαστήριο Λειτουργικών Συστημάτων · 6',
+  'Algorithms · 6': 'Αλγόριθμοι · 6',
+  'Software Engineering · 8': 'Τεχνολογία Λογισμικού · 8',
+  'Computer Networks · 8': 'Δίκτυα Υπολογιστών · 8',
+  'Decision Support Systems · 8': 'Συστήματα Αποφάσεων · 8',
+  'Advanced Computer Architecture · 8':
+    'Προηγμένα Θέματα Αρχιτεκτονικής Υπολογιστών · 8',
+  'Software as a Service · 9': 'Τεχνολογίες Υπηρεσιών Λογισμικού · 9',
+  'Internet Protocols · Pass': 'Πρωτόκολλα Διαδικτύου · Επιτυχώς',
+  'Security · 7': 'Ασφάλεια · 7',
+  'Forecasting Techniques · 8': 'Τεχνικές Προβλέψεων · 8',
+  'Digital Enterprise Management · 9': 'ΔΨΕ · 9',
+  'Electromagnetic Compatibility · 10': 'Ηλεκτρομαγνητική Συμβατότητα · 10',
+  'Neural Networks · 6': 'Νευρωνικά Δίκτυα · 6',
+  'Information Systems · 10': 'Πληροφοριακά Συστήματα · 10',
+  'Advanced Databases · 7': 'Προχωρημένες Βάσεις Δεδομένων · 7',
   'European Researchers’ Night, NTUA (2019)': 'Βραδιά του Ερευνητή, ΕΜΠ (2019)',
   '100 years of ECE celebration, NTUA (2017)':
     'Εορτασμός 100 χρόνων ΗΜΜΥ, ΕΜΠ (2017)',
 
   /* -------------------------------- Work ------------------------------ */
-  'Veltiston AI — two and a half years': 'Veltiston AI — δυόμισι χρόνια',
-  'Joined an AI healthcare startup founded by MIT Professor Dimitris Bertsimas as one of its first engineers, and grew into Technical Lead of the flagship Nurse Scheduling platform — concept to production, with teams across Greece, Boston and Morocco.':
-    'Μπήκε σε μια startup τεχνητής νοημοσύνης για την υγεία, ιδρυμένη από τον καθηγητή του MIT Δημήτρη Μπερτσιμά, ως ένας από τους πρώτους μηχανικούς της, και εξελίχθηκε σε Technical Lead της ναυαρχίδας της, της πλατφόρμας Nurse Scheduling — από τη σύλληψη ως την παραγωγή, με ομάδες σε Ελλάδα, Βοστώνη και Μαρόκο.',
+  'Veltiston AI, two and a half years': 'Veltiston AI, δυόμισι χρόνια',
+  'Joined an AI healthcare startup founded by MIT Professor Dimitris Bertsimas as one of its first engineers, and grew into Technical Lead of the flagship Nurse Scheduling platform, concept to production, with teams across Greece, Boston and Morocco.':
+    'Μπήκε σε μια startup τεχνητής νοημοσύνης για την υγεία, ιδρυμένη από τον καθηγητή του MIT Δημήτρη Μπερτσιμά, ως ένας από τους πρώτους μηχανικούς της, και εξελίχθηκε σε Technical Lead της ναυαρχίδας της, της πλατφόρμας Nurse Scheduling, από τη σύλληψη ως την παραγωγή, με ομάδες σε Ελλάδα, Βοστώνη και Μαρόκο.',
   'Veltiston AI · Athens, hybrid': 'Veltiston AI · Αθήνα, υβριδικά',
   'May 2026 – present': 'Μάιος 2026 – σήμερα',
   'Full-stack Software Engineer': 'Full-stack Software Engineer',
@@ -313,8 +546,8 @@ export const PROFILE: Record<string, string> = {
     'Αρχιτεκτονική ασφάλειας και διαχείρισης δεδομένων σύμφωνη με το HIPAA σε όλα τα παραπάνω.',
   'Selected for the IBM Associate Program, training in DevOps and integration.':
     'Επιλεγμένος για το IBM Associate Program, με εκπαίδευση σε DevOps και ενσωματώσεις.',
-  'Worked on the Cosmos Project at the National Bank of Greece — a core banking transformation migrating legacy PL/I and COBOL systems to Infosys Finacle.':
-    'Εργάστηκε στο έργο Cosmos της Εθνικής Τράπεζας της Ελλάδος — μετασχηματισμός του βασικού τραπεζικού συστήματος με μετάβαση από PL/I και COBOL στο Infosys Finacle.',
+  'Worked on the Cosmos Project at the National Bank of Greece, a core banking transformation migrating legacy PL/I and COBOL systems to Infosys Finacle.':
+    'Εργάστηκε στο έργο Cosmos της Εθνικής Τράπεζας της Ελλάδος, μετασχηματισμός του βασικού τραπεζικού συστήματος με μετάβαση από PL/I και COBOL στο Infosys Finacle.',
   'Coordinated integration calls across bank subsystems to support Finacle onboarding.':
     'Συντόνισε τις συσκέψεις ενσωμάτωσης μεταξύ των υποσυστημάτων της τράπεζας για την υποστήριξη της μετάβασης στο Finacle.',
   'Designed integration architecture for both the transitional coexistence state and the target state.':
@@ -337,8 +570,8 @@ export const PROFILE: Record<string, string> = {
   /* -------------------------------- Army ------------------------------ */
   'Reservist Second Lieutenant, Special Forces':
     'Έφεδρος Ανθυπολοχαγός, Ειδικές Δυνάμεις',
-  'Hellenic Armed Forces — 575 Marine Battalion':
-    'Ελληνικές Ένοπλες Δυνάμεις — 575 Τάγμα Πεζοναυτών',
+  'Hellenic Armed Forces, 575 Marine Battalion':
+    'Ελληνικές Ένοπλες Δυνάμεις, 575 Τάγμα Πεζοναυτών',
   'September 2022 – 22 November 2023': 'Σεπτέμβριος 2022 – 22 Νοεμβρίου 2023',
   'What the job actually was': 'Τι ήταν στην πραγματικότητα η δουλειά',
   'Same discipline, different terrain: stand-ups instead of formations, on-call instead of watch.':
@@ -347,8 +580,8 @@ export const PROFILE: Record<string, string> = {
     'Βασική εκπαίδευση στο Κέντρο Εκπαίδευσης Ειδικών Δυνάμεων, Νέα Πέραμος.',
   'Graduated 3rd in class from the Infantry Reserve Officers School, Heraklion.':
     'Αποφοίτησε 3ος της σειράς του από τη Σχολή Εφέδρων Αξιωματικών Πεζικού, Ηράκλειο.',
-  'Completed the Rangers’ Basic Training School — Guerilla Warfare School, Rentina.':
-    'Ολοκλήρωσε τη Βασική Σχολή Καταδρομών — Σχολείο Ανταρτοπολέμου, Ρεντίνα.',
+  'Completed the Rangers’ Basic Training School (Guerilla Warfare School), Rentina.':
+    'Ολοκλήρωσε τη Βασική Σχολή Καταδρομών (Σχολείο Ανταρτοπολέμου), Ρεντίνα.',
   'Reported to the 575 Marine Battalion as an Officer Designate on 11 February 2023.':
     'Παρουσιάστηκε στο 575 Τάγμα Πεζοναυτών ως Δόκιμος Αξιωματικός στις 11 Φεβρουαρίου 2023.',
   'Served as Platoon Leader and Weapons Officer for a Marine Company, and as Deputy Company Commander.':
@@ -371,8 +604,8 @@ export const PROFILE: Record<string, string> = {
     'Χριστιανικό Ίδρυμα Νεότητας «Παντοκράτωρ» · Παλαιό Φάληρο',
   'February 2021 – September 2022': 'Φεβρουάριος 2021 – Σεπτέμβριος 2022',
   'Still going': 'Συνεχίζονται',
-  'Appointed by the foundation’s council after years as a volunteer, while finishing the degree — the Vice-President approached him directly to fill the vacancy.':
-    'Διορίστηκε από το συμβούλιο του ιδρύματος μετά από χρόνια ως εθελοντής, ενώ τελείωνε τη σχολή — ο Αντιπρόεδρος απευθύνθηκε προσωπικά σε αυτόν για να καλύψει τη θέση.',
+  'Appointed by the foundation’s council after years as a volunteer, while finishing the degree. The Vice-President approached him directly to fill the vacancy.':
+    'Διορίστηκε από το συμβούλιο του ιδρύματος μετά από χρόνια ως εθελοντής, ενώ τελείωνε τη σχολή. Ο Αντιπρόεδρος απευθύνθηκε προσωπικά σε αυτόν για να καλύψει τη θέση.',
   'Renovated, upgraded and modernised the building infrastructure and the foundation’s day-to-day operations.':
     'Ανακαίνισε, αναβάθμισε και εκσυγχρόνισε τις κτιριακές υποδομές και την καθημερινή λειτουργία του ιδρύματος.',
   'Supervised and taught the children in the foundation’s programmes.':
@@ -393,16 +626,16 @@ export const PROFILE: Record<string, string> = {
   'Facility management': 'Διαχείριση εγκαταστάσεων',
   'Event management': 'Διοργάνωση εκδηλώσεων',
   'Financial oversight': 'Οικονομική εποπτεία',
-  'Leading volunteer at the same foundation — 2017–2021 and 2023 to today':
-    'Επικεφαλής εθελοντής στο ίδιο ίδρυμα — 2017–2021 και από το 2023 ως σήμερα',
-  'Children’s tutor in Robotics at Citylab, Alimos — 2020–2021':
-    'Εκπαιδευτής παιδιών στη Ρομποτική στο Citylab, Άλιμος — 2020–2021',
+  'Leading volunteer at the same foundation, 2017–2021 and 2023 to today':
+    'Επικεφαλής εθελοντής στο ίδιο ίδρυμα, 2017–2021 και από το 2023 ως σήμερα',
+  'Children’s tutor in Robotics at Citylab, Alimos, 2020–2021':
+    'Εκπαιδευτής παιδιών στη Ρομποτική στο Citylab, Άλιμος, 2020–2021',
   'Blood donor since 2017': 'Αιμοδότης από το 2017',
 
   /* ------------------------------ The radio --------------------------- */
   'Open channels': 'Ανοιχτά κανάλια',
-  'The Radio Center broadcasts on three frequencies. Pick one and the message goes straight to me — no operator in between.':
-    'Το Ραδιοφωνικό Κέντρο εκπέμπει σε τρεις συχνότητες. Διάλεξε μία και το μήνυμα έρχεται κατευθείαν σε μένα — χωρίς κανέναν χειριστή στη μέση.',
+  'The Radio Center broadcasts on three frequencies. Pick one and the message goes straight to me, with no operator in between.':
+    'Το Ραδιοφωνικό Κέντρο εκπέμπει σε τρεις συχνότητες. Διάλεξε μία και το μήνυμα έρχεται κατευθείαν σε μένα, χωρίς κανέναν χειριστή στη μέση.',
 
   /* -------------------------- The keeper’s logbook -------------------- */
   'Nine years of building things other people depend on: five at NTUA, one in uniform, half a year at IBM inside a bank, and two and a half leading platform work at an AI healthcare startup whose software now runs in four U.S. hospitals. One published paper along the way.':
@@ -421,22 +654,22 @@ export const PROFILE: Record<string, string> = {
     'Δύσκολα προβλήματα με πραγματικούς χρήστες από πίσω, μια ομάδα που κάνει ειλικρινή review ο ένας στον άλλο, και αρκετή ιδιοκτησία ώστε να διορθώνεις την αιτία αντί για το σύμπτωμα. Εξ αποστάσεως, υβριδικά ή στην Αθήνα.',
   'If the island convinced you, the Radio Center is a two-minute walk south.':
     'Αν σε έπεισε το νησί, το Ραδιοφωνικό Κέντρο απέχει δύο λεπτά με τα πόδια προς τον νότο.',
-  'Owning a system end to end — schema, service, API, UI, pipeline, dashboard — instead of one slice of it.':
-    'Να έχω ένα σύστημα από άκρη σε άκρη — σχήμα, υπηρεσία, API, διεπαφή, pipeline, dashboard — αντί για μία φέτα του.',
+  'Owning a system end to end (schema, service, API, UI, pipeline, dashboard) instead of one slice of it.':
+    'Να έχω ένα σύστημα από άκρη σε άκρη (σχήμα, υπηρεσία, API, διεπαφή, pipeline, dashboard) αντί για μία φέτα του.',
   'Taking a legacy codebase nobody wants to touch and making it shippable again, in increments, without a rewrite.':
     'Να παίρνω έναν παλιό κώδικα που κανείς δεν θέλει να αγγίξει και να τον ξανακάνω παραδοτέο, σταδιακά, χωρίς να τον ξαναγράψω.',
   'Leading engineers across time zones: reviews that teach, sprints that finish, decisions that are written down.':
     'Να ηγούμαι μηχανικών σε διαφορετικές ζώνες ώρας: review που διδάσκουν, sprint που τελειώνουν, αποφάσεις που καταγράφονται.',
-  'Working where correctness is not negotiable — healthcare data, HIPAA, audit trails, Epic and FHIR integrations.':
-    'Να δουλεύω εκεί όπου η ορθότητα δεν είναι διαπραγματεύσιμη — δεδομένα υγείας, HIPAA, ίχνη ελέγχου, ενσωματώσεις Epic και FHIR.',
+  'Working where correctness is not negotiable: healthcare data, HIPAA, audit trails, Epic and FHIR integrations.':
+    'Να δουλεύω εκεί όπου η ορθότητα δεν είναι διαπραγματεύσιμη: δεδομένα υγείας, HIPAA, ίχνη ελέγχου, ενσωματώσεις Epic και FHIR.',
   'Translating between hospital stakeholders, product and engineering without losing detail in either direction.':
     'Να μεταφράζω ανάμεσα στους εμπλεκόμενους των νοσοκομείων, το προϊόν και τη μηχανική χωρίς να χάνεται λεπτομέρεια προς καμία κατεύθυνση.',
 
   /* ------------------------------ The family -------------------------- */
   'Seven of us: my father, my mother, three brothers, my sister and me. One bathroom, one table, and never a quiet evening in the whole of it.':
     'Επτά μας: ο πατέρας μου, η μητέρα μου, τρία αδέλφια, η αδελφή μου και εγώ. Ένα μπάνιο, ένα τραπέζι, και ούτε ένα ήσυχο βράδυ σε όλα αυτά.',
-  'A big family is a small organisation. Nobody hands you a role — you find the thing that needs doing and you do it, because if you wait for somebody else the thing does not get done. That is the whole of it, and I have not found a team since where it was not also true.':
-    'Μια μεγάλη οικογένεια είναι ένας μικρός οργανισμός. Κανείς δεν σου δίνει ρόλο — βρίσκεις αυτό που πρέπει να γίνει και το κάνεις, γιατί αν περιμένεις κάποιον άλλο δεν θα γίνει. Αυτό είναι όλο, και δεν έχω βρει από τότε ομάδα όπου να μην ισχύει κι εκεί.',
+  'A big family is a small organisation. Nobody hands you a role. You find the thing that needs doing and you do it, because if you wait for somebody else the thing does not get done. That is the whole of it, and I have not found a team since where it was not also true.':
+    'Μια μεγάλη οικογένεια είναι ένας μικρός οργανισμός. Κανείς δεν σου δίνει ρόλο. Βρίσκεις αυτό που πρέπει να γίνει και το κάνεις, γιατί αν περιμένεις κάποιον άλλο δεν θα γίνει. Αυτό είναι όλο, και δεν έχω βρει από τότε ομάδα όπου να μην ισχύει κι εκεί.',
   'My siblings were my first friends, and they are still the ones who knew me before I had anything to show.':
     'Τα αδέλφια μου ήταν οι πρώτοι μου φίλοι, και είναι ακόμη αυτοί που με ήξεραν πριν έχω τίποτα να δείξω.',
   'Responsibility, because with five children something is always somebody’s job and often it was mine':
@@ -455,16 +688,16 @@ export const PROFILE: Record<string, string> = {
     'Τα μαστορέματα είναι ο ίδιος βρόχος με τη μηχανική, με πιο σύντομο κύκλο ανατροφοδότησης και χειρότερες συνέπειες: μέτρα, κόψε, ανακάλυψε ότι ο τοίχος δεν είναι ίσιος, προσαρμόσου. Τίποτα δεν σου μαθαίνει να σέβεσαι μια ανοχή όσο ένα ράφι που δεν κάθεται αλφάδι.',
   'The rest of the hobbies live somewhere between here and the front door: running and cycling, where the thinking happens somewhere around kilometre six; hiking and camping, usually somewhere with no signal; chess, badly but stubbornly; and theater, from the audience these days.':
     'Τα υπόλοιπα ενδιαφέροντα ζουν κάπου ανάμεσα σε εδώ και την εξώπορτα: τρέξιμο και ποδήλατο, όπου η σκέψη γίνεται κάπου στο έκτο χιλιόμετρο· πεζοπορία και κάμπινγκ, συνήθως κάπου χωρίς σήμα· σκάκι, άσχημα αλλά πεισματικά· και θέατρο, από την πλατεία πια.',
-  'Wood, mostly — shelving, tables, whatever the flat needs':
-    'Ξύλο, κυρίως — ράφια, τραπέζια, ό,τι χρειάζεται το σπίτι',
+  'Wood, mostly: shelving, tables, whatever the flat needs':
+    'Ξύλο, κυρίως: ράφια, τραπέζια, ό,τι χρειάζεται το σπίτι',
   'The bicycle gets stripped and rebuilt more often than it strictly needs':
     'Το ποδήλατο λύνεται και ξαναχτίζεται πιο συχνά απ’ όσο χρειάζεται στ’ αλήθεια',
   'Every tool goes back on the board, which took years to become true':
     'Κάθε εργαλείο επιστρέφει στο ταμπλό, κάτι που χρειάστηκε χρόνια για να γίνει αλήθεια',
 
   /* -------------------------------- Lab ------------------------------- */
-  'A mini server in the corner running Linux, and enough electronics on the bench to make something blink by the end of an evening. It is not a showpiece — it is where I try the thing before I trust it at work.':
-    'Ένας μικρός σέρβερ στη γωνία με Linux, και αρκετά ηλεκτρονικά στον πάγκο ώστε να κάνεις κάτι να αναβοσβήνει μέχρι το τέλος του βραδιού. Δεν είναι βιτρίνα — είναι εκεί που δοκιμάζω κάτι πριν το εμπιστευτώ στη δουλειά.',
+  'A mini server in the corner running Linux, and enough electronics on the bench to make something blink by the end of an evening. It is not a showpiece. It is where I try the thing before I trust it at work.':
+    'Ένας μικρός σέρβερ στη γωνία με Linux, και αρκετά ηλεκτρονικά στον πάγκο ώστε να κάνεις κάτι να αναβοσβήνει μέχρι το τέλος του βραδιού. Δεν είναι βιτρίνα. Είναι εκεί που δοκιμάζω κάτι πριν το εμπιστευτώ στη δουλειά.',
   'Everything I know about operations I learned by breaking my own machine at eleven at night with nobody to escalate to. You read the logs because there is no one else to read them.':
     'Ό,τι ξέρω για τη λειτουργία συστημάτων το έμαθα χαλώντας το δικό μου μηχάνημα στις έντεκα το βράδυ, χωρίς κανέναν να κλιμακώσω. Διαβάζεις τα logs επειδή δεν υπάρχει κανείς άλλος να τα διαβάσει.',
   'One small Linux box, doing more jobs than it was ever sold to do':
@@ -475,8 +708,8 @@ export const PROFILE: Record<string, string> = {
     'Το μέρος όπου μια κακή ιδέα προλαβαίνει να είναι κακή ιδέα φθηνά',
 
   /* ------------------------------ Bookshelf --------------------------- */
-  'Not many books, and none of them here by accident. These are the ones I have gone back to — Verne is on the shelf across the room, where he has always been.':
-    'Όχι πολλά βιβλία, και κανένα τους εδώ τυχαία. Αυτά είναι εκείνα στα οποία έχω επιστρέψει — ο Βερν είναι στο ράφι απέναντι, εκεί που ήταν πάντα.',
+  'Not many books, and none of them here by accident. These are the ones I have gone back to. Verne is on the shelf across the room, where he has always been.':
+    'Όχι πολλά βιβλία, και κανένα τους εδώ τυχαία. Αυτά είναι εκείνα στα οποία έχω επιστρέψει. Ο Βερν είναι στο ράφι απέναντι, εκεί που ήταν πάντα.',
   'The Gambler': 'Ο Παίκτης',
   'Fyodor Dostoevsky': 'Φιόντορ Ντοστογιέφσκι',
   'On wanting the wrong thing, clearly':
@@ -540,8 +773,8 @@ export const PROFILE: Record<string, string> = {
     'Τρεις άντρες διασχίζουν μια ήπειρο με αερόστατο που δεν μπορούν να κατευθύνουν, με τη λογική ότι μπορείς πάντως να διαλέξεις το ύψος σου. Που είναι και το μεγαλύτερο μέρος της μηχανικής: σπάνια διαλέγεις τον άνεμο.',
   'A coded note, a volcano in Iceland, and an uncle who will not be argued out of it. The first book that made me want to know how something worked badly enough to climb into it.':
     'Ένα κρυπτογραφημένο σημείωμα, ένα ηφαίστειο στην Ισλανδία, και ένας θείος που δεν μεταπείθεται. Το πρώτο βιβλίο που με έκανε να θέλω να μάθω πώς δουλεύει κάτι τόσο πολύ ώστε να μπω μέσα του.',
-  'The twenty thousand leagues are how far the Nautilus travels, not how deep she goes — which everybody gets wrong, and which is the sort of detail I have never been able to leave alone.':
-    'Οι είκοσι χιλιάδες λεύγες είναι το πόσο ταξιδεύει το Ναυτίλος, όχι το πόσο βαθιά πάει — που όλοι το μπερδεύουν, και που είναι ακριβώς το είδος της λεπτομέρειας που ποτέ δεν μπόρεσα να αφήσω ήσυχη.',
+  'The twenty thousand leagues are how far the Nautilus travels, not how deep she goes, which everybody gets wrong, and which is the sort of detail I have never been able to leave alone.':
+    'Οι είκοσι χιλιάδες λεύγες είναι το πόσο ταξιδεύει το Ναυτίλος, όχι το πόσο βαθιά πάει, που όλοι το μπερδεύουν, και που είναι ακριβώς το είδος της λεπτομέρειας που ποτέ δεν μπόρεσα να αφήσω ήσυχη.',
   'Nemo is an engineer with a grievance and unlimited budget. I have met the type.':
     'Ο Νέμο είναι μηχανικός με παράπονο και απεριόριστο προϋπολογισμό. Έχω συναντήσει τον τύπο.',
   'Five men land on a rock with nothing and end up with brick, iron, glass, a telegraph and a boat. It is four hundred pages of working out what you can make from what is actually to hand.':
@@ -566,12 +799,10 @@ export const PROFILE: Record<string, string> = {
     'Κάθε σπίτι πρέπει να έχει ένα δωμάτιο που δεν αφορά κανέναν.',
   'Mario, still, and no apology for it':
     'Ακόμη Mario, και καμία απολογία γι’ αυτό',
-  'Star Wars — the whole thing, arguments about the ordering included':
-    'Star Wars — όλο, μαζί με τους καβγάδες για τη σειρά',
+  'Star Wars, the whole thing, arguments about the ordering included':
+    'Star Wars, όλο, μαζί με τους καβγάδες για τη σειρά',
   'The Marvel run, watched properly and in sequence like a serious person':
     'Όλο το Marvel, δει σωστά και με τη σειρά σαν σοβαρός άνθρωπος',
-  'Ranked 1st in the admission exam (2014).':
-    'Πρώτος στις εισαγωγικές εξετάσεις (2014).',
   'Clinical Research': 'Κλινική έρευνα',
   'Healthcare platforms': 'Πλατφόρμες υγείας',
   'Artificial Neural Networks': 'Τεχνητά νευρωνικά δίκτυα',

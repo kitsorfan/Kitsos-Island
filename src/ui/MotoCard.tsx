@@ -85,7 +85,7 @@ export function MotoCard() {
           <>
             <p className="moto-card__lead">
               The ring road runs right round the town, through the woods and
-              across all seven district roads —{' '}
+              across all seven district roads:{' '}
               <strong>{Math.round(LAP_LENGTH)} metres</strong> of it,{' '}
               {setup.laps === 1 ? 'once' : `${setup.laps} times`}. Three of the
               islanders are on the grid ahead of you, and you start at the back
@@ -208,7 +208,7 @@ export function MotoCard() {
               </li>
               <li>
                 {t(
-                  'Cutting the middle of the island does not shorten the lap — you have to come past every sector of the circuit for it to count.',
+                  'Cutting the middle of the island does not shorten the lap. You have to come past every sector of the circuit for it to count.',
                 )}
               </li>
               <li>
@@ -235,7 +235,7 @@ export function MotoCard() {
             <div className="moto-card__score">
               <div>
                 <span>{t('Finished')}</span>
-                <strong>{ORDINAL[run.place] || '—'}</strong>
+                <strong>{ORDINAL[run.place] || '–'}</strong>
               </div>
               <div>
                 <span>{t('Race time')}</span>
@@ -243,7 +243,7 @@ export function MotoCard() {
               </div>
               <div>
                 <span>{t('Best lap')}</span>
-                <strong>{run.best > 0 ? clock(run.best) : '—'}</strong>
+                <strong>{run.best > 0 ? clock(run.best) : '–'}</strong>
               </div>
             </div>
           </>

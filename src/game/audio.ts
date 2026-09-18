@@ -171,6 +171,133 @@ export function fizz() {
   tone(1568, 0.1, 'triangle', 0.026, 0.08)
 }
 
+/* ------------------------------- applause -------------------------------- */
+
+/**
+ * A room applauding, which is the one sound on the island that is not notes.
+ *
+ * A clap is a burst of broadband noise with almost no tone in it, so this is
+ * built out of noise rather than oscillators: a short buffer of white noise,
+ * bandpassed to take the hiss off the top and the rumble off the bottom, and
+ * enveloped hard — a couple of milliseconds up and forty down. That is one
+ * pair of hands.
+ *
+ * A room is then a few dozen of those scattered over the applause with their
+ * own delays, gains and filter frequencies, because twenty people clapping in
+ * step is a slow handclap and means the opposite of what this means. The
+ * scatter is random rather than seeded: no two ovations are the same one, and
+ * nothing re-renders off it, so there is nothing for a repeat to betray.
+ */
+function clap(ac: AudioContext, at: number, gain: number, hz: number) {
+  const length = Math.floor(ac.sampleRate * 0.05)
+  const buffer = ac.createBuffer(1, length, ac.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < length; i++) {
+    // Noise under a hard decay: the burst is over before it is heard to end.
+    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 7)
+  }
+
+  const source = ac.createBufferSource()
+  source.buffer = buffer
+
+  const band = ac.createBiquadFilter()
+  band.type = 'bandpass'
+  band.frequency.value = hz
+  band.Q.value = 0.8
+
+  const level = ac.createGain()
+  level.gain.value = gain
+
+  source.connect(band).connect(level).connect(ac.destination)
+  source.start(at)
+  source.stop(at + 0.06)
+}
+
+/**
+ * One voice in the cheer: an open vowel with a bit of a rasp on it.
+ *
+ * Filtered noise again rather than an oscillator — a shout has far more air
+ * in it than tone — but bandpassed much lower and much narrower than a clap,
+ * up where a voice sits, and held for the better part of a second with a
+ * slow swell rather than a hard transient. Ten or so of these behind the
+ * hands is the difference between a polite round of applause and a room
+ * that is actually pleased.
+ */
+function shout(ac: AudioContext, at: number, gain: number, hz: number) {
+  const length = Math.floor(ac.sampleRate * 0.9)
+  const buffer = ac.createBuffer(1, length, ac.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1
+
+  const source = ac.createBufferSource()
+  source.buffer = buffer
+
+  // Two narrow bands, which is roughly where the first two formants of an
+  // open vowel sit. One band on its own is a hiss; two is a voice.
+  const one = ac.createBiquadFilter()
+  one.type = 'bandpass'
+  one.frequency.value = hz
+  one.Q.value = 7
+  const two = ac.createBiquadFilter()
+  two.type = 'bandpass'
+  two.frequency.value = hz * 2.7
+  two.Q.value = 5
+
+  const level = ac.createGain()
+  const life = 0.35 + Math.random() * 0.45
+  level.gain.setValueAtTime(0.0001, at)
+  level.gain.exponentialRampToValueAtTime(gain, at + 0.09)
+  level.gain.exponentialRampToValueAtTime(0.0001, at + life)
+
+  source.connect(one)
+  one.connect(two).connect(level).connect(ac.destination)
+  source.start(at)
+  source.stop(at + life + 0.05)
+}
+
+/**
+ * The ovation at the end of the defence: a couple of seconds of a full room,
+ * swelling over the first half second and running down over the last.
+ *
+ * Hands and voices together. The hands carry the rhythm of it and the voices
+ * carry the warmth, and a room that is on its feet has both — applause on
+ * its own is what you get for a talk that finished on time.
+ */
+export function applause() {
+  if (muted || level === 0) return
+  const ac = audioContext()
+  if (!ac) return
+  const now = ac.currentTime
+  const span = 2.6
+  /* Enough hands to read as a room, few enough not to stall a phone. */
+  const hands = 54
+  /* And a handful of voices over them. More than this is a football match. */
+  const voices = 9
+
+  /** Up over the first half second, held, then away over the last third. */
+  const shape = (at: number) => {
+    const swell = Math.min(1, at / 0.5)
+    const fade = at > span * 0.62 ? 1 - (at - span * 0.62) / (span * 0.38) : 1
+    return swell * fade
+  }
+
+  for (let i = 0; i < hands; i++) {
+    const at = Math.random() * span
+    const volume = 0.05 * shape(at) * (0.5 + Math.random() * 0.5) * scale()
+    if (volume < 0.002) continue
+    clap(ac, now + at, volume, 900 + Math.random() * 1700)
+  }
+
+  for (let i = 0; i < voices; i++) {
+    // Voices come in a little after the first hands, the way they do.
+    const at = 0.12 + Math.random() * (span - 0.9)
+    const volume = 0.03 * shape(at) * (0.6 + Math.random() * 0.4) * scale()
+    if (volume < 0.002) continue
+    // Spread across a room of different people.
+    shout(ac, now + at, volume, 290 + Math.random() * 320)
+  }
+}
+
 /* -------------------------------- engine --------------------------------- */
 
 /**

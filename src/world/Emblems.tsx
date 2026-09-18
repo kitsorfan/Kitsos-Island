@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CanvasTexture, SRGBColorSpace, Texture } from 'three'
+import {
+  CanvasTexture,
+  LinearFilter,
+  LinearMipmapLinearFilter,
+  SRGBColorSpace,
+  Texture,
+} from 'three'
 
 /**
  * Institution marks. Each one prefers a real file from `public/marks/` and
@@ -36,6 +42,31 @@ function useDrawnTexture(
   return texture
 }
 
+/**
+ * Redraws an image onto the nearest power-of-two square canvas, letterboxed so
+ * nothing is stretched. WebGL only builds mipmaps for power-of-two textures,
+ * and without mipmaps a detailed mark shimmers badly once it is more than a
+ * few metres from the camera.
+ */
+function squareToPowerOfTwo(image: HTMLImageElement) {
+  const longest = Math.max(image.naturalWidth, image.naturalHeight)
+  const size = Math.min(1024, 2 ** Math.round(Math.log2(longest)))
+
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return image
+
+  const scale = size / longest
+  const w = image.naturalWidth * scale
+  const h = image.naturalHeight * scale
+  ctx.imageSmoothingQuality = 'high'
+  ctx.drawImage(image, (size - w) / 2, (size - h) / 2, w, h)
+  return canvas
+}
+
 /** The real artwork, if someone has dropped it into public/marks/. */
 function useSuppliedTexture(file: string) {
   const [texture, setTexture] = useState<Texture | null>(null)
@@ -47,9 +78,15 @@ function useSuppliedTexture(file: string) {
     image.onload = () => {
       // An SVG without explicit dimensions decodes to nothing useful.
       if (!alive || !image.naturalWidth || !image.naturalHeight) return
-      const tex = new Texture(image)
+      // Mipmaps only generate from power-of-two sources, and the supplied
+      // artwork is whatever size it was exported at. Square it off first, or
+      // the fine engraving on the seal aliases into grey mush at distance.
+      const tex = new Texture(squareToPowerOfTwo(image))
       tex.colorSpace = SRGBColorSpace
-      tex.anisotropy = 8
+      tex.anisotropy = 16
+      tex.generateMipmaps = true
+      tex.minFilter = LinearMipmapLinearFilter
+      tex.magFilter = LinearFilter
       tex.needsUpdate = true
       setTexture(tex)
     }

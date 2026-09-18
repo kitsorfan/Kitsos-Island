@@ -58,7 +58,7 @@ export function PaintballCard() {
             <div className="pb-card__teams">
               <div className="pb-team pb-team--friend">
                 <span className="pb-team__label">
-                  On your side — {game.friends.length} of {MAX_FRIENDS}
+                  On your side: {game.friends.length} of {MAX_FRIENDS}
                 </span>
                 <p className="pb-team__hint">
                   {game.friends.length === 0
@@ -89,7 +89,7 @@ export function PaintballCard() {
 
               <div className="pb-team pb-team--enemy">
                 <span className="pb-team__label">
-                  Against you — {game.enemies.length}
+                  Against you: {game.enemies.length}
                 </span>
                 <p className="pb-team__hint">
                   {game.enemies.length > ROSTER.length
@@ -132,7 +132,7 @@ export function PaintballCard() {
               </li>
               <li>
                 <strong>{t('Get down')}</strong> (Ctrl, or the DUCK button) and
-                their paint sails over you — but you cannot shoot back from down
+                their paint sails over you, but you cannot shoot back from down
                 there. Cover costs you the shot.
               </li>
               <li>
@@ -141,7 +141,7 @@ export function PaintballCard() {
               </li>
               <li>
                 {t(
-                  'Your marker leads whichever enemy you are facing — a ring marks them. Paint a friend and you lose them.',
+                  'Your marker leads whichever enemy you are facing. A ring marks them. Paint a friend and you lose them.',
                 )}
               </li>
             </ul>

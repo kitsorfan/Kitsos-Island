@@ -21,7 +21,7 @@ import { LOCALES, useTranslate } from '../i18n'
 const QUALITIES: { id: Quality; label: string; hint: string }[] = [
   { id: 'auto', label: 'Auto', hint: 'Steps down if the island runs slow' },
   { id: 'high', label: 'High', hint: 'Shadows always on' },
-  { id: 'low', label: 'Low', hint: 'Shadows off — fastest' },
+  { id: 'low', label: 'Low', hint: 'Shadows off, fastest' },
 ]
 
 /** 'Off', then one bar per step, so the number means something at a glance. */

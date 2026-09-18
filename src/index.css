@@ -644,6 +644,50 @@ canvas {
   animation: blink 0.9s steps(1) infinite;
 }
 
+/* The answers to a question, laid out two to a row where there is room. */
+.dialogue__choices {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem;
+  margin: 0 0 0.9rem;
+  padding: 0;
+  list-style: none;
+}
+
+.dialogue__choice {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.55rem 0.8rem;
+  border-radius: 10px;
+  border: 3px solid var(--line);
+  background: #fff8e6;
+  box-shadow: 0 3px 0 rgba(42, 32, 51, 0.3);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.dialogue__choice:hover,
+.dialogue__choice:focus-visible {
+  background: #ffd166;
+  outline: none;
+}
+
+.dialogue__choice:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(42, 32, 51, 0.3);
+}
+
+.dialogue__choice kbd {
+  font-size: 0.7rem;
+}
+
 .dialogue__footer {
   position: relative;
   display: flex;
@@ -1011,6 +1055,25 @@ canvas {
   outline-offset: 1px;
 }
 
+/*
+ * The honeypot. A field no person can see, reach by tab, or be told about by
+ * a screen reader, which a form-filling bot has no way of telling apart from
+ * the real ones. Anything in it means nobody human typed it.
+ *
+ * Hidden by being taken out of the layout rather than by `display: none` or
+ * `visibility: hidden` — the crude bots skip those two, and the whole point
+ * is that this one looks live.
+ */
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .radio__actions {
   display: flex;
   flex-wrap: wrap;
@@ -1025,6 +1088,113 @@ canvas {
   background: var(--paper-2);
   border: 2px dashed var(--paper-edge);
   font-size: 0.94rem;
+}
+
+/* ------------------------------ toy shelf ----------------------------- */
+
+/*
+ * The shelf of toys, close up. Three boards of toys you can pick up, one of
+ * which is a switch — the layout matches the shelf in the room so the thing
+ * you clicked is where you expect it.
+ */
+.toyshelf {
+  margin-top: 1.2rem;
+}
+
+.toyshelf__case {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  border-radius: 12px;
+  border: 3px solid var(--line);
+  background: linear-gradient(#a97c4e, #8a6642);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.18);
+}
+
+/* A board: the toys stand on it, and it has a lip like a real shelf. */
+.toyshelf__board {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 0.5rem 0.4rem 0.35rem;
+  border-radius: 7px;
+  background: rgba(45, 30, 20, 0.22);
+  border-bottom: 4px solid #6f4f33;
+}
+
+.toyshelf__toy {
+  display: grid;
+  place-items: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  padding: 0;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: rgba(255, 246, 226, 0.1);
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.toyshelf__toy:hover,
+.toyshelf__toy:focus-visible {
+  background: rgba(255, 246, 226, 0.26);
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  outline: none;
+}
+
+.toyshelf__toy:active {
+  transform: translateY(0);
+}
+
+.toyshelf__emoji {
+  font-size: 1.9rem;
+  line-height: 1;
+  /* Emoji render as colour glyphs, so a filter is the only way to shade
+     them; a soft drop shadow is enough to lift them off the board. */
+  filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.4));
+}
+
+/* The rotor never stops, which is the only clue on the shelf. */
+.toyshelf__emoji--spin {
+  animation: toyshelf-spin 2.4s linear infinite;
+}
+
+@keyframes toyshelf-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.toyshelf__toy--found {
+  background: rgba(255, 209, 102, 0.34);
+  border-color: var(--accent);
+}
+
+.toyshelf__note {
+  margin: 0.9rem 0 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  background: var(--paper-2);
+  border: 2px dashed var(--paper-edge);
+  font-size: 0.94rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toyshelf__emoji--spin {
+    animation: none;
+  }
+  .toyshelf__toy {
+    transition: none;
+  }
 }
 
 /* ------------------------------- journal ------------------------------ */
@@ -4534,4 +4704,516 @@ canvas {
   .rescue__keys {
     display: none;
   }
+}
+
+/* -------------------------- the wall calendar ------------------------- */
+
+/* The calendar out of the basement, laid out the way a calendar is: twelve
+   months across the top, the days of the chosen one in a grid under it. Wider
+   than a settings row and narrower than a panel, because a month of days is
+   exactly seven columns and nothing about that wants stretching. */
+.wallcal {
+  width: min(430px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 1rem 1.15rem 1rem;
+  border-radius: 20px;
+  border: 4px solid var(--line);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  animation: pop-in 0.22s ease both;
+  text-align: center;
+}
+
+/* Turned to the twenty-fifth, the card itself goes red. */
+.wallcal--feast {
+  border-color: #8f2f22;
+}
+
+.wallcal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  text-align: left;
+}
+
+.wallcal__kicker {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  color: #c07a1d;
+}
+
+.wallcal--feast .wallcal__kicker {
+  color: #b5442f;
+}
+
+.wallcal__title {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 3.4vw, 1.3rem);
+}
+
+.wallcal__months {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.28rem;
+  margin: 0.75rem 0 0.6rem;
+}
+
+.wallcal__months .chip {
+  padding: 0.3rem 0.1rem;
+  font-size: 0.76rem;
+}
+
+.wallcal__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.24rem;
+}
+
+.wallcal__day {
+  padding: 0.34rem 0;
+  border-radius: 9px;
+  border: 2px solid var(--line);
+  background: var(--paper-2);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #3a3149;
+  cursor: pointer;
+}
+
+.wallcal__day:hover,
+.wallcal__day:focus-visible {
+  background: #fff8e6;
+}
+
+.wallcal__day--on {
+  background: #2f6fa8;
+  border-color: var(--line);
+  color: #fff6e2;
+}
+
+.wallcal--feast .wallcal__day--on {
+  background: #8f2f22;
+}
+
+.wallcal__read {
+  margin: 0.7rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+/* Whose day it is, right under the date. */
+.wallcal__named {
+  margin: 0.1rem 0 0;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: #2f6fa8;
+}
+
+.wallcal--feast .wallcal__named {
+  color: #8f2f22;
+}
+
+.wallcal__note {
+  margin: 0.35rem 0 0.6rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.wallcal > .chip {
+  margin-top: 0.7rem;
+}
+
+/* ------------------------- the Christmas toast ------------------------ */
+
+/* Over the canvas for three seconds when the last of them reaches the table.
+   No pointer events: the room carries on underneath and you can keep
+   walking through it. */
+.cheer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  pointer-events: none;
+  animation: cheer-out 3s ease-in forwards;
+}
+
+.cheer__line {
+  margin: 0;
+  padding: 0 1rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 9vw, 4.6rem);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-transform: uppercase;
+  color: #fff3d8;
+  /* Read against a lit room or a dark one: a red core, a warm halo, and a
+     hard dark edge under both. */
+  text-shadow:
+    0 0 2px #8f2f22,
+    0 3px 0 #8f2f22,
+    0 6px 18px rgba(0, 0, 0, 0.75),
+    0 0 46px rgba(255, 176, 46, 0.7);
+  animation: cheer-in 0.5s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+
+.cheer__snow {
+  position: absolute;
+  inset: -12% 0 0;
+}
+
+.cheer__flake {
+  position: absolute;
+  top: -5%;
+  border-radius: 50%;
+  background: #fffdf7;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  animation-name: cheer-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes cheer-in {
+  from {
+    transform: scale(0.55) rotate(-4deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Holds for most of the three seconds, then goes. */
+@keyframes cheer-out {
+  0%,
+  72% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes cheer-fall {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(2.5vw, 118vh, 0);
+  }
+}
+
+/* Somebody who has asked for less motion gets the words and no weather. */
+@media (prefers-reduced-motion: reduce) {
+  .cheer__snow {
+    display: none;
+  }
+
+  .cheer__line {
+    animation: none;
+  }
+}
+
+/* ------------------------------ the defence ------------------------------ */
+
+/* The slide counter and the title, along the bottom of the hall. It sits
+   above the touch controls' thumb area and below everything else. */
+.lecture {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 40;
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 0 1rem 5rem;
+  pointer-events: none;
+}
+
+.lecture__step {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0;
+  max-width: min(46rem, 92vw);
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(18, 15, 24, 0.66);
+  backdrop-filter: blur(3px);
+  color: #efe7d6;
+  font-size: clamp(0.72rem, 2.6vw, 0.9rem);
+  line-height: 1.3;
+  text-align: center;
+}
+
+.lecture__count {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  color: #8fb8e8;
+}
+
+.lecture__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* And the applause. No backdrop behind it: the room is on its feet and that
+   is the thing worth looking at — so the words sit low, out of the middle of
+   the shot where the class is, rather than across them. */
+.lecture__ovation {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 4.6vw, 2.2rem);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-transform: uppercase;
+  color: #fff3d8;
+  text-shadow:
+    0 0 2px #24467a,
+    0 3px 0 #24467a,
+    0 6px 18px rgba(0, 0, 0, 0.75),
+    0 0 46px rgba(120, 178, 255, 0.6);
+  animation: lecture-bow 0.6s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+
+@keyframes lecture-bow {
+  from {
+    transform: translateY(0.6rem) scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lecture__ovation {
+    animation: none;
+  }
+}
+
+/* --------------------------------- the lift --------------------------------
+   The one way between floors of the Work District that takes time. The car is
+   in the scene; this is the plate over the doors, which is the only thing
+   telling you the building has more floors than the one you are on.
+
+   It sits high and narrow rather than across the middle: the doors closing in
+   front of you are the shot, and this is the number above them. */
+.lift {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 40;
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  padding: clamp(1.4rem, 8vh, 4.5rem) 1rem 0;
+  pointer-events: none;
+}
+
+.lift__indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 1.1rem;
+  border: 1px solid rgba(47, 181, 154, 0.5);
+  border-radius: 0.5rem;
+  background: rgba(12, 18, 22, 0.78);
+  backdrop-filter: blur(3px);
+  color: #2fb59a;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 0.6rem rgba(47, 181, 154, 0.55);
+}
+
+.lift__arrow {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  animation: lift-arrow 1.1s ease-in-out infinite;
+}
+
+.lift__floor {
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.lift__dest {
+  margin: 0;
+  color: #d8e4e2;
+  font-size: clamp(0.7rem, 2.4vw, 0.85rem);
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 0.4rem rgba(0, 0, 0, 0.8);
+}
+
+@keyframes lift-arrow {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lift__arrow {
+    animation: none;
+    opacity: 0.85;
+  }
+}
+
+/* ------------------------------ the lift panel -----------------------------
+   The buttons inside the car. It sits against the right-hand side rather than
+   in the middle of the screen, because the car itself is what you want to be
+   looking at — and because a panel is a thing on a wall, not a dialogue.
+
+   The third-floor button is drawn dead: no fill, no glow, and it says so when
+   you press it. That is the joke, so it has to look pressable first. */
+.liftpanel {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(8, 11, 14, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.liftpanel__car {
+  width: min(22rem, 92vw);
+  padding: 1.1rem 1.2rem 1rem;
+  border: 1px solid rgba(47, 181, 154, 0.35);
+  border-radius: 0.8rem;
+  background: linear-gradient(180deg, #1b232a, #141a20);
+  box-shadow: 0 1.4rem 3rem rgba(0, 0, 0, 0.5);
+  color: #e6eeec;
+}
+
+.liftpanel__here {
+  margin: 0 0 0.8rem;
+  color: #2fb59a;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.liftpanel__buttons {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0 0 0.6rem;
+  padding: 0;
+  list-style: none;
+}
+
+.liftpanel__button {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.liftpanel__button:hover,
+.liftpanel__button:focus-visible {
+  border-color: rgba(47, 181, 154, 0.7);
+  background: rgba(47, 181, 154, 0.12);
+}
+
+.liftpanel__number {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(47, 181, 154, 0.55);
+  border-radius: 999px;
+  color: #2fb59a;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.liftpanel__label {
+  flex: 1;
+}
+
+.liftpanel__you {
+  flex: none;
+  color: rgba(230, 238, 236, 0.5);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+}
+
+/* The floor nobody has built. */
+.liftpanel__button[data-dead] .liftpanel__number {
+  border-color: rgba(255, 255, 255, 0.16);
+  color: rgba(230, 238, 236, 0.35);
+}
+
+.liftpanel__button[data-dead] .liftpanel__label {
+  color: rgba(230, 238, 236, 0.35);
+}
+
+.liftpanel__button[data-here] {
+  border-color: rgba(47, 181, 154, 0.35);
+  background: rgba(47, 181, 154, 0.07);
+}
+
+.liftpanel__refused {
+  margin: 0 0 0.7rem;
+  padding: 0.6rem 0.7rem;
+  border-left: 2px solid rgba(47, 181, 154, 0.6);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(230, 238, 236, 0.82);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.liftpanel__refused p {
+  margin: 0 0 0.4rem;
+}
+
+.liftpanel__refused p:last-child {
+  margin-bottom: 0;
+}
+
+.liftpanel__out {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: rgba(230, 238, 236, 0.75);
+  font: inherit;
+  cursor: pointer;
+}
+
+.liftpanel__out:hover,
+.liftpanel__out:focus-visible {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #e6eeec;
 }

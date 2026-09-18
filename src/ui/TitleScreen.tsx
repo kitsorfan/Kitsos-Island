@@ -31,7 +31,7 @@ export function TitleScreen() {
 
         <p className="title__blurb">
           {t(
-            'Walk the island, talk to the townspeople and step inside the buildings. Five keys are hidden across the districts, one per building — find them all and the Old Lighthouse on the cape opens. The Radio Center down south sends a message straight to my inbox.',
+            'Walk the island, talk to the townspeople and step inside the buildings. Five keys are hidden across the districts, one per building. Find them all and the Old Lighthouse on the cape opens. The Radio Center down south sends a message straight to my inbox.',
           )}
         </p>
 

@@ -1,5 +1,6 @@
 import type { Building, KeyItem, Mission, Npc, SignPost, Vec2 } from '../types'
-import { HOME_FAMILY, OLD_FAMILY } from './family'
+import { CLASS } from './audience'
+import { HOME_FAMILY, IN_LAWS, OLD_FAMILY } from './family'
 import { PROFILE } from './profile'
 
 /** Everything inside this radius is flat, walkable ground. */
@@ -235,7 +236,7 @@ export const BUILDINGS: Building[] = [
     kind: 'army',
     name: 'Army Camp',
     short: 'Camp',
-    subtitle: 'Marine Special Forces — reserve',
+    subtitle: 'Marine Special Forces, reserve',
     position: [60, 54],
     door: [60, 43],
     half: [10.2, 8.7],
@@ -282,7 +283,7 @@ export const BUILDINGS: Building[] = [
     kind: 'lighthouse',
     name: 'The Old Lighthouse',
     short: 'Lighthouse',
-    subtitle: 'Sealed — five district keys open it',
+    subtitle: 'Sealed. Five district keys open it',
     position: [-70, -66],
     door: [-62.5, -59],
     half: [7, 7],
@@ -329,7 +330,7 @@ export const MISSIONS: Mission[] = [
     buildingId: 'house',
     keyId: 'key-house',
     brief: 'Someone on his street will know how to get into Kitsos House.',
-    hint: 'Kyria Voula says the spare is on the shelf beside the chessboard, inside the house.',
+    hint: 'Ms. Stella says the spare is on the shelf beside the chessboard, inside the house.',
     done: 'Brass Key taken from the shelf by the chessboard.',
   },
   {
@@ -338,7 +339,7 @@ export const MISSIONS: Mission[] = [
     buildingId: 'university',
     keyId: 'key-academy',
     brief: 'The Academy keeps its keys somewhere behind the lectern.',
-    hint: 'Prof. Nikolaos left the lecture hall key on the thesis display, past the lectern.',
+    hint: 'The Dean left the lecture hall key on the thesis display, past the lectern.',
     done: 'Lecture Hall Key collected from the thesis display.',
   },
   {
@@ -347,7 +348,7 @@ export const MISSIONS: Mission[] = [
     buildingId: 'work',
     keyId: 'key-work',
     brief: 'Nobody gets into the server room without asking first.',
-    hint: 'Anna says the server room key hangs on the rack at the back of the office floor.',
+    hint: 'Giorgos says the server room key hangs on the rack at the back of the IBM floor, one up from the lobby.',
     done: 'Server Room Key pulled off the rack.',
   },
   {
@@ -365,7 +366,7 @@ export const MISSIONS: Mission[] = [
     buildingId: 'school',
     keyId: 'key-school',
     brief: 'The school still has his file somewhere.',
-    hint: 'Ms. Maria keeps the cabinet key in the trophy case beside the blackboard.',
+    hint: 'Ms. Maria keeps the cabinet key in the trophy case in the school hall.',
     done: 'Cabinet Key found in the trophy case.',
   },
 ]
@@ -401,14 +402,14 @@ export const NPCS: Npc[] = [
     pace: 1.7,
     lines: [
       'Welcome to KITSOS TOWN! Small island, big CV.',
-      `Everything here belongs to ${PROFILE.firstName} "${PROFILE.nickname}" ${PROFILE.lastName} — a senior full stack engineer and technical lead out of ${PROFILE.location}.`,
+      `Everything here belongs to ${PROFILE.firstName} "${PROFILE.nickname}" ${PROFILE.lastName}, a senior full stack engineer and technical lead out of ${PROFILE.location}.`,
       'Seven roads leave this square, and every one of them is named for what he took out of it. Motivation, Discipline, Curiosity, Caring, Leadership, Collaboration.',
-      'And north-west, Freedom Road, out to the Old Lighthouse on the cape. Sealed for years. Five district keys open it — one hidden in each building.',
+      'And north-west, Freedom Road, out to the Old Lighthouse on the cape. Sealed for years. Five district keys open it, one hidden in each building.',
       'Press M for the map if the walk gets long. Once you have found a place, you can travel straight back to it.',
     ],
     journal: {
       title: 'Welcome to Kitsos Town',
-      body: 'Christos "Kitsos" Orfanopoulos — Senior Full Stack Software Engineer & Technical Lead, based in Athens, Greece. Five keys, one per district, open the Old Lighthouse on the north-west cape.',
+      body: 'Christos "Kitsos" Orfanopoulos, Senior Full Stack Software Engineer & Technical Lead, based in Athens, Greece. Five keys, one per district, open the Old Lighthouse on the north-west cape.',
     },
   },
   {
@@ -432,11 +433,11 @@ export const NPCS: Npc[] = [
     pace: 1.2,
     lines: [
       'Kitsos? He has been around this tent since 2017.',
-      'Leading volunteer at the Christian Youth Foundation "Pantokrator" in Paleo Faliro — 2017 to 2021, then again from 2023 to today.',
+      'Leading volunteer at the Christian Youth Foundation "Pantokrator" in Paleo Faliro, 2017 to 2021, then again from 2023 to today.',
       'He even ran the place. Director from February 2021 to September 2022, appointed by the council while he was still finishing his degree.',
       'Staff, volunteers, the buildings, the books, the grant applications. Events, field trips, tree planting, donation drives, prison visits.',
       'When the lockdowns hit he put the whole programme on a live stream so the children would not lose it.',
-      'The Vice-President — a retired Supreme Court judge, mind you — wrote it all down in a letter. It is up at the school.',
+      'The Vice-President, a retired Supreme Court judge, mind you, wrote it all down in a letter. It is up at the school.',
       'And he still gives blood. Blood donor since 2017, no fuss about it.',
     ],
     journal: {
@@ -460,7 +461,7 @@ export const NPCS: Npc[] = [
     prop: 'cap',
     lines: [
       'Sit down, I have white. …No? Fine.',
-      'Kitsos plays here between runs. Chess, running, cycling — the man cannot sit still.',
+      'Kitsos plays here between runs. Chess, running, cycling. The man cannot sit still.',
       'Hiking, camping, theater, and half the furniture in his house is DIY.',
       'He treats a codebase the same way he treats an endgame: slowly, then all at once.',
     ],
@@ -491,7 +492,7 @@ export const NPCS: Npc[] = [
     pace: 1.5,
     lines: [
       'Lovely square, is it not? He rebuilt those benches himself.',
-      'Careful on Motivation Road — the students cycle like maniacs.',
+      'Careful on Motivation Road. The students cycle like maniacs.',
     ],
   },
   {
@@ -542,13 +543,13 @@ export const NPCS: Npc[] = [
     ],
     pace: 3.6,
     lines: [
-      'Cannot stop — halfway through the loop!',
+      'Cannot stop, halfway through the loop!',
       'He runs this coast most mornings. Cycles the long way round on Sundays.',
       'Says the best debugging happens at kilometre six.',
     ],
     journal: {
       title: 'Coastal loop',
-      body: 'Runs and cycles the island loop — the thinking happens somewhere around kilometre six.',
+      body: 'Runs and cycles the island loop. The thinking happens somewhere around kilometre six.',
     },
   },
   {
@@ -569,40 +570,48 @@ export const NPCS: Npc[] = [
       'Sea is calm. Good day for a long conversation.',
       'Athens is over that horizon. That is where he lives and works.',
       'Hiking, camping, a boat when he can get one. Then back to the screens.',
-      'If you have a job for him, do not shout it at the sea — use the Radio Center.',
+      'If you have a job for him, do not shout it at the sea. Use the Radio Center.',
     ],
     journal: {
       title: 'Based in Athens',
-      body: 'Lives and works in Athens, Greece — Greek nationality, open to conversations that start with a message.',
+      body: 'Lives and works in Athens, Greece. Greek nationality, open to conversations that start with a message.',
     },
   },
   /* ---------------------------- districts -------------------------- */
   {
     id: 'neighbour',
-    name: 'Kyria Voula',
+    name: 'Ms. Stella',
     role: 'Neighbour',
     area: 'island',
     position: [-53, 44],
     facing: Math.PI * 0.7,
     colors: {
       skin: SKIN.light,
-      hair: '#8f8f8f',
+      hair: '#b9b4ad',
       shirt: '#c96fa0',
       pants: '#4c4358',
     },
+    hair: 'long',
+    dress: '#8e5a7c',
+    dressTrim: '#e4d7c4',
+    smile: true,
     gives: 'm-house',
     missionLines: [
       'Shelf by the chessboard. You cannot miss it, he never tidies.',
     ],
     lines: [
       'That is his house, right there. Lights on late, always.',
-      'Greek is his mother tongue, English at proficiency — the Michigan ECPE — and French to B2, he has the DELF for it.',
-      'Athens born and based. Greek national. Go in, he does not mind visitors.',
+      'I have watched that boy grow up from this spot. Seventy years I have been across the road from them.',
+      'I knew his grandfather. Same walk, same way of standing in a doorway to finish a sentence.',
+      'Whatever is broken, he is out there with it. The shutter, the gate, the car up on the drive with the bonnet open all Sunday.',
+      'And the whole family, God bless them. You will not find better people on this island.',
+      'Greek is his mother tongue, English at proficiency with the Michigan ECPE, and French to B2 with the DELF for it.',
+      'Athens born and based. Greek national. Go in, go in, he does not mind visitors.',
       'Looking for the brass key? It is on the shelf beside the chessboard, inside.',
     ],
     journal: {
       title: 'Profile & languages',
-      body: 'Athens, Greece · Greek nationality. Greek (native), English (proficiency — ECPE, University of Michigan 2016), French (B2 — DELF 2019).',
+      body: 'Athens, Greece · Greek nationality. Greek (native), English (proficiency, ECPE, University of Michigan 2016), French (B2, DELF 2019).',
     },
   },
   {
@@ -632,7 +641,7 @@ export const NPCS: Npc[] = [
     ],
     journal: {
       title: 'Student representation',
-      body: 'Students’ representative and leader of the Independent ECE Students — e-voting, depoliticization of the university, realistic and democratic problem-solving.',
+      body: 'Students’ representative and leader of the Independent ECE Students: e-voting, depoliticization of the university, realistic and democratic problem-solving.',
     },
   },
   {
@@ -661,7 +670,7 @@ export const NPCS: Npc[] = [
     ],
     journal: {
       title: 'Teaching robotics',
-      body: 'Children’s tutor in Robotics at Citylab, Alimos — 2020–2021.',
+      body: 'Children’s tutor in Robotics at Citylab, Alimos, 2020–2021.',
     },
   },
   {
@@ -687,7 +696,7 @@ export const NPCS: Npc[] = [
       'Halt. …Relax, civilian, the camp is open today.',
       'Second Lieutenant Orfanopoulos, reservist. September 2022 to November 2023, straight out of NTUA.',
       'Basic training at the Center of Special Forces in Nea Peramos. Third in his class out of the Infantry Reserve Officers School in Heraklion.',
-      'Then the Rangers’ school at Rentina — guerilla warfare. After that, Deputy Company Commander and Weapons Officer at a Marine Battalion.',
+      'Then the Rangers’ school at Rentina, guerilla warfare. After that, Deputy Company Commander and Weapons Officer at a Marine Battalion.',
       'Platoon Leader and Weapons Officer for a Marine Company. Personnel, logistics, weaponry, readiness.',
       'The Battalion Commander wrote him a letter. It is framed inside, on the east wall. Read it.',
       'That is where the calm comes from. Bad news does not make him louder.',
@@ -699,10 +708,14 @@ export const NPCS: Npc[] = [
     },
   },
   /* --------------------------- interiors --------------------------- */
+
+  /* ------------------------------ the Academy ----------------------- */
+
+  /** The Dean, at the lectern, who supervised the thesis and appointed him. */
   {
-    id: 'professor',
-    name: 'Prof. Nikolaos',
-    role: 'NTUA',
+    id: 'dean',
+    name: 'Dean Tsanakas',
+    role: 'Dean, School of ECE',
     area: 'university',
     position: [-6, 2],
     facing: Math.PI * 0.85,
@@ -716,17 +729,117 @@ export const NPCS: Npc[] = [
     gives: 'm-academy',
     missionLines: ['The thesis display, past the lectern. Mind the cables.'],
     lines: [
-      'Ah, another visitor for the Academy.',
-      'Christos took the MEng at the National Technical University of Athens, School of Electrical and Computer Engineering. 2017 to 2022, GPA 8.4.',
-      'His thesis in 2022: a movement compliance application using machine learning.',
-      'And it did not stop there — it became a paper on arXiv in December 2025. The case by the east wall has it.',
-      'The Dean himself supervised it, and graded it with distinction. His letter is on the board by the west wall.',
-      'Five hard years. He came out of it able to build a system, not just a feature.',
-      'If you want the lecture hall key, it is sitting on the thesis display over there.',
+      'Panagiotis Tsanakas, Dean of the School. Sit anywhere; the lecture is over.',
+      'The most competitive school in the country to get into, only the top entrance grades make it, and a five-year programme most students take seven and a half to finish. Christos finished it in five. 2017 to 2022, 8.4.',
+      'He was my student in Operating Systems and Software Service Technologies, and I supervised his thesis: a phone application that watches a movement through a neural network, recognises it and judges how well it was done. Distinction. Three years later, a paper on arXiv. The case by the east wall has it.',
+      'When the assemblies were being wrecked by people with no connection to this School, I appointed him independent students’ representative. Two years, and he told everyone everything he did. That is rarer than the grades.',
+      'And through the last three of those years he was also working, the last two of them full-time, running a youth foundation. I still do not know where the hours came from.',
+      'The lecture hall key is on the thesis display, past the lectern. My letter is on the board by the west wall.',
     ],
     journal: {
-      title: 'NTUA — MEng ECE',
-      body: 'National Technical University of Athens, School of Electrical and Computer Engineering, MEng 2017–2022, GPA 8.4. Thesis: movement compliance application using machine learning.',
+      title: 'NTUA, MEng ECE',
+      body: 'National Technical University of Athens, School of Electrical and Computer Engineering, the most competitive school in Greece to enter. MEng 2017–2022 in the five years the programme is designed for, GPA 8.4; thesis supervised by the Dean and graded with distinction.',
+    },
+  },
+  /** The programming lecturer, in the lab where the first-year labs ran. */
+  {
+    id: 'professor',
+    name: 'Prof. Nikos',
+    role: 'Programming, NTUA',
+    area: 'university-lab',
+    position: [-3, -6.4],
+    facing: Math.PI * 0.95,
+    colors: {
+      skin: SKIN.tan,
+      hair: '#6b6b6b',
+      shirt: '#3f7bd6',
+      pants: '#33384a',
+    },
+    prop: 'glasses',
+    lines: [
+      'Introduction to Programming, then Programming Techniques: ten and ten. He did not just do the exercises. He did them, and then posted the worked solutions on the forum for everybody else.',
+      'He assisted in my first-year labs. The students asked him things they would not ask me.',
+      'Operating Systems, Human–Computer Interaction, Multimedia, Information Systems: tens, all of them. The transcript is on the wall; read it for yourself.',
+      'What I tell them is that a program is instructions somebody else has to read later. He wrote his as if he believed it.',
+    ],
+    journal: {
+      title: 'Tens in programming',
+      body: 'Prof. Nikos, who taught him programming at NTUA: a ten in every programming course from the first semester to the last, worked solutions posted for the whole year, and a lab instructor in the first-year labs.',
+    },
+  },
+  /** The first-year with the Guide under his arm. */
+  {
+    id: 'student-giorgos',
+    name: 'Giorgos',
+    role: 'First year, ECE',
+    area: 'university-lab',
+    position: [8, 5.4],
+    facing: -Math.PI * 0.6,
+    colors: {
+      skin: SKIN.light,
+      hair: '#2a2420',
+      shirt: '#d94f6b',
+      pants: '#2f5aa8',
+    },
+    prop: 'bag',
+    smile: true,
+    lines: [
+      'Are you here about the Guide? A hundred and ten pages. Every compulsory course: what it is, how it is examined, how to survive it.',
+      'It is years old and we still pass it round. Half of us thought the author was a legend somebody made up. Turns out he is a person.',
+      'He put his notes online too, and answered the forum questions. Some of us would not have made it to second year without him.',
+    ],
+    journal: {
+      title: 'The legend of the Guide',
+      body: 'Giorgos, a first-year at ECE: the hundred-and-ten-page Survival Guide is still passed from year to year, and some of the students reading it were not sure the author was real.',
+    },
+  },
+  /** The professor who sat through the assemblies with him. */
+  {
+    id: 'prof-ilias',
+    name: 'Prof. Ilias',
+    role: 'Faculty assembly, NTUA',
+    area: 'university-council',
+    position: [8.2, -3.4],
+    facing: -Math.PI * 0.7,
+    colors: {
+      skin: SKIN.deep,
+      hair: '#3a3a3a',
+      shirt: '#5d4a72',
+      pants: '#2b2f3a',
+    },
+    lines: [
+      'I sat on the faculty assemblies for years. Most student representatives came to shout. He came with a list.',
+      'A petition, more than seven hundred signatures in two days, for e-voting, and for keeping party politics out of the students’ business. Then he stood up in front of eight hundred people and said it again.',
+      'Two years as the independent representative the Dean appointed, and every time, a note to the students on what had been said and done. Openness is not a slogan when you actually do it.',
+    ],
+    journal: {
+      title: 'A list, not a shout',
+      body: 'Prof. Ilias, who sat on the faculty assemblies: the petition of more than 700 signatures in two days, the speech to 800, and two years of independent representation reported back to the students every time.',
+    },
+  },
+  /** The classmate whose recommendation is on the board in the hall. */
+  {
+    id: 'classmate-stelios',
+    name: 'Stelios',
+    role: 'Classmate, ECE',
+    area: 'university-council',
+    position: [-4, 5.2],
+    facing: -Math.PI * 0.2,
+    colors: {
+      skin: SKIN.tan,
+      hair: '#3b2a1e',
+      shirt: '#e2a33f',
+      pants: '#39435c',
+    },
+    smile: true,
+    lines: [
+      'Projects and coding competitions, five years of them, and he was on the team for most of mine.',
+      'Very strong coding skills, a solution-oriented mindset, and a person of integrity. I wrote that down for him later, it is on the board in the lecture hall, and I would write it again.',
+      'He always ended up leading, and nobody minded. That is the trick, and I have not learned it yet.',
+    ],
+    journal: {
+      title: 'A classmate’s word',
+      body: 'Stelios Kandylakis, his classmate at ECE: five years of shared projects and coding competitions, and a recommendation: strong coding, a solution-oriented mindset, integrity, and leadership nobody minded.',
     },
   },
   {
@@ -745,50 +858,247 @@ export const NPCS: Npc[] = [
     lines: [
       'The lab bench is open, mind the cables.',
       'See the certificate wall over there? MIT Open Learning for the AI foundations, CITI Program for biomedical research and HIPAA, Docker from IBM.',
-      'Languages too — ECPE and ECCE from Michigan, and DELF B2 in French.',
+      'Languages too: ECPE and ECCE from Michigan, and DELF B2 in French.',
       'He was at the Arduino IEEE Workshop here in 2018, volunteered at the European Researchers’ Night in 2019 and the 100-years celebration of ECE in 2017.',
-      'Contests as well — 2nd in the National Biology Competition of 2016, plus awards in Physics, Mathematics, Informatics and Literature.',
+      'Contests as well: 2nd in the National Biology Competition of 2016, plus awards in Physics, Mathematics, Informatics and Literature.',
     ],
     journal: {
       title: 'Seminars & contests',
       body: 'IBM graduate program (2024), Agile bootcamp in Hamburg (2024), Arduino IEEE Workshop at NTUA (2018). 2nd in the National Biology Competition (2016) and awards in Physics, Mathematics, Informatics and Literature. Volunteer at European Researchers’ Night (2019) and 100 years of ECE (2017).',
     },
   },
+  /* ------------------------- the Work District ---------------------- */
+
+  /*
+   * Three floors, and the people are sorted by the floor they belong to: the
+   * lobby explains the building, the first floor is IBM, the second is
+   * Veltiston AI. Nobody talks about a floor that is not theirs.
+   */
+
+  /**
+   * The lobby. Robin has the run of it — she is the one who tells you what
+   * the building is for and how to read it, and she is named for the author
+   * whose book on presenting yourself is the reason the lobby exists at all.
+   */
   {
-    id: 'recruiter',
-    name: 'Anna',
-    role: 'Veltiston.AI',
+    id: 'robin',
+    name: 'Robin',
+    role: 'On presenting yourself',
     area: 'work',
-    position: [-7, 5],
-    facing: Math.PI * 0.6,
+    position: [-4, 4],
+    facing: Math.PI * 0.75,
     colors: {
       skin: SKIN.light,
-      hair: '#5a3a24',
+      hair: '#7a4a2c',
       shirt: '#2fb59a',
       pants: '#2b3140',
     },
-    gives: 'm-work',
-    missionLines: ['Server rack, back wall. Do not touch anything blinking.'],
+    hair: 'long',
+    prop: 'glasses',
+    smile: true,
     lines: [
-      'Work District. Mind the deploys.',
-      'He came in May 2024 as one of the first engineers at Veltiston AI — an AI healthcare startup founded by MIT Professor Dimitris Bertsimas.',
-      'Full-stack engineer for two years, Senior Software Engineer since May 2026, and project lead on three projects.',
-      'Java, Spring Boot, React, MySQL and AWS — a cloud-native platform now live in four major U.S. hospitals.',
-      'He also leads the software on a contract for Holistic Hospital Optimization, on the same problem from the other side.',
-      'Weekly production releases, HIPAA compliance, and nobody paged at 3am. Mostly.',
+      'Welcome to the Work District. Three floors, one employer each, and a lift that only goes to two of them.',
+      'I am Robin. I am here because somebody has to say the unglamorous part out loud: the work does not speak for itself. It never has.',
+      'Most engineers are worse at describing what they built than at building it. A CV is not a receipt for your time — it is an argument about what you can do next.',
+      'So this building is laid out as an argument. Ground floor: what he is good at, what he is certified in, and the jobs he held before any of it was software.',
+      'First floor, IBM. Second floor, Veltiston AI. Take the stairs in the corner or the lift, whichever you prefer. The lift is slower and worth it.',
+      'The third floor is not built. That is not modesty, it is just the truth about where he is standing.',
+    ],
+    journal: {
+      title: 'How the building reads',
+      body: 'The Work District is laid out as an argument rather than a list: the ground floor is capabilities, certifications and the student jobs; the first floor is IBM 2023–2024; the second is Veltiston AI 2024–present. The third floor is not built yet.',
+    },
+  },
+
+  /**
+   * Kyriakos Oikonomou, retired justice of the Areios Pagos and the
+   * Vice-President who handed a twenty-something undergraduate the running of
+   * a foundation. He stands at the board of student jobs, where his own
+   * letter hangs beside it.
+   */
+  {
+    id: 'oikonomou',
+    name: 'Kyriakos Oikonomou',
+    role: 'Vice-President, "Pantokrator" Foundation',
+    area: 'work',
+    position: [-12.5, -9],
+    facing: -Math.PI * 0.45,
+    colors: {
+      skin: SKIN.light,
+      hair: '#d8d4cc',
+      shirt: '#5a5f6b',
+      pants: '#31353d',
+    },
+    prop: 'glasses',
+    lines: [
+      'You are looking at the small board. Good — most people walk past it to get to the lift.',
+      'I am Kyriakos Oikonomou. I sat on the Supreme Court, the Areios Pagos, until I retired, and I have been Vice-President of the "Pantokrator" Foundation in Paleo Faliro since 2020.',
+      'In 2021 the Directorship of the Foundation fell vacant. I did not advertise it. I went to Christos, who was then a student at the Polytechnic, and asked him to take it.',
+      'He was an undergraduate. I handed him a building, the staff, the volunteers, the budget and the children. He was twenty-something.',
+      'A year and a half later he left, because the degree was finished and the army was waiting, and what he handed back had gone well past what we asked of him. The premises renovated, the operations modernised, the events running.',
+      'He was organised, hard-working and conscientious, and he told us everything he did as he did it. The children trusted him and listened to him, which is not a thing you can be appointed to.',
+      'My letter is on the wall beside the board. Read it there — I have said it better on paper than I will standing here.',
+    ],
+    journal: {
+      title: 'Kyriakos Oikonomou',
+      body: 'Retired Justice of the Hellenic Supreme Court and Vice-President of the "Pantokrator" Foundation, who personally offered Kitsos the Directorship in 2021 while he was still an NTUA undergraduate — and judged what he left behind to have exceeded expectations.',
+    },
+  },
+
+  /* ----------------------- first floor, IBM ------------------------- */
+
+  /**
+   * Giorgos, who was on the other end of the pipeline at the bank. He gives
+   * out the server-room mission, because the racks are on his floor.
+   */
+  {
+    id: 'devops',
+    name: 'Giorgos',
+    role: 'DevOps colleague, IBM',
+    area: 'work-ibm',
+    position: [-4.5, 1],
+    facing: Math.PI * 0.6,
+    colors: {
+      skin: SKIN.light,
+      hair: '#2e2a26',
+      shirt: '#1f4fa0',
+      pants: '#2b3140',
+    },
+    gives: 'm-work',
+    missionLines: [
+      'Server rack, back wall of this floor. Do not touch anything blinking.',
+    ],
+    lines: [
+      'First floor. IBM. Mind the deploys.',
+      'Giorgos — I was on the DevOps side with him on the Cosmos Project at the National Bank of Greece.',
+      'Cosmos was the core banking transformation: PL/I and COBOL, decades of it, being moved onto Infosys Finacle. You do not turn that off one evening and turn it on the next morning.',
+      'So there is a coexistence state, where the old and the new run side by side and have to agree with each other, and a target state where only the new is left. He designed the integration architecture for both.',
+      'He ran the integration calls across the bank subsystems too, which is the job nobody volunteers for: half a dozen teams who each think the problem is somebody else.',
+      'On our side it was ticket deployments and pipeline automation — Jenkins, Podman, Docker Compose, ELK and Grafana on top so you could see what you had done.',
       'The server room key is on the rack at the back. Take it, you have my blessing.',
     ],
     journal: {
-      title: 'Veltiston AI — Senior Engineer',
-      body: 'At Veltiston AI since May 2024: full-stack engineer, then Senior Software Engineer from May 2026 and project lead on three projects. Technical Lead of the Nurse Scheduling platform — Java, Spring Boot, React, MySQL, AWS — live in four major U.S. hospitals. Also Lead Software Engineer on contract for Holistic Hospital Optimization.',
+      title: 'IBM, DevOps Engineer',
+      body: 'November 2023 – May 2024, via the IBM Associate Program. Cosmos Project at the National Bank of Greece: legacy PL/I and COBOL to Infosys Finacle, integration architecture for both the coexistence and target states, integration calls across bank subsystems, and CI/CD with Jenkins, Podman, ELK and Grafana.',
     },
   },
+
+  /**
+   * Ms. Ioanna Panagopoulou, his supervisor on the bank side. She is the one
+   * who can say how he was as an integration analyst, because she is the one
+   * he reported to.
+   */
   {
-    id: 'teammate',
-    name: 'Youssef',
-    role: 'Engineer, Veltiston.AI',
-    area: 'work',
-    position: [9, 6],
+    id: 'panagopoulou',
+    name: 'Ms. Ioanna Panagopoulou',
+    role: 'Supervisor, National Bank of Greece',
+    area: 'work-ibm',
+    position: [4.5, 1],
+    facing: -Math.PI * 0.3,
+    colors: {
+      skin: SKIN.light,
+      hair: '#3b2f28',
+      shirt: '#e8eaee',
+      pants: '#2f3542',
+    },
+    hair: 'long',
+    dress: '#33405a',
+    dressTrim: '#8ba3c9',
+    smile: true,
+    lines: [
+      'You must be the one walking round the building. Ioanna Panagopoulou — I supervised him at the bank.',
+      'He came to us through IBM as an integration analyst, on the Finacle onboarding. On paper that is a junior posting.',
+      'It was not how he worked it. He would come to the calls having already read what the subsystem actually did, not just what the ticket said about it.',
+      'Integration analysis is mostly translation: this team says "customer", that team means something narrower by it, and the migration fails in eighteen months if nobody notices today. He noticed.',
+      'He was excellent at it. I say that plainly because I was asked plainly, and because I would take him back tomorrow.',
+      'He left for a startup, which I told him was the right decision and was sorry to hear.',
+    ],
+    journal: {
+      title: 'Ms. Ioanna Panagopoulou',
+      body: 'His supervisor at the National Bank of Greece during the Finacle onboarding, who rated him excellent as an integration analyst: reading what each subsystem actually did rather than what the ticket said, and catching the mismatches that sink a migration late.',
+    },
+  },
+
+  /**
+   * Klaus, from the Agile and Enterprise Design Thinking bootcamp in Hamburg
+   * that IBM Greece sent him to. A week, and the only one on this floor who
+   * saw him outside the bank.
+   */
+  {
+    id: 'klaus',
+    name: 'Klaus',
+    role: 'IBM Hamburg, Agile bootcamp',
+    area: 'work-ibm',
+    position: [10, -7],
+    facing: Math.PI * 0.85,
+    colors: {
+      skin: SKIN.light,
+      hair: '#c9b48a',
+      shirt: '#3c6fb8',
+      pants: '#343a45',
+    },
+    prop: 'bag',
+    lines: [
+      'Hamburg, February 2024. Cold week. Good week.',
+      'Klaus. IBM sent people from across Europe to the Agile and Enterprise Design Thinking bootcamp, and Greece sent him.',
+      'That is the part worth pausing on: one person represented IBM Greece, and he had been with the company a few months.',
+      'Design Thinking at IBM is not a poster. It is a working method — you start from the user you are actually building for, you write down who they are, and you are held to it for the rest of the week.',
+      'He argued. Politely, but he argued, which is more than most did. And he came back with the method rather than the certificate, which is the rarer outcome.',
+      'We still talk. If you are hiring him, do it before somebody in Hamburg does.',
+    ],
+    journal: {
+      title: 'Hamburg, February 2024',
+      body: 'Represented IBM Greece at the international Agile & Enterprise Design Thinking bootcamp in Hamburg, a few months into the job — sent as the one person from the Greek practice.',
+    },
+  },
+
+  /* -------------------- second floor, Veltiston AI ------------------ */
+
+  /**
+   * Professor Dimitris Bertsimas, who founded the company. He talks about the
+   * vision and about what a founding engineer in 2024 actually signed up for,
+   * and leaves the technology to the people who write it.
+   */
+  {
+    id: 'bertsimas',
+    name: 'Prof. Dimitris Bertsimas',
+    role: 'Founder, Veltiston AI',
+    area: 'work-veltiston',
+    position: [-6, 5],
+    facing: Math.PI * 0.62,
+    colors: {
+      skin: SKIN.tan,
+      hair: '#5c5750',
+      shirt: '#1f3b4d',
+      pants: '#2b3140',
+    },
+    prop: 'glasses',
+    smile: true,
+    lines: [
+      'Welcome to the second floor. This is the company.',
+      'Dimitris Bertsimas. I teach at MIT, and I founded Veltiston AI because optimisation has been solved in the literature for thirty years and hospitals are still building rosters by hand.',
+      'That is the whole vision, and it is not a modest one: take the analytics that work on paper and put them where a charge nurse can press a button at seven in the morning.',
+      'Christos was one of the founding engineers, in 2024. There were very few of us then and the platform did not exist — there was an idea about scheduling and a great deal of arguing.',
+      'He built it from that. Concept to production, and then he became the technical lead of it, which is a different job and he made the change well.',
+      'What I look for is people who can hold the mathematics and the delivery in one head. He can. He also tells me when I am wrong, in front of other people, which is worth more than it costs.',
+      'Four major American hospitals run it now. That is not a pilot. That is a ward that is short-staffed if we are wrong.',
+    ],
+    journal: {
+      title: 'Prof. Dimitris Bertsimas',
+      body: 'MIT professor and founder of Veltiston AI, who confirms Kitsos as one of the founding engineers in 2024: built the Nurse Scheduling platform from concept to production and became its technical lead. The vision — put optimisation where a charge nurse can press a button.',
+    },
+  },
+
+  /**
+   * Karim, in Morocco, who is on the receiving end of the leadership rather
+   * than describing it from outside.
+   */
+  {
+    id: 'karim',
+    name: 'Karim',
+    role: 'Engineer, Veltiston AI · Morocco',
+    area: 'work-veltiston',
+    position: [8, 5],
     facing: -Math.PI * 0.2,
     colors: {
       skin: SKIN.deep,
@@ -797,22 +1107,31 @@ export const NPCS: Npc[] = [
       pants: '#3a3f4d',
     },
     prop: 'headset',
+    smile: true,
     lines: [
-      'Greece, Boston, Morocco — I am the Morocco part of the stand-up.',
-      'He leads cross-functional teams of five to ten developers across three time zones: architecture, delivery, code reviews, sprint planning, the calls nobody wants to make.',
-      'He runs the technical interviews, mentors us, and onboards every new engineer himself.',
-      'He also took a legacy Java/Angular app and dragged it into this decade — Agile process, engineering standards, CI/CD, documentation, refactoring in slices.',
+      'Greece, Boston, Morocco. I am the Morocco part of the stand-up.',
+      'Karim. I have worked under a few leads. I am going to tell you why this one is different, and it is not the architecture.',
+      'Three time zones is an excuse most companies use. He refuses it. The handover is written down, the decisions are written down, and nobody in Casablanca finds out on Thursday what was settled in Athens on Monday.',
+      'He leads teams of five to ten across all of it: architecture, code reviews, sprint planning, the customer calls nobody wants.',
+      'He reviews my code properly — line by line, with the reason, and he changes his mind when I am right. That sounds small. Ask around how rare it is.',
+      'He runs the technical interviews and he onboards every new engineer himself. I was onboarded by him. That is why I am still here.',
+      'Good leadership, honestly. I do not say that about many people and I am not paid to say it about him.',
     ],
     journal: {
-      title: 'Leadership',
-      body: 'Leads cross-functional teams of 5–10 developers across Greece, Boston and Morocco. Drives architecture, delivery, code reviews and sprint planning; leads technical interviews, mentoring and onboarding. Modernized a legacy Java/Angular application with Agile process, standards, CI/CD and incremental refactoring.',
+      title: 'Leading across three time zones',
+      body: 'Leads cross-functional teams of 5–10 across Greece, Boston and Morocco: written handover and decisions so no time zone finds out late, line-by-line code review, and he runs the technical interviews and onboards every new engineer himself.',
     },
   },
+
+  /**
+   * Michalis, who joined at the same time he did and can therefore say what
+   * was actually built, and out of what. The technology wall is his.
+   */
   {
-    id: 'architect',
-    name: 'Thodoris',
-    role: 'Platform architect',
-    area: 'work',
+    id: 'michalis',
+    name: 'Michalis',
+    role: 'Engineer, Veltiston AI',
+    area: 'work-veltiston',
     position: [12, -6],
     facing: Math.PI * 0.9,
     colors: {
@@ -823,67 +1142,315 @@ export const NPCS: Npc[] = [
     },
     prop: 'hardhat',
     lines: [
+      'Michalis. I joined about the same time he did, so I watched all of this get built.',
       'You want the interesting part? The integrations.',
-      'A documentation assistant on Spring AI with RAG and agentic AI. A SMART on FHIR app running inside Epic. A Length of Stay plugin delivered the same way.',
-      'UKG workforce management wired in, SAML 2.0 single sign-on against Microsoft ADFS, a notification framework and full activity audit logging.',
-      'Even the ticketing is ours — Jira-integrated, with reCAPTCHA on the front so the queue stays real.',
-      'Observability is not an afterthought: Grafana, Graylog, Sentry. Secure and scalable, or it does not ship.',
+      'A documentation assistant on Spring AI — retrieval-augmented generation over the hospital’s own material, with agentic AI on top so it can actually do something rather than just answer.',
+      'A SMART on FHIR application running inside Epic. If you have not worked with an EHR: you do not get to ask Epic to change. You arrive in the shape it expects.',
+      'A Length of Stay analytics plugin delivered the same way, UKG workforce management wired in, SAML 2.0 single sign-on against Microsoft ADFS.',
+      'A secure notification framework, full activity audit logging, and a Jira-integrated ticketing system with reCAPTCHA on the front so the queue stays real.',
+      'Java 17 through 25, Spring Boot, React, MySQL with Flyway, AWS, Docker, Jenkins and GitLab CI. Grafana, Graylog and Sentry watching it. JUnit, Mockito and JaCoCo proving it.',
+      'And it goes to production most weeks. That pace is not normal. It works because HIPAA and the security architecture were designed in at the start, not bolted on when the auditor called.',
     ],
     journal: {
-      title: 'Platform capabilities',
-      body: 'Spring AI documentation assistant (RAG + agentic AI), a SMART on FHIR app embedded in Epic EHR, a Length of Stay analytics plugin, UKG integration, SAML 2.0 SSO via Microsoft ADFS, a secure notification framework, audit logging, and Jira-integrated ticketing with reCAPTCHA.',
+      title: 'What the platform is made of',
+      body: 'Spring AI documentation assistant with RAG and agentic AI, a SMART on FHIR app inside Epic EHR, a Length of Stay plugin, UKG integration, SAML 2.0 SSO via Microsoft ADFS, secure notifications, audit logging and Jira-integrated ticketing with reCAPTCHA — on Java, Spring Boot, React, MySQL, AWS and Docker, released to production most weeks.',
     },
   },
+
+  /**
+   * Josh, from the data science team in Boston. Kitsos leads the software on
+   * the H2O side, which is the one part of the floor that is not his own
+   * team — so it is the one that says most about how he works with others.
+   */
   {
-    id: 'devops',
-    name: 'Dimitris',
-    role: 'Dev(Sec)Ops, IBM',
-    area: 'work',
+    id: 'josh',
+    name: 'Josh',
+    role: 'Data scientist, MIT team · Boston',
+    area: 'work-veltiston',
     position: [-11, -7],
     facing: Math.PI * 0.25,
     colors: {
       skin: SKIN.light,
-      hair: '#2e2a26',
-      shirt: '#1f4fa0',
-      pants: '#2b3140',
+      hair: '#8a6a42',
+      shirt: '#4b6b52',
+      pants: '#2f3542',
     },
     lines: [
-      'Before the startup, there was the bank.',
-      'November 2023 to May 2024, DevOps Engineer at IBM — picked for the IBM Associate Program.',
-      'The Cosmos Project at the National Bank of Greece: moving core banking off legacy PL/I and COBOL onto Infosys Finacle.',
-      'He ran the integration calls across the bank’s subsystems and designed the architecture for both the coexistence state and the target state.',
-      'Deployments and pipeline automation with Jenkins, Podman, ELK and Grafana. And he represented IBM Greece at the Agile and Enterprise Design Thinking bootcamp in Hamburg.',
+      'Josh, out of Boston. Data science side, the MIT team.',
+      'We work in H2O. Kitsos leads the software on that side, which means he is the one turning what we prove into something a hospital can actually run.',
+      'That handoff is where most of these companies die. The model is beautiful in a notebook and then nobody can deploy it, or it deploys and nobody can explain it to a clinician.',
+      'He asks the right question, which is never "what accuracy did you get". It is "what happens to this the week the data looks different", and then he builds for that answer.',
+      'He does not pretend to be a data scientist and he does not let us pretend to be engineers. Everybody is better off.',
+      'Length of stay, scheduling, the analytics going into Epic — that is the pipeline from our side to the ward, and he owns the software half of it.',
     ],
     journal: {
-      title: 'IBM — DevOps Engineer',
-      body: 'November 2023 – May 2024, via the IBM Associate Program. Cosmos Project at the National Bank of Greece: legacy PL/I and COBOL to Infosys Finacle, integration architecture for coexistence and target states, CI/CD automation with Jenkins, Podman, ELK and Grafana. Represented IBM Greece at an Agile bootcamp in Hamburg.',
+      title: 'The H2O side',
+      body: 'Leads the software on the H2O/data-science side with the MIT team in Boston: turning proven models into something a hospital can run and a clinician can be told about — length of stay, scheduling, and the analytics delivered into Epic.',
     },
   },
+
+  /* ----------------------------- the school ------------------------- */
+
+  /**
+   * His first teacher, in the hall. The elementary years get one honour and
+   * she is it; the junior high is through the door behind her.
+   */
   {
     id: 'teacher',
     name: 'Ms. Maria',
-    role: 'Town School',
+    role: 'His first teacher',
     area: 'school',
-    position: [-6, -3],
-    facing: -Math.PI * 0.35,
+    position: [-6, 2],
+    facing: Math.PI * 0.6,
     colors: {
       skin: SKIN.light,
       hair: '#6b4a30',
       shirt: '#e6a63c',
       pants: '#3d4353',
     },
+    prop: 'glasses',
+    smile: true,
     gives: 'm-school',
-    missionLines: ['Trophy case, beside the blackboard. Quietly, please.'],
+    missionLines: ['The trophy case, here in the hall. Quietly, please.'],
     lines: [
-      'Shh — exams. Come in, quietly.',
-      'Model High School of Ionidios in Piraeus, 2015 to 2017, graduating GPA 19.9 out of 20.',
-      'Before that, the Model Experimental High School of Evaggeliki in Nea Smyrni, 2011 to 2015 — he ranked 1st in the admission exam of 2014.',
-      'Bright kid. Insufferably curious. Still is, I hear.',
-      'The cabinet key is in the trophy case by the blackboard, if that is what you came for.',
+      'Come in. The boy from my first class? Of course I remember him.',
+      'A charismatic child, and a good heart. That is the rarer half. Homework done every single day, and a hand up before I had finished the question.',
+      'I wrote in his report that he would have a bright future. I do not write that often. I was right.',
+      'He captained the chess team to first place in the city tournament, and led the basketball team two years running, third in the local tournament.',
+      'Evangeliki is through the west door. The cabinet key is in the trophy case here in the hall, if that is what you came for.',
     ],
     journal: {
-      title: 'Schooling',
-      body: 'Model High School of Ionidios, Piraeus (2015–2017, GPA 19.9). Model Experimental High School of Evaggeliki, Nea Smyrni (2011–2015) — ranked 1st in the 2014 admission exam.',
+      title: 'His first teacher',
+      body: 'Ms. Maria, who taught his first class: a charismatic child with a good heart, homework done every day, a hand always up. She wrote that he would have a bright future.',
+    },
+  },
+
+  /* ------------------------------ Evangeliki ------------------------ */
+
+  {
+    id: 'principal-nikos',
+    name: 'Principal Nikos',
+    role: 'Principal, Evangeliki',
+    area: 'school-evangeliki',
+    position: [2.6, -6],
+    facing: Math.PI * 0.8,
+    colors: {
+      skin: SKIN.tan,
+      hair: '#8a8a8a',
+      shirt: '#3d4353',
+      pants: '#2b2f3a',
+    },
+    prop: 'glasses',
+    lines: [
+      'Not only an excellent student, first of his class every year, the prize of excellence every year, but truly responsible as class president.',
+      'Never in my career had a student handed me a report. Fifteen pages, on what his class had achieved in the year.',
+      'And the accounts. By the letter of the law he returned every cent of the class money he had not needed. Do you know how rare that is? At that age?',
+      'He represented the school as well. When they asked me who should speak for us, I did not have to think.',
+    ],
+    journal: {
+      title: 'The principal’s word',
+      body: 'Principal Nikos of Evangeliki: an excellent student, and a truly responsible class president, the only one in his career to hand in a report, fifteen pages of it, and to return every unspent cent of the class funds as the law required.',
+    },
+  },
+  {
+    id: 'teacher-diamantis',
+    name: 'Mr. Diamantis',
+    role: 'Robotics instructor',
+    area: 'school-evangeliki',
+    position: [-11, 5],
+    facing: Math.PI / 2,
+    colors: {
+      skin: SKIN.deep,
+      hair: '#2a2420',
+      shirt: '#d9853f',
+      pants: '#3a3f4a',
+    },
+    prop: 'cap',
+    lines: [
+      'Robotics. That year the whole class built a submarine drone. It floated, it dived, it came back, mostly.',
+      'Kitsos built a proof-of-concept electric bicycle on his own. Twelve volts, a motor, a frame off the rack, and it moved. Truly remarkable, at that age.',
+      'That bicycle by the bench? That is the one.',
+    ],
+    journal: {
+      title: 'Twelve volts',
+      body: 'Mr. Diamantis, who ran the robotics class at Evangeliki: the class built a submarine drone, and Kitsos on his own built a working proof-of-concept electric bicycle running on 12 V.',
+    },
+  },
+  {
+    id: 'teacher-stavroula',
+    name: 'Ms. Stavroula',
+    role: 'Pascal tutor',
+    area: 'school-evangeliki',
+    position: [-9.8, -2.6],
+    facing: Math.PI * 0.75,
+    colors: {
+      skin: SKIN.light,
+      hair: '#4a2c1e',
+      shirt: '#2f6fa8',
+      pants: '#3d4353',
+    },
+    hair: 'long',
+    lines: [
+      'Pascal, from the age of thirteen. He always loved programming, and he always wanted more of it.',
+      'Every extra exercise I set, he did, and then came back with small games of his own. With graphics, mind you, on these machines.',
+      'You can tell the ones who will do this for a living. They do not stop when the bell goes.',
+    ],
+    journal: {
+      title: 'Pascal, at thirteen',
+      body: 'Ms. Stavroula, his Pascal tutor at Evangeliki: he always loved programming and wanted more, every extra exercise done, and small games of his own with graphics on top.',
+    },
+  },
+  {
+    id: 'classmate-sotiris',
+    name: 'Sotiris',
+    role: 'Classmate',
+    area: 'school-evangeliki',
+    position: [10.6, 2.6],
+    facing: -Math.PI / 2,
+    colors: {
+      skin: SKIN.tan,
+      hair: '#3b2a1e',
+      shirt: '#c8402c',
+      pants: '#2f4a6b',
+    },
+    smile: true,
+    lines: [
+      'Stop studying and come play! Maths and physics, all the time!',
+      'Ask him about the chess team and you will be here until the bell.',
+      'Fine. One more problem, mine this time. Get it right and I will tell you something about the jetty past the school.',
+    ],
+    /**
+     * The one question on the island with a prize: a right answer buys the
+     * only hint anywhere to the swim, which is otherwise a thing you find by
+     * fooling about on the end of the jetty.
+     */
+    quiz: {
+      id: 'swim-hint',
+      question:
+        'Which of these contests did Kitsos never enter, or never win a prize in?',
+      choices: [
+        { text: 'Literature' },
+        { text: 'Biology' },
+        { text: 'Philosophy', right: true },
+        { text: 'Drawing' },
+      ],
+      right: [
+        'Philosophy! Never went near it. Everything else on that list he had a go at, and mostly came back with something.',
+        'So. The jetty on the west shore, out past the school. Walk to the very end of it and tap Space, the jump key, three times, quick, and he goes over the side and swims.',
+        'Do not tell Ms. Maria I told you.',
+      ],
+      wrong: [
+        'Nope, he did that one. Go and read the honours board if you do not believe me.',
+        'Come back when you have done your homework. Deal?',
+      ],
+      journal: {
+        title: 'Three taps off the jetty',
+        body: 'Sotiris’s tip, for a right answer: from the end of the jetty past the school, three quick taps of the jump key take him over the side and into the sea, and he swims.',
+      },
+    },
+    journal: {
+      title: 'Stop studying and come play',
+      body: 'Sotiris, his classmate at Evangeliki, who spent three years trying to get him out of a maths problem and onto a football pitch. Sometimes it worked.',
+    },
+  },
+
+  /* ------------------------------- Ionidios ------------------------- */
+
+  {
+    id: 'teacher-dimitra',
+    name: 'Ms. Dimitra',
+    role: 'Biology, Ionidios',
+    area: 'school-ionidios',
+    position: [10.6, -3.6],
+    facing: -Math.PI * 0.6,
+    colors: {
+      skin: SKIN.light,
+      hair: '#3b2a1e',
+      shirt: '#5d7a4a',
+      pants: '#3d4353',
+    },
+    hair: 'long',
+    prop: 'glasses',
+    lines: [
+      'Second among about one thousand six hundred and fifty, in the Panhellenic Biology Competition. I never once saw him revise for it.',
+      'I told him he should be a doctor. He told me biology was programming in organic matter: DNA is the source, the cell is the runtime, and evolution is a build that never finishes. I have not found the flaw in it yet.',
+      'First in his class, year after year. I put that in a letter for a scholarship, and every word of it was true.',
+      'Excellent in Biology without trying. That is the part I still find unfair.',
+    ],
+    journal: {
+      title: 'Programming in organic matter',
+      body: 'Ms. Dimitra, his biology teacher at Ionidios: 2nd of about 1,650 in the Panhellenic Biology Competition without seeming to try, and told he should be a doctor. He answered that biology was programming in organic matter.',
+    },
+  },
+  {
+    id: 'teacher-nikos',
+    name: 'Mr. Nikos',
+    role: 'Physics, Ionidios',
+    area: 'school-ionidios',
+    position: [-11, 5],
+    facing: Math.PI / 2,
+    colors: {
+      skin: SKIN.tan,
+      hair: '#4a4a4a',
+      shirt: '#2f4a6b',
+      pants: '#2b2f3a',
+    },
+    lines: [
+      'General physics and science-stream physics, both years. Excellent throughout. I wrote that on a scholarship form, and I do not hand the word out.',
+      'He captained our EUSO team: the science olympiad where three of you share one bench of experiments and a problem that changes the moment you touch it. He kept the bench calm.',
+      'Every event, competition and presentation this school put on, he was in it. And he argued well: a very good conversationalist, with clear arguments and a sense of humour. You need one, in physics.',
+    ],
+    journal: {
+      title: 'The EUSO bench',
+      body: 'Mr. Nikos, his physics teacher at Ionidios: excellent in both lyceum years, captain of the school’s EUSO science-experiments team, in every event the school ran, and, in his own words on the form, a pleasant personality with a particular sense of humour.',
+    },
+  },
+  {
+    id: 'teacher-panagiotis',
+    name: 'Mr. Panagiotis',
+    role: 'Informatics, Ionidios',
+    area: 'school-ionidios',
+    position: [10, 2.4],
+    facing: -Math.PI * 0.85,
+    colors: {
+      skin: SKIN.deep,
+      hair: '#1f1c1a',
+      shirt: '#8a2f3a',
+      pants: '#3a3f4a',
+    },
+    lines: [
+      'Top of the class in Informatics, and by sixteen he had left the syllabus behind. He was teaching himself C++ while the rest were still drawing flowcharts.',
+      'I put him forward for the Summer School of the University of Piraeus. He went. He came back asking for harder problems.',
+      'The awards in Programming and Mathematics are on the board. I would have been surprised by anything less.',
+    ],
+    journal: {
+      title: 'C++ at sixteen',
+      body: 'Mr. Panagiotis, his informatics teacher at Ionidios: top student, teaching himself C++ from sixteen, and sent to the Summer School of the University of Piraeus on his recommendation.',
+    },
+  },
+  {
+    id: 'classmate-angelica',
+    name: 'Angelica',
+    role: 'Classmate',
+    area: 'school-ionidios',
+    position: [-8.6, -6.2],
+    facing: Math.PI * 0.7,
+    colors: {
+      skin: SKIN.light,
+      hair: '#6b3a22',
+      shirt: '#e6a63c',
+      pants: '#2f4a6b',
+    },
+    hair: 'long',
+    smile: true,
+    lines: [
+      'If something in this school was broken, nobody called the caretaker. You waited for Kitsos to notice it.',
+      'The projector, the tap in the lab, the chair with three legs. He would have it open on the floor before the teacher had finished sighing.',
+      'First in the class, and still the one you wanted next to you on a bad day. Do not tell him I said either of those.',
+    ],
+    journal: {
+      title: 'The one who fixed things',
+      body: 'Angelica, his classmate at Ionidios: whatever broke in the school, he had it open on the floor before anyone had called the caretaker, and he was the one you wanted beside you on a bad day.',
     },
   },
   /* ---------------------------- night shift ------------------------- */
@@ -907,10 +1474,10 @@ export const NPCS: Npc[] = [
     hand: 'flashlight',
     shift: 'night',
     lines: [
-      'Easy. The district is shut — nobody goes in after hours.',
+      'Easy. The district is shut. Nobody goes in after hours.',
       'Unless… did production fall over at midnight? Is that what has you out here?',
       'Because it has not. Not once. Not one page in the small hours the whole time I have had this gate. It would be a first.',
-      'Mind you, Kitsos kept those hours anyway. University years worst of all: in before the sun, still at it long after. Nothing was paging him — he just did not stop.',
+      'Mind you, Kitsos kept those hours anyway. University years worst of all: in before the sun, still at it long after. Nothing was paging him. He just did not stop.',
     ],
   },
 
@@ -933,7 +1500,7 @@ export const NPCS: Npc[] = [
     hand: 'flashlight',
     shift: 'night',
     lines: [
-      'Halt. Stop where you are — you are already closer than I let anyone get.',
+      'Halt. Stop where you are. You are already closer than I let anyone get.',
       'The camp is sealed until reveille. Nothing goes in, nothing comes out, and no, there is no exception being made tonight.',
       'Do not take it personally. That is the whole of the job: somebody stays awake so that everybody else can sleep.',
       'The Lieutenant understood that better than most of them. At the Infantry Reserve Officers School they made him cadet company leader, and he slept last and woke first, every night of it.',
@@ -980,7 +1547,7 @@ export const NPCS: Npc[] = [
     prop: 'headset',
     lines: [
       'Radio Center, Sofia speaking. Signal is strong today.',
-      'Two open channels — email and LinkedIn — plus the message desk right here.',
+      'Two open channels, email and LinkedIn, plus the message desk right here.',
       'Step up to the console and pick one. Everything goes straight to Kitsos; there is no operator in between.',
     ],
     journal: {
@@ -992,6 +1559,10 @@ export const NPCS: Npc[] = [
   /* ------------------------ Kitsos House ------------------------- */
   ...HOME_FAMILY,
   ...OLD_FAMILY,
+  /* Her side, in the house on the twenty-fifth of December only. */
+  ...IN_LAWS,
+  /* The class, in the lecture hall for the thesis defence and nowhere else. */
+  ...CLASS,
 ]
 
 export const SIGNS: SignPost[] = [
@@ -1001,7 +1572,7 @@ export const SIGNS: SignPost[] = [
     facing: 0,
     label: 'Town Plaza',
     lines: [
-      'KITSOS TOWN — Town Plaza. Seven roads leave this square, and not one of them is named after where it goes.',
+      'KITSOS TOWN: Town Plaza. Seven roads leave this square, and not one of them is named after where it goes.',
       'North, Motivation Road, to the Polytechnic. East, Discipline Road, to the Work District. West, Curiosity Road, to the Town School.',
       'South-west, Caring Road, to Kitsos House. South-east, Leadership Road, to the Army Camp. Due south, Collaboration Road, to the Radio Center.',
       'And north-west out to the cape: Freedom Road, and the Old Lighthouse at the end of it. Locked.',
@@ -1014,7 +1585,7 @@ export const SIGNS: SignPost[] = [
     facing: 0,
     label: 'Motivation Road',
     lines: [
-      'MOTIVATION ROAD — the Polytechnic, straight on. Mind the bicycles.',
+      'MOTIVATION ROAD: the Polytechnic, straight on. Mind the bicycles.',
       'Electrical & Computer Engineering, and the lecture hall behind it.',
       'Five years of it. Nobody made him finish; that is rather the point of the name.',
     ],
@@ -1025,7 +1596,7 @@ export const SIGNS: SignPost[] = [
     facing: -Math.PI * 0.45,
     label: 'Discipline Road',
     lines: [
-      'DISCIPLINE ROAD — the Work District. Veltiston.AI and IBM Consulting.',
+      'DISCIPLINE ROAD: the Work District. Veltiston.AI and IBM Consulting.',
       'Deploys on Thursdays. Coffee is free, the incidents are not.',
       'Shipping the same standard on a bad week as on a good one is the whole trick.',
     ],
@@ -1036,7 +1607,7 @@ export const SIGNS: SignPost[] = [
     facing: Math.PI * 0.6,
     label: 'Curiosity Road',
     lines: [
-      'CURIOSITY ROAD — the Town School, where the whole thing started.',
+      'CURIOSITY ROAD: the Town School, where the whole thing started.',
       'Carry on past the school for the west beach and the dock.',
       'Everything after this road is just the same question asked louder.',
     ],
@@ -1047,7 +1618,7 @@ export const SIGNS: SignPost[] = [
     facing: Math.PI * 0.25,
     label: 'Freedom Road',
     lines: [
-      'FREEDOM ROAD — the north-west cape, and the Old Lighthouse on the end of it.',
+      'FREEDOM ROAD: the north-west cape, and the Old Lighthouse on the end of it.',
       'The door has five locks. One key waits in each district building.',
       'Nobody has opened it in years. Be the one who does.',
     ],
@@ -1058,7 +1629,7 @@ export const SIGNS: SignPost[] = [
     facing: Math.PI,
     label: 'Collaboration Road',
     lines: [
-      'COLLABORATION ROAD — the Radio Center, straight ahead. Follow the antenna.',
+      'COLLABORATION ROAD: the Radio Center, straight ahead. Follow the antenna.',
       'Open to recruiters, collaborators and old friends alike.',
       'Nothing worth building on this island was built by one person.',
     ],
@@ -1071,7 +1642,7 @@ export const SIGNS: SignPost[] = [
     facing: 2.04,
     label: 'Caring Road',
     lines: [
-      'CARING ROAD — Kitsos House, south-west. Kyria Voula is usually on the step.',
+      'CARING ROAD: Kitsos House, south-west. Ms. Stella is usually on the step.',
       'Home, and the people who made it one. Volunteering, the Foundation, the blood bank.',
       'Everything on this road he does for nothing, which is how you know he means it.',
     ],
@@ -1082,7 +1653,7 @@ export const SIGNS: SignPost[] = [
     facing: -2.005,
     label: 'Leadership Road',
     lines: [
-      'LEADERSHIP ROAD — the Army Camp, south-east. Ask for Sergeant Petros.',
+      'LEADERSHIP ROAD: the Army Camp, south-east. Ask for Sergeant Petros.',
       'Marine Battalion, reserve. Platoon Leader and Weapons Officer.',
       'He slept last and woke first. Nobody on this road had to be told twice.',
     ],

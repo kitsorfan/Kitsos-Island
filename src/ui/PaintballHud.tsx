@@ -105,7 +105,7 @@ export function PaintballHud() {
         </div>
 
         {field.down && (
-          <p className="pb__down">{t('Down — you cannot shoot from here')}</p>
+          <p className="pb__down">{t('Down. You cannot shoot from here')}</p>
         )}
 
         <div className={`pb__reload${reloading ? ' pb__reload--on' : ''}`}>
@@ -115,7 +115,7 @@ export function PaintballHud() {
           />
           <span>
             {reloading
-              ? `Refilling — ${Math.ceil(left * (RELOAD_MS / 1000))}s`
+              ? `Refilling: ${Math.ceil(left * (RELOAD_MS / 1000))}s`
               : `${game.ammo} of ${MAG_SIZE} rounds`}
           </span>
         </div>

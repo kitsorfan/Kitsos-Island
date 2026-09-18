@@ -54,7 +54,7 @@ export function showUnsupported(root: HTMLElement) {
   <h1>The island needs 3D graphics</h1>
   <p>
     This CV is normally an explorable 3D island, but your browser cannot run
-    WebGL 2 — usually because hardware acceleration is turned off, or the page
+    WebGL 2, usually because hardware acceleration is turned off, or the page
     is open in a remote desktop session.
   </p>
   <p><strong>The whole CV is available as a plain page instead.</strong></p>

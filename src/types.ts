@@ -78,6 +78,15 @@ export interface Building {
   sentries?: boolean
 }
 
+/**
+ * A dinner jacket over a white shirt, and what is worn at the throat of it.
+ * Every man in the house is in one for Christmas dinner.
+ */
+export interface DinnerSuit {
+  bowTie: string
+  buttonhole: string
+}
+
 /** What the player can carry in his off hand after dark, or nothing. */
 export type HandLight = 'torch' | 'flashlight'
 export type Carried = HandLight | 'none'
@@ -91,6 +100,23 @@ export type Carried = HandLight | 'none'
 export type Quality = 'auto' | 'high' | 'low'
 
 /* ------------------------------ people ----------------------------- */
+
+/**
+ * A question a character puts to you at the end of their lines, with the
+ * answers on buttons. Get it right and they say `right` — and say it again
+ * every time after, because the secret is out. Get it wrong and they say
+ * `wrong`, and you can come back and try again.
+ */
+export interface Quiz {
+  /** The secret let out by a right answer, which is also what settles it. */
+  id: string
+  question: string
+  choices: { text: string; right?: boolean }[]
+  right: string[]
+  wrong: string[]
+  /** Journal entry filed with the right answer. */
+  journal?: { title: string; body: string }
+}
 
 export interface Npc {
   id: string
@@ -116,6 +142,8 @@ export interface Npc {
   gives?: string
   /** Extra dialogue once their mission is active but unfinished. */
   missionLines?: string[]
+  /** A question after their lines, and what a right answer buys. */
+  quiz?: Quiz
   /**
    * When they are out. Left off, they are there whatever the hour; a night
    * shift only appears once the lamps are on, and does not stop for a party.
@@ -130,6 +158,41 @@ export interface Npc {
   dressTrim?: string
   /** A mouth, turned up. Reserved for the people he is glad to see. */
   smile?: boolean
+  /** In a dinner jacket. Set for the day by `feastWear`, never otherwise. */
+  suit?: DinnerSuit
+  /**
+   * Their place at the long table for the Christmas meal. Anybody with one
+   * leaves their own room for that day and turns up in the basement instead,
+   * standing about talking until the host calls the meal — see game/feast.ts,
+   * which owns both halves of the day.
+   */
+  feast?: Vec2
+  /** In the house for the meal and no other day: the in-laws. */
+  feastOnly?: boolean
+  /**
+   * Their desk in the lecture hall for the thesis defence. Anybody with one
+   * files in when he steps up to the lectern and leaves when he steps down —
+   * see game/lecture.ts, which owns the whole of the defence.
+   */
+  lecture?: Vec2
+  /** In the hall for the defence and at no other time: the class. */
+  lectureOnly?: boolean
+  /** What they say at the table, instead of what they say the rest of the year. */
+  feastLines?: string[]
+  /**
+   * What they change into for it. Everybody in this family dresses for
+   * Christmas dinner, so these are merged over their everyday colours on the
+   * day and ignored every other one.
+   */
+  feastWear?: {
+    shirt?: string
+    pants?: string
+    /** A skirt, for anyone in one. `shirt` is the bodice above it. */
+    dress?: string
+    dressTrim?: string
+    /** A dinner jacket and a bow tie, for the men. */
+    suit?: DinnerSuit
+  }
 }
 
 export interface SignPost {
@@ -207,12 +270,21 @@ export type PropKind =
   | 'boiler'
   | 'longTable'
   | 'photoWall'
+  | 'toyBox'
+  /* Out only on the twenty-fifth of December. */
+  | 'fireplace'
+  | 'christmasTree'
+  | 'wreath'
+  | 'garland'
+  /* And this one only once the host has called the meal. */
+  | 'feastTable'
   | 'shutter'
-  | 'stairwell'
   | 'armchair'
   | 'tv'
   | 'beanbag'
   | 'poster'
+  /* The shelf of toys in the library, one of which is a switch. */
+  | 'toyShelf'
 
 export interface InteriorProp {
   kind: PropKind
@@ -232,6 +304,14 @@ export type ExhibitKind =
   | 'radio'
   /** Opens the summary panel and offers a generated CV download. */
   | 'cv'
+  /** The one on the basement wall. Says 8 April, and can be told otherwise. */
+  | 'calendar'
+  /**
+   * A thing already standing in the room as furniture — the toys on their
+   * shelf. Draws nothing of its own: the prop is the object, and this only
+   * puts a prompt and a halo on it.
+   */
+  | 'toy'
 
 export interface Exhibit {
   id: string
@@ -253,21 +333,43 @@ export interface Exhibit {
    * `InteriorLink` that needs one: the shelf tells you it is a door.
    */
   reveals?: { id: string; title: string; body: string }
+  /**
+   * For kind 'toy': where the thing you actually click sits, and how big a
+   * target it is. `at` is in room coordinates like `position`, `y` is its
+   * height off the floor, and `size` is the half-extent of the invisible box
+   * the pointer has to hit. Without one a toy is only pressable from up close
+   * with the keyboard; with one it can simply be clicked.
+   */
+  hitbox?: { at: Vec2; y: number; size: number }
 }
 
 /**
  * A way from one room to another inside the same building: the stairs to the
  * cellar, the door nobody has the key to, the shelf that turns out to swing.
+ *
+ * A 'lift' is the exception to the instant ones: walking into the car shuts
+ * the doors and rides, and only then puts you out on the far floor. It needs a
+ * `floor` so the indicator has a number to count to.
+ *
+ * Every one sits on a wall and is taken by walking into it. `position` is the
+ * point on the wall and `rotation` turns its own +z to face into the room —
+ * so 0 for the north wall, π for the south, π/2 for the west and -π/2 for the
+ * east. Two rooms are joined by a link on each side pointing at the other:
+ * going through one, you come out just inside the other, facing the room.
  */
 export interface InteriorLink {
   id: string
-  /** Prompt shown when you stand at it. */
+  /** What it is, for the prompt on the one kind that has to be pressed. */
   label: string
   position: Vec2
   rotation?: number
-  kind: 'stairsDown' | 'stairsUp' | 'door' | 'hatch' | 'locked'
-  /** Area it opens onto, and where you arrive in it. */
+  kind: 'stairsDown' | 'stairsUp' | 'door' | 'hatch' | 'locked' | 'lift'
+  /** Area it opens onto. */
   to?: string
+  /**
+   * Where you arrive, if not just inside the matching link on the other side.
+   * Only needed when the far room has no link pointing back here.
+   */
   arrive?: Vec2
   /** What it says when it does not open, or on the way through. */
   lines?: string[]
@@ -278,6 +380,30 @@ export interface InteriorLink {
   needs?: string
   /** Journal entry filed the first time it opens. */
   journal?: { title: string; body: string }
+  /**
+   * For kind 'lift': the floor this car is standing on. The indicator counts
+   * from here to the floor you press, so the ride takes as long as the number
+   * of floors crossed.
+   */
+  floor?: number
+  /**
+   * For kind 'lift': the panel inside the car, in the order the buttons are
+   * on it. Every floor of the building appears, including the one you are
+   * already standing on and the one nothing has been built on yet.
+   */
+  serves?: LiftStop[]
+}
+
+/** One button on a lift panel. */
+export interface LiftStop {
+  /** The number on the button. */
+  floor: number
+  /** What that floor is, under the number. */
+  label: string
+  /** The room it opens onto. Left off, the button is not wired to anything. */
+  to?: string
+  /** What the car says when a button with nowhere to go is pressed. */
+  lines?: string[]
 }
 
 export interface Interior {
@@ -297,17 +423,27 @@ export interface Interior {
   rug: string
   wall: string
   accent: string
-  /** Where you appear when you walk in, just inside the door. */
+  /**
+   * Where you appear when you walk in from the island, just inside the front
+   * door. Rooms deeper in the building are entered through their links, and
+   * only fall back on this if a link has nowhere better to put you.
+   */
   spawn: Vec2
   props: InteriorProp[]
-  exhibits: Exhibit[]
-  /** Stairs and doors to other rooms of the same building. */
-  links?: InteriorLink[]
   /**
-   * Where the way out leads, for a room with no front door of its own. Left
-   * off, it steps straight outside onto the island.
+   * Dressing that only goes up when the calendar on the basement wall says
+   * the twenty-fifth of December. Folded in on top of `props` for that day
+   * alone, furniture and colliders together.
    */
-  exit?: { to: string; arrive: Vec2; label: string }
+  festive?: InteriorProp[]
+  exhibits: Exhibit[]
+  /**
+   * Stairs and doors to other rooms of the same building. The front room is
+   * the one without a `building`: it alone has a doorway in its south wall,
+   * and that doorway leads outside. Every other room is reached, and left,
+   * through these.
+   */
+  links?: InteriorLink[]
   /**
    * Windows punched through the walls, as a fraction along each side from its
    * middle. They light the room and give it an outside.

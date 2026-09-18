@@ -51,15 +51,15 @@ Seven roads radiate from the town square. Each district building can be entered:
 walking through the door swaps the world for a hand-built room full of exhibits,
 people and — in five of them — a key.
 
-| Place                            | Inside                                                                                                                          |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **Kitsos House** (SW)            | Trainer card, languages, hobbies, the workbench · 🔑 Brass Key                                                                  |
-| **NTUA Academy** (N)             | Degree, thesis and contests, published research, certifications, two academic references, student council · 🔑 Lecture Hall Key |
-| **Work District** (E)            | Veltiston AI, the platform, IBM, full skills matrix · 🔑 Server Room Key                                                        |
-| **Army Camp** (SE)               | Service record and the Battalion Commander's letter, under the Greek flag · 🔑 Footlocker Key                                   |
-| **Town School** (W)              | Early education, teaching and volunteering, the foundation's letter · 🔑 Cabinet Key                                            |
-| **Radio Center** (S)             | The transmitter — email, LinkedIn and a message desk                                                                            |
-| **The Old Lighthouse** (NW cape) | Sealed with five locks. Inside: the career summary, what he is good at, what he is looking for, and a CV download               |
+| Place                            | Inside                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Kitsos House** (SW)            | Trainer card, languages, hobbies, the workbench · 🔑 Brass Key                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **NTUA Academy** (N)             | The lecture hall: the Dean, the degree, thesis and contests, published research, certifications, two academic references · 🔑 Lecture Hall Key. West door: the programming lab, the transcript and the Survival Guide. East door: the council room, the petition and the Independent movement                                                                                                                                                                                                                           |
+| **Work District** (E)            | Three floors, one employer each, reached by stairs or by a lift that takes its time. Ground: capabilities, the certification wall, the jobs he held as an NTUA student and the Vice-President who gave him the first of them. First: IBM — the Cosmos Project at the National Bank of Greece, his supervisor there, and Hamburg · 🔑 Server Room Key. Second: Veltiston AI — the founder, the stack, the team across three time zones, the data-science side. The lift has a button for a third floor and it is not lit |
+| **Army Camp** (SE)               | Service record and the Battalion Commander's letter, under the Greek flag · 🔑 Footlocker Key                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **Town School** (W)              | The hall: his first teacher, two cups, volunteering and the foundation's letter · 🔑 Cabinet Key. West door: the Evangeliki classroom, the principal, the Pascal tutor, the robotics bench and the after-school clubs. East door: the Ionidios classroom, three teachers and their scholarship letters, the EUSO bench and the machine he learned C++ on                                                                                                                                                                |
+| **Radio Center** (S)             | The transmitter — email, LinkedIn and a message desk                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **The Old Lighthouse** (NW cape) | Sealed with five locks. Inside: the career summary, what he is good at, what he is looking for, and a CV download                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ### Missions and keys
 
@@ -120,6 +120,14 @@ Some notes on how it hangs together:
   indoor scenes light themselves and the draw call count stays low. The player
   controller is shared and picks its colliders, bounds, ground height and camera
   from whichever area is active.
+- **The lift is the one way through that takes time.** Every other door and
+  flight swaps the room the moment you walk into it. Walking into the car
+  instead raises its panel (`ui/LiftPanel.tsx`) with a button per floor; press
+  one and the doors shut, the indicator counts, and only when the car stops are
+  you put out — on the far floor's lift, not on its stairs. `game/lift.ts` owns
+  the timing, so the doors in the scene and the number over them read the same
+  clock. The button for the third floor is on the panel and does nothing, which
+  is the point of it.
 - **The frame loop never re-renders React.** `Player.tsx` reads input, resolves
   collisions and drives the camera inside `useFrame`, writing to refs. Walking
   NPCs publish their positions to `game/actors.ts` rather than to state, so a

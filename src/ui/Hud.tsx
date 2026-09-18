@@ -253,7 +253,7 @@ export function Hud() {
 
         {mode === 'explore' && !playing && (
           <div className="hud__buttons">
-            {night && (
+            {night && area === 'island' && (
               <button
                 className="icon-button"
                 onClick={toggleHandLight}
@@ -289,7 +289,7 @@ export function Hud() {
                 sprintLock.on = next
                 setSprint(next)
               }}
-              title={t('Keep running — the same as holding Shift')}
+              title={t('Keep running, the same as holding Shift')}
             >
               👟<span>{t(sprint ? 'Running' : 'Walk')}</span>
             </button>
@@ -340,7 +340,7 @@ export function Hud() {
           <span>
             {nearby.verb ? `${nearby.verb} ` : ''}
             <strong>{nearby.label}</strong>
-            {nearby.blocked ? ` — ${t('locked')}` : ''}
+            {nearby.blocked ? ` · ${t('locked')}` : ''}
           </span>
         </div>
       )}

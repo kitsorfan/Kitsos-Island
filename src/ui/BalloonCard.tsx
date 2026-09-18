@@ -59,7 +59,7 @@ export function BalloonCard() {
                 <strong>{WATER_CALLS} want a water bomb</strong>
                 <p>
                   {t(
-                    'Out in the sun on the roads and the parade ground. A bomb drops like a stone, so it lands close to under you — and everyone it catches scatters, hands over their heads.',
+                    'Out in the sun on the roads and the parade ground. A bomb drops like a stone, so it lands close to under you, and everyone it catches scatters, hands over their heads.',
                   )}
                 </p>
               </div>
@@ -107,11 +107,11 @@ export function BalloonCard() {
                     <dd>{t('A and D')}</dd>
                   </div>
                   <div>
-                    <dt>{t('Burner — climb')}</dt>
+                    <dt>{t('Burner: climb')}</dt>
                     <dd>{t('Hold Shift')}</dd>
                   </div>
                   <div>
-                    <dt>{t('Vent — drop')}</dt>
+                    <dt>{t('Vent: drop')}</dt>
                     <dd>{t('Hold Ctrl')}</dd>
                   </div>
                   <div>
@@ -137,12 +137,12 @@ export function BalloonCard() {
             <ul className="bl-card__rules">
               <li>
                 {t(
-                  'Two rings follow you across the grass — the blue one is where a bomb would land, the pink one where confetti would. Line the right ring up with the right gathering.',
+                  'Two rings follow you across the grass: the blue one is where a bomb would land, the pink one where confetti would. Line the right ring up with the right gathering.',
                 )}
               </li>
               <li>
                 The basket holds {STOCK_MAX} of each and a fresh one comes up
-                every couple of seconds, so there is no running out — only
+                every couple of seconds, so there is no running out, only
                 waiting.
               </li>
               <li>

@@ -112,7 +112,7 @@ export function HideHud() {
 
       <div className="hd__panel">
         <span className="hd__label">
-          {seeking ? 'Hide and seek — seeking' : 'Hide and seek — hiding'}
+          {seeking ? 'Hide and seek: seeking' : 'Hide and seek: hiding'}
         </span>
 
         {seeking ? (
@@ -140,7 +140,7 @@ export function HideHud() {
             {!lit && (
               <p className="hd__warn">
                 {t(
-                  'Your torch is out — press T or you will never see them at all',
+                  'Your torch is out. Press T or you will never see them at all',
                 )}
               </p>
             )}
@@ -179,7 +179,7 @@ export function HideHud() {
               />
               <span>
                 {readout.chasers > 0
-                  ? `${readout.chasers} AFTER YOU \u2014 ${Math.round(readout.closest)}m`
+                  ? `${readout.chasers} AFTER YOU: ${Math.round(readout.closest)}m`
                   : readout.seen
                     ? 'SEEN'
                     : 'Nobody has seen you'}
@@ -202,7 +202,7 @@ export function HideHud() {
                 {lit
                   ? 'That torch is visible right across the town'
                   : 'They can hear you moving'}{' '}
-                — anyone inside {Math.round(readout.drawing)}m is on their way
+                · anyone inside {Math.round(readout.drawing)}m is on their way
               </p>
             )}
           </>

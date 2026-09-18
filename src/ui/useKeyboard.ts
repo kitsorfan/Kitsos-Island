@@ -66,10 +66,20 @@ export function useKeyboard() {
           }
           return
 
-        case 'dialogue':
-          if (ADVANCE_KEYS.has(event.code)) dialogueBridge.advance()
+        case 'dialogue': {
+          // The digits pick an answer, once the question is on its last page.
+          const digit = /^Digit([1-9])$/.exec(event.code)
+          const asked = state.dialogue
+          if (
+            digit &&
+            asked?.choices &&
+            asked.page === asked.lines.length - 1
+          ) {
+            state.choose(Number(digit[1]) - 1)
+          } else if (ADVANCE_KEYS.has(event.code)) dialogueBridge.advance()
           else if (event.code === 'Escape') state.closeDialogue()
           return
+        }
 
         case 'panel':
           if (event.code === 'Escape') {
@@ -103,6 +113,10 @@ export function useKeyboard() {
           if (['Escape', 'KeyP'].includes(event.code)) {
             state.closeArcade()
           }
+          return
+
+        case 'calendar':
+          if (event.code === 'Escape') state.closeCalendar()
           return
 
         case 'moto':

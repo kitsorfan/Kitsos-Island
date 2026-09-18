@@ -34,8 +34,24 @@ function cvPage(): Plugin {
 export default defineConfig({
   plugins: [react(), cvPage()],
   build: {
-    // The whole island is needed on first paint, so it ships as one chunk;
-    // three.js alone accounts for most of it.
-    chunkSizeWarningLimit: 1400,
+    /**
+     * three.js and the r3f helpers on top of it come to well over half the
+     * island and change only when a dependency is bumped, so they ship apart
+     * from the island itself, which changes constantly. A visitor coming back
+     * after an edit re-downloads the island and keeps the engine.
+     */
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            { name: 'three', test: /node_modules[\\/]three[\\/]/ },
+            { name: 'drei', test: /node_modules[\\/]@react-three[\\/]/ },
+          ],
+        },
+      },
+    },
+    // Enough room for the engine chunk above, and not a byte more: the point
+    // of the limit is to say something when the island grows a second one.
+    chunkSizeWarningLimit: 800,
   },
 })

@@ -453,7 +453,7 @@ function burst(p: Parcel, ground: number, events: BalloonEvents) {
     BALLOON.feed = {
       text:
         p.kind === 'water'
-          ? 'Soaked — they were waiting on confetti'
+          ? 'Soaked. They were waiting on confetti'
           : 'Confetti on the ones who wanted cooling down',
       kind: 'bad',
       at: Date.now(),
@@ -620,7 +620,7 @@ export function stepBalloon(delta: number, input: BalloonInput): BalloonEvents {
       text:
         left === 0
           ? 'Every one of them served.'
-          : `${last.label} — ${left} to go`,
+          : `${last.label}: ${left} to go`,
       kind: 'good',
       at: Date.now(),
     }

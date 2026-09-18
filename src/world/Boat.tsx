@@ -210,7 +210,7 @@ const SMOKE_FRAG = /* glsl */ `
     float h = vUv.y;
 
     // Orange at the base and grey by the top, and the whole column goes to
-    // a deep red as the flare burns down — which is a warning you can read
+    // a deep red as the flare burns down, which is a warning you can read
     // from the far side of the sea, as a number on the glass is not.
     vec3 hot = mix(vec3(0.92, 0.16, 0.12), vec3(0.98, 0.48, 0.14), uBurn);
     vec3 col = mix(hot, vec3(0.44, 0.46, 0.5), smoothstep(0.04, 0.55, h));

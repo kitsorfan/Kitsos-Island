@@ -172,7 +172,7 @@ export function BalloonHud() {
               >
                 {readout.next.want === 'water' ? '💧' : '🎉'}
               </span>
-              {readout.next.label} —{' '}
+              {readout.next.label}:{' '}
               <strong>{Math.round(readout.next.distance)}m</strong>
             </span>
           )}

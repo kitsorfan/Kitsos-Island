@@ -660,7 +660,7 @@ export const VELTISTON_SECTIONS: PanelSection[] = [
             meta: 'May 2024 – May 2026',
             bullets: [
               'One of the company’s first engineers; built the flagship Nurse Scheduling platform from concept to production.',
-              'Led production deployments across four major U.S. hospitals, working directly with hospital stakeholders.',
+              'Led production deployments across major U.S. hospitals, working directly with hospital stakeholders.',
               'Modernized legacy applications: Agile practices, engineering standards, CI/CD pipelines, documentation, automated testing and incremental refactoring.',
             ],
           },
@@ -695,15 +695,20 @@ export const PLATFORM_SECTIONS: PanelSection[] = [
     heading: 'What I shipped',
     blocks: [
       {
+        type: 'text',
+        text: 'Technical lead on every one of these: the architecture, the decisions, the reviews and the delivery into the hospital.',
+      },
+      {
         type: 'list',
         items: [
-          'Technical lead of the flagship Nurse Scheduling platform, live in four major U.S. hospitals.',
+          'The flagship Nurse Scheduling platform, live in major U.S. hospitals.',
           'An AI-powered documentation assistant built on Spring AI, retrieval-augmented generation and agentic AI.',
           'A SMART on FHIR application embedded inside Epic EHR.',
           'A Length of Stay analytics plugin delivered into Epic EHR through SMART on FHIR.',
           'Integration with UKG workforce management systems.',
           'SAML 2.0 single sign-on against Microsoft ADFS.',
-          'A secure notification framework and comprehensive activity audit logging.',
+          'A React Native mobile application for the platform.',
+          'A secure notification framework and comprehensive activity audit logging, reaching nurses through Microsoft Teams and Twilio SMS.',
           'A Jira-integrated ticketing system with Google reCAPTCHA for secure issue submission and workflow automation.',
           'HIPAA-compliant security and data handling architecture across all of it.',
         ],
@@ -789,12 +794,12 @@ export const WORK_DIRECTORY_SECTIONS: PanelSection[] = [
           },
           { label: 'First', value: 'IBM · 2023–2024' },
           { label: 'Second', value: 'Veltiston AI · 2024–present' },
-          { label: 'Third', value: 'Not built yet' },
+          { label: 'Third', value: 'Empty. Waiting on an offer' },
         ],
       },
       {
         type: 'text',
-        text: 'The lift has a button for the third floor. It is not lit. Whatever the next adventure turns out to be, it has not been signed for.',
+        text: 'The lift has a button for the third floor. Press it and nothing lights, because nobody has decided yet what that floor is — which is the honest position of a senior engineer who is good at this and is listening to offers. If you are reading this because you are hiring, you are the one who gets to name it.',
       },
     ],
   },
@@ -914,6 +919,7 @@ export const VELTISTON_STACK_SECTIONS: PanelSection[] = [
             label: 'AI',
             tags: [
               'Spring AI',
+              'Ollama',
               'RAG',
               'Agentic AI',
               'Vector search',
@@ -922,7 +928,13 @@ export const VELTISTON_STACK_SECTIONS: PanelSection[] = [
           },
           {
             label: 'Front',
-            tags: ['React', 'TypeScript', 'Angular', 'Tailwind CSS'],
+            tags: [
+              'React',
+              'React Native',
+              'TypeScript',
+              'Angular',
+              'Tailwind CSS',
+            ],
           },
           { label: 'Data', tags: ['MySQL', 'Flyway'] },
           {
@@ -941,13 +953,19 @@ export const VELTISTON_STACK_SECTIONS: PanelSection[] = [
             tags: ['Jenkins', 'GitLab CI', 'Bitbucket Pipelines', 'Git'],
           },
           { label: 'Watching it', tags: ['Grafana', 'Graylog', 'Sentry'] },
-          { label: 'Proving it', tags: ['JUnit', 'Mockito', 'JaCoCo'] },
+          {
+            label: 'Proving it',
+            tags: ['JUnit', 'Mockito', 'JaCoCo', 'Vitest'],
+          },
           {
             label: 'Hospital side',
             tags: [
               'SMART on FHIR',
               'Epic EHR',
               'UKG',
+              'Microsoft Teams',
+              'Jira',
+              'Twilio',
               'SAML 2.0 SSO',
               'Microsoft ADFS',
               'JWT',
@@ -964,12 +982,12 @@ export const VELTISTON_STACK_SECTIONS: PanelSection[] = [
     blocks: [
       {
         type: 'text',
-        text: 'A production release most weeks, on a platform four major U.S. hospitals run their nursing rosters on. The people using it are charge nurses at shift change, not beta testers. That is the whole argument for why the standards are what they are.',
+        text: 'A production release most weeks, on a platform major U.S. hospitals run their nursing rosters on. The people using it are charge nurses at shift change, not beta testers. That is the whole argument for why the standards are what they are.',
       },
       {
         type: 'stats',
         stats: [
-          { label: 'Live in', value: '4 major U.S. hospitals' },
+          { label: 'Live in', value: 'Major U.S. hospitals' },
           { label: 'Releases', value: 'Weekly, to production' },
           { label: 'Teams', value: 'Greece · Boston · Morocco' },
           { label: 'Since', value: 'May 2024, founding engineer' },
@@ -1010,6 +1028,7 @@ export const SKILLS_SECTIONS: PanelSection[] = [
             label: 'AI',
             tags: [
               'Spring AI',
+              'Ollama',
               'RAG',
               'Agentic AI',
               'Artificial neural networks',
@@ -1691,7 +1710,7 @@ export const TOY_SHELF_SECTIONS: PanelSection[] = [
       },
       {
         type: 'text',
-        text: 'One of them is not like the others. Have a proper look.',
+        text: 'Pick things up. Nothing on this shelf minds being handled.',
       },
     ],
   },
@@ -1717,6 +1736,35 @@ export const PLAYROOM_SECTIONS: PanelSection[] = [
       {
         type: 'quote',
         text: 'Every house should have one room that is nobody\u2019s business.',
+      },
+    ],
+  },
+]
+
+/**
+ * The globe in the corner of the Evangeliki classroom, which is the one thing
+ * in that room he ever spun instead of read. Six countries on it have been
+ * stood in rather than pointed at, and that is the whole of what the panel
+ * says: a list, not an itinerary.
+ */
+export const GLOBE_SECTIONS: PanelSection[] = [
+  {
+    heading: 'Where the globe has been stopped',
+    blocks: [
+      {
+        type: 'text',
+        text: 'The astronomy corner had a globe, and a boy who spun it more than he studied it. Six of the countries on it he has since stood in.',
+      },
+      {
+        type: 'flags',
+        countries: [
+          { code: 'gr', name: 'Greece' },
+          { code: 'cy', name: 'Cyprus' },
+          { code: 'de', name: 'Germany' },
+          { code: 'fr', name: 'France' },
+          { code: 'it', name: 'Italy' },
+          { code: 'ch', name: 'Switzerland' },
+        ],
       },
     ],
   },

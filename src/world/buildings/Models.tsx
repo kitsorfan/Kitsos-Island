@@ -8,6 +8,8 @@ import {
   type MeshBasicMaterial,
   type MeshStandardMaterial,
 } from 'three'
+import { useGame } from '../../state/store'
+import { DOOR_AJAR, DOOR_OPEN, DOOR_SLIDE } from '../../game/doors'
 import { TextPlane } from '../TextSign'
 import { GreekFlag } from '../InteriorProps'
 import { IbmMark, NtuaSeal, VeltistonMark } from '../Emblems'
@@ -1033,20 +1035,83 @@ export function WorkModel() {
           />
         </mesh>
       ))}
-      <mesh position={[-2.6, 1.7, FRONT + 0.09]}>
-        <boxGeometry args={[3.4, 3.4, 0.12]} />
-        <meshStandardMaterial
-          color="#d6f5ee"
-          transparent
-          opacity={0.8}
-          roughness={0.1}
-          metalness={0.2}
-        />
-      </mesh>
-      <mesh position={[-2.6, 1.7, FRONT + 0.17]}>
-        <boxGeometry args={[0.12, 3.4, 0.06]} />
-        <meshStandardMaterial color="#22313f" />
-      </mesh>
+      <SlidingDoors buildingId="work" x={-2.6} z={FRONT + 0.09} width={3.4} />
+    </group>
+  )
+}
+
+/**
+ * Glass that slides apart as somebody walks up to it.
+ *
+ * Two leaves rather than one pane, because a sliding door is only legible as
+ * one while you can see the join travel. They are driven straight off the
+ * entrance in the store — the same clock the walk is on — so the glass is
+ * always exactly as open as the walk expects it to be.
+ */
+function SlidingDoors({
+  buildingId,
+  x,
+  z,
+  width,
+}: {
+  buildingId: string
+  x: number
+  z: number
+  width: number
+}) {
+  const left = useRef<Group>(null)
+  const right = useRef<Group>(null)
+  const leaf = width / 2
+
+  useFrame((_, delta) => {
+    if (!left.current || !right.current) return
+    const { nearby } = useGame.getState()
+    /*
+     * The whole of the door's behaviour: how near he is, and nothing else.
+     *
+     * Wide once the sensor has him — `silent` is set only on a door that
+     * opens by itself, so this is already the daylight-and-unlocked case and
+     * needs no second opinion about it — ajar while he is merely in range,
+     * and shut when he walks off. He is never moved by any of it: he walks in
+     * through the opening himself, on the same controls he had on the plaza.
+     */
+    const sensed = nearby?.id === buildingId
+    const target = sensed ? (nearby.silent ? DOOR_OPEN : DOOR_AJAR) : 0
+
+    /*
+     * Eased against the clock rather than a fixed fraction per frame, so the
+     * glass takes DOOR_SLIDE to travel on any machine. The old per-frame lerp
+     * was the whole of the sticking: on a slow frame rate the leaves were
+     * still only part way open by the time he reached them, so the harder the
+     * scene was to draw, the more the door looked jammed.
+     */
+    const want = leaf * 0.92 * target
+    const k = 1 - Math.exp((-delta / DOOR_SLIDE) * 3)
+    left.current.position.x += (-want - left.current.position.x) * k
+    right.current.position.x += (want - right.current.position.x) * k
+  })
+
+  return (
+    <group position={[x, 1.7, z]}>
+      {[left, right].map((ref, i) => (
+        <group key={i} ref={ref}>
+          <mesh position={[i === 0 ? -leaf / 2 : leaf / 2, 0, 0]}>
+            <boxGeometry args={[leaf, 3.4, 0.12]} />
+            <meshStandardMaterial
+              color="#d6f5ee"
+              transparent
+              opacity={0.8}
+              roughness={0.1}
+              metalness={0.2}
+            />
+          </mesh>
+          {/* The stile on the leading edge: the join you watch travel. */}
+          <mesh position={[i === 0 ? -0.06 : 0.06, 0, 0.08]}>
+            <boxGeometry args={[0.12, 3.4, 0.06]} />
+            <meshStandardMaterial color="#22313f" />
+          </mesh>
+        </group>
+      ))}
     </group>
   )
 }

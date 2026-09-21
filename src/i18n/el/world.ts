@@ -79,10 +79,14 @@ export const WORLD: Record<string, string> = {
     'Το Κλειδί της Ντουλάπας βρέθηκε στην προθήκη των επάθλων.',
 
   /* ------------------------------ Islanders --------------------------- */
-  'Mayor Kostas': 'Δήμαρχος Κώστας',
+  'Mayor Vasilis': 'Δήμαρχος Βασίλης',
   'Kitsos Town': 'Η Πόλη του Κίτσου',
   Eleni: 'Ελένη',
   'Volunteer coordinator': 'Υπεύθυνη εθελοντισμού',
+  Kostas: 'Κώστας',
+  'Foundation volunteer': 'Εθελοντής του Ιδρύματος',
+  Marios: 'Μάριος',
+  'At the tent with his mum': 'Στη σκηνή με τη μαμά του',
   Grigoris: 'Γρηγόρης',
   'Park regular': 'Θαμώνας του πάρκου',
   Thanasis: 'Θανάσης',
@@ -90,6 +94,26 @@ export const WORLD: Record<string, string> = {
   Despina: 'Δέσποινα',
   Nikos: 'Νίκος',
   'Coastal path': 'Παραλιακό μονοπάτι',
+  /* --------------------- Angelica, the island warden ------------------- */
+  /* Her name is already in the dictionary: she shares it with his classmate
+     at Ionidios. What is new is the post, now that she is out of the
+     basement and walking the island the rest of the year. */
+  'Architect, island warden': 'Αρχιτέκτονας, επόπτρια του νησιού',
+  'Angelica. I am an architect, and today I am the one inspecting this island.':
+    'Αντζέλικα. Είμαι αρχιτέκτονας, και σήμερα είμαι εγώ που επιθεωρώ αυτό το νησί.',
+  'Not his work history — the island itself. Seven roads out of one square, a district for each part of a career, and every one of them walkable without a map. That is a plan, not a heap.':
+    'Όχι το βιογραφικό του — το ίδιο το νησί. Εφτά δρόμοι από μία πλατεία, μια συνοικία για κάθε κομμάτι μιας καριέρας, και όλοι τους περπατιούνται χωρίς χάρτη. Αυτό είναι σχέδιο, όχι σωρός.',
+  'I check what I am shown against what is actually built. Most places that show you a portfolio are showing you drawings. This one you can walk into, open doors in, and get a little lost in.':
+    'Ελέγχω αυτό που μου δείχνουν με αυτό που έχει όντως χτιστεί. Τα περισσότερα μέρη που σου δείχνουν ένα portfolio σού δείχνουν σχέδια. Σε αυτό μπαίνεις μέσα, ανοίγεις πόρτες, και χάνεσαι κιόλας λιγάκι.',
+  'The lift in the Work District is the honest bit. Two floors of employer, and a third that is poured, wired and empty, with nobody pretending it is spoken for.':
+    'Το ασανσέρ στη Συνοικία Εργασίας είναι το ειλικρινές κομμάτι. Δύο όροφοι εργοδοτών, κι ένας τρίτος χυμένος, καλωδιωμένος και άδειος, χωρίς κανείς να προσποιείται ότι είναι πιασμένος.',
+  'The lighthouse is right. The plaza still wants one more tree.':
+    'Ο φάρος είναι σωστός. Η πλατεία θέλει ακόμη ένα δέντρο.',
+  'If you need me, I am somewhere on these roads. And contact Kitsos as well — he is the one who can say yes to anything. The Radio Center is due south.':
+    'Αν με χρειαστείς, είμαι κάπου σε αυτούς τους δρόμους. Και επικοινώνησε και με τον Κίτσο — αυτός είναι που μπορεί να πει ναι σε οτιδήποτε. Το Ραδιοφωνικό Κέντρο είναι νότια.',
+  'Angelica, island warden': 'Αντζέλικα, επόπτρια του νησιού',
+  'Amalia’s sister, an architect, who walks the island inspecting the thing itself rather than the career inside it: one square, seven roads, a district per chapter, and a third floor left honestly empty. On these roads most days, at the table on the twenty-fifth — and Kitsos through the Radio Center.':
+    'Η αδελφή της Αμαλίας, αρχιτέκτονας, που περπατά το νησί επιθεωρώντας το ίδιο το πράγμα κι όχι την καριέρα που έχει μέσα του: μία πλατεία, εφτά δρόμοι, μια συνοικία ανά κεφάλαιο, κι ένας τρίτος όροφος αφημένος ειλικρινά άδειος. Στους δρόμους τις περισσότερες μέρες, στο τραπέζι στις είκοσι πέντε — και τον Κίτσο μέσω του Ραδιοφωνικού Κέντρου.',
   'Captain Yannis': 'Καπετάν Γιάννης',
   'The dock': 'Η προβλήτα',
   'Ms. Stella': 'Κυρία Στέλλα',
@@ -138,6 +162,7 @@ export const WORLD: Record<string, string> = {
   'Private Fotis': 'Στρατιώτης Φώτης',
   'Sentry, Army Camp': 'Σκοπός, Στρατόπεδο',
   Sofia: 'Σοφία',
+  Signpost: 'Πινακίδα',
   'Town Plaza': 'Κεντρική Πλατεία',
 
   /* -------------------------------- Roads ----------------------------- */
@@ -147,6 +172,7 @@ export const WORLD: Record<string, string> = {
   'Freedom Road': 'Οδός Ελευθερίας',
   'Collaboration Road': 'Οδός Συνεργασίας',
   'Caring Road': 'Οδός Φροντίδας',
+  'Volunteers’ Kiosk': 'Το Περίπτερο των Εθελοντών',
   'Leadership Road': 'Οδός Ηγεσίας',
 
   /* --------------------------- Journal entries ------------------------ */
@@ -183,8 +209,8 @@ export const WORLD: Record<string, string> = {
     'Πρόγραμμα αποφοίτων IBM (2024), Agile bootcamp στο Αμβούργο (2024), Arduino IEEE Workshop στο ΕΜΠ (2018). 2ος στον Πανελλήνιο Διαγωνισμό Βιολογίας (2016) και διακρίσεις σε Φυσική, Μαθηματικά, Πληροφορική και Λογοτεχνία. Εθελοντής στη Βραδιά του Ερευνητή (2019) και στα 100 χρόνια ΗΜΜΥ (2017).',
   /* Τα ημερολόγια της Συνοικίας Εργασίας. */
   'How the building reads': 'Πώς διαβάζεται το κτίριο',
-  'The Work District is laid out as an argument rather than a list: the ground floor is capabilities, certifications and the student jobs; the first floor is IBM 2023–2024; the second is Veltiston AI 2024–present. The third floor is not built yet.':
-    'Η Συνοικία Εργασίας είναι στημένη σαν επιχείρημα και όχι σαν λίστα: το ισόγειο έχει τις ικανότητες, τις πιστοποιήσεις και τις φοιτητικές δουλειές· ο πρώτος όροφος είναι η IBM 2023–2024· ο δεύτερος η Veltiston AI από το 2024 ως σήμερα. Ο τρίτος όροφος δεν έχει χτιστεί ακόμη.',
+  'The Work District is laid out as an argument rather than a list: the ground floor is capabilities, certifications and the student jobs; the first floor is IBM 2023–2024; the second is Veltiston AI 2024–present. The third floor is built, empty and unnamed — what goes on it depends on who is hiring.':
+    'Η Συνοικία Εργασίας είναι στημένη σαν επιχείρημα και όχι σαν λίστα: το ισόγειο έχει τις ικανότητες, τις πιστοποιήσεις και τις φοιτητικές δουλειές· ο πρώτος όροφος είναι η IBM 2023–2024· ο δεύτερος η Veltiston AI από το 2024 ως σήμερα. Ο τρίτος όροφος είναι χτισμένος, άδειος και χωρίς όνομα — το τι θα μπει σε αυτόν εξαρτάται από το ποιος προσλαμβάνει.',
   'Retired Justice of the Hellenic Supreme Court and Vice-President of the "Pantokrator" Foundation, who personally offered Kitsos the Directorship in 2021 while he was still an NTUA undergraduate — and judged what he left behind to have exceeded expectations.':
     'Επίτιμος Αρεοπαγίτης και Αντιπρόεδρος του Ιδρύματος «Παντοκράτωρ», που πρόσφερε προσωπικά στον Κίτσο τη θέση του Διευθυντή το 2021, όσο ήταν ακόμη προπτυχιακός φοιτητής στο ΕΜΠ — και έκρινε ότι όσα άφησε πίσω του ξεπέρασαν τις προσδοκίες.',
   'Three floors': 'Τρεις όροφοι',
@@ -212,8 +238,8 @@ export const WORLD: Record<string, string> = {
   'What the platform is made of': 'Από τι είναι φτιαγμένη η πλατφόρμα',
   'Spring AI documentation assistant with RAG and agentic AI, a SMART on FHIR app inside Epic EHR, a Length of Stay plugin, UKG integration, SAML 2.0 SSO via Microsoft ADFS, secure notifications, audit logging and Jira-integrated ticketing with reCAPTCHA — on Java, Spring Boot, React, MySQL, AWS and Docker, released to production most weeks.':
     'Βοηθός τεκμηρίωσης σε Spring AI με RAG και agentic AI, εφαρμογή SMART on FHIR μέσα στο Epic EHR, plugin Length of Stay, ενσωμάτωση UKG, SSO με SAML 2.0 μέσω Microsoft ADFS, ασφαλείς ειδοποιήσεις, audit logging και σύστημα αιτημάτων με Jira και reCAPTCHA — πάνω σε Java, Spring Boot, React, MySQL, AWS και Docker, με έκδοση στην παραγωγή τις περισσότερες εβδομάδες.',
-  'Java 17–25, Spring Boot and Spring AI, React, MySQL, AWS, Docker, Jenkins and GitLab CI, watched with Grafana, Graylog and Sentry — shipped to production most weeks, into four major U.S. hospitals.':
-    'Java 17–25, Spring Boot και Spring AI, React, MySQL, AWS, Docker, Jenkins και GitLab CI, υπό παρακολούθηση με Grafana, Graylog και Sentry — σε παραγωγή τις περισσότερες εβδομάδες, σε τέσσερα μεγάλα νοσοκομεία των ΗΠΑ.',
+  'Java 17–25, Spring Boot and Spring AI, React, MySQL, AWS, Docker, Jenkins and GitLab CI, watched with Grafana, Graylog and Sentry — shipped to production most weeks, into major U.S. hospitals.':
+    'Java 17–25, Spring Boot και Spring AI, React, MySQL, AWS, Docker, Jenkins και GitLab CI, υπό παρακολούθηση με Grafana, Graylog και Sentry — σε παραγωγή τις περισσότερες εβδομάδες, σε μεγάλα νοσοκομεία των ΗΠΑ.',
   'The H2O side': 'Η πλευρά του H2O',
   'Leads the software on the H2O/data-science side with the MIT team in Boston: turning proven models into something a hospital can run and a clinician can be told about — length of stay, scheduling, and the analytics delivered into Epic.':
     'Ηγείται του λογισμικού στην πλευρά H2O/data science μαζί με την ομάδα του MIT στη Βοστώνη: μετατρέπει αποδεδειγμένα μοντέλα σε κάτι που μπορεί να τρέξει ένα νοσοκομείο και να εξηγηθεί σε έναν κλινικό γιατρό — length of stay, προγραμματισμός βαρδιών, και τα analytics που παραδίδονται στο Epic.',
@@ -281,6 +307,47 @@ export const WORLD: Record<string, string> = {
     'Ο αντιπρόεδρος, αρεοπαγίτης εν αποστρατεία, σημείωσε, τα έγραψε όλα σε μια επιστολή. Είναι πάνω στο σχολείο.',
   'And he still gives blood. Blood donor since 2017, no fuss about it.':
     'Και δίνει ακόμη αίμα. Αιμοδότης από το 2017, χωρίς τυμπανοκρουσίες.',
+
+  /* ------------------------------- Kostas ----------------------------- */
+  'Clipboard is on the table, pen is on a string. The string is because of me, not because of you.':
+    'Το ντοσιέ είναι στο τραπέζι, το στιλό δεμένο με σπάγκο. Ο σπάγκος μπήκε για μένα, όχι για σένα.',
+  'Twenty-odd of us run this tent. Kitsos was the one who wrote down who was doing what, and after that the tent stopped losing people.':
+    'Καμιά εικοσαριά είμαστε σε αυτή τη σκηνή. Ο Κίτσος ήταν αυτός που έγραψε ποιος κάνει τι, και από τότε η σκηνή σταμάτησε να χάνει κόσμο.',
+  'I came in for one Saturday in 2018 to shift some boxes. He put my name on a rota and I have not got off it since.':
+    'Ήρθα για ένα Σάββατο το 2018 να κουβαλήσω κάτι κούτες. Μου έγραψε το όνομα στο πρόγραμμα βαρδιών και δεν έχω ξεκολλήσει από τότε.',
+  'Tree planting in the spring, the donation drive at Christmas, the prison visits, the field trips. The blood drive is the one we never have to advertise.':
+    'Δενδροφύτευση την άνοιξη, η συγκέντρωση προσφορών τα Χριστούγεννα, οι επισκέψεις στις φυλακές, οι εκδρομές. Την αιμοδοσία είναι το μόνο που δεν χρειάζεται ποτέ να το διαφημίσουμε.',
+  'When he took over as Director he was younger than half his volunteers. Nobody minded by the second week.':
+    'Όταν ανέλαβε διευθυντής ήταν μικρότερος από τους μισούς εθελοντές του. Από τη δεύτερη εβδομάδα δεν το σκεφτόταν κανείς.',
+  'The volunteers': 'Οι εθελοντές',
+  'The tent on the west green: sign-ups, donation drives, tree planting and the blood drive. Kostas has been on the rota since 2018.':
+    'Η σκηνή στο δυτικό πάρκο: εγγραφές, συγκεντρώσεις προσφορών, δενδροφυτεύσεις και η αιμοδοσία. Ο Κώστας είναι στο πρόγραμμα βαρδιών από το 2018.',
+
+  /* ------------------------------- Marios ----------------------------- */
+  'I am ALLOWED behind the table. Kostas said. You are not.':
+    'Εγώ ΕΠΙΤΡΕΠΕΤΑΙ να είμαι πίσω από το τραπέζι. Το είπε ο Κώστας. Εσύ όχι.',
+  'I do the stickers. Everyone who signs up gets one, and if you give blood you get two.':
+    'Εγώ κάνω τα αυτοκόλλητα. Όποιος γράφεται παίρνει ένα, και αν δώσεις αίμα παίρνεις δύο.',
+  'Kitsos took us to plant trees up the hill. Mine is the crooked one. He said crooked ones still grow.':
+    'Ο Κίτσος μάς πήγε να φυτέψουμε δέντρα πάνω στον λόφο. Το δικό μου είναι το στραβό. Είπε ότι και τα στραβά μεγαλώνουν.',
+  'My mum says he ran the whole building when he was young. Younger than mum. That is weird.':
+    'Η μαμά μου λέει ότι διηύθυνε ολόκληρο το κτίριο όταν ήταν νέος. Πιο νέος από τη μαμά. Περίεργο.',
+  'The children at the tent': 'Τα παιδιά στη σκηνή',
+  'Marios hands out the sign-up stickers. The Foundation’s programme — trips, tree planting, the lot — is run for children like him, and went on a live stream through the lockdowns rather than stopping.':
+    'Ο Μάριος μοιράζει τα αυτοκόλλητα των εγγραφών. Το πρόγραμμα του Ιδρύματος — εκδρομές, δενδροφυτεύσεις, όλα — γίνεται για παιδιά σαν κι αυτόν, και στα lockdown βγήκε σε ζωντανή μετάδοση αντί να σταματήσει.',
+
+  /* -------------------------- The kiosk board ------------------------- */
+  'VOLUNTEERS’ KIOSK: sign-ups, donations, tree planting, and the blood drive.':
+    'ΤΟ ΠΕΡΙΠΤΕΡΟ ΤΩΝ ΕΘΕΛΟΝΤΩΝ: εγγραφές, προσφορές, δενδροφυτεύσεις και αιμοδοσία.',
+  'Run out of the Christian Youth Foundation "Pantokrator" in Paleo Faliro. Kitsos has been on this rota since 2017.':
+    'Λειτουργεί από το Χριστιανικό Ίδρυμα Νεότητας «Παντοκράτωρ» στο Παλαιό Φάληρο. Ο Κίτσος είναι σε αυτό το πρόγραμμα βαρδιών από το 2017.',
+  'Leading volunteer 2017–2021 and again from 2023, and Director of the place in between, 2021 to 2022.':
+    'Επικεφαλής εθελοντής 2017–2021 και ξανά από το 2023, και διευθυντής του στο ενδιάμεσο, από το 2021 ως το 2022.',
+  'He gives blood himself, since 2017. The tin of stickers is Marios’ department, and he is strict about it.':
+    'Δίνει και ο ίδιος αίμα, από το 2017. Το κουτί με τα αυτοκόλλητα είναι αρμοδιότητα του Μάριου, και είναι αυστηρός σε αυτό.',
+  'The volunteers’ kiosk': 'Το περίπτερο των εθελοντών',
+  'The stall on the west green: sign-ups, donation drives, tree planting and a standing blood drive, run out of the "Pantokrator" Foundation in Paleo Faliro. Kitsos has been on the rota since 2017 — leading volunteer, and Director 2021–2022.':
+    'Ο πάγκος στο δυτικό πάρκο: εγγραφές, συγκεντρώσεις προσφορών, δενδροφυτεύσεις και μόνιμη αιμοδοσία, από το Ίδρυμα «Παντοκράτωρ» στο Παλαιό Φάληρο. Ο Κίτσος είναι στο πρόγραμμα βαρδιών από το 2017 — επικεφαλής εθελοντής, και διευθυντής 2021–2022.',
 
   /* ------------------------------ Grigoris ---------------------------- */
   'Sit down, I have white. …No? Fine.': 'Κάτσε, έχω τα λευκά. …Όχι; Καλά.',
@@ -380,8 +447,8 @@ export const WORLD: Record<string, string> = {
   /* ---------------------------- Dean Tsanakas ------------------------- */
   'Panagiotis Tsanakas, Dean of the School. Sit anywhere; the lecture is over.':
     'Παναγιώτης Τσανάκας, Κοσμήτορας της Σχολής. Κάθισε όπου θες· η διάλεξη τελείωσε.',
-  'The most competitive school in the country to get into, only the top entrance grades make it, and a five-year programme most students take seven and a half to finish. Christos finished it in five. 2017 to 2022, 8.4.':
-    'Η πιο ανταγωνιστική σχολή της χώρας για να μπεις, μόνο οι κορυφαίες βαθμολογίες των πανελληνίων περνούν, και ένα πενταετές πρόγραμμα που οι περισσότεροι φοιτητές θέλουν εφτάμισι χρόνια για να τελειώσουν. Ο Χρήστος το τελείωσε σε πέντε. 2017 ως 2022, 8,4.',
+  'The most competitive school in the country to get into, only the top entrance grades make it, and a five-year programme most students take seven and a half to finish. Kitsos finished it in five. 2017 to 2022, 8.4.':
+    'Η πιο ανταγωνιστική σχολή της χώρας για να μπεις, μόνο οι κορυφαίες βαθμολογίες των πανελληνίων περνούν, και ένα πενταετές πρόγραμμα που οι περισσότεροι φοιτητές θέλουν εφτάμισι χρόνια για να τελειώσουν. Ο Κίτσος το τελείωσε σε πέντε. 2017 ως 2022, 8,4.',
   'He was my student in Operating Systems and Software Service Technologies, and I supervised his thesis: a phone application that watches a movement through a neural network, recognises it and judges how well it was done. Distinction. Three years later, a paper on arXiv. The case by the east wall has it.':
     'Ήταν φοιτητής μου στα Λειτουργικά Συστήματα και στις Τεχνολογίες Υπηρεσιών Λογισμικού, και επέβλεψα τη διπλωματική του: μια εφαρμογή για κινητό που παρακολουθεί μια κίνηση μέσα από νευρωνικό δίκτυο, την αναγνωρίζει και κρίνει πόσο καλά εκτελέστηκε. Άριστα. Τρία χρόνια μετά, δημοσίευση στο arXiv. Η προθήκη στον ανατολικό τοίχο την έχει.',
   'When the assemblies were being wrecked by people with no connection to this School, I appointed him independent students’ representative. Two years, and he told everyone everything he did. That is rarer than the grades.':
@@ -462,16 +529,17 @@ export const WORLD: Record<string, string> = {
     'Γι’ αυτό το κτίριο είναι στημένο σαν επιχείρημα. Ισόγειο: σε τι είναι καλός, τι πιστοποιήσεις έχει, και οι δουλειές που έκανε πριν γίνει τίποτα απ’ όλα αυτά λογισμικό.',
   'First floor, IBM. Second floor, Veltiston AI. Take the stairs in the corner or the lift, whichever you prefer. The lift is slower and worth it.':
     'Πρώτος όροφος, IBM. Δεύτερος όροφος, Veltiston AI. Πάρε τη σκάλα στη γωνία ή το ασανσέρ, ό,τι προτιμάς. Το ασανσέρ είναι πιο αργό και αξίζει.',
-  'The third floor is not built. That is not modesty, it is just the truth about where he is standing.':
-    'Ο τρίτος όροφος δεν έχει χτιστεί. Αυτό δεν είναι μετριοφροσύνη, είναι απλώς η αλήθεια για το πού βρίσκεται.',
+  'And the third floor? Built, empty, unnamed. He is good at this and he is listening — so what goes up there depends on who walks in.':
+    'Και ο τρίτος όροφος; Χτισμένος, άδειος, χωρίς όνομα. Είναι καλός σε αυτό και ακούει προτάσεις — οπότε το τι θα ανέβει εκεί πάνω εξαρτάται από το ποιος θα μπει.',
+  'You have walked in.': 'Μόλις μπήκες.',
 
   /* --------------------------- Κυριάκος Οικονόμου --------------------- */
   'You are looking at the small board. Good — most people walk past it to get to the lift.':
     'Κοιτάς τον μικρό πίνακα. Ωραία — οι περισσότεροι τον προσπερνούν για να πάνε στο ασανσέρ.',
   'I am Kyriakos Oikonomou. I sat on the Supreme Court, the Areios Pagos, until I retired, and I have been Vice-President of the "Pantokrator" Foundation in Paleo Faliro since 2020.':
     'Είμαι ο Κυριάκος Οικονόμου. Υπηρέτησα στον Άρειο Πάγο μέχρι που συνταξιοδοτήθηκα, και είμαι Αντιπρόεδρος του Ιδρύματος «Παντοκράτωρ» στο Παλαιό Φάληρο από το 2020.',
-  'In 2021 the Directorship of the Foundation fell vacant. I did not advertise it. I went to Christos, who was then a student at the Polytechnic, and asked him to take it.':
-    'Το 2021 έμεινε κενή η θέση του Διευθυντή του Ιδρύματος. Δεν την προκήρυξα. Πήγα στον Χρήστο, που ήταν τότε φοιτητής στο Πολυτεχνείο, και του ζήτησα να την αναλάβει.',
+  'In 2021 the Directorship of the Foundation fell vacant. I did not advertise it. I went to Kitsos, who was then a student at the Polytechnic, and asked him to take it.':
+    'Το 2021 έμεινε κενή η θέση του Διευθυντή του Ιδρύματος. Δεν την προκήρυξα. Πήγα στον Κίτσο, που ήταν τότε φοιτητής στο Πολυτεχνείο, και του ζήτησα να την αναλάβει.',
   'He was an undergraduate. I handed him a building, the staff, the volunteers, the budget and the children. He was twenty-something.':
     'Ήταν προπτυχιακός φοιτητής. Του παρέδωσα ένα κτίριο, το προσωπικό, τους εθελοντές, τον προϋπολογισμό και τα παιδιά. Ήταν είκοσι και κάτι χρονών.',
   'A year and a half later he left, because the degree was finished and the army was waiting, and what he handed back had gone well past what we asked of him. The premises renovated, the operations modernised, the events running.':
@@ -532,14 +600,14 @@ export const WORLD: Record<string, string> = {
     'Δημήτρης Μπερτσιμάς. Διδάσκω στο MIT, και ίδρυσα τη Veltiston AI επειδή η βελτιστοποίηση έχει λυθεί στη βιβλιογραφία εδώ και τριάντα χρόνια και τα νοσοκομεία εξακολουθούν να φτιάχνουν βάρδιες στο χέρι.',
   'That is the whole vision, and it is not a modest one: take the analytics that work on paper and put them where a charge nurse can press a button at seven in the morning.':
     'Αυτό είναι όλο το όραμα, και δεν είναι μετριοπαθές: πάρε τα analytics που δουλεύουν στο χαρτί και βάλ’ τα εκεί που μια προϊσταμένη νοσηλεύτρια μπορεί να πατήσει ένα κουμπί στις εφτά το πρωί.',
-  'Christos was one of the founding engineers, in 2024. There were very few of us then and the platform did not exist — there was an idea about scheduling and a great deal of arguing.':
-    'Ο Χρήστος ήταν ένας από τους ιδρυτικούς μηχανικούς, το 2024. Ήμασταν πολύ λίγοι τότε και η πλατφόρμα δεν υπήρχε — υπήρχε μια ιδέα για τον προγραμματισμό βαρδιών και πολλή συζήτηση.',
+  'Kitsos was one of the founding engineers, in 2024. There were very few of us then and the platform did not exist — there was an idea about scheduling and a great deal of arguing.':
+    'Ο Κίτσος ήταν ένας από τους ιδρυτικούς μηχανικούς, το 2024. Ήμασταν πολύ λίγοι τότε και η πλατφόρμα δεν υπήρχε — υπήρχε μια ιδέα για τον προγραμματισμό βαρδιών και πολλή συζήτηση.',
   'He built it from that. Concept to production, and then he became the technical lead of it, which is a different job and he made the change well.':
     'Την έχτισε από εκεί. Από τη σύλληψη ως την παραγωγή, και μετά έγινε ο τεχνικός υπεύθυνός της, που είναι άλλη δουλειά, και έκανε τη μετάβαση καλά.',
-  'What I look for is people who can hold the mathematics and the delivery in one head. He can. He also tells me when I am wrong, in front of other people, which is worth more than it costs.':
-    'Αυτό που ψάχνω είναι ανθρώπους που μπορούν να κρατούν τα μαθηματικά και την παράδοση στο ίδιο κεφάλι. Εκείνος μπορεί. Μου λέει επίσης πότε κάνω λάθος, μπροστά σε άλλους, που αξίζει περισσότερο απ’ όσο κοστίζει.',
-  'Four major American hospitals run it now. That is not a pilot. That is a ward that is short-staffed if we are wrong.':
-    'Τέσσερα μεγάλα αμερικανικά νοσοκομεία την τρέχουν τώρα. Αυτό δεν είναι πιλοτικό. Αυτό είναι ένας θάλαμος που μένει υποστελεχωμένος αν κάνουμε λάθος.',
+  'What I look for is people who can hold the mathematics and the delivery in one head. He can. He also tells me when he disagrees with me, in front of other people, which is worth more than it costs.':
+    'Αυτό που ψάχνω είναι ανθρώπους που μπορούν να κρατούν τα μαθηματικά και την παράδοση στο ίδιο κεφάλι. Εκείνος μπορεί. Μου λέει επίσης πότε διαφωνεί μαζί μου, μπροστά σε άλλους, που αξίζει περισσότερο απ’ όσο κοστίζει.',
+  'Major American hospitals run it now. That is not a pilot. That is a ward that is short-staffed if we are wrong.':
+    'Μεγάλα αμερικανικά νοσοκομεία την τρέχουν τώρα. Αυτό δεν είναι πιλοτικό. Αυτό είναι ένας θάλαμος που μένει υποστελεχωμένος αν κάνουμε λάθος.',
 
   /* -------------------------------- Καρίμ ----------------------------- */
   'Greece, Boston, Morocco. I am the Morocco part of the stand-up.':
@@ -794,8 +862,8 @@ export const WORLD: Record<string, string> = {
 
   /* ------------------------ The radio beacon -------------------------- */
 
-  'Everything here belongs to Christos "Kitsos" Orfanopoulos, a senior full stack engineer and technical lead out of Athens, Greece.':
-    'Όλα εδώ ανήκουν στον Χρήστο «Κίτσο» Ορφανόπουλο, senior full stack μηχανικό και τεχνικό υπεύθυνο, από την Αθήνα.',
+  'Everything here belongs to Kitsos Orfanopoulos, a senior full stack engineer and technical lead out of Athens, Greece.':
+    'Όλα εδώ ανήκουν στον Κίτσο Ορφανόπουλο, senior full stack μηχανικό και τεχνικό υπεύθυνο, από την Αθήνα.',
   'Reach Kitsos at kitsorfan@protonmail.com or linkedin.com/in/kitsorfan.':
     'Βρες τον Κίτσο στο kitsorfan@protonmail.com ή στο linkedin.com/in/kitsorfan.',
 

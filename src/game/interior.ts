@@ -85,9 +85,12 @@ const EXHIBIT_FOOTPRINT: Record<string, Vec2> = {
   cv: [1.3, 0.6],
   /* Flat on the wall: the margin keeps you off it, so nothing to bump. */
   calendar: [0, 0],
+  techWall: [0, 0],
   key: [0, 0],
   /* Standing on a shelf that is a collider already. */
   toy: [0, 0],
+  /* Likewise: the prop it hangs on brings its own footprint. */
+  prop: [0, 0],
 }
 
 function rotated(half: Vec2, rotation = 0): Vec2 {
@@ -336,3 +339,11 @@ export function interiorColliders(
 export const INTERIOR_MARGIN = 1.6
 
 export const WALL_HEIGHT = 5.4
+
+/**
+ * How wide the technology wall runs, and how far along it you can stand and
+ * still read it. It is a wall rather than an object, so it answers from
+ * anywhere in front of it instead of only from the point it is anchored at.
+ */
+export const TECH_WALL_SPAN = 22
+export const TECH_WALL_REACH = TECH_WALL_SPAN / 2 + 2.4

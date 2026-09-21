@@ -46,6 +46,14 @@ import type { Npc, Vec2 } from '../types'
 /** How close you have to be before someone stops walking to greet you. */
 const GREET_RANGE = 6
 
+/**
+ * How big a child is built against a grown-up. Everything that floats over a
+ * head — the journal marker, the chat bubble, a paintball team ring — is
+ * outside the scaled body, so each one multiplies its own height by this
+ * rather than inheriting it, and a child's marker sits over a child's head.
+ */
+const CHILD_SCALE = 0.72
+
 /** How fast an islander gets away from a water bomb that has just landed. */
 const BOLT_SPEED = 7.4
 
@@ -148,7 +156,7 @@ export function Npcs({ area }: { area: string }) {
  * in every six, and never the same two seconds as their neighbour. It is the
  * cheapest possible way to say "this room is noisy" — three dots and a tail.
  */
-function ChatBubble({ seed }: { seed: number }) {
+function ChatBubble({ seed, scale = 1 }: { seed: number; scale?: number }) {
   const bubble = useRef<Group>(null)
   useFrame((state) => {
     if (!bubble.current) return
@@ -159,13 +167,13 @@ function ChatBubble({ seed }: { seed: number }) {
     // Swells in and settles, rather than popping into existence at full size.
     const age = cycle / 0.34
     const grow = Math.min(1, age * 7)
-    bubble.current.scale.setScalar(0.85 + grow * 0.15)
+    bubble.current.scale.setScalar((0.85 + grow * 0.15) * scale)
     bubble.current.position.y =
-      2.62 + Math.sin(state.clock.elapsedTime * 2.4 + seed) * 0.02
+      (2.62 + Math.sin(state.clock.elapsedTime * 2.4 + seed) * 0.02) * scale
   })
   return (
     <Billboard>
-      <group ref={bubble} position={[0.55, 2.62, 0]}>
+      <group ref={bubble} position={[0.55 * scale, 2.62 * scale, 0]}>
         <mesh>
           <planeGeometry args={[0.72, 0.38]} />
           <meshBasicMaterial color="#fdf7e9" transparent opacity={0.96} />
@@ -798,11 +806,14 @@ function NpcActor({
         <Character
           colors={npc.colors}
           prop={npc.prop}
+          scale={npc.child ? CHILD_SCALE : 1}
           seed={seed}
           motion={motion}
           hair={npc.hair}
           dress={npc.dress}
           dressTrim={npc.dressTrim}
+          blazer={npc.blazer}
+          blouse={npc.blouse}
           suit={Boolean(npc.suit)}
           bowTie={npc.suit?.bowTie}
           buttonhole={npc.suit?.buttonhole}
@@ -823,7 +834,10 @@ function NpcActor({
         />
       </group>
       {team && !painted && (
-        <mesh position={[0, 2.62, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <mesh
+          position={[0, npc.child ? 2.62 * CHILD_SCALE : 2.62, 0]}
+          rotation={[-Math.PI / 2, 0, 0]}
+        >
           <ringGeometry args={[0.3, 0.46, 14]} />
           <meshBasicMaterial
             color={team === 'friend' ? PAINT.friend : PAINT.enemy}
@@ -836,10 +850,16 @@ function NpcActor({
         <circleGeometry args={[0.5, 14]} />
         <meshBasicMaterial color="#2a4a22" transparent opacity={0.2} />
       </mesh>
-      {feasting && <ChatBubble seed={seed} />}
+      {feasting && (
+        <ChatBubble seed={seed} scale={npc.child ? CHILD_SCALE : 1} />
+      )}
       {!met && !team && !anonymous && npc.journal && (
         <Billboard>
-          <group ref={marker} position={[0, 2.6, 0]} scale={1.35}>
+          <group
+            ref={marker}
+            position={[0, npc.child ? 2.6 * CHILD_SCALE : 2.6, 0]}
+            scale={1.35}
+          >
             <mesh position={[0, 0.12, 0]}>
               <boxGeometry args={[0.13, 0.36, 0.02]} />
               <meshBasicMaterial color="#ffd93d" />

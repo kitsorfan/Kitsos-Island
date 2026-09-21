@@ -4,6 +4,8 @@ import { useGame } from '../state/store'
 import * as sfx from '../game/audio'
 import { RadioConsole } from './RadioConsole'
 import { ToyShelfCase } from './ToyShelfCase'
+import { Flag } from './Flag'
+import { TechIcon, hasTechIcon } from './TechIcon'
 import type { Letter, PanelBlock } from '../types'
 import { useT } from '../i18n/useT'
 
@@ -203,6 +205,18 @@ function Block({ block }: { block: PanelBlock }) {
         </ul>
       )
 
+    case 'flags':
+      return (
+        <ul className="panel__list panel__list--flags">
+          {block.countries.map((c) => (
+            <li key={c.code}>
+              <Flag code={c.code} />
+              {t(c.name)}
+            </li>
+          ))}
+        </ul>
+      )
+
     case 'stats':
       return (
         <div className="stat-grid">
@@ -223,7 +237,11 @@ function Block({ block }: { block: PanelBlock }) {
               <span className="tag-group__label">{group.label}</span>
               <div className="tag-group__tags">
                 {group.tags.map((tag) => (
-                  <span key={tag} className="chip">
+                  <span
+                    key={tag}
+                    className={`chip${hasTechIcon(tag) ? ' chip--mark' : ''}`}
+                  >
+                    <TechIcon name={tag} />
                     {tag}
                   </span>
                 ))}
@@ -254,7 +272,11 @@ function Block({ block }: { block: PanelBlock }) {
               {entry.tags && (
                 <div className="tag-group__tags">
                   {entry.tags.map((tag) => (
-                    <span key={tag} className="chip chip--sm">
+                    <span
+                      key={tag}
+                      className={`chip chip--sm${hasTechIcon(tag) ? ' chip--mark' : ''}`}
+                    >
+                      <TechIcon name={tag} />
                       {tag}
                     </span>
                   ))}

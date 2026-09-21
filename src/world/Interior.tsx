@@ -8,6 +8,7 @@ import {
   FLIGHT,
   FLIGHT_RISE,
   FLIGHT_RUN,
+  TECH_WALL_SPAN,
   WALL_HEIGHT,
   WELL,
   roomProps,
@@ -23,6 +24,8 @@ import { Slides } from './Slides'
 import { Npcs } from './Npcs'
 import { Player } from './Player'
 import { TextPlane } from './TextSign'
+import { TECH_GROUPS, useMarkTexture } from './TechMarks'
+import type { TechGroup, TechMark } from './TechMarks'
 import type {
   Exhibit,
   Interior as InteriorData,
@@ -32,7 +35,11 @@ import type {
 
 export function Interior({ id }: { id: string }) {
   const interior = INTERIOR_BY_ID.get(id)
-  const secrets = useGame((s) => s.secrets)
+  /* Not what has been found — what was opened on this visit. The shelf that
+     swings is shut every time you walk in, whatever the journal already says
+     about it. */
+  const swung = useGame((s) => s.swung)
+  const visit = useGame((s) => s.spawn.token)
   const christmas = useGame((s) => s.christmas)
   if (!interior) return null
 
@@ -116,7 +123,7 @@ export function Interior({ id }: { id: string }) {
           key={link.id}
           link={link}
           accent={interior.accent}
-          shown={!link.needs || Boolean(secrets[link.needs])}
+          shown={!link.needs || swung[link.needs] === visit}
         />
       ))}
       {interior.exhibits.map((exhibit) => (
@@ -384,9 +391,9 @@ function ExhibitPiece({
     <>
       {/* The thing you click, when the exhibit is a thing rather than a
           board: an invisible box sitting on the real object across the room
-          from the prompt. It is given in room coordinates of its own because
-          the toy it covers belongs to a piece of furniture, not to this
-          group. */}
+          from the prompt — the toy on its shelf, the globe on its stand. It
+          is given in room coordinates of its own because the prop it covers
+          belongs to the furniture of the room, not to this group. */}
       {exhibit.hitbox && <ExhibitHitbox exhibit={exhibit} accent={accent} />}
       <group
         position={[exhibit.position[0], 0, exhibit.position[1]]}
@@ -404,7 +411,9 @@ function ExhibitPiece({
           <Logbook accent={accent} />
         ) : exhibit.kind === 'calendar' ? (
           <WallCalendar />
-        ) : exhibit.kind === 'toy' ? null : (
+        ) : exhibit.kind === 'techWall' ? (
+          <TechWall accent={accent} />
+        ) : exhibit.kind === 'toy' || exhibit.kind === 'prop' ? null : (
           <NoticeBoard accent={accent} />
         )}
         {active && <Halo accent={accent} />}
@@ -414,13 +423,14 @@ function ExhibitPiece({
 }
 
 /**
- * The clickable box over a toy. Invisible, but it takes the pointer: hovering
- * it puts the hand cursor up and clicking it does exactly what walking over
- * and pressing Enter does, because both call `examine`.
+ * The clickable box over a prop — a toy, or the globe. Invisible, but it
+ * takes the pointer: hovering it puts the hand cursor up and clicking it does
+ * exactly what walking over and pressing Enter does, because both call
+ * `examine`.
  *
  * The cursor is reset on unmount as well as on pointer-out — leaving the room
- * with the pointer still over the toy would otherwise leave the hand cursor
- * up over the whole island.
+ * with the pointer still over it would otherwise leave the hand cursor up
+ * over the whole island.
  */
 function ExhibitHitbox({
   exhibit,
@@ -547,6 +557,209 @@ function Halo({ accent }: { accent: string }) {
         depthWrite={false}
       />
     </mesh>
+  )
+}
+
+/* ------------------------- the technology wall ------------------------ */
+
+/**
+ * The wall's measurements, in metres of room.
+ *
+ * A row is built downwards out of four fixed bands — heading, gap, plate,
+ * name — rather than out of one pitch with the pieces hung off it by eye. The
+ * heading is a fixed height whatever its group is called, so a five-mark
+ * group's heading cannot grow into the row above it the way a plane scaled to
+ * its group's width does.
+ */
+const TECH_WALL_WIDTH = TECH_WALL_SPAN
+/** One mark's plate, and the spacing from one plate to the next along a row. */
+const TECH_TILE = 0.72
+const TECH_TILE_PITCH = 1.28
+/** The bands a row is made of, top to bottom. */
+const TECH_HEAD_H = 0.24
+/**
+ * How wide a heading's plane is allowed to get. TextPlane draws onto a canvas
+ * of fixed width and an aspect-derived height, so a plane stretched to a
+ * seven-mark group's full run would be a couple of dozen pixels tall and set
+ * its type far too small to read. Capped, a wide group's heading simply sits
+ * centred over its run at the same size as every other heading.
+ */
+const TECH_HEAD_W = 2.6
+const TECH_NAME_H = 0.2
+const TECH_GAP = 0.09
+/** One row's full height, and the drop from one row's top to the next's. */
+const TECH_ROW_H =
+  TECH_HEAD_H + TECH_GAP + TECH_TILE + TECH_GAP * 0.6 + TECH_NAME_H
+const TECH_ROW_PITCH = TECH_ROW_H + 0.24
+/** The title strip across the head of the board, and the margin under it. */
+const TECH_ROW_TOP = 0.62
+/** Three rows, the title strip, and a margin at the foot. */
+const TECH_WALL_HEIGHT = 0.26 + 3 * TECH_ROW_PITCH + 0.34
+/**
+ * Height of the middle of the board off the floor. Sat on a low skirting and
+ * held clear of the 5.4m ceiling, which the top batten would otherwise meet.
+ */
+const TECH_WALL_MID = 0.12 + TECH_WALL_HEIGHT / 2
+/** How many marks fit across one row before the next group wraps. */
+const TECH_ROW_TILES = Math.floor(TECH_WALL_WIDTH / TECH_TILE_PITCH)
+
+/**
+ * The marks on the technology wall, laid out in the rows the CV groups them
+ * into. The wall is drawn in its own frame with +x running along it and its
+ * face looking down +z, so the exhibit's own rotation is all that decides
+ * which wall of the room it hangs on.
+ */
+function TechWall({ accent }: { accent: string }) {
+  const t = useT()
+
+  /**
+   * Rows are packed by group: a group runs on the current row if it fits and
+   * starts a new one if it does not, so the wall fills evenly whatever the
+   * roster happens to hold, and a group is never split across two rows.
+   */
+  const rows = useMemo(() => {
+    const out: TechGroup[][] = []
+    let row: TechGroup[] = []
+    let used = 0
+    for (const group of TECH_GROUPS) {
+      const width = group.marks.length
+      if (row.length && used + width > TECH_ROW_TILES) {
+        out.push(row)
+        row = []
+        used = 0
+      }
+      row.push(group)
+      used += width
+    }
+    if (row.length) out.push(row)
+    return out
+  }, [])
+
+  return (
+    <group>
+      {/* The board the marks are mounted on, and the batten framing it. */}
+      <mesh position={[0, TECH_WALL_MID, -0.06]} receiveShadow>
+        <boxGeometry args={[TECH_WALL_WIDTH, TECH_WALL_HEIGHT, 0.12]} />
+        <meshStandardMaterial color="#2c3a42" flatShading roughness={0.92} />
+      </mesh>
+      {[-1, 1].map((side) => (
+        <mesh
+          key={side}
+          position={[0, TECH_WALL_MID + (side * TECH_WALL_HEIGHT) / 2, 0]}
+        >
+          <boxGeometry args={[TECH_WALL_WIDTH, 0.14, 0.18]} />
+          <meshStandardMaterial color={accent} flatShading roughness={0.6} />
+        </mesh>
+      ))}
+
+      <TextPlane
+        text={t('Everything it is built out of')}
+        width={7}
+        aspect={9}
+        color="#eaf6f2"
+        outline="rgba(0,0,0,0.55)"
+        position={[0, TECH_WALL_MID + TECH_WALL_HEIGHT / 2 - 0.3, 0.12]}
+      />
+
+      {rows.map((row, r) => {
+        // Each row is centred on its own run of tiles, so a short row sits in
+        // the middle of the wall rather than hanging off the left edge.
+        const tiles = row.reduce((n, g) => n + g.marks.length, 0)
+        const span = tiles * TECH_TILE_PITCH
+        // The top edge of this row's heading band. Everything in the row is
+        // measured down from here, band by band.
+        const top =
+          TECH_WALL_MID +
+          TECH_WALL_HEIGHT / 2 -
+          TECH_ROW_TOP -
+          r * TECH_ROW_PITCH
+        let i = 0
+
+        return (
+          <group key={r} position={[0, top, 0]}>
+            {row.map((group) => {
+              const start = -span / 2 + i * TECH_TILE_PITCH
+              const mid = start + (group.marks.length * TECH_TILE_PITCH) / 2
+              const rule = group.marks.length * TECH_TILE_PITCH * 0.9
+              i += group.marks.length
+
+              return (
+                <group key={group.label}>
+                  {/*
+                    The heading sits in a band of its own fixed height: its
+                    plane is as wide as the text needs at that height, not as
+                    wide as the group, so a long label sets in smaller rather
+                    than growing up into the row above.
+                  */}
+                  <TextPlane
+                    text={t(group.label)}
+                    width={Math.min(rule, TECH_HEAD_W)}
+                    aspect={Math.min(rule, TECH_HEAD_W) / TECH_HEAD_H}
+                    color={accent}
+                    outline="rgba(0,0,0,0.5)"
+                    position={[mid, -TECH_HEAD_H / 2, 0.12]}
+                  />
+                  <mesh position={[mid, -TECH_HEAD_H - TECH_GAP * 0.35, 0.1]}>
+                    <planeGeometry args={[rule, 0.025]} />
+                    <meshBasicMaterial
+                      color={accent}
+                      transparent
+                      opacity={0.5}
+                      depthWrite={false}
+                    />
+                  </mesh>
+
+                  {group.marks.map((mark, m) => (
+                    <TechTile
+                      key={mark.id}
+                      mark={mark}
+                      x={start + (m + 0.5) * TECH_TILE_PITCH}
+                    />
+                  ))}
+                </group>
+              )
+            })}
+          </group>
+        )
+      })}
+    </group>
+  )
+}
+
+/**
+ * One mark on the wall: the plate, the drawn mark, and the name under it.
+ * Placed relative to the top of its row's heading band, so the row's bands
+ * are the only thing that decides where it lands.
+ */
+function TechTile({ mark, x }: { mark: TechMark; x: number }) {
+  const texture = useMarkTexture(mark.id, mark.draw)
+  const centre = -TECH_HEAD_H - TECH_GAP - TECH_TILE / 2
+
+  return (
+    <group position={[x, centre, 0]}>
+      {/* The plate the mark is mounted on, stood a little off the board. */}
+      <mesh position={[0, 0, 0.07]}>
+        <planeGeometry args={[TECH_TILE * 1.1, TECH_TILE * 1.1]} />
+        <meshStandardMaterial color="#f4f7f6" roughness={0.85} />
+      </mesh>
+      <mesh position={[0, 0, 0.09]}>
+        <planeGeometry args={[TECH_TILE, TECH_TILE]} />
+        <meshBasicMaterial map={texture} transparent depthWrite={false} />
+      </mesh>
+      {/*
+        The name is held to the tile pitch so a long one — "SAML · ADFS · JWT"
+        — sets smaller inside its own slot rather than running across its
+        neighbours. TextPlane shrinks the type to fit the plane it is given.
+      */}
+      <TextPlane
+        text={mark.name}
+        width={TECH_TILE_PITCH * 0.96}
+        aspect={(TECH_TILE_PITCH * 0.96) / TECH_NAME_H}
+        color="#dfe9ee"
+        outline="rgba(0,0,0,0.6)"
+        position={[0, -TECH_TILE / 2 - TECH_GAP * 0.6 - TECH_NAME_H / 2, 0.1]}
+      />
+    </group>
   )
 }
 
@@ -1152,27 +1365,41 @@ function LiftDoors({ link, accent }: { link: InteriorLink; accent: string }) {
       <group ref={rightLeaf} position={[0.62, 0, 0.2]}>
         <LiftLeaf handed={1} />
       </group>
-      {/* The indicator: the floor it is passing, lit over the doors. */}
+      {/*
+        The indicator: the floor it is passing, lit over the doors.
+
+        Three surfaces within a centimetre of one another, so each is given a
+        depth of its own and only the housing writes any. The lamp used to sit
+        exactly on the housing's front face, which left the two fighting for
+        every pixel — the number broke up into green confetti as the camera
+        moved. Now the housing is opaque and owns the depth buffer here; the
+        lamp and the digit lie in front of it, write nothing, and are ordered
+        between themselves by renderOrder rather than by a 2mm gap that
+        transparency sorting was free to resolve either way.
+      */}
       <mesh position={[0, 3.62, 0.24]}>
         <boxGeometry args={[1.1, 0.5, 0.12]} />
         <meshStandardMaterial color="#141a1f" flatShading />
       </mesh>
-      <TextPlane
-        text={String(floor)}
-        width={0.5}
-        aspect={1}
-        color={accent}
-        position={[0, 3.62, 0.32]}
-      />
-      <mesh position={[0, 3.62, 0.3]}>
+      <mesh position={[0, 3.62, 0.315]} renderOrder={1}>
         <planeGeometry args={[1.02, 0.42]} />
         <meshBasicMaterial
           ref={lamp}
           color={accent}
           transparent
           opacity={0.55}
+          depthWrite={false}
         />
       </mesh>
+      {/* The digit last, so it reads over the lit panel rather than under it. */}
+      <TextPlane
+        text={String(floor)}
+        width={0.5}
+        aspect={1}
+        color={accent}
+        position={[0, 3.62, 0.33]}
+        renderOrder={2}
+      />
       {/* The call panel, down the jamb on the right. */}
       <mesh position={[1.42, 1.5, 0.24]}>
         <boxGeometry args={[0.3, 0.9, 0.1]} />
@@ -1320,8 +1547,8 @@ function SwungShelf({ accent }: { accent: string }) {
         it is opened the hinge edge stays welded to the frame — the same
         trick the door next door uses.
       */}
-      <group position={[-1.3, 0, 0.16]} rotation={[0, 1.02, 0]}>
-        <group position={[1.3, 0, 0]}>
+      <group position={[-1.38, 0, 0.22]} rotation={[0, 1.02, 0]}>
+        <group position={[1.3, 0, 0.22]}>
           {/* Carcass: a back, two ends and the boards between them. */}
           <mesh position={[0, 1.6, -0.16]} castShadow>
             <boxGeometry args={[2.6, 3.2, 0.12]} />

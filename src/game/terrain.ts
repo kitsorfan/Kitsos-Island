@@ -7,6 +7,7 @@ import {
   ISLAND_FLAT_RADIUS,
   ISLAND_SHORE_RADIUS,
   ISLAND_WALK_RADIUS,
+  KIOSK,
   LEDGES,
   NPCS,
   PATHS,
@@ -310,6 +311,22 @@ export const STATIC_COLLIDERS: Collider[] = [
     hx: PARTY_BUTTON.half[0],
     hz: PARTY_BUTTON.half[1],
     circle: true,
+  },
+  /*
+   * The volunteers' table, which used to be air you could walk through.
+   *
+   * Only the table is solid, not the whole gazebo: the front of the kiosk is
+   * where you walk up to talk to the two of them, and a box round the four
+   * posts would shut that off. The table stands back from the centre in the
+   * kiosk's own frame, so its offset is turned by the kiosk's facing to reach
+   * world space, and both half-extents are scaled the way the drawing is.
+   */
+  {
+    x: KIOSK.x + Math.sin(KIOSK.facing) * KIOSK.table.z * KIOSK.scale,
+    z: KIOSK.z + Math.cos(KIOSK.facing) * KIOSK.table.z * KIOSK.scale,
+    hx: KIOSK.table.hx * KIOSK.scale,
+    hz: KIOSK.table.hz * KIOSK.scale,
+    rotation: KIOSK.facing,
   },
 ]
 

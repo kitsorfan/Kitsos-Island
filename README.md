@@ -18,6 +18,7 @@ stylesheet — it deploys as static files anywhere.
 | 3D    | three.js · @react-three/fiber 9 · @react-three/drei 10 |
 | State | Zustand 5                                              |
 | Lint  | oxlint                                                 |
+| Tests | Vitest 3 · Testing Library · jsdom                     |
 
 ## Run it
 
@@ -27,6 +28,9 @@ npm run dev      # http://localhost:5173
 npm run build    # static bundle in dist/
 npm run preview  # serve the built bundle
 npm run lint
+npm test         # the whole suite, once
+npm run test:watch     # re-runs what a change touches
+npm run test:coverage  # text summary, plus coverage/ for the full report
 ```
 
 ## Controls
@@ -104,6 +108,7 @@ src/
     InteriorProps.tsx  the furniture kit, and the Greek flag
     buildings/      one low-poly model per building kind
   ui/             title, dialogue, panels, journal, HUD, minimap, map, touch pad
+  test/           shared fixtures, and the setup every test file runs first
 ```
 
 Some notes on how it hangs together:
@@ -144,6 +149,35 @@ Some notes on how it hangs together:
   hill standing between the lens and the player and rotates the boom to the open
   side — needed because every door faces the plaza, which puts half the buildings
   behind you as you approach. Indoors, the wall nearest the camera hides itself.
+
+## Tests
+
+Tests sit beside what they test — `collision.ts` next to `collision.test.ts` —
+so a change and its test are read together and neither is easy to forget.
+
+Most of the island is arithmetic, and most of the suite runs in plain Node with
+no DOM at all. A file that wants a document says so at the top:
+
+```ts
+/**
+ * @vitest-environment jsdom
+ */
+```
+
+What is worth testing here, and what is not: the pieces with a rule worth
+stating — collision push-out, the lift, the save format, the aiming ring, the
+translator — are covered closely. The r3f components are meshes and materials
+that a headless run cannot render, so the logic they used to hold was pulled
+into plain modules, and those are what the tests hold. The data tables and the
+Greek dictionary are declarations rather than behaviour and are measured only
+where something reads them.
+
+Two habits worth keeping when adding to it. Assert the rule rather than the
+arithmetic: a test that pins the exact push distance of every collider will
+fail the next time a fence moves, whereas one that asserts he ends up outside
+the fence will not. And where a module is random — the paintball draw, the
+flare positions — either hold the randomness off and put the pieces on the
+board by hand, or assert only what is true of every draw.
 
 ## Editing the content
 

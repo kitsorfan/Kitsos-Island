@@ -1,7 +1,14 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import type { Group, Mesh } from 'three'
-import { DOCK, DOCK_EDGE, DOCK_PLANKS, FOUNTAIN, SIGNS } from '../data/world'
+import {
+  DOCK,
+  DOCK_EDGE,
+  DOCK_PLANKS,
+  FOUNTAIN,
+  KIOSK,
+  SIGNS,
+} from '../data/world'
 import {
   BENCHES,
   FENCE_SPACING,
@@ -405,15 +412,35 @@ function ChessCorner() {
   )
 }
 
+/**
+ * The volunteers' kiosk on the west green: a gazebo, a trestle table under it
+ * and the clutter of a stall that is actually being run.
+ *
+ * Everything on the table is placed against the table's own local frame, so
+ * the whole stall can be turned or moved as one and nothing slides off. The
+ * table stands at the back of the canopy rather than under the middle of it,
+ * which leaves the front open to walk into: the two of them who run the stall
+ * stand in that gap, one behind the table and one out in front.
+ *
+ * Where it stands and how big it is built come from KIOSK in data/world, so
+ * that the collider agrees with the drawing. The group is scaled, so a length
+ * written here is that much bigger on the ground; TABLE_Y and the rest are in
+ * the unscaled frame, like every other number in this file.
+ */
+
+/** Top of the trestle table. Its depth and offset are KIOSK.table. */
+const TABLE_Y = 1.01
+const TABLE_Z = KIOSK.table.z
+
 function VolunteerTent() {
-  const x = -27
-  const z = 23.5
+  const { x, z } = KIOSK
   return (
     <group
       position={[x, groundHeight(x, z), z]}
-      rotation={[0, 0.4, 0]}
-      scale={1.3}
+      rotation={[0, KIOSK.facing, 0]}
+      scale={KIOSK.scale}
     >
+      {/* Canopy: a valance all round, and the pyramid roof over it. */}
       <mesh position={[0, 2.5, 0]} castShadow>
         <boxGeometry args={[4.6, 0.16, 4]} />
         <meshStandardMaterial color="#e05a6f" flatShading roughness={0.9} />
@@ -422,6 +449,17 @@ function VolunteerTent() {
         <coneGeometry args={[3.4, 0.7, 4]} />
         <meshStandardMaterial color="#f0f2f4" flatShading roughness={0.9} />
       </mesh>
+
+      {/* Scalloped edging along the front lip of the canopy. */}
+      {[-1.8, -0.9, 0, 0.9, 1.8].map((sx) => (
+        <mesh key={sx} position={[sx, 2.36, 2]} castShadow>
+          <cylinderGeometry
+            args={[0.28, 0.28, 0.06, 10, 1, false, 0, Math.PI]}
+          />
+          <meshStandardMaterial color="#f0f2f4" flatShading roughness={0.9} />
+        </mesh>
+      ))}
+
       {[
         [-2.1, -1.8],
         [2.1, -1.8],
@@ -437,11 +475,70 @@ function VolunteerTent() {
           />
         </mesh>
       ))}
-      <mesh position={[0, 0.95, -1.5]} castShadow>
-        <boxGeometry args={[3.4, 0.12, 1.1]} />
+
+      <KioskBanner />
+      <KioskTable />
+      <KioskSaplings />
+      <KioskCrates />
+      <KioskDonorBoard />
+    </group>
+  )
+}
+
+/** The cloth banner slung across the back of the canopy. */
+function KioskBanner() {
+  return (
+    <group position={[0, 1.95, -1.94]}>
+      <mesh castShadow>
+        <boxGeometry args={[4.1, 0.78, 0.06]} />
+        <meshStandardMaterial color="#c8394f" flatShading roughness={0.95} />
+      </mesh>
+      {/* A white cross at each end: the blood drive is the standing draw. */}
+      {[-1.72, 1.72].map((bx) => (
+        <group key={bx} position={[bx, 0, 0.04]}>
+          <mesh>
+            <boxGeometry args={[0.38, 0.12, 0.02]} />
+            <meshStandardMaterial color="#fdf7e9" />
+          </mesh>
+          <mesh>
+            <boxGeometry args={[0.12, 0.38, 0.02]} />
+            <meshStandardMaterial color="#fdf7e9" />
+          </mesh>
+        </group>
+      ))}
+      <TextPlane
+        text="GIVE BLOOD / SIGN UP"
+        width={2.7}
+        aspect={7.5}
+        color="#fff3e2"
+        outline="rgba(0,0,0,0.45)"
+        position={[0, 0, 0.05]}
+        renderOrder={2}
+      />
+    </group>
+  )
+}
+
+/**
+ * The trestle table and what is laid out on it, left to right: the first-aid
+ * box, two clipboards with pens on strings, the tin the stickers come out of,
+ * and a stack of leaflets with a jar of pens behind them.
+ */
+function KioskTable() {
+  return (
+    <group position={[0, 0, TABLE_Z]}>
+      {/* Cloth to the ground at the front, so the trestle is not on show. */}
+      <mesh position={[0, 0.48, 0.02]} castShadow>
+        <boxGeometry args={[KIOSK.table.hx * 2 - 0.08, 0.96, 1.06]} />
+        <meshStandardMaterial color="#2f7d6b" flatShading roughness={1} />
+      </mesh>
+      <mesh position={[0, TABLE_Y - 0.06, 0]} castShadow receiveShadow>
+        <boxGeometry args={[KIOSK.table.hx * 2, 0.12, KIOSK.table.hz * 2]} />
         <meshStandardMaterial color="#c39a63" flatShading roughness={1} />
       </mesh>
-      <group position={[0, 1.25, -1.5]}>
+
+      {/* First-aid box. */}
+      <group position={[-1.24, TABLE_Y + 0.25, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.7, 0.5, 0.5]} />
           <meshStandardMaterial color="#f7f2e6" flatShading roughness={0.9} />
@@ -454,6 +551,219 @@ function VolunteerTent() {
           <boxGeometry args={[0.12, 0.36, 0.02]} />
           <meshStandardMaterial color="#d63d3d" />
         </mesh>
+      </group>
+
+      {/* Two clipboards, lying flat and not quite square to each other. */}
+      {[
+        { cx: -0.32, rot: 0.14 },
+        { cx: 0.36, rot: -0.22 },
+      ].map(({ cx, rot }) => (
+        <group
+          key={cx}
+          position={[cx, TABLE_Y + 0.02, 0.06]}
+          rotation={[0, rot, 0]}
+        >
+          <mesh castShadow>
+            <boxGeometry args={[0.46, 0.03, 0.62]} />
+            <meshStandardMaterial color="#8a6642" flatShading roughness={1} />
+          </mesh>
+          <mesh position={[0, 0.025, -0.02]}>
+            <boxGeometry args={[0.4, 0.01, 0.54]} />
+            <meshStandardMaterial color="#fdf7e9" roughness={0.95} />
+          </mesh>
+          {/* The clip, and the pen on its string beside it. */}
+          <mesh position={[0, 0.045, -0.26]}>
+            <boxGeometry args={[0.18, 0.04, 0.07]} />
+            <meshStandardMaterial
+              color="#9aa2ab"
+              metalness={0.5}
+              roughness={0.5}
+            />
+          </mesh>
+          <mesh
+            position={[0.16, 0.05, 0.12]}
+            rotation={[0, 0, Math.PI / 2]}
+            castShadow
+          >
+            <cylinderGeometry args={[0.018, 0.018, 0.3, 6]} />
+            <meshStandardMaterial color="#2f3542" roughness={0.6} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* The sticker tin: lid up, and a bright roll of them inside. */}
+      <group position={[1.06, TABLE_Y + 0.08, 0.12]} rotation={[0, -0.3, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.44, 0.16, 0.34]} />
+          <meshStandardMaterial color="#3f6fb5" flatShading roughness={0.8} />
+        </mesh>
+        <mesh position={[0, 0.16, -0.17]} rotation={[-1.05, 0, 0]} castShadow>
+          <boxGeometry args={[0.44, 0.02, 0.34]} />
+          <meshStandardMaterial color="#3f6fb5" flatShading roughness={0.8} />
+        </mesh>
+        <mesh position={[0, 0.1, 0.02]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.11, 0.11, 0.06, 12]} />
+          <meshStandardMaterial color="#f2b134" flatShading roughness={0.9} />
+        </mesh>
+      </group>
+
+      {/* Leaflets, and a jar of pens standing behind them. */}
+      <group position={[1.52, TABLE_Y + 0.04, -0.2]}>
+        {[0, 0.05, 0.1].map((ly, i) => (
+          <mesh
+            key={ly}
+            position={[0, ly, i * 0.01]}
+            rotation={[0, i * 0.12, 0]}
+            castShadow
+          >
+            <boxGeometry args={[0.34, 0.04, 0.46]} />
+            <meshStandardMaterial
+              color="#fdf7e9"
+              flatShading
+              roughness={0.95}
+            />
+          </mesh>
+        ))}
+      </group>
+      <group position={[0.7, TABLE_Y + 0.12, -0.34]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.12, 0.1, 0.22, 10]} />
+          <meshStandardMaterial
+            color="#cfe6f5"
+            transparent
+            opacity={0.55}
+            roughness={0.3}
+          />
+        </mesh>
+        {[
+          { color: '#d63d3d', px: -0.04, tilt: 0.12 },
+          { color: '#2f7d6b', px: 0.03, tilt: -0.1 },
+          { color: '#2f3542', px: 0.05, tilt: 0.04 },
+        ].map((pen) => (
+          <mesh
+            key={pen.color}
+            position={[pen.px, 0.2, 0]}
+            rotation={[0, 0, pen.tilt]}
+            castShadow
+          >
+            <cylinderGeometry args={[0.016, 0.016, 0.34, 6]} />
+            <meshStandardMaterial color={pen.color} roughness={0.6} />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  )
+}
+
+/** A rack of saplings in pots, waiting to go up the hill in the spring. */
+function KioskSaplings() {
+  return (
+    <group position={[2.55, 0, 0.9]} rotation={[0, -0.5, 0]}>
+      <mesh position={[0, 0.16, 0]} castShadow receiveShadow>
+        <boxGeometry args={[1.5, 0.1, 0.62]} />
+        <meshStandardMaterial color="#8a6642" flatShading roughness={1} />
+      </mesh>
+      {[-0.52, 0, 0.52].map((sx, i) => (
+        <group key={sx} position={[sx, 0.21, i === 1 ? -0.08 : 0.06]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.19, 0.15, 0.3, 8]} />
+            <meshStandardMaterial color="#b4643c" flatShading roughness={1} />
+          </mesh>
+          <mesh position={[0, 0.16, 0]}>
+            <cylinderGeometry args={[0.16, 0.16, 0.04, 8]} />
+            <meshStandardMaterial color="#4a3a2a" flatShading roughness={1} />
+          </mesh>
+          <mesh
+            position={[0, 0.42, 0]}
+            rotation={[0, 0, (i - 1) * 0.08]}
+            castShadow
+          >
+            <cylinderGeometry args={[0.032, 0.042, 0.52, 6]} />
+            <meshStandardMaterial color="#6b5030" flatShading roughness={1} />
+          </mesh>
+          {/* The crown clears the top of the stem rather than swallowing it:
+              a sapling is mostly stick, which is how you tell it from a tree. */}
+          <mesh position={[0, 0.86, 0]} castShadow>
+            <icosahedronGeometry args={[0.22, 0]} />
+            <meshStandardMaterial color="#4f8f3a" flatShading roughness={1} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  )
+}
+
+/** Crates from the donation drive, stacked at the end of the stall. */
+function KioskCrates() {
+  return (
+    <group position={[-2.5, 0, 0.7]} rotation={[0, 0.34, 0]}>
+      <mesh position={[0, 0.3, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.95, 0.6, 0.7]} />
+        <meshStandardMaterial color="#c8a06a" flatShading roughness={1} />
+      </mesh>
+      <mesh position={[0.08, 0.86, 0.06]} rotation={[0, 0.3, 0]} castShadow>
+        <boxGeometry args={[0.85, 0.52, 0.64]} />
+        <meshStandardMaterial color="#b58e5c" flatShading roughness={1} />
+      </mesh>
+      {/* What is in the top one: folded clothes, and a tin on top of them. */}
+      <mesh position={[0.08, 1.16, 0.06]} rotation={[0, 0.3, 0]}>
+        <boxGeometry args={[0.7, 0.12, 0.5]} />
+        <meshStandardMaterial color="#5f77b5" flatShading roughness={1} />
+      </mesh>
+      <mesh position={[0.24, 1.28, -0.04]} castShadow>
+        <cylinderGeometry args={[0.1, 0.1, 0.16, 10]} />
+        <meshStandardMaterial color="#9aa2ab" metalness={0.5} roughness={0.5} />
+      </mesh>
+    </group>
+  )
+}
+
+/**
+ * The board on a stake beside the stall: the tally of who has turned up so
+ * far, chalked up five to a row. It faces out across the green.
+ */
+function KioskDonorBoard() {
+  return (
+    <group position={[-2.35, 0, 2.35]} rotation={[0, 0.18, 0]}>
+      <mesh position={[0, 0.85, 0]} castShadow>
+        <boxGeometry args={[0.12, 1.7, 0.12]} />
+        <meshStandardMaterial color="#8a6642" flatShading roughness={1} />
+      </mesh>
+      <group position={[0, 1.78, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[1.5, 1.05, 0.1]} />
+          <meshStandardMaterial color="#c39a63" flatShading roughness={1} />
+        </mesh>
+        <mesh position={[0, 0, 0.06]}>
+          <boxGeometry args={[1.32, 0.88, 0.02]} />
+          <meshStandardMaterial color="#2f4a3e" roughness={0.95} />
+        </mesh>
+        <TextPlane
+          text="VOLUNTEERS"
+          width={1.2}
+          aspect={6}
+          color="#ffe9c4"
+          outline="rgba(0,0,0,0.5)"
+          position={[0, 0.3, 0.08]}
+          renderOrder={2}
+        />
+        {/* Three rows of chalk ticks, five to a row, and the rota filling. */}
+        {[0, 1, 2].map((row) => (
+          <group key={row} position={[0, 0.02 - row * 0.17, 0.08]}>
+            {[-0.42, -0.21, 0, 0.21, 0.42].map((tx, i) => (
+              <mesh
+                key={tx}
+                position={[tx, 0, 0]}
+                rotation={[0, 0, i % 2 ? 0.2 : -0.16]}
+              >
+                <boxGeometry args={[0.03, 0.11, 0.01]} />
+                <meshBasicMaterial
+                  color={row * 5 + i < 11 ? '#fdf7e9' : '#4a6355'}
+                />
+              </mesh>
+            ))}
+          </group>
+        ))}
       </group>
     </group>
   )

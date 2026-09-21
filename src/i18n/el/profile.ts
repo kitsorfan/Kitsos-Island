@@ -19,6 +19,8 @@ const KEPT = [
   'Java',
   'Spring Boot',
   'Spring AI',
+  'Ollama',
+  'Vitest',
   'Spring Framework',
   'Spring Security',
   'Spring Data JPA',
@@ -35,6 +37,9 @@ const KEPT = [
   'ELK Stack',
   'Grafana',
   'Jira',
+  'Microsoft Teams',
+  'Twilio',
+  'React Native',
   'Confluence',
   'GitLab CI',
   'Bitbucket Pipelines',
@@ -518,16 +523,20 @@ export const PROFILE: Record<string, string> = {
     'Συνεργάζεται με Product, Design, QA και DevOps για εβδομαδιαίες εκδόσεις στην παραγωγή.',
   'One of the company’s first engineers; built the flagship Nurse Scheduling platform from concept to production.':
     'Ένας από τους πρώτους μηχανικούς της εταιρείας· έχτισε τη ναυαρχίδα της, την πλατφόρμα Nurse Scheduling, από τη σύλληψη ως την παραγωγή.',
-  'Led production deployments across four major U.S. hospitals, working directly with hospital stakeholders.':
-    'Ηγήθηκε των εγκαταστάσεων σε παραγωγή σε τέσσερα μεγάλα νοσοκομεία των ΗΠΑ, σε άμεση συνεργασία με τους εμπλεκόμενους των νοσοκομείων.',
+  'Led production deployments across major U.S. hospitals, working directly with hospital stakeholders.':
+    'Ηγήθηκε των εγκαταστάσεων σε παραγωγή σε μεγάλα νοσοκομεία των ΗΠΑ, σε άμεση συνεργασία με τους εμπλεκόμενους των νοσοκομείων.',
   'Modernized legacy applications: Agile practices, engineering standards, CI/CD pipelines, documentation, automated testing and incremental refactoring.':
     'Εκσυγχρόνισε παλαιές εφαρμογές: Agile πρακτικές, πρότυπα μηχανικής, pipelines CI/CD, τεκμηρίωση, αυτοματοποιημένες δοκιμές και σταδιακό refactoring.',
   'Software lead on AI-powered healthcare applications for U.S. hospitals.':
     'Επικεφαλής λογισμικού σε εφαρμογές υγείας με τεχνητή νοημοσύνη για νοσοκομεία των ΗΠΑ.',
   'Nurse scheduling, hospital length-of-stay optimization, SMART on FHIR integrations and enterprise healthcare platform work.':
     'Προγραμματισμός βαρδιών νοσηλευτών, βελτιστοποίηση διάρκειας νοσηλείας, ενσωματώσεις SMART on FHIR και εργασία σε εταιρική πλατφόρμα υγείας.',
-  'Technical lead of the flagship Nurse Scheduling platform, live in four major U.S. hospitals.':
-    'Technical lead της ναυαρχίδας πλατφόρμας Nurse Scheduling, σε παραγωγή σε τέσσερα μεγάλα νοσοκομεία των ΗΠΑ.',
+  'The flagship Nurse Scheduling platform, live in major U.S. hospitals.':
+    'Η ναυαρχίδα πλατφόρμα Nurse Scheduling, σε παραγωγή σε μεγάλα νοσοκομεία των ΗΠΑ.',
+  'Technical lead on every one of these: the architecture, the decisions, the reviews and the delivery into the hospital.':
+    'Technical lead σε κάθε ένα από αυτά: η αρχιτεκτονική, οι αποφάσεις, οι ανασκοπήσεις και η παράδοση μέσα στο νοσοκομείο.',
+  'A React Native mobile application for the platform.':
+    'Εφαρμογή κινητού σε React Native για την πλατφόρμα.',
   'An AI-powered documentation assistant built on Spring AI, retrieval-augmented generation and agentic AI.':
     'Βοηθός τεκμηρίωσης με τεχνητή νοημοσύνη, χτισμένος πάνω σε Spring AI, retrieval-augmented generation και agentic AI.',
   'A SMART on FHIR application embedded inside Epic EHR.':
@@ -538,8 +547,8 @@ export const PROFILE: Record<string, string> = {
     'Ενσωμάτωση με συστήματα διαχείρισης προσωπικού UKG.',
   'SAML 2.0 single sign-on against Microsoft ADFS.':
     'Single sign-on με SAML 2.0 απέναντι σε Microsoft ADFS.',
-  'A secure notification framework and comprehensive activity audit logging.':
-    'Ασφαλές framework ειδοποιήσεων και πλήρες audit logging δραστηριότητας.',
+  'A secure notification framework and comprehensive activity audit logging, reaching nurses through Microsoft Teams and Twilio SMS.':
+    'Ασφαλές framework ειδοποιήσεων και πλήρες audit logging δραστηριότητας, που φτάνει στους νοσηλευτές μέσω Microsoft Teams και Twilio SMS.',
   'A Jira-integrated ticketing system with Google reCAPTCHA for secure issue submission and workflow automation.':
     'Σύστημα αιτημάτων ενσωματωμένο με Jira και Google reCAPTCHA για ασφαλή υποβολή και αυτοματοποίηση ροών.',
   'HIPAA-compliant security and data handling architecture across all of it.':
@@ -808,4 +817,17 @@ export const PROFILE: Record<string, string> = {
   'Artificial Neural Networks': 'Τεχνητά νευρωνικά δίκτυα',
   'And anything well made: give me a good film and I will give you the evening':
     'Και οτιδήποτε καλοφτιαγμένο: δώσε μου μια καλή ταινία και σου δίνω το βράδυ',
+
+  /* The globe in the corner of the Evangeliki classroom. The flags stay as
+     they are: an emoji is the same in both languages. */
+  'The globe in the corner': 'Η υδρόγειος στη γωνία',
+  'Where the globe has been stopped': 'Πού έχει σταματήσει η υδρόγειος',
+  'The astronomy corner had a globe, and a boy who spun it more than he studied it. Six of the countries on it he has since stood in.':
+    'Η γωνιά της αστρονομίας είχε μια υδρόγειο, και ένα παιδί που την έστρεφε περισσότερο από όσο τη μελέτησε. Σε έξι από τις χώρες της έχει έκτοτε σταθεί.',
+  Greece: 'Ελλάδα',
+  Cyprus: 'Κύπρος',
+  Germany: 'Γερμανία',
+  France: 'Γαλλία',
+  Italy: 'Ιταλία',
+  Switzerland: 'Ελβετία',
 }

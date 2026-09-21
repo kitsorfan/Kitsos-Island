@@ -11,6 +11,13 @@ interface TextPlaneProps {
   aspect?: number
   position?: [number, number, number]
   rotation?: [number, number, number]
+  /**
+   * Drawing order against other transparent surfaces at the same depth. Text
+   * laid on a lit panel needs it: two planes a couple of millimetres apart
+   * are otherwise sorted by distance alone, which is free to put the panel
+   * over the words.
+   */
+  renderOrder?: number
 }
 
 const FONT_STACK =
@@ -63,6 +70,7 @@ export function TextPlane({
   aspect = 6,
   position = [0, 0, 0],
   rotation = [0, 0, 0],
+  renderOrder,
 }: TextPlaneProps) {
   const texture = useMemo(() => {
     const tex = new CanvasTexture(draw(text, color, outline, bold, aspect))
@@ -74,7 +82,7 @@ export function TextPlane({
   useEffect(() => () => texture.dispose(), [texture])
 
   return (
-    <mesh position={position} rotation={rotation}>
+    <mesh position={position} rotation={rotation} renderOrder={renderOrder}>
       <planeGeometry args={[width, width / aspect]} />
       <meshBasicMaterial map={texture} transparent depthWrite={false} />
     </mesh>

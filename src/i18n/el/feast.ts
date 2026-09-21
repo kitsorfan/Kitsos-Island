@@ -112,10 +112,8 @@ export const FEAST: Record<string, string> = {
     'Χρόνια πολλά. Κάτσε να φας, και για τα υπόλοιπα θα μιλήσουμε μετά.',
 
   Angelica: 'Αντζέλικα',
-  'Sister-in-law, architect': 'Κουνιάδα, αρχιτέκτονας',
-  'Angelica, at the table': 'Η Αντζέλικα, στο τραπέζι',
-  'Amalia’s sister, an architect. She has walked the whole island once and has notes on the plaza.':
-    'Η αδελφή της Αμαλίας, αρχιτέκτονας. Έχει περπατήσει όλο το νησί μια φορά και έχει παρατηρήσεις για την πλατεία.',
+  /* Her role and journal moved out to the island with her — see el/world.ts.
+     What stays here is what she says at the table on the day. */
   'I am an architect, so I have opinions about your island. The lighthouse is right. The plaza wants one more tree.':
     'Είμαι αρχιτέκτονας, οπότε έχω άποψη για το νησί σου. Ο φάρος είναι σωστός. Η πλατεία θέλει ένα δέντρο ακόμη.',
   'You and Kostis build. I draw first and then argue with whoever has to build it. Same family of problem.':

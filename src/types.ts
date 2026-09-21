@@ -20,11 +20,23 @@ export interface Letter {
   scans?: string[]
 }
 
+/** The flags `PanelBlock` can draw. Each one has a case in `Flag`. */
+export type FlagCode = 'gr' | 'cy' | 'de' | 'fr' | 'it' | 'ch'
+
 export type PanelBlock =
   | { type: 'text'; text: string }
   | { type: 'letters'; letters: Letter[] }
   | { type: 'quote'; text: string }
   | { type: 'list'; items: string[] }
+  /**
+   * A list of countries, each with its flag drawn beside it.
+   *
+   * Drawn rather than typed: the flag emoji are pairs of regional-indicator
+   * letters, and Windows renders those as the bare letter pairs — 'GR',
+   * 'DE' — in every browser on it. An SVG of a few rectangles is the same
+   * picture everywhere.
+   */
+  | { type: 'flags'; countries: { code: FlagCode; name: string }[] }
   | { type: 'stats'; stats: { label: string; value: string }[] }
   | { type: 'tags'; groups: { label: string; tags: string[] }[] }
   | {
@@ -76,6 +88,14 @@ export interface Building {
   closesAtNight?: string[]
   /** Soldiers on the gate rather than a dark lobby: they whistle you back. */
   sentries?: boolean
+  /**
+   * Sliding glass on a sensor: walking up to it is enough, and no prompt is
+   * ever offered. Only while the door would have let you in anyway — a night
+   * that shuts it, or a lock that has not been opened, still turns you away
+   * at a press, because a refusal you did not ask for is a door that grabs
+   * at you.
+   */
+  autoDoor?: boolean
 }
 
 /**
@@ -151,11 +171,26 @@ export interface Npc {
   shift?: 'day' | 'night'
   /** Carried in the off hand, for anyone working in the dark. */
   hand?: HandLight
+  /**
+   * A child: the same figure built smaller, so height alone tells you who is
+   * a grown-up across a green. Their chat bubble and journal marker are
+   * raised back off the top of the head, which a bare scale would sink.
+   */
+  child?: boolean
   /** Worn down the back instead of the cropped default. */
   hair?: 'short' | 'long'
   /** A skirt in this colour over the legs, with a trim at the hem. */
   dress?: string
   dressTrim?: string
+  /**
+   * A tailored jacket in this colour, over a blouse. Office wear, as against
+   * the `suit` that is only ever worn to Christmas dinner: it squares the
+   * shoulders, and it straightens a `dress` into a pencil skirt rather than
+   * leaving it the flared one the village wears.
+   */
+  blazer?: string
+  /** The blouse under it. Off-white if not given. */
+  blouse?: string
   /** A mouth, turned up. Reserved for the people he is glad to see. */
   smile?: boolean
   /** In a dinner jacket. Set for the day by `feastWear`, never otherwise. */
@@ -201,6 +236,11 @@ export interface SignPost {
   facing: number
   label: string
   lines: string[]
+  /**
+   * Filed the first time the board is read. Most signs are directions and
+   * have none; one that is a landmark in its own right does.
+   */
+  journal?: { title: string; body: string }
 }
 
 /* ----------------------------- missions ---------------------------- */
@@ -307,11 +347,25 @@ export type ExhibitKind =
   /** The one on the basement wall. Says 8 April, and can be told otherwise. */
   | 'calendar'
   /**
+   * The run of technology marks along a wall, grouped the way the CV groups
+   * them. Flat against the wall like the calendar, so the room's margin keeps
+   * you off it and there is nothing to walk into.
+   */
+  | 'techWall'
+  /**
    * A thing already standing in the room as furniture — the toys on their
    * shelf. Draws nothing of its own: the prop is the object, and this only
    * puts a prompt and a halo on it.
    */
   | 'toy'
+  /**
+   * A piece of furniture already in the room that opens a panel and nothing
+   * else — the globe in the corner at Evangeliki. Like 'toy' it draws
+   * nothing of its own and is reached through a `hitbox` on the prop, but it
+   * hides no puzzle, so it files its journal entry on the first look the way
+   * every other exhibit does.
+   */
+  | 'prop'
 
 export interface Exhibit {
   id: string
@@ -334,8 +388,8 @@ export interface Exhibit {
    */
   reveals?: { id: string; title: string; body: string }
   /**
-   * For kind 'toy': where the thing you actually click sits, and how big a
-   * target it is. `at` is in room coordinates like `position`, `y` is its
+   * For kinds 'toy' and 'prop': where the thing you actually click sits, and
+   * how big a target it is. `at` is in room coordinates like `position`, `y` is its
    * height off the floor, and `size` is the half-extent of the invisible box
    * the pointer has to hit. Without one a toy is only pressable from up close
    * with the keyboard; with one it can simply be clicked.
@@ -387,9 +441,11 @@ export interface InteriorLink {
    */
   floor?: number
   /**
-   * For kind 'lift': the panel inside the car, in the order the buttons are
-   * on it. Every floor of the building appears, including the one you are
-   * already standing on and the one nothing has been built on yet.
+   * For kind 'lift': the panel inside the car, from the ground floor up.
+   * Every floor of the building appears, including the one you are already
+   * standing on and the one nothing has been built on yet. The panel draws
+   * them the other way round — top floor at the top — the way the building
+   * actually stands.
    */
   serves?: LiftStop[]
 }
@@ -400,6 +456,8 @@ export interface LiftStop {
   floor: number
   /** What that floor is, under the number. */
   label: string
+  /** The years that floor covers, beside the name. Left off for the empty one. */
+  when?: string
   /** The room it opens onto. Left off, the button is not wired to anything. */
   to?: string
   /** What the car says when a button with nowhere to go is pressed. */

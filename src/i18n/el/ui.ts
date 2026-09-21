@@ -14,17 +14,22 @@ export const UI: Record<string, string> = {
   'The lift': 'Το ασανσέρ',
   Floor: 'Όροφος',
   Reception: 'Υποδοχή',
+  /* Τα χρόνια δίπλα στο όνομα του ορόφου. */
+  '2023–2024': '2023–2024',
+  '2024–present': '2024–σήμερα',
   'you are here': 'είσαι εδώ',
   'Step back out': 'Βγες πάλι έξω',
   'You are on this floor already.': 'Είσαι ήδη σε αυτόν τον όροφο.',
   'Nothing happens.': 'Δεν γίνεται τίποτα.',
-  'The button for the third floor does not light when you press it.':
-    'Το κουμπί για τον τρίτο όροφο δεν ανάβει όταν το πατάς.',
-  'The shaft goes up past the second floor — you can hear it — but there is no landing at the top yet. Nobody has poured one.':
-    'Το φρεάτιο συνεχίζει πάνω από τον δεύτερο όροφο — το ακούς — αλλά δεν υπάρχει ακόμη πλατύσκαλο στην κορυφή. Κανείς δεν έχει ρίξει μπετόν.',
-  'IBM, then Veltiston AI. Whatever the third thing turns out to be, it has not been signed for.':
-    'IBM, μετά Veltiston AI. Ό,τι κι αν αποδειχθεί ότι είναι το τρίτο, δεν έχει υπογραφεί ακόμη.',
-  'Come back in a later commit.': 'Ξαναπέρνα σε επόμενο commit.',
+  'You press it. The button does not light — but somewhere above you, something heavy shifts in the shaft.':
+    'Το πατάς. Το κουμπί δεν ανάβει — αλλά κάπου από πάνω σου, κάτι βαρύ μετακινείται μέσα στο φρεάτιο.',
+  'The floor is there. Poured, wired, empty. The lift was built to reach it.':
+    'Ο όροφος είναι εκεί. Χυμένος, καλωδιωμένος, άδειος. Το ασανσέρ χτίστηκε για να τον φτάνει.',
+  'IBM taught him how large systems actually fail. Veltiston AI taught him how to build one fast enough to matter, for people who feel it on a Monday morning.':
+    'Η IBM τού έμαθε πώς αποτυγχάνουν στ’ αλήθεια τα μεγάλα συστήματα. Η Veltiston AI τού έμαθε πώς να χτίζει ένα αρκετά γρήγορα ώστε να μετράει, για ανθρώπους που το νιώθουν ένα πρωινό Δευτέρας.',
+  'So: third floor. Nobody has decided what it is yet.':
+    'Λοιπόν: τρίτος όροφος. Κανείς δεν έχει αποφασίσει ακόμη τι είναι.',
+  'You could.': 'Εσύ θα μπορούσες.',
 
   /* ------------------------------- HUD ------------------------------- */
   'Kitsos Island': 'Το Νησί του Κίτσου',

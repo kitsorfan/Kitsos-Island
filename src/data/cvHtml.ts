@@ -31,6 +31,13 @@ function renderBlock(block: PanelBlock): string {
     case 'list':
       return `<ul>${block.items.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`
 
+    // On paper a flag is just the country: the swatch is a thing the panel
+    // draws, and nothing here has a canvas to draw it on.
+    case 'flags':
+      return `<ul>${block.countries
+        .map((c) => `<li>${esc(c.name)}</li>`)
+        .join('')}</ul>`
+
     case 'stats':
       // A description list: the label is the term, the value defines it.
       return `<dl class="stats">${block.stats

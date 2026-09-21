@@ -274,7 +274,12 @@ export function placed(npc: Npc, area: string, christmas: boolean): Npc | null {
       dress: wear?.dress ?? npc.dress,
       dressTrim: wear?.dressTrim ?? npc.dressTrim,
       suit: wear?.suit,
-      prop: npc.prop === 'cap' ? undefined : npc.prop,
+      /* Nobody comes to Christmas dinner in the clothes they work in: the
+         cap comes off, and so does the hard hat and the site blazer Angelica
+         spends the rest of the year in. */
+      prop: npc.prop === 'cap' || npc.prop === 'hardhat' ? undefined : npc.prop,
+      blazer: undefined,
+      blouse: undefined,
     }
   }
   // The in-laws are here for the meal and for nothing else.

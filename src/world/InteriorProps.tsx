@@ -1634,20 +1634,16 @@ function ToyBox({ color }: { color?: string }) {
 /**
  * The low shelf of toys in the library, at the end of the run of books. Four
  * boards of things that were never put away: bricks, a rocket, a robot, a
- * dinosaur, a car, a boat, a stack of board games — and on the middle board,
- * front and centre where a small hand could reach it, the helicopter.
+ * dinosaur, a car, a boat, a stack of board games — and along the middle
+ * board with the rest of them, the helicopter.
  *
- * The helicopter is the switch. It stands proud of everything beside it, its
- * rotor turns on its own, and it is the only thing on the shelf with a light
- * of its own, so the eye goes to it before anything has been said.
+ * The helicopter is the switch, and nothing on the shelf says so. Its rotor
+ * hangs still like every other toy up here, it sits in the row rather than in
+ * front of it, and the light over the boards is over all of them. A switch
+ * you can pick out by looking is not a switch: the only way to it is
+ * remembering which toy it was.
  */
 function ToyShelf({ color }: { color?: string }) {
-  const rotor = useRef<Group>(null)
-  /* Slow enough to read as a toy being idly spun, not as an aircraft. */
-  useFrame((_, delta) => {
-    if (rotor.current) rotor.current.rotation.y += delta * 2.2
-  })
-
   /* Bricks along the top board, in the colours bricks come in. */
   const bricks: [number, string][] = [
     [-1.1, '#d94f4f'],
@@ -1780,11 +1776,12 @@ function ToyShelf({ color }: { color?: string }) {
       </group>
 
       {/*
-        The helicopter, front and centre of the middle board and standing
-        clear of its neighbours: skids, a cabin, a tail with a fin on it, and
-        a rotor that turns. This is the thing you press.
+        The helicopter, on the end of the middle board and standing in the row
+        with the robot and the dinosaur rather than out in front of them:
+        skids, a cabin, a tail with a fin on it, and a rotor that hangs still.
+        This is the thing you press, and there is no way to tell.
       */}
-      <group position={[0.42, 1.53, 0.12]} rotation={[0, -0.22, 0]}>
+      <group position={[0.42, 1.53, 0]} rotation={[0, -0.22, 0]}>
         {/* Skids. */}
         {[-0.13, 0.13].map((z) => (
           <mesh key={z} position={[0, 0.03, z]} castShadow>
@@ -1834,7 +1831,7 @@ function ToyShelf({ color }: { color?: string }) {
           <cylinderGeometry args={[0.025, 0.025, 0.09, 6]} />
           <meshStandardMaterial color="#3a3f4a" flatShading />
         </mesh>
-        <group ref={rotor} position={[0, 0.5, 0]}>
+        <group position={[0, 0.5, 0]} rotation={[0, 0.35, 0]}>
           {[0, Math.PI / 2].map((a) => (
             <mesh key={a} rotation={[0, a, 0]} castShadow>
               <boxGeometry args={[0.78, 0.02, 0.07]} />
@@ -1848,12 +1845,13 @@ function ToyShelf({ color }: { color?: string }) {
         </group>
       </group>
 
-      {/* The one light on the shelf, over the helicopter. Nothing says this is
-          the switch; it is only the toy you can see properly. */}
+      {/* A light over the shelf, centred on the whole run of boards so that
+          every toy on it reads the same. Anything narrower is a spotlight on
+          the answer. */}
       <pointLight
-        position={[0.42, 1.85, 0.5]}
-        intensity={2.4}
-        distance={2.6}
+        position={[0, 1.95, 0.6]}
+        intensity={2.2}
+        distance={3.4}
         color="#ffd79a"
       />
 

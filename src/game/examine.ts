@@ -63,10 +63,14 @@ export function examine(
  * This is where the secret actually comes out, and where the journal entry is
  * filed: both of them are the reward for having spotted the one toy on the
  * shelf that does something, rather than for having walked past it.
+ *
+ * It is not a one-off. The shelf only stands open for the visit it was opened
+ * on, so walking out and back in finds the wall shut and the helicopter has
+ * to be pressed again. The journal and the toast are what know the difference
+ * between the visits: both keep their counsel from the second press on.
  */
 export function pickUpToy(exhibit: Exhibit, source: string): void {
   const state = useGame.getState()
-  if (exhibit.reveals && state.secrets[exhibit.reveals.id]) return
 
   if (exhibit.journal) {
     state.record({

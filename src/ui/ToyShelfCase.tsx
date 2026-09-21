@@ -10,9 +10,9 @@ import { useT } from '../i18n/useT'
  * across the top, then the middle, then the bottom.
  *
  * Only one of them does anything, and nothing here says which. That is the
- * whole puzzle — the helicopter is a toy among toys until you pick it up, and
- * the rotor turning is the only thing that marks it out, exactly as on the
- * shelf itself.
+ * whole puzzle, so the helicopter is drawn exactly like the eight toys beside
+ * it: no spin, no glow, no hint in the label. You have to remember which toy
+ * it was, or try them until one gives.
  */
 const TOYS: { id: string; emoji: string; name: string; row: number }[] = [
   { id: 'bricks', emoji: '🧱', name: 'A handful of bricks', row: 0 },
@@ -42,14 +42,17 @@ const SWITCH = 'helicopter'
 export function ToyShelfCase() {
   const t = useT()
   const area = useGame((s) => s.area)
-  const secrets = useGame((s) => s.secrets)
+  const swung = useGame((s) => s.swung)
+  const visit = useGame((s) => s.spawn.token)
   const [tried, setTried] = useState<string | null>(null)
 
   const interior = INTERIOR_BY_ID.get(area)
   const exhibit = interior?.exhibits.find((e) => e.kind === 'toy')
   if (!interior || !exhibit) return null
 
-  const done = Boolean(exhibit.reveals && secrets[exhibit.reveals.id])
+  /* Pressed on this visit, not ever: the shelf shuts behind you when you
+     leave, so the case comes back the way it was the first time. */
+  const done = Boolean(exhibit.reveals && swung[exhibit.reveals.id] === visit)
 
   const take = (id: string, name: string) => {
     if (id !== SWITCH) {
@@ -77,15 +80,7 @@ export function ToyShelfCase() {
                 aria-label={t(toy.name)}
                 title={t(toy.name)}
               >
-                <span
-                  className={
-                    toy.id === SWITCH
-                      ? 'toyshelf__emoji toyshelf__emoji--spin'
-                      : 'toyshelf__emoji'
-                  }
-                >
-                  {toy.emoji}
-                </span>
+                <span className="toyshelf__emoji">{toy.emoji}</span>
               </button>
             ))}
           </div>

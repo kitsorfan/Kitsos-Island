@@ -22,7 +22,7 @@ import type {
 import * as sfx from '../game/audio'
 import { LEVELS, setSfxLevel as applySfxLevel } from '../game/audio'
 import { BIRTHDAY, clampDate, isFeast } from '../game/calendar'
-import { LIFT_DOORS, LIFT_PER_FLOOR } from '../game/lift'
+import { LIFT_DOORS, LIFT_PER_FLOOR, liftStance } from '../game/lift'
 import type { CalendarDate } from '../game/calendar'
 import type { Locale } from '../i18n'
 import { forgetProgress, isEmpty, loadProgress, saveProgress } from './save'
@@ -277,6 +277,12 @@ export interface Nearby {
   verb: string
   /** Set when the target cannot be used yet. */
   blocked?: boolean
+  /**
+   * Set when there is no key to press: the thing opens by itself as you
+   * reach it. The label still shows, so you know what you are walking into,
+   * but offering a keycap for a door already sliding would be a lie.
+   */
+  silent?: boolean
 }
 
 export interface JournalEntry {
@@ -293,6 +299,20 @@ export interface Spawn {
   /** Which way he faces on arrival; into the room, if left off. */
   facing?: number
   token: number
+}
+
+/**
+ * A short walk he takes on his own, with the controls out of his hands.
+ *
+ * A spawn is a teleport and draws a curtain over itself, which is right for
+ * crossing a building and wrong for crossing a threshold: stepping into a
+ * lift is two metres, and it has to be seen to be understood. The player
+ * walks this off over a few frames and then it is cleared.
+ */
+export interface Stride {
+  to: Vec2
+  /** Which way he ends up facing. */
+  facing?: number
 }
 
 /**
@@ -337,6 +357,8 @@ interface GameState {
   panel: PanelPayload | null
   nearby: Nearby | null
   spawn: Spawn
+  /** A step he is taking by himself; null whenever he has the controls. */
+  stride: Stride | null
 
   visited: Record<string, true>
   entries: JournalEntry[]
@@ -351,6 +373,22 @@ interface GameState {
   discovered: Record<string, true>
   /** Things found that are not keys: a shelf that swings, and whatever next. */
   secrets: Record<string, true>
+  /**
+   * Which visit a way that has to be opened was opened on, secret by secret,
+   * as the spawn token that was current at the time.
+   *
+   * `secrets` is permanent and is what the journal and the keyring are built
+   * on: once the helicopter has been found it stays found. The shelf itself
+   * is not. It is shut when you walk into the library and shut again the
+   * moment you walk out, so every visit is the same room with the same panel
+   * in the back wall until a hand goes to the toy shelf.
+   *
+   * The token is what makes that work, where the room's own id would not:
+   * every move between areas bumps it, so walking out of the library and
+   * straight back in leaves this pointing at a visit that is over, which is
+   * exactly the case the room id cannot tell from never having left.
+   */
+  swung: Record<string, number>
   lighthouseOpen: boolean
   cvUnlocked: boolean
   greetingReturn: Mode
@@ -534,6 +572,10 @@ interface GameState {
   leaveBuilding: () => void
   /** Stairs and doors between the rooms of one building. */
   goRoom: (to: string, arrive: Vec2, facing?: number) => void
+  /** He has finished a walk he was taking by himself. */
+  endStride: () => void
+  /** The glass slides and he starts walking through it. */
+  /** He is through: the lobby replaces the island. */
   /** Into the car: the doors stay open and the panel comes up. */
   callLift: (call: LiftCall) => void
   /** Out of the car without pressing anything. */
@@ -695,6 +737,7 @@ export const useGame = create<GameState>((set, get) => ({
   panel: null,
   nearby: null,
   spawn: { area: 'island', position: [...PLAYER_START] as Vec2, token: 0 },
+  stride: null,
 
   visited: Object.fromEntries(RESTORED.entries.map((e) => [e.id, true])),
   entries: RESTORED.entries,
@@ -704,6 +747,8 @@ export const useGame = create<GameState>((set, get) => ({
   missions: RESTORED.missions,
   discovered: RESTORED.discovered,
   secrets: RESTORED.secrets,
+  // Nothing is standing open at the title screen, whatever the save holds.
+  swung: {},
   lighthouseOpen: RESTORED.lighthouseOpen,
   cvUnlocked: RESTORED.cvUnlocked,
   greetingReturn: 'explore',
@@ -1728,24 +1773,53 @@ export const useGame = create<GameState>((set, get) => ({
     }))
   },
 
+  /** The step he was taking by himself is done; nothing is walking him now. */
+  endStride: () => {
+    if (get().stride) set({ stride: null })
+  },
+
   /**
-   * Into the car. Nothing moves yet: the doors stay open, the panel comes up,
-   * and he is free to walk straight back out again.
+   * Into the car. Nothing moves yet: he walks in, the doors stay open, the
+   * panel comes up, and he is free to walk straight back out again.
    */
   callLift: (call) => {
     if (get().lift || get().liftCall) return
+    /*
+     * Step him into the car. Until this existed a ride was watched from the
+     * corridor — the doors shut on an empty shaft in front of him and opened
+     * again on a room he had been teleported to, which read as a door with a
+     * delay rather than as a lift.
+     */
+    const room = INTERIOR_BY_ID.get(call.room)
+    const car = (room?.links ?? []).find((l) => l.id === call.linkId)
+    const stance = car ? liftStance(car, room) : null
     set({
       liftCall: call,
       mode: 'lift',
       nearby: null,
       panel: null,
       dialogue: null,
+      /* Walked, not teleported: a spawn here would drop a curtain over the
+         one step that makes the ride make sense. */
+      stride: stance && { to: stance.inside, facing: stance.facing },
     })
   },
 
+  /**
+   * Out of the car without going anywhere — he backs out the way he came in,
+   * onto the floor he was already standing on.
+   */
   leaveLift: () => {
-    if (!get().liftCall) return
-    set({ liftCall: null, mode: 'explore' })
+    const call = get().liftCall
+    if (!call) return
+    const room = INTERIOR_BY_ID.get(call.room)
+    const car = (room?.links ?? []).find((l) => l.id === call.linkId)
+    const stance = car ? liftStance(car, room) : null
+    set({
+      liftCall: null,
+      mode: 'explore',
+      stride: stance && { to: stance.outside, facing: stance.facing },
+    })
   },
 
   /**
@@ -1762,7 +1836,12 @@ export const useGame = create<GameState>((set, get) => ({
       })
       return
     }
-    /* Already on that floor: the doors do not even close. */
+    /*
+     * Already on that floor. The panel does not offer the button at all any
+     * more, so this is a backstop rather than a path anybody walks — kept
+     * because a ride to the floor you are standing on would teleport you
+     * across your own room.
+     */
     if (stop.to === call.room) {
       sfx.dry()
       set({
@@ -1797,6 +1876,8 @@ export const useGame = create<GameState>((set, get) => ({
       nearby: null,
       panel: null,
       dialogue: null,
+      /* He is already standing in the car; nothing is left to walk. */
+      stride: null,
     })
   },
 
@@ -1828,15 +1909,22 @@ export const useGame = create<GameState>((set, get) => ({
         facing,
         token: s.spawn.token + 1,
       },
+      /* A teleport outranks a walk: whatever step was under way belonged to
+         the room he has just left. */
+      stride: null,
     }))
   },
 
   revealSecret: (id, found) => {
-    if (get().secrets[id]) return
-    sfx.jingle()
+    const first = !get().secrets[id]
+    if (first) sfx.jingle()
     set((s) => ({
-      secrets: { ...s.secrets, [id]: true },
-      toast: found ? { ...found, kind: 'key' as const } : s.toast,
+      secrets: first ? { ...s.secrets, [id]: true } : s.secrets,
+      /* Swung open on this visit, and only this one: leaving shuts it again,
+         and finding the switch a second time on a later visit opens it again
+         without filing anything twice. */
+      swung: { ...s.swung, [id]: s.spawn.token },
+      toast: first && found ? { ...found, kind: 'key' as const } : s.toast,
     }))
   },
 
@@ -1911,6 +1999,7 @@ export const useGame = create<GameState>((set, get) => ({
       missions: { ...IDLE_MISSIONS },
       discovered: {},
       secrets: {},
+      swung: {},
       lighthouseOpen: false,
       cvUnlocked: false,
       toast: {

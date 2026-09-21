@@ -20,6 +20,21 @@ JPG, PNG and WebP render as a thumbnail that opens full size in a new tab. A
 `.pdf` renders as a download link instead. Add or rename freely — the list of
 filenames lives beside each letter in `profile.ts`.
 
-Before publishing scans, consider covering the referees' phone numbers and
-email addresses: those are their personal data, and the site does not print
-them anywhere else.
+## Before you add a scan
+
+Cover the referee's phone number, email address and any home address first.
+That is their personal data, not mine, and they did not choose to publish it:
+the site prints none of it anywhere else, and a scan that shows it hands it to
+every crawler that reads a public repo. Signatures are worth covering too.
+
+Git will not take these files by accident — `.gitignore` holds every image and
+PDF in this folder, so adding one is a deliberate act:
+
+```bash
+git add -f public/letters/tsanakas.jpg
+```
+
+Do that only once the scan itself is redacted. A commit that publishes a
+referee's phone number cannot be undone by a later commit that removes it:
+the image stays in the history, and on a public repo it has already been
+cloned, cached and indexed.

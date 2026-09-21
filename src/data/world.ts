@@ -220,12 +220,29 @@ export const BUILDINGS: Building[] = [
     short: 'Work',
     subtitle: 'Veltiston.AI · IBM Consulting',
     position: [78, -34],
-    door: [66, -34],
+    /*
+     * In front of the glass, which is not in front of the building.
+     *
+     * The tower's entrance sits off the centre of its own facade — the model
+     * puts the doors at local x = -2.6, and a quarter turn swings that round
+     * to nearly four metres down the frontage. A mark on the building's
+     * centre line therefore left him standing on the grass beside the
+     * canopy, walking into a blank wall while the doors opened out of shot.
+     *
+     * Set back far enough from the glass that walking in is a stride rather
+     * than a shuffle: a metre and a half, which is the walk the entrance
+     * animation is timed for.
+     */
+    door: [65.4, -37.9],
     half: [9.5, 10.2],
     rotation: -Math.PI / 2,
     scale: 1.5,
     height: 22,
     accent: '#2fb59a',
+    /* An office lobby: the glass slides for you, the way it does on a Monday
+       morning. Only in daylight — after dark the badge reader is what you
+       meet, and that is a press, not a walk. */
+    autoDoor: true,
     closesAtNight: [
       'The glass is dark and the badge reader is dead. Nothing is shipping tonight.',
       'There is somebody on the gate, though, if you want the long version.',
@@ -381,7 +398,7 @@ export const NPCS: Npc[] = [
   /* --------------------------- town plaza -------------------------- */
   {
     id: 'mayor',
-    name: 'Mayor Kostas',
+    name: 'Mayor Vasilis',
     role: 'Kitsos Town',
     area: 'island',
     position: [8, 10],
@@ -402,7 +419,7 @@ export const NPCS: Npc[] = [
     pace: 1.7,
     lines: [
       'Welcome to KITSOS TOWN! Small island, big CV.',
-      `Everything here belongs to ${PROFILE.firstName} "${PROFILE.nickname}" ${PROFILE.lastName}, a senior full stack engineer and technical lead out of ${PROFILE.location}.`,
+      `Everything here belongs to ${PROFILE.nickname} ${PROFILE.lastName}, a senior full stack engineer and technical lead out of ${PROFILE.location}.`,
       'Seven roads leave this square, and every one of them is named for what he took out of it. Motivation, Discipline, Curiosity, Caring, Leadership, Collaboration.',
       'And north-west, Freedom Road, out to the Old Lighthouse on the cape. Sealed for years. Five district keys open it, one hidden in each building.',
       'Press M for the map if the walk gets long. Once you have found a place, you can travel straight back to it.',
@@ -443,6 +460,72 @@ export const NPCS: Npc[] = [
     journal: {
       title: 'Volunteering',
       body: 'Leading volunteer (2017–2021, 2023–today) and Director (2021–2022) at the Christian Youth Foundation "Pantokrator", Paleo Faliro. Blood donor since 2017.',
+    },
+  },
+  {
+    id: 'kiosk-kostas',
+    name: 'Kostas',
+    role: 'Foundation volunteer',
+    area: 'island',
+    // Behind the table, under the back of the canopy, looking out over it.
+    // Both of these are worked out in the kiosk's own frame and turned by
+    // KIOSK.facing, which is why they are not round numbers.
+    position: [-28.71, 20.62],
+    facing: 0.425,
+    colors: {
+      skin: SKIN.tan,
+      hair: '#6b5646',
+      shirt: '#2f7d6b',
+      pants: '#3a3f4d',
+    },
+    prop: 'cap',
+    smile: true,
+    lines: [
+      'Clipboard is on the table, pen is on a string. The string is because of me, not because of you.',
+      'Twenty-odd of us run this tent. Kitsos was the one who wrote down who was doing what, and after that the tent stopped losing people.',
+      'I came in for one Saturday in 2018 to shift some boxes. He put my name on a rota and I have not got off it since.',
+      'Tree planting in the spring, the donation drive at Christmas, the prison visits, the field trips. The blood drive is the one we never have to advertise.',
+      'When he took over as Director he was younger than half his volunteers. Nobody minded by the second week.',
+    ],
+    journal: {
+      title: 'The volunteers',
+      body: 'The tent on the west green: sign-ups, donation drives, tree planting and the blood drive. Kostas has been on the rota since 2018.',
+    },
+  },
+  {
+    id: 'kiosk-marios',
+    name: 'Marios',
+    role: 'At the tent with his mum',
+    area: 'island',
+    // In the open front of the stall, on the other side of the table from
+    // Kostas and turned back towards it.
+    position: [-26.03, 23.3],
+    facing: -2.315,
+    colors: {
+      skin: SKIN.light,
+      hair: '#3a2a1c',
+      shirt: '#f2b134',
+      pants: '#2f5aa8',
+    },
+    child: true,
+    smile: true,
+    /* Three points across the open front of the stall. None of them, and no
+     * leg between them, crosses the table he is not allowed round. */
+    route: [
+      [-26.03, 23.3],
+      [-23.95, 24.04],
+      [-27.97, 25.54],
+    ],
+    pace: 2.4,
+    lines: [
+      'I am ALLOWED behind the table. Kostas said. You are not.',
+      'I do the stickers. Everyone who signs up gets one, and if you give blood you get two.',
+      'Kitsos took us to plant trees up the hill. Mine is the crooked one. He said crooked ones still grow.',
+      'My mum says he ran the whole building when he was young. Younger than mum. That is weird.',
+    ],
+    journal: {
+      title: 'The children at the tent',
+      body: 'Marios hands out the sign-up stickers. The Foundation’s programme — trips, tree planting, the lot — is run for children like him, and went on a live stream through the lockdowns rather than stopping.',
     },
   },
   {
@@ -730,7 +813,7 @@ export const NPCS: Npc[] = [
     missionLines: ['The thesis display, past the lectern. Mind the cables.'],
     lines: [
       'Panagiotis Tsanakas, Dean of the School. Sit anywhere; the lecture is over.',
-      'The most competitive school in the country to get into, only the top entrance grades make it, and a five-year programme most students take seven and a half to finish. Christos finished it in five. 2017 to 2022, 8.4.',
+      'The most competitive school in the country to get into, only the top entrance grades make it, and a five-year programme most students take seven and a half to finish. Kitsos finished it in five. 2017 to 2022, 8.4.',
       'He was my student in Operating Systems and Software Service Technologies, and I supervised his thesis: a phone application that watches a movement through a neural network, recognises it and judges how well it was done. Distinction. Three years later, a paper on arXiv. The case by the east wall has it.',
       'When the assemblies were being wrecked by people with no connection to this School, I appointed him independent students’ representative. Two years, and he told everyone everything he did. That is rarer than the grades.',
       'And through the last three of those years he was also working, the last two of them full-time, running a youth foundation. I still do not know where the hours came from.',
@@ -902,11 +985,12 @@ export const NPCS: Npc[] = [
       'Most engineers are worse at describing what they built than at building it. A CV is not a receipt for your time — it is an argument about what you can do next.',
       'So this building is laid out as an argument. Ground floor: what he is good at, what he is certified in, and the jobs he held before any of it was software.',
       'First floor, IBM. Second floor, Veltiston AI. Take the stairs in the corner or the lift, whichever you prefer. The lift is slower and worth it.',
-      'The third floor is not built. That is not modesty, it is just the truth about where he is standing.',
+      'And the third floor? Built, empty, unnamed. He is good at this and he is listening — so what goes up there depends on who walks in.',
+      'You have walked in.',
     ],
     journal: {
       title: 'How the building reads',
-      body: 'The Work District is laid out as an argument rather than a list: the ground floor is capabilities, certifications and the student jobs; the first floor is IBM 2023–2024; the second is Veltiston AI 2024–present. The third floor is not built yet.',
+      body: 'The Work District is laid out as an argument rather than a list: the ground floor is capabilities, certifications and the student jobs; the first floor is IBM 2023–2024; the second is Veltiston AI 2024–present. The third floor is built, empty and unnamed — what goes on it depends on who is hiring.',
     },
   },
 
@@ -921,8 +1005,8 @@ export const NPCS: Npc[] = [
     name: 'Kyriakos Oikonomou',
     role: 'Vice-President, "Pantokrator" Foundation',
     area: 'work',
-    position: [-12.5, -9],
-    facing: -Math.PI * 0.45,
+    position: [-11.5, -10.4],
+    facing: Math.PI * 0.05,
     colors: {
       skin: SKIN.light,
       hair: '#d8d4cc',
@@ -933,7 +1017,7 @@ export const NPCS: Npc[] = [
     lines: [
       'You are looking at the small board. Good — most people walk past it to get to the lift.',
       'I am Kyriakos Oikonomou. I sat on the Supreme Court, the Areios Pagos, until I retired, and I have been Vice-President of the "Pantokrator" Foundation in Paleo Faliro since 2020.',
-      'In 2021 the Directorship of the Foundation fell vacant. I did not advertise it. I went to Christos, who was then a student at the Polytechnic, and asked him to take it.',
+      'In 2021 the Directorship of the Foundation fell vacant. I did not advertise it. I went to Kitsos, who was then a student at the Polytechnic, and asked him to take it.',
       'He was an undergraduate. I handed him a building, the staff, the volunteers, the budget and the children. He was twenty-something.',
       'A year and a half later he left, because the degree was finished and the army was waiting, and what he handed back had gone well past what we asked of him. The premises renovated, the operations modernised, the events running.',
       'He was organised, hard-working and conscientious, and he told us everything he did as he did it. The children trusted him and listened to him, which is not a thing you can be appointed to.',
@@ -998,12 +1082,17 @@ export const NPCS: Npc[] = [
     colors: {
       skin: SKIN.light,
       hair: '#3b2f28',
-      shirt: '#e8eaee',
-      pants: '#2f3542',
+      shirt: '#f2efe8',
+      pants: '#242a36',
     },
     hair: 'long',
-    dress: '#33405a',
-    dressTrim: '#8ba3c9',
+    /* A bank suit: charcoal navy, ivory blouse, the skirt cut from the same
+       cloth as the jacket. She is the one person in the building who came
+       from the client side, and she is dressed like it. */
+    blazer: '#242a36',
+    blouse: '#f2efe8',
+    dress: '#2c3242',
+    dressTrim: '#3d4761',
     smile: true,
     lines: [
       'You must be the one walking round the building. Ioanna Panagopoulou — I supervised him at the bank.',
@@ -1029,7 +1118,7 @@ export const NPCS: Npc[] = [
     name: 'Klaus',
     role: 'IBM Hamburg, Agile bootcamp',
     area: 'work-ibm',
-    position: [10, -7],
+    position: [12, -1],
     facing: Math.PI * 0.85,
     colors: {
       skin: SKIN.light,
@@ -1078,10 +1167,10 @@ export const NPCS: Npc[] = [
       'Welcome to the second floor. This is the company.',
       'Dimitris Bertsimas. I teach at MIT, and I founded Veltiston AI because optimisation has been solved in the literature for thirty years and hospitals are still building rosters by hand.',
       'That is the whole vision, and it is not a modest one: take the analytics that work on paper and put them where a charge nurse can press a button at seven in the morning.',
-      'Christos was one of the founding engineers, in 2024. There were very few of us then and the platform did not exist — there was an idea about scheduling and a great deal of arguing.',
+      'Kitsos was one of the founding engineers, in 2024. There were very few of us then and the platform did not exist — there was an idea about scheduling and a great deal of arguing.',
       'He built it from that. Concept to production, and then he became the technical lead of it, which is a different job and he made the change well.',
-      'What I look for is people who can hold the mathematics and the delivery in one head. He can. He also tells me when I am wrong, in front of other people, which is worth more than it costs.',
-      'Four major American hospitals run it now. That is not a pilot. That is a ward that is short-staffed if we are wrong.',
+      'What I look for is people who can hold the mathematics and the delivery in one head. He can. He also tells me when he disagrees with me, in front of other people, which is worth more than it costs.',
+      'Major American hospitals run it now. That is not a pilot. That is a ward that is short-staffed if we are wrong.',
     ],
     journal: {
       title: 'Prof. Dimitris Bertsimas',
@@ -1565,6 +1654,28 @@ export const NPCS: Npc[] = [
   ...CLASS,
 ]
 
+/**
+ * The volunteers' kiosk on the west green.
+ *
+ * Where it stands, which way it faces and how big it is built live here
+ * rather than in the component that draws it, because the collision that
+ * stops you walking through the table has to agree with them, and terrain
+ * cannot import from the world folder. `scale` multiplies every length in
+ * the component, so a half-extent taken off it must be scaled too.
+ */
+export const KIOSK = {
+  x: -27,
+  z: 23.5,
+  facing: 0.4,
+  scale: 1.3,
+  /**
+   * The solid part, in the kiosk's own unscaled frame: the trestle table and
+   * the stall behind it, not the open front where the two of them stand. A
+   * box this shallow keeps the gap under the canopy walkable.
+   */
+  table: { z: -1.5, hx: 1.75, hz: 0.57 },
+} as const
+
 export const SIGNS: SignPost[] = [
   {
     id: 'sign-plaza',
@@ -1657,6 +1768,31 @@ export const SIGNS: SignPost[] = [
       'Marine Battalion, reserve. Platoon Leader and Weapons Officer.',
       'He slept last and woke first. Nobody on this road had to be told twice.',
     ],
+  },
+  {
+    /*
+     * The board on the green in front of the volunteers' kiosk. It stands
+     * clear of the stall itself, so that reading it and talking to the two of
+     * them at the table are two different things you walk up to.
+     */
+    id: 'sign-kiosk',
+    position: [-22.01, 25.62],
+    // Turned back towards the square, so the board faces whoever is walking
+    // out to the kiosk rather than showing them its blank back. The writing
+    // is on the board's -z, which is why this is the approach bearing less a
+    // half turn rather than the bearing itself.
+    facing: 2.1 - Math.PI,
+    label: 'Volunteers’ Kiosk',
+    lines: [
+      'VOLUNTEERS’ KIOSK: sign-ups, donations, tree planting, and the blood drive.',
+      'Run out of the Christian Youth Foundation "Pantokrator" in Paleo Faliro. Kitsos has been on this rota since 2017.',
+      'Leading volunteer 2017–2021 and again from 2023, and Director of the place in between, 2021 to 2022.',
+      'He gives blood himself, since 2017. The tin of stickers is Marios’ department, and he is strict about it.',
+    ],
+    journal: {
+      title: 'The volunteers’ kiosk',
+      body: 'The stall on the west green: sign-ups, donation drives, tree planting and a standing blood drive, run out of the "Pantokrator" Foundation in Paleo Faliro. Kitsos has been on the rota since 2017 — leading volunteer, and Director 2021–2022.',
+    },
   },
 ]
 

@@ -7,6 +7,7 @@ import {
   EVANGELIKI_SECTIONS,
   FAMILY_SECTIONS,
   GARAGE_SECTIONS,
+  GLOBE_SECTIONS,
   GUIDE_SECTIONS,
   HOUSE_SECTIONS,
   LAB_SECTIONS,
@@ -41,19 +42,34 @@ import {
  * The panel inside the Work District lift. Every car has the same one, which
  * is the point of it: from anywhere in the building you can see that there
  * are three floors and that one of them is not built.
+ *
+ * Listed from the ground up, because that is the order he worked them; the
+ * panel turns the list over to draw it, so the buttons stand the way the
+ * building does.
  */
 const LIFT_PANEL: LiftStop[] = [
   { floor: 0, label: 'Reception', to: 'work' },
-  { floor: 1, label: 'IBM', to: 'work-ibm' },
-  { floor: 2, label: 'Veltiston AI', to: 'work-veltiston' },
+  { floor: 1, label: 'IBM', when: '2023–2024', to: 'work-ibm' },
+  {
+    floor: 2,
+    label: 'Veltiston AI',
+    when: '2024–present',
+    to: 'work-veltiston',
+  },
+  /*
+   * The third floor. The button is the last thing in the building and it is
+   * pointed at whoever is reading: the shaft is built, the floor is empty,
+   * and the only person who can say what goes on it is the one pressing.
+   */
   {
     floor: 3,
-    label: '—',
+    label: '?',
     lines: [
-      'The button for the third floor does not light when you press it.',
-      'The shaft goes up past the second floor — you can hear it — but there is no landing at the top yet. Nobody has poured one.',
-      'IBM, then Veltiston AI. Whatever the third thing turns out to be, it has not been signed for.',
-      'Come back in a later commit.',
+      'You press it. The button does not light — but somewhere above you, something heavy shifts in the shaft.',
+      'The floor is there. Poured, wired, empty. The lift was built to reach it.',
+      'IBM taught him how large systems actually fail. Veltiston AI taught him how to build one fast enough to matter, for people who feel it on a Monday morning.',
+      'So: third floor. Nobody has decided what it is yet.',
+      'You could.',
     ],
   },
 ]
@@ -559,7 +575,10 @@ export const INTERIORS: Interior[] = [
       {
         id: 'library-toys',
         kind: 'toy',
-        label: 'the helicopter on the toy shelf',
+        /* The prompt names the shelf, never the toy. 'Look at the helicopter'
+           hands over the answer from across the room, before a single thing
+           has been picked up. */
+        label: 'the shelf of toys',
         /* Where you stand to get the prompt: out in the room, off the shelf. */
         position: [-8.4, 5.4],
         rotation: Math.PI / 2,
@@ -1072,7 +1091,7 @@ export const INTERIORS: Interior[] = [
         id: 'work-stairs-up',
         kind: 'stairsUp',
         label: 'the stairs to the first floor',
-        position: [-11, -12.6],
+        position: [13.4, -9],
         to: 'work-ibm',
         journal: {
           title: 'Three floors',
@@ -1083,7 +1102,7 @@ export const INTERIORS: Interior[] = [
         id: 'work-lift',
         kind: 'lift',
         label: 'the lift',
-        position: [11, -12.6],
+        position: [9, -12.6],
         floor: 0,
         serves: LIFT_PANEL,
       },
@@ -1105,8 +1124,8 @@ export const INTERIORS: Interior[] = [
       { kind: 'table', position: [12.5, 6] },
       { kind: 'sofa', position: [-15, 6], rotation: Math.PI / 2 },
       /* The certification wall runs the length of the west side. */
-      { kind: 'bookshelf', position: [-15.6, -2], rotation: Math.PI / 2 },
-      { kind: 'bookshelf', position: [-15.6, -6], rotation: Math.PI / 2 },
+      { kind: 'bookshelf', position: [-15.6, -1.4], rotation: Math.PI / 2 },
+      { kind: 'bookshelf', position: [-15.6, -4.6], rotation: Math.PI / 2 },
       { kind: 'painting', position: [15.8, -2], rotation: -Math.PI / 2 },
       { kind: 'desk', position: [7, -7] },
       { kind: 'monitor', position: [7, -6.6], rotation: Math.PI },
@@ -1125,7 +1144,7 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'Work District',
-          body: 'A floor per employer: IBM 2023–2024 on the first, Veltiston AI 2024–present on the second. The third floor is not built yet.',
+          body: 'A floor per employer: IBM 2023–2024 on the first, Veltiston AI 2024–present on the second. The third floor is built and empty, and what goes on it has not been decided.',
         },
       },
       {
@@ -1177,8 +1196,7 @@ export const INTERIORS: Interior[] = [
         id: 'work-student-jobs',
         kind: 'board',
         label: 'the board of student jobs',
-        position: [-15.8, -9.5],
-        rotation: Math.PI / 2,
+        position: [-13.5, -12.3],
         panel: {
           kicker: 'While at NTUA',
           title: 'The jobs he held as a student',
@@ -1193,11 +1211,15 @@ export const INTERIORS: Interior[] = [
         id: 'work-foundation-letter',
         kind: 'case',
         label: 'the letter beside the board',
-        position: [-11.5, -12.3],
+        position: [-9.5, -12.3],
         panel: {
           kicker: 'Reference',
           title: 'From the Vice-President',
           sections: REFERENCE_FOUNDATION_SECTIONS,
+        },
+        journal: {
+          title: 'Foundation reference',
+          body: 'Kyriakos Oikonomou, retired Justice of the Hellenic Supreme Court and Vice-President of the "Pantokrator" Foundation, who appointed him Director in 2021: his contribution "had far exceeded our expectations" — renovation, events, volunteers and digital media.',
         },
       },
     ],
@@ -1225,26 +1247,27 @@ export const INTERIORS: Interior[] = [
     accent: '#4d8ee0',
     spawn: [0, 7.5],
     links: [
+      /* The well you come up out of, and the flight on up, both along the
+         west wall: the shaft is in the other corner of the building. */
       {
         id: 'work-ibm-down',
         kind: 'stairsDown',
         label: 'the stairs down to the lobby',
-        position: [-11, -12.6],
+        position: [4.6, -9],
         to: 'work',
       },
       {
         id: 'work-ibm-up',
         kind: 'stairsUp',
         label: 'the stairs to the second floor',
-        position: [-11, 12.6],
-        rotation: Math.PI,
+        position: [13.4, -9],
         to: 'work-veltiston',
       },
       {
         id: 'work-ibm-lift',
         kind: 'lift',
         label: 'the lift',
-        position: [11, -12.6],
+        position: [9, -12.6],
         floor: 1,
         serves: LIFT_PANEL,
       },
@@ -1259,24 +1282,27 @@ export const INTERIORS: Interior[] = [
       },
       /* The integration desks, facing each other across the floor: the calls
          he ran between the bank's subsystems happened over these. */
-      { kind: 'desk', position: [-8, 4] },
-      { kind: 'monitor', position: [-8, 4.4] },
-      { kind: 'chair', position: [-8, 6], rotation: Math.PI },
+      { kind: 'desk', position: [-6, 4] },
+      { kind: 'monitor', position: [-6, 4.4] },
+      { kind: 'chair', position: [-6, 6], rotation: Math.PI },
       { kind: 'desk', position: [8, 4] },
       { kind: 'monitor', position: [8, 4.4] },
       { kind: 'chair', position: [8, 6], rotation: Math.PI },
       { kind: 'desk', position: [-8, -4] },
       { kind: 'monitor', position: [-8, -3.6], rotation: Math.PI },
-      { kind: 'desk', position: [8, -4] },
-      { kind: 'monitor', position: [8, -3.6], rotation: Math.PI },
+      /* Well west of the stairwell, mirroring its partner across the floor:
+         at [8, -4] this desk stood squarely in front of you as you came up
+         from the lobby, and you met a monitor before you met the room. */
+      { kind: 'desk', position: [-2.5, -4] },
+      { kind: 'monitor', position: [-2.5, -3.6], rotation: Math.PI },
       /* The racks along the back wall, and the key on one of them. */
-      { kind: 'serverRack', position: [-3, -12] },
-      { kind: 'serverRack', position: [0, -12] },
-      { kind: 'serverRack', position: [3, -12] },
+      { kind: 'serverRack', position: [-8, -12] },
+      { kind: 'serverRack', position: [-5, -12] },
+      { kind: 'serverRack', position: [-2, -12] },
       { kind: 'whiteboard', position: [15.6, 6], rotation: -Math.PI / 2 },
       { kind: 'plant', position: [-15.8, 9] },
-      { kind: 'crate', position: [14, -10] },
-      { kind: 'crate', position: [15, -8], rotation: 0.4 },
+      { kind: 'crate', position: [14.6, 10.4] },
+      { kind: 'crate', position: [11.8, 10.8], rotation: 0.4 },
     ],
     exhibits: [
       {
@@ -1299,7 +1325,7 @@ export const INTERIORS: Interior[] = [
         id: 'work-key',
         kind: 'key',
         label: 'the server rack',
-        position: [0, -11.3],
+        position: [-5, -10.2],
         keyId: 'key-work',
       },
     ],
@@ -1332,15 +1358,14 @@ export const INTERIORS: Interior[] = [
         id: 'work-velt-down',
         kind: 'stairsDown',
         label: 'the stairs down to the first floor',
-        position: [-11, 12.6],
-        rotation: Math.PI,
+        position: [4.6, -9],
         to: 'work-ibm',
       },
       {
         id: 'work-velt-lift',
         kind: 'lift',
         label: 'the lift',
-        position: [11, -12.6],
+        position: [9, -12.6],
         floor: 2,
         serves: LIFT_PANEL,
       },
@@ -1366,12 +1391,14 @@ export const INTERIORS: Interior[] = [
       { kind: 'desk', position: [3.2, -3] },
       { kind: 'monitor', position: [3.2, -2.6], rotation: Math.PI },
       /* The wall the architecture gets drawn on, and redrawn. */
-      { kind: 'whiteboard', position: [-15.6, 4], rotation: Math.PI / 2 },
-      { kind: 'whiteboard', position: [-15.6, -4], rotation: Math.PI / 2 },
-      { kind: 'sofa', position: [14.8, 8], rotation: -Math.PI / 2 },
-      { kind: 'table', position: [12.3, 8] },
+      { kind: 'whiteboard', position: [-15.6, -1], rotation: Math.PI / 2 },
+      { kind: 'whiteboard', position: [-15.6, -6], rotation: Math.PI / 2 },
+      /* The lounge corner, moved off the east wall to leave it clear: the
+         whole of that wall is the technology wall now. */
+      { kind: 'sofa', position: [-14.6, 8], rotation: Math.PI / 2 },
+      { kind: 'table', position: [-12.1, 8] },
       { kind: 'plant', position: [-15.8, 11] },
-      { kind: 'plant', position: [15.8, 11] },
+      { kind: 'plant', position: [15.8, 11.6] },
       { kind: 'serverRack', position: [-14, -11.5], rotation: 0.2 },
     ],
     exhibits: [
@@ -1402,10 +1429,16 @@ export const INTERIORS: Interior[] = [
         },
       },
       {
+        /*
+         * Not a case with one thing in it: the east wall of the floor, hung
+         * with a mark for every technology on the CV, grouped the way the CV
+         * groups them. Walking anywhere along it offers the panel that says
+         * what the stack is and how often it ships.
+         */
         id: 'work-stack',
-        kind: 'case',
+        kind: 'techWall',
         label: 'the technology wall',
-        position: [15.8, 0],
+        position: [16.4, -1],
         rotation: -Math.PI / 2,
         panel: {
           kicker: 'Veltiston AI',
@@ -1414,7 +1447,7 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'The stack, and the pace',
-          body: 'Java 17–25, Spring Boot and Spring AI, React, MySQL, AWS, Docker, Jenkins and GitLab CI, watched with Grafana, Graylog and Sentry — shipped to production most weeks, into four major U.S. hospitals.',
+          body: 'Java 17–25, Spring Boot and Spring AI, React, MySQL, AWS, Docker, Jenkins and GitLab CI, watched with Grafana, Graylog and Sentry — shipped to production most weeks, into major U.S. hospitals.',
         },
       },
     ],
@@ -1576,22 +1609,6 @@ export const INTERIORS: Interior[] = [
         },
       },
       {
-        id: 'school-reference',
-        kind: 'board',
-        label: 'the foundation’s letter',
-        position: [11.6, 2],
-        rotation: -Math.PI / 2,
-        panel: {
-          kicker: 'Town School',
-          title: 'The foundation’s letter',
-          sections: REFERENCE_FOUNDATION_SECTIONS,
-        },
-        journal: {
-          title: 'Foundation reference',
-          body: 'Kyriakos Oikonomou, retired Justice of the Hellenic Supreme Court and Vice-President of the "Pantokrator" Foundation, who appointed him Director at 2021: his contribution "had far exceeded our expectations": renovation, events, volunteers and digital media.',
-        },
-      },
-      {
         id: 'school-key',
         kind: 'key',
         label: 'the trophy case shelf',
@@ -1709,6 +1726,33 @@ export const INTERIORS: Interior[] = [
         journal: {
           title: 'The extra classes',
           body: 'Pascal from the age of thirteen, a sundial and a planetarium to scale, a submarine drone with the robotics class and an electric bicycle on his own, and the chess team to captain.',
+        },
+      },
+      /*
+       * The globe in the astronomy corner. A 'toy' like the helicopter in
+       * the library — the prop is already in the room and draws itself, so
+       * this only hangs a prompt and a hitbox on it. Nothing here opens a
+       * door: spinning it just says where it has been stopped.
+       */
+      {
+        id: 'evangeliki-globe',
+        kind: 'prop',
+        label: 'the globe',
+        /* Where you stand for the prompt: out in front of it, clear of the
+           lamp and the table sharing that corner. */
+        position: [12.6, -6.9],
+        rotation: Math.PI,
+        /* And the ball itself, 1.1 up its stand with a 0.55 radius — a
+           hitbox a touch wider so it can be clicked without being hunted. */
+        hitbox: { at: [12.6, -8.6], y: 1.1, size: 0.62 },
+        panel: {
+          kicker: 'Evangeliki',
+          title: 'The globe in the corner',
+          sections: GLOBE_SECTIONS,
+        },
+        journal: {
+          title: 'Six countries',
+          body: 'The globe in the astronomy corner at Evangeliki: Greece, Cyprus, Germany, France, Italy and Switzerland, stood in rather than pointed at.',
         },
       },
     ],

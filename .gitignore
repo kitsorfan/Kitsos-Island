@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Written by `npm run test:coverage`
+coverage
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,3 +25,20 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Reference letter scans.
+#
+# These are other people's personal data, not mine: letterhead carries direct
+# phone numbers, private addresses and signatures, and once an image is pushed
+# to a public repo it is in the history for good. So they are ignored by
+# default and have to be added deliberately, with a force-add, after the
+# referee's contact details have actually been covered over:
+#
+#   git add -f public/letters/tsanakas.jpg
+#
+# See public/letters/README.md.
+public/letters/*.jpg
+public/letters/*.jpeg
+public/letters/*.png
+public/letters/*.webp
+public/letters/*.pdf

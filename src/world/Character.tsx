@@ -59,6 +59,10 @@ interface CharacterProps {
   /** A skirt in this colour over the legs, with a trim if one is given. */
   dress?: string
   dressTrim?: string
+  /** A tailored jacket, over a blouse. Straightens a `dress` into a pencil skirt. */
+  blazer?: string
+  /** The blouse under it. Off-white if not given. */
+  blouse?: string
   /** A mouth, turned up. Nobody else on the island has one. */
   smile?: boolean
   /** Overrides the dance step the seed would have picked. */
@@ -119,6 +123,8 @@ export function Character({
   hair = 'short',
   dress,
   dressTrim,
+  blazer,
+  blouse,
   smile = false,
   danceStyle,
   suit = false,
@@ -735,21 +741,34 @@ export function Character({
           </group>
         ))}
 
-        {/* A skirt, over the legs and under the waist */}
+        {/* A skirt, over the legs and under the waist. Under a blazer it is
+            a pencil skirt — narrow, to the knee — and everywhere else the
+            flared one the village and the feast wear. */}
         {dress && (
-          <group position={[0, 0.66, 0]}>
+          <group position={[0, blazer ? 0.78 : 0.66, 0]}>
             <mesh castShadow>
-              <cylinderGeometry args={[0.22, 0.56, 0.78, 14, 1, true]} />
+              <cylinderGeometry
+                args={
+                  blazer
+                    ? [0.28, 0.32, 0.62, 14, 1, true]
+                    : [0.22, 0.56, 0.78, 14, 1, true]
+                }
+              />
               <meshStandardMaterial
                 color={dress}
                 flatShading
-                roughness={0.75}
+                roughness={blazer ? 0.6 : 0.75}
                 side={DoubleSide}
               />
             </mesh>
             {dressTrim && (
-              <mesh position={[0, -0.39, 0]} rotation={[Math.PI / 2, 0, 0]}>
-                <torusGeometry args={[0.54, 0.035, 6, 18]} />
+              <mesh
+                position={[0, blazer ? -0.31 : -0.39, 0]}
+                rotation={[Math.PI / 2, 0, 0]}
+              >
+                <torusGeometry
+                  args={blazer ? [0.315, 0.018, 6, 18] : [0.54, 0.035, 6, 18]}
+                />
                 <meshStandardMaterial color={dressTrim} roughness={0.5} />
               </mesh>
             )}
@@ -792,6 +811,63 @@ export function Character({
                     <meshStandardMaterial color="#22262e" roughness={0.6} />
                   </mesh>
                 ))}
+              </group>
+            )}
+
+            {/* A tailored jacket, open over a blouse: the office answer to
+                the dinner jacket below. Squared shoulders, a notch lapel
+                each side, and a hem that sits below the torso box. */}
+            {blazer && (
+              <group>
+                {/* The blouse, in the opening */}
+                <mesh position={[0, 1.04, 0.196]}>
+                  <boxGeometry args={[0.22, 0.6, 0.02]} />
+                  <meshStandardMaterial
+                    color={blouse ?? '#f4f1ea'}
+                    roughness={0.8}
+                  />
+                </mesh>
+                {/* The jacket, a shade proud of the torso on every side */}
+                <mesh position={[0, 1.04, 0]} castShadow>
+                  <boxGeometry args={[0.66, 0.78, 0.42]} />
+                  <meshStandardMaterial
+                    color={blazer}
+                    flatShading
+                    roughness={0.7}
+                  />
+                </mesh>
+                {/* Cut away down the front, so the blouse shows through */}
+                <mesh position={[0, 1.0, 0.208]}>
+                  <boxGeometry args={[0.28, 0.7, 0.02]} />
+                  <meshStandardMaterial
+                    color={blouse ?? '#f4f1ea'}
+                    roughness={0.8}
+                  />
+                </mesh>
+                {/* Notch lapels, falling open from the collar */}
+                {[-0.15, 0.15].map((lx) => (
+                  <mesh
+                    key={lx}
+                    position={[lx * 1.35, 1.16, 0.214]}
+                    rotation={[0, 0, lx > 0 ? -0.2 : 0.2]}
+                  >
+                    <boxGeometry args={[0.16, 0.42, 0.025]} />
+                    <meshStandardMaterial
+                      color={blazer}
+                      flatShading
+                      roughness={0.55}
+                    />
+                  </mesh>
+                ))}
+                {/* Collar, standing at the back of the neck */}
+                <mesh position={[0, 1.4, -0.02]}>
+                  <boxGeometry args={[0.44, 0.12, 0.44]} />
+                  <meshStandardMaterial
+                    color={blazer}
+                    flatShading
+                    roughness={0.55}
+                  />
+                </mesh>
               </group>
             )}
 
@@ -881,19 +957,43 @@ export function Character({
                 <mesh castShadow>
                   <boxGeometry args={[0.18, 0.18, 0.2]} />
                   <meshStandardMaterial
-                    color={colors.shirt}
+                    color={blazer ?? colors.shirt}
                     flatShading
-                    roughness={0.9}
+                    roughness={blazer ? 0.7 : 0.9}
                   />
                 </mesh>
-                <mesh position={[0, -0.31, 0]} castShadow>
-                  <boxGeometry args={[0.17, 0.62, 0.2]} />
-                  <meshStandardMaterial
-                    color={colors.shirt}
-                    flatShading
-                    roughness={0.9}
-                  />
-                </mesh>
+                {/* A blazer sleeve runs to a cuff and lets the blouse finish
+                    the arm; every other sleeve is the one piece it always
+                    was. */}
+                {blazer ? (
+                  <>
+                    <mesh position={[0, -0.24, 0]} castShadow>
+                      <boxGeometry args={[0.18, 0.48, 0.21]} />
+                      <meshStandardMaterial
+                        color={blazer}
+                        flatShading
+                        roughness={0.7}
+                      />
+                    </mesh>
+                    <mesh position={[0, -0.55, 0]} castShadow>
+                      <boxGeometry args={[0.17, 0.14, 0.2]} />
+                      <meshStandardMaterial
+                        color={blouse ?? '#f4f1ea'}
+                        flatShading
+                        roughness={0.85}
+                      />
+                    </mesh>
+                  </>
+                ) : (
+                  <mesh position={[0, -0.31, 0]} castShadow>
+                    <boxGeometry args={[0.17, 0.62, 0.2]} />
+                    <meshStandardMaterial
+                      color={colors.shirt}
+                      flatShading
+                      roughness={0.9}
+                    />
+                  </mesh>
+                )}
                 {gun && arm.ref === armR && <Marker accent={gunColor} />}
                 {bouquet && !gun && arm.ref === armR && (
                   <group ref={bouquetRef} position={[0, -0.6, 0]}>
@@ -1472,31 +1572,44 @@ function Accessory({ prop }: { prop?: Npc['prop'] }) {
           </mesh>
         </group>
       )
+    /*
+     * The lenses stand clear of the eyes rather than on them.
+     *
+     * The eyes are a box 0.04 deep centred at z=0.27, so they reach 0.29; the
+     * lenses used to be 0.02 deep centred at 0.28 and reached exactly 0.29
+     * too. Two coplanar faces with a transparent material in front is the one
+     * combination that has to flicker: there is no depth between them to sort
+     * by, so which one wins changes with the camera. Moving the frame forward
+     * to 0.34 puts a clear 3cm of air in front of the eye, and the lens no
+     * longer writes depth, so whatever ends up behind it is simply drawn.
+     */
     case 'glasses':
       return (
-        <group position={[0, 0, 0.28]}>
-          <mesh position={[-0.14, 0, 0]}>
-            <boxGeometry args={[0.16, 0.15, 0.02]} />
-            <meshStandardMaterial
-              color="#cfe6f5"
-              transparent
-              opacity={0.55}
-              roughness={0.2}
-            />
-          </mesh>
-          <mesh position={[0.14, 0, 0]}>
-            <boxGeometry args={[0.16, 0.15, 0.02]} />
-            <meshStandardMaterial
-              color="#cfe6f5"
-              transparent
-              opacity={0.55}
-              roughness={0.2}
-            />
-          </mesh>
+        <group position={[0, 0, 0.34]}>
+          {[-0.14, 0.14].map((lx) => (
+            <mesh key={lx} position={[lx, 0, 0]}>
+              <boxGeometry args={[0.16, 0.15, 0.02]} />
+              <meshStandardMaterial
+                color="#cfe6f5"
+                transparent
+                opacity={0.45}
+                roughness={0.2}
+                depthWrite={false}
+              />
+            </mesh>
+          ))}
+          {/* The bridge, and an arm back to each ear: opaque, so they are
+              what actually reads as a pair of glasses from a distance. */}
           <mesh>
             <boxGeometry args={[0.36, 0.03, 0.02]} />
             <meshStandardMaterial color="#2f3542" />
           </mesh>
+          {[-0.22, 0.22].map((rx) => (
+            <mesh key={rx} position={[rx, 0, -0.04]}>
+              <boxGeometry args={[0.04, 0.16, 0.03]} />
+              <meshStandardMaterial color="#2f3542" />
+            </mesh>
+          ))}
         </group>
       )
     case 'flowers':

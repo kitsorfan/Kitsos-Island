@@ -336,9 +336,17 @@ export function Hud() {
 
       {mode === 'explore' && nearby && !playing && (
         <div className={`prompt${nearby.blocked ? ' prompt--locked' : ''}`}>
-          <kbd>{coarse ? 'A' : 'Enter'}</kbd>
+          {/* A door on a sensor has no key to offer: it names itself and
+              opens as he reaches it. */}
+          {nearby.silent ? (
+            <span className="prompt__auto" aria-hidden="true">
+              ▸
+            </span>
+          ) : (
+            <kbd>{coarse ? 'A' : 'Enter'}</kbd>
+          )}
           <span>
-            {nearby.verb ? `${nearby.verb} ` : ''}
+            {nearby.silent ? '' : nearby.verb ? `${nearby.verb} ` : ''}
             <strong>{nearby.label}</strong>
             {nearby.blocked ? ` · ${t('locked')}` : ''}
           </span>

@@ -63,12 +63,12 @@ export const INTERIORS: Record<string, string> = {
   'The shelf downstairs': 'Το ράφι στο κάτω πάτωμα',
   'Dostoevsky, Hugo, Feynman, Orwell, Remarque, Steinbeck: six books he has gone back to, in a room with one shelf that turns out not to be only a shelf.':
     'Ντοστογιέφσκι, Ουγκώ, Φάινμαν, Όργουελ, Ρεμάρκ, Στάινμπεκ: έξι βιβλία στα οποία έχει επιστρέψει, σε ένα δωμάτιο με ένα ράφι που τελικά δεν είναι μόνο ράφι.',
-  'the helicopter on the toy shelf': 'το ελικόπτερο στο ράφι με τα παιχνίδια',
+  'the shelf of toys': 'το ράφι με τα παιχνίδια',
   'The shelf of toys': 'Το ράφι με τα παιχνίδια',
   'Four boards of things nobody ever put away. Most of it has not moved in twenty years.':
     'Τέσσερα ράφια με πράγματα που κανείς δεν μάζεψε ποτέ. Τα περισσότερα δεν έχουν κουνηθεί εδώ και είκοσι χρόνια.',
-  'One of them is not like the others. Have a proper look.':
-    'Ένα από αυτά δεν είναι σαν τα υπόλοιπα. Κοίταξέ τα καλά.',
+  'Pick things up. Nothing on this shelf minds being handled.':
+    'Πιάσε ό,τι θέλεις. Τίποτα σε αυτό το ράφι δεν πειράζεται να το ακουμπήσουν.',
   'A handful of bricks': 'Μια χούφτα τουβλάκια',
   'A tin rocket': 'Ένας τενεκεδένιος πύραυλος',
   'The ball that never went back in the box':
@@ -164,6 +164,23 @@ export const INTERIORS: Record<string, string> = {
   'Second floor · Veltiston AI': 'Δεύτερος όροφος · Veltiston AI',
   'the building directory': 'ο πίνακας του κτιρίου',
   'What is on which floor': 'Τι υπάρχει σε κάθε όροφο',
+  /* Ο πίνακας του κτιρίου, και ο τρίτος όροφος που δεν έχει όνομα. */
+  Directory: 'Ευρετήριο',
+  'Two employers, one floor each, in the order he worked them. Everything on the ground floor is the part that came before either of them, or runs underneath both.':
+    'Δύο εργοδότες, ένας όροφος στον καθένα, με τη σειρά που τους δούλεψε. Ό,τι υπάρχει στο ισόγειο είναι το κομμάτι που προηγήθηκε και των δύο, ή που τρέχει από κάτω τους.',
+  Ground: 'Ισόγειο',
+  'Capabilities, certifications, student jobs':
+    'Ικανότητες, πιστοποιήσεις, φοιτητικές δουλειές',
+  First: 'Πρώτος',
+  'IBM · 2023–2024': 'IBM · 2023–2024',
+  Second: 'Δεύτερος',
+  'Veltiston AI · 2024–present': 'Veltiston AI · 2024–σήμερα',
+  Third: 'Τρίτος',
+  'Empty. Waiting on an offer': 'Άδειος. Περιμένει μια πρόταση',
+  'The lift has a button for the third floor. Press it and nothing lights, because nobody has decided yet what that floor is — which is the honest position of a senior engineer who is good at this and is listening to offers. If you are reading this because you are hiring, you are the one who gets to name it.':
+    'Το ασανσέρ έχει κουμπί για τον τρίτο όροφο. Το πατάς και δεν ανάβει τίποτα, γιατί κανείς δεν έχει αποφασίσει ακόμη τι είναι αυτός ο όροφος — που είναι η ειλικρινής θέση ενός senior μηχανικού που είναι καλός σε αυτό και ακούει προτάσεις. Αν το διαβάζεις επειδή προσλαμβάνεις, εσύ είσαι που θα του δώσει όνομα.',
+  'A floor per employer: IBM 2023–2024 on the first, Veltiston AI 2024–present on the second. The third floor is built and empty, and what goes on it has not been decided.':
+    'Ένας όροφος ανά εργοδότη: IBM 2023–2024 στον πρώτο, Veltiston AI από το 2024 ως σήμερα στον δεύτερο. Ο τρίτος όροφος είναι χτισμένος και άδειος, και δεν έχει αποφασιστεί τι θα μπει σε αυτόν.',
   'the capabilities board': 'ο πίνακας των ικανοτήτων',
   'What he does': 'Τι κάνει',
   'the skills terminal': 'το τερματικό των δεξιοτήτων',
@@ -173,6 +190,9 @@ export const INTERIORS: Record<string, string> = {
   'While at NTUA': 'Στα χρόνια του ΕΜΠ',
   'The jobs he held as a student': 'Οι δουλειές που έκανε ως φοιτητής',
   'the letter beside the board': 'η επιστολή δίπλα στον πίνακα',
+  'Foundation reference': 'Σύσταση του ιδρύματος',
+  'Kyriakos Oikonomou, retired Justice of the Hellenic Supreme Court and Vice-President of the "Pantokrator" Foundation, who appointed him Director in 2021: his contribution "had far exceeded our expectations" — renovation, events, volunteers and digital media.':
+    'Ο Κυριάκος Οικονόμου, Αρεοπαγίτης ε.τ. και Αντιπρόεδρος του Ιδρύματος «Παντοκράτωρ», που τον διόρισε Διευθυντή το 2021: η συνεισφορά του «είχε ξεπεράσει κατά πολύ τις προσδοκίες μας» — ανακαίνιση, εκδηλώσεις, εθελοντές και ψηφιακά μέσα.',
   Reference: 'Σύσταση',
   'From the Vice-President': 'Από τον Αντιπρόεδρο',
   'the stairs to the first floor': 'η σκάλα προς τον πρώτο όροφο',
@@ -243,11 +263,6 @@ export const INTERIORS: Record<string, string> = {
   'the Pascal machine': 'το μηχάνημα της Pascal',
   'Pascal from the age of thirteen, a sundial and a planetarium to scale, a submarine drone with the robotics class and an electric bicycle on his own, and the chess team to captain.':
     'Pascal από τα δεκατρία, ένα ηλιακό ρολόι και ένα πλανητάριο σε κλίμακα, ένα υποβρύχιο drone με την τάξη ρομποτικής και ένα ηλεκτρικό ποδήλατο μόνος του, και η ομάδα σκακιού για αρχηγία.',
-  'the foundation’s letter': 'η επιστολή του ιδρύματος',
-  'The foundation’s letter': 'Η επιστολή του ιδρύματος',
-  'Foundation reference': 'Σύσταση του ιδρύματος',
-  'Kyriakos Oikonomou, retired Justice of the Hellenic Supreme Court and Vice-President of the "Pantokrator" Foundation, who appointed him Director at 2021: his contribution "had far exceeded our expectations": renovation, events, volunteers and digital media.':
-    'Ο Κυριάκος Οικονόμου, Αρεοπαγίτης ε.τ. και Αντιπρόεδρος του Ιδρύματος «Παντοκράτωρ», που τον διόρισε Διευθυντή το 2021: η συνεισφορά του «είχε ξεπεράσει κατά πολύ τις προσδοκίες μας»: ανακαίνιση, εκδηλώσεις, εθελοντές και ψηφιακά μέσα.',
   'the trophy case shelf': 'το ράφι της προθήκης των επάθλων',
 
   /* --------------------------- Radio & lighthouse --------------------- */
@@ -263,4 +278,11 @@ export const INTERIORS: Record<string, string> = {
   'The short version': 'Η σύντομη εκδοχή',
   'Opened with all five district keys. The keeper’s logbook holds the career summary, what he is good at, and what he is looking for.':
     'Άνοιξε με τα πέντε κλειδιά των συνοικιών. Το ημερολόγιο του φαροφύλακα κρατάει τη σύνοψη της καριέρας, σε τι είναι καλός, και τι ψάχνει.',
+
+  /* The globe at Evangeliki: the prompt you get beside it, and what the
+     journal files once you have spun it. */
+  'the globe': 'η υδρόγειος',
+  'Six countries': 'Έξι χώρες',
+  'The globe in the astronomy corner at Evangeliki: Greece, Cyprus, Germany, France, Italy and Switzerland, stood in rather than pointed at.':
+    'Η υδρόγειος στη γωνιά της αστρονομίας στην Ευαγγελική: Ελλάδα, Κύπρος, Γερμανία, Γαλλία, Ιταλία και Ελβετία — χώρες όχι δειγμένες μα πατημένες.',
 }

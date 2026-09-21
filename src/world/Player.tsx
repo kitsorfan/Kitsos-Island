@@ -27,8 +27,10 @@ import {
 import type { Collider } from '../game/terrain'
 import { resolveCollisions, type Bounds } from '../game/collision'
 import { examine } from '../game/examine'
+import { AUTO_DOOR_REACH, DOOR_ADMIT, autoOpens, doorShut } from '../game/doors'
 import {
   INTERIOR_MARGIN,
+  TECH_WALL_REACH,
   doorwayReached,
   interiorColliders,
   interiorFloor,
@@ -176,15 +178,13 @@ const OUTDOOR_CAM = { distance: 22, height: 15.5 }
 /** A match needs to see further out than a stroll does. */
 const FIGHT_CAM = { distance: 27, height: 18 }
 
-/** True while a door will turn you away: locked, or shut for the night. */
-function doorShut(
+/** `doorShut`, asked by building id, which is all a target carries. */
+function shutDoor(
   id: string,
   state: { night: boolean; lighthouseOpen: boolean },
 ): boolean {
   const building = BUILDING_BY_ID.get(id)
-  if (!building) return false
-  if (building.closesAtNight && state.night) return true
-  return Boolean(building.locksWith) && !state.lighthouseOpen
+  return building ? doorShut(building, state) : false
 }
 
 interface Target extends Nearby {
@@ -193,8 +193,45 @@ interface Target extends Nearby {
   range: number
   /** Recomputed each frame for characters that move. */
   live?: string
+  /**
+   * How near you have to get before it fires by itself, in metres, for the
+   * few things that do — a sliding office door and nothing else so far.
+   * Tighter than `range`, so the prompt radius is not also the trip wire:
+   * the door should open as you reach it, not as you wander past the plaza.
+   */
+  auto?: number
   trigger: () => void
 }
+
+/**
+ * How long after arriving somewhere before a way through can fire again, in
+ * seconds. See `settling` in the controller for why it exists.
+ */
+const ARRIVAL_SETTLE = 0.6
+
+/**
+ * How fast he walks a step he is taking by himself — into a lift car, and
+ * back out of it. A little under a walk, because it is a short distance and
+ * being marched at full speed into a box reads as a shove.
+ */
+const STRIDE_SPEED = 2.2
+
+/** Near enough the mark to call the step finished, in metres. */
+const STRIDE_REACHED = 0.06
+
+/**
+ * How long a step he takes by himself may run before it is called done
+ * wherever he has got to, in seconds.
+ *
+ * A mark he cannot quite reach — set a few centimetres inside a wall, say —
+ * would otherwise leave him walking on the spot with the controls out of his
+ * hands, which is the one failure here that cannot be recovered from.
+ *
+ * Generous against the steps this actually drives — a couple of metres, about
+ * a second — because it is a backstop and not a schedule. Anything near it is
+ * already a bug; the cap only decides whether you can keep playing after one.
+ */
+const STRIDE_TIMEOUT = 6
 
 /**
  * Through a link into the next room. You arrive just inside the link on the
@@ -251,12 +288,37 @@ export function Player() {
   const group = useRef<Group>(null)
   /** Whether he has stepped clear of every threshold since he last arrived. */
   const offThreshold = useRef(false)
+  /**
+   * The same, for the doors outside that open by themselves.
+   *
+   * Kept apart from `offThreshold` because the two are cleared by different
+   * things: that one by the links of a room, this one by the doorstep he is
+   * put back on when he walks out of a building. Sharing a flag would have
+   * stepping out of the lobby count as stepping clear of the glass, and the
+   * glass would take him straight back in.
+   */
+  const offDoorstep = useRef(false)
+  /**
+   * Seconds left of the pause after arriving somewhere, during which no way
+   * through will fire.
+   *
+   * Stepping clear of a threshold is not enough on its own. Arriving at the
+   * top of a flight puts him a couple of strides from the well that goes
+   * straight back down, and the camera is still swinging round to face the
+   * new room — so a held W can read as "forward" into the well before he has
+   * seen where he is, and the floor he just climbed to flickers past. The
+   * pause is short enough not to feel like a lock and long enough that the
+   * shot has settled before anything can take him anywhere.
+   */
+  const settling = useRef(0)
   const camera = useThree((s) => s.camera)
   const viewport = useThree((s) => s.size)
   const area = useGame((s) => s.area)
   /** Only a re-render can put the marker in his hand, so subscribe to it. */
   const armed = useGame((s) => s.paintball !== null)
   const night = useGame((s) => s.night)
+  /** The five locks: whether the lighthouse has given, which one door reads. */
+  const lighthouseOpen = useGame((s) => s.lighthouseOpen)
   const firstPerson = useGame((s) => s.firstPerson)
   const handLight = useGame((s) => s.handLight)
   /** Her prompt only exists once she is down there, so it is subscribed. */
@@ -290,6 +352,8 @@ export function Player() {
   /** Eased 0 to 1: how much of the shot belongs to the defence. */
   const podium = useRef(0)
   const spawnToken = useRef(-1)
+  /** How long the current step-by-himself has been going. */
+  const striding = useRef(0)
   /** Height above the ground, and its rate of change. */
   const hop = useRef({ y: 0, vy: 0 })
   /** Where his feet ride while he is in the water, eased as he wades out. */
@@ -511,6 +575,9 @@ export function Player() {
 
     if (!indoors) {
       for (const b of BUILDINGS) {
+        /* The glass only slides while it would have let him in anyway — see
+           game/doors.ts, which owns the rule and the reason for it. */
+        const opens = autoOpens(b, { night, lighthouseOpen })
         list.push({
           id: b.id,
           kind: 'door',
@@ -519,6 +586,7 @@ export function Player() {
           x: b.door[0],
           z: b.door[1],
           range: b.sentries ? 7 : 4.2,
+          auto: opens ? AUTO_DOOR_REACH : undefined,
           trigger: () => {
             const state = useGame.getState()
             if (b.closesAtNight && state.night) {
@@ -659,11 +727,19 @@ export function Player() {
           range: 3,
           trigger: () => {
             sfx.confirm()
-            useGame.getState().talk({
+            const state = useGame.getState()
+            state.talk({
               speaker: s.label,
               role: 'Signpost',
               lines: s.lines,
             })
+            if (s.journal)
+              state.record({
+                id: s.id,
+                title: s.journal.title,
+                body: s.journal.body,
+                source: s.label,
+              })
           },
         })
       }
@@ -739,7 +815,10 @@ export function Player() {
           verb: toy ? 'Look at' : 'Examine',
           x: exhibit.position[0],
           z: exhibit.position[1],
-          range: 2.9,
+          // The technology wall is a wall, not an object: it runs most of the
+          // room, so it answers from anywhere along its length rather than
+          // only from the one point its position names.
+          range: exhibit.kind === 'techWall' ? TECH_WALL_REACH : 2.9,
           trigger: () => examine(exhibit, accent, interior.name),
         })
       }
@@ -771,7 +850,7 @@ export function Player() {
 
     void store
     return list
-  }, [area, indoors, interior, amaliaHere, night, christmas])
+  }, [area, indoors, interior, amaliaHere, night, lighthouseOpen, christmas])
 
   /* ------------------------------- frame ------------------------------ */
 
@@ -792,8 +871,11 @@ export function Player() {
       boom.current = 1
       // However he got somewhere else — a door, the map — he arrives dry.
       dryOff()
-      // And on a threshold he has to step off before it can take him back.
+      // And on a threshold he has to step off before it can take him back,
+      // with a moment's grace on top while the camera comes round.
       offThreshold.current = false
+      offDoorstep.current = false
+      settling.current = ARRIVAL_SETTLE
       if (store.area !== 'island') {
         yaw.current = 0
         facing.current = store.spawn.facing ?? Math.PI
@@ -837,7 +919,55 @@ export function Player() {
       return p ? [{ x: p.x, z: p.z, hx: 0.7, hz: 0.7, circle: true }] : []
     })
 
-    if (magnitude > 0.02) {
+    /*
+     * A step he takes by himself: into the lift car, and out of it again.
+     *
+     * It runs ahead of the ordinary walk and returns, so the controls stay
+     * out of his hands for the length of it — `isInteractive` is already
+     * false in lift mode, so there is no input to fight with, but the walk
+     * cycle and the facing still have to be driven or he slides in rigid.
+     */
+    if (store.stride) {
+      const [tx, tz] = store.stride.to
+      const dx = tx - position.current[0]
+      const dz = tz - position.current[1]
+      const gap = Math.hypot(dx, dz)
+      striding.current += delta
+
+      if (gap <= STRIDE_REACHED || striding.current >= STRIDE_TIMEOUT) {
+        /* Only snap onto the mark if he actually got there; a step given up
+           on leaves him where he stands rather than through a wall. */
+        if (gap <= STRIDE_REACHED) {
+          position.current[0] = tx
+          position.current[1] = tz
+        }
+        striding.current = 0
+        motion.current.moving = false
+        motion.current.speed = 0
+        if (store.stride.facing !== undefined) {
+          let diff = store.stride.facing - facing.current
+          while (diff > Math.PI) diff -= Math.PI * 2
+          while (diff < -Math.PI) diff += Math.PI * 2
+          facing.current += diff * Math.min(1, delta * 10)
+        }
+        store.endStride()
+      } else {
+        const step = Math.min(gap, STRIDE_SPEED * delta)
+        position.current[0] += (dx / gap) * step
+        position.current[1] += (dz / gap) * step
+
+        /* He faces the way he is walking, which on the way in is the back of
+           the car and on the way out is the room. */
+        const desired = Math.atan2(dx, dz)
+        let diff = desired - facing.current
+        while (diff > Math.PI) diff -= Math.PI * 2
+        while (diff < -Math.PI) diff += Math.PI * 2
+        facing.current += diff * Math.min(1, delta * 12)
+
+        motion.current.moving = true
+        motion.current.speed = STRIDE_SPEED
+      }
+    } else if (magnitude > 0.02) {
       const sin = Math.sin(yaw.current)
       const cos = Math.cos(yaw.current)
       const dx = cos * move.x - sin * move.y
@@ -1244,10 +1374,15 @@ export function Player() {
     // stairwell, or out through the front doorway. A threshold only fires
     // once he has stepped clear of every threshold since he arrived, so
     // coming out of one door never drops him straight back through it.
-    if (interior && active && !fight && !hunting) {
+    if (settling.current > 0) settling.current -= delta
+    if (interior && active && !fight && !hunting && settling.current <= 0) {
       let through: InteriorLink | 'out' | null = null
       for (const link of interior.links ?? []) {
-        if (link.needs && !store.secrets[link.needs]) continue
+        /* Shut is shut: a way that has to be opened is only walkable while
+           it is standing open on this visit, which is what the wall in front
+           of you is already showing. */
+        if (link.needs && store.swung[link.needs] !== store.spawn.token)
+          continue
         if (linkReached(link, px, pz)) {
           through = link
           break
@@ -1294,6 +1429,34 @@ export function Player() {
     }
 
     if (active) {
+      /*
+       * A door on a sensor opens, and that is the whole of what it does.
+       *
+       * It used to take him in as well: walk inside the reach and the lobby
+       * replaced the plaza, with a scripted step across the threshold in
+       * between. Both halves of that are gone. The sensor's only job now is
+       * to stand the glass open — the walk through it is his, on the controls
+       * he already had — so the reach is read here purely to mark the door as
+       * sensing, and `silent` carries that to the leaves and the prompt.
+       *
+       * He is still admitted at the doorstep rather than at sensor range, and
+       * still held to the two rules the thresholds indoors are held to: he
+       * must have stepped clear since he last arrived, and the camera must
+       * have settled. Coming out of a building puts him squarely on its
+       * doorstep, and without them the lobby would swallow him straight back.
+       */
+      const sensing = best !== null && best.auto !== undefined && bestDist < best.auto
+      /* Inside the glass itself, not merely inside the sensor's notice. */
+      const crossing = sensing && bestDist < DOOR_ADMIT
+      if (!crossing) offDoorstep.current = true
+      else if (offDoorstep.current && settling.current <= 0) {
+        offDoorstep.current = false
+        store.setNearby(null)
+        consumeInteract()
+        best!.trigger()
+        return
+      }
+
       store.setNearby(
         best
           ? {
@@ -1301,7 +1464,10 @@ export function Player() {
               kind: best.kind,
               label: best.label,
               verb: best.verb,
-              blocked: best.kind === 'door' && doorShut(best.id, store),
+              blocked: best.kind === 'door' && shutDoor(best.id, store),
+              /* Nothing to press, and the leaves read this to know to open:
+                 only a door actually within its own reach is sensing. */
+              silent: sensing || undefined,
             }
           : null,
       )

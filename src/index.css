@@ -520,6 +520,17 @@ canvas {
   animation: pop-in 0.16s ease both;
 }
 
+/* A door that opens by itself has no key to show, so it shows a way in
+   instead: the same weight as the keycap it stands in for, so the prompt
+   does not jump about as you walk from one kind of door to another. */
+.prompt__auto {
+  padding: 0 0.15rem;
+  color: var(--line);
+  font-size: 1.05rem;
+  line-height: 1;
+  opacity: 0.75;
+}
+
 /* ---------------------------- the long hold --------------------------- */
 
 /* Sits above the interaction prompt rather than on top of it: she is
@@ -843,6 +854,32 @@ canvas {
   color: var(--accent, #3f7bd6);
 }
 
+/*
+ * The countries on the globe, each with its flag drawn beside it. The bullet
+ * comes off: the flag is the marker, and a dot in front of it as well only
+ * makes the row ragged.
+ */
+.panel__list--flags {
+  list-style: none;
+  padding-left: 0;
+}
+
+.panel__list--flags li {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+/* Sits on the text's baseline rather than the line box, so the flag lines up
+   with the word instead of floating over it. */
+.flag {
+  flex: none;
+  border-radius: 1.5px;
+  /* Drawn at 21x14; the swatch grows with the text around it. */
+  width: 1.45em;
+  height: auto;
+}
+
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -893,7 +930,12 @@ canvas {
   gap: 0.4rem;
 }
 
-.chip {
+.tag-group__tags .chip {
+  /* The settings-card chip above shares the class, spreads to fill its row and
+     is a button; a tag chip is as wide as its own label, and is only a label —
+     so the hand cursor goes back to an arrow. */
+  flex: none;
+  cursor: default;
   padding: 0.32rem 0.7rem;
   border-radius: 99px;
   border: 2px solid var(--line);
@@ -901,12 +943,45 @@ canvas {
   font-size: 0.88rem;
   font-weight: 700;
   color: #3a3149;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease;
 }
 
-.chip--sm {
+/* It lifts under the pointer to say it is worth reading, not worth clicking. */
+.tag-group__tags .chip:hover {
+  background: #fff;
+  border-color: var(--ink-soft);
+}
+
+/* A chip that carries a mark sits its label beside it rather than under. */
+.tag-group__tags .chip--mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.36rem;
+  padding-left: 0.46rem;
+  /* The mark is the only thing allowed to push a chip wider — the label keeps
+     to one line, or a two-word chip rounds itself into a circle. */
+  white-space: nowrap;
+}
+
+.tech-icon {
+  flex: none;
+  /* Drawn at 24x24; the mark grows with the text it sits beside. */
+  width: 1.15em;
+  height: 1.15em;
+}
+
+.tag-group__tags .chip--sm {
   font-size: 0.8rem;
   padding: 0.24rem 0.6rem;
   background: #fff;
+}
+
+/* The small chip is already white, so it darkens a shade instead. */
+.tag-group__tags .chip--sm:hover {
+  background: var(--paper-2);
+  border-color: var(--ink-soft);
 }
 
 .timeline {
@@ -1160,20 +1235,8 @@ canvas {
   filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.4));
 }
 
-/* The rotor never stops, which is the only clue on the shelf. */
-.toyshelf__emoji--spin {
-  animation: toyshelf-spin 2.4s linear infinite;
-}
-
-@keyframes toyshelf-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
+/* Nothing on the case marks the helicopter out. It is one of nine, and the
+   only thing that tells it apart is what happens when it is picked up. */
 .toyshelf__toy--found {
   background: rgba(255, 209, 102, 0.34);
   border-color: var(--accent);
@@ -1189,9 +1252,6 @@ canvas {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .toyshelf__emoji--spin {
-    animation: none;
-  }
   .toyshelf__toy {
     transition: none;
   }
@@ -5138,7 +5198,7 @@ canvas {
     background 0.15s ease;
 }
 
-.liftpanel__button:hover,
+.liftpanel__button:not([data-here]):hover,
 .liftpanel__button:focus-visible {
   border-color: rgba(47, 181, 154, 0.7);
   background: rgba(47, 181, 154, 0.12);
@@ -5161,6 +5221,15 @@ canvas {
   flex: 1;
 }
 
+/* The years that floor covers, held against the name. */
+.liftpanel__when {
+  flex: none;
+  color: rgba(230, 238, 236, 0.55);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
 .liftpanel__you {
   flex: none;
   color: rgba(230, 238, 236, 0.5);
@@ -5178,9 +5247,18 @@ canvas {
   color: rgba(230, 238, 236, 0.35);
 }
 
+/* The floor you are standing on says so; it does not also need its years. */
+.liftpanel__button[data-here] .liftpanel__when {
+  display: none;
+}
+
 .liftpanel__button[data-here] {
   border-color: rgba(47, 181, 154, 0.35);
   background: rgba(47, 181, 154, 0.07);
+  /* It is not a button any more — the car is already here — so it should
+     not answer the pointer like one. */
+  cursor: default;
+  opacity: 0.75;
 }
 
 .liftpanel__refused {

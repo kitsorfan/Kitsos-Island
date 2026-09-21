@@ -310,13 +310,32 @@ export const IN_LAWS: Npc[] = [
       body: 'Amalia’s mother, an English teacher. Thirty years of it, and she has read every word on this island twice.',
     },
   },
+  /**
+   * Angelica, Amalia's sister and an architect, who is out on the island most
+   * of the year and at the table on the twenty-fifth.
+   *
+   * She used to be an in-law you only ever met at Christmas dinner, which
+   * wasted the one thing she is: the only person here looking at the island
+   * rather than at him. Everybody else is a reference and tells you how he
+   * was somewhere. She has no history with him to report — she inspects what
+   * he built, which is the one voice that can call the place a piece of work
+   * instead of a CV.
+   *
+   * Christmas still wins: `feast` is read before anything else, so on the day
+   * she leaves the roads and turns up in the basement like the rest of her
+   * family. `feastOnly` is gone, because she is no longer only there.
+   *
+   * She wanders wide and slowly — an inspection is a walk with pauses in it,
+   * and a warden you run into in three different districts reads as somebody
+   * doing rounds rather than somebody standing at a post.
+   */
   {
     id: 'inlaw-angelica',
     name: 'Angelica',
-    role: 'Sister-in-law, architect',
-    area: 'house-basement',
-    position: [-4.6, -1.2],
-    facing: Math.PI,
+    role: 'Architect, island warden',
+    area: 'island',
+    position: [30, -14],
+    facing: Math.PI * 0.6,
     colors: {
       skin: SKIN.light,
       hair: '#2f2419',
@@ -325,17 +344,42 @@ export const IN_LAWS: Npc[] = [
     },
     hair: 'long',
     smile: true,
-    feastOnly: true,
+    /* Site clothes over drawing-office clothes: the blazer says whose plan it
+       is, the hard hat says she is the one walking the site today. */
+    prop: 'hardhat',
+    blazer: '#2f6f63',
+    blouse: '#f2efe8',
+    /* A circuit of the districts rather than a beat: out past the work road,
+       down the south side and back up towards the plaza. */
+    route: [
+      [30, -14],
+      [46, -30],
+      [22, -44],
+      [-14, -34],
+      [-26, -8],
+      [2, 4],
+    ],
+    pace: 1.3,
     feast: [2.4, -0.6],
     lines: [
+      'Angelica. I am an architect, and today I am the one inspecting this island.',
+      'Not his work history — the island itself. Seven roads out of one square, a district for each part of a career, and every one of them walkable without a map. That is a plan, not a heap.',
+      'I check what I am shown against what is actually built. Most places that show you a portfolio are showing you drawings. This one you can walk into, open doors in, and get a little lost in.',
+      'The lift in the Work District is the honest bit. Two floors of employer, and a third that is poured, wired and empty, with nobody pretending it is spoken for.',
+      'The lighthouse is right. The plaza still wants one more tree.',
+      'If you need me, I am somewhere on these roads. And contact Kitsos as well — he is the one who can say yes to anything. The Radio Center is due south.',
+    ],
+    /* At the table she is family rather than an inspector, and says what she
+       always said there. */
+    feastLines: [
       'I am an architect, so I have opinions about your island. The lighthouse is right. The plaza wants one more tree.',
       'You and Kostis build. I draw first and then argue with whoever has to build it. Same family of problem.',
       'Chronia polla! And happy Christmas, in that order, since the nameday is the one people forget.',
     ],
     feastWear: { shirt: '#1f4f45', dress: '#1f4f45', dressTrim: '#d9b25c' },
     journal: {
-      title: 'Angelica, at the table',
-      body: 'Amalia’s sister, an architect. She has walked the whole island once and has notes on the plaza.',
+      title: 'Angelica, island warden',
+      body: 'Amalia’s sister, an architect, who walks the island inspecting the thing itself rather than the career inside it: one square, seven roads, a district per chapter, and a third floor left honestly empty. On these roads most days, at the table on the twenty-fifth — and Kitsos through the Radio Center.',
     },
   },
 ]

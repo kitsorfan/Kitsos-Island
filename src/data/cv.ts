@@ -45,6 +45,10 @@ function renderSections(sections: PanelSection[]): string[] {
         case 'list':
           out.push(...block.items.map((i) => `- ${i}`), '')
           break
+        // Markdown has no flags in it: the country is the content.
+        case 'flags':
+          out.push(...block.countries.map((c) => `- ${c.name}`), '')
+          break
         case 'stats':
           out.push(...block.stats.map((s) => `- ${s.label}: ${s.value}`), '')
           break

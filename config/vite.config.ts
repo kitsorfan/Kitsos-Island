@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
-import { buildCvHtml } from '../src/data/cvHtml.ts'
+import { buildCvHtml } from '../src/features/cv/cvHtml.ts'
 
 /**
  * Writes the plain HTML CV out beside the island.

@@ -1321,13 +1321,22 @@ function LiftDoors({ link, accent }: { link: InteriorLink; accent: string }) {
   const [floor, setFloor] = useState(link.floor ?? 0)
 
   useFrame(() => {
-    const ride = useGame.getState().lift
-    /* Only the car he is actually riding moves. The lift on every other
-       floor stands with its doors open, waiting to be called. */
-    const mine = ride && ride.linkId === link.id
+    const { lift: ride, area } = useGame.getState()
+    /*
+     * Only the car he is actually riding moves. The lift on every other floor
+     * stands with its doors open, waiting to be called.
+     *
+     * "His" is the car in the room he is in, not the link the ride started
+     * on: every floor gives its own lift its own id, and the room swaps to
+     * the far floor the moment the car stops. Matching on `linkId` alone left
+     * the arrival floor's leaves outside the ride entirely, so they mounted
+     * wide and the opening was never drawn — the half of the animation that
+     * was missing.
+     */
+    const mine = ride && (ride.linkId === link.id || area === ride.toRoom)
     const phase = mine
       ? liftPhase(ride, performance.now() / 1000)
-      : { open: 1, floor: link.floor ?? 0, done: true, t: 1 }
+      : { open: 1, floor: link.floor ?? 0, done: true, arrived: true, t: 1 }
     const slide = 0.62 + (1 - phase.open) * 0.62
     if (leftLeaf.current) leftLeaf.current.position.x = -slide
     if (rightLeaf.current) rightLeaf.current.position.x = slide

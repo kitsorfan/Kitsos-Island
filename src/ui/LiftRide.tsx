@@ -17,17 +17,20 @@ import { useT } from '../i18n/useT'
  */
 export function LiftRide() {
   const ride = useGame((s) => s.lift)
+  const arriveLift = useGame((s) => s.arriveLift)
   const endLift = useGame((s) => s.endLift)
   const t = useT()
   /* The floor showing over the doors. It starts at whichever floor the ride
      starts on, and after that only the animation frame moves it — so this is
      never set from inside the effect, only from the ride itself. */
   const [floor, setFloor] = useState(ride?.from ?? 0)
-  /* A ride that ended must not be ended twice by a frame already in flight. */
+  /* Each half of the arrival fires once, however many frames are in flight. */
+  const landed = useRef(false)
   const finished = useRef(false)
 
   useEffect(() => {
     if (!ride) return
+    landed.current = false
     finished.current = false
     sfx.confirm()
 
@@ -35,22 +38,36 @@ export function LiftRide() {
     const tick = () => {
       const phase = liftPhase(ride, performance.now() / 1000)
       setFloor((was) => (was === phase.floor ? was : phase.floor))
-      if (phase.done && !finished.current) {
-        finished.current = true
+
+      /*
+       * The car stops, and the room changes under still-shut doors. Doing it
+       * here rather than at the end of the ride is the whole of why the doors
+       * are seen to open: the far floor takes over with the opening half of
+       * the ride still to run.
+       */
+      if (phase.arrived && !landed.current) {
+        landed.current = true
         const dest = INTERIOR_BY_ID.get(ride.toRoom)
         const link = (INTERIOR_BY_ID.get(ride.fromRoom)?.links ?? []).find(
           (l) => l.id === ride.linkId,
         )
-        if (!dest || !link) return
-        const { at, facing } = liftArrival(dest, ride.fromRoom, link)
-        endLift(at, facing)
+        if (dest && link) {
+          const { at, facing } = liftArrival(dest, ride.fromRoom, link)
+          arriveLift(at, facing)
+        }
+      }
+
+      /* Doors wide: the ride is over and the walk is his again. */
+      if (phase.done && !finished.current) {
+        finished.current = true
+        endLift()
         return
       }
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [ride, endLift])
+  }, [ride, arriveLift, endLift])
 
   if (!ride) return null
 

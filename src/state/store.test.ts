@@ -465,7 +465,7 @@ describe('getting into the lift and out of it', () => {
     expect(useGame.getState().stride).toBeNull()
   })
 
-  it('puts him down outside the car at the end of a ride', () => {
+  it('puts him down outside the car when the car arrives', () => {
     callIt()
     useGame
       .getState()
@@ -473,7 +473,7 @@ describe('getting into the lift and out of it', () => {
 
     const dest = INTERIORS.find((r) => r.id === 'work-veltiston')!
     const { at } = liftArrival(dest, 'work', car('work'))
-    useGame.getState().endLift(at)
+    useGame.getState().arriveLift(at)
 
     const { area, spawn } = useGame.getState()
     expect(area).toBe('work-veltiston')
@@ -484,5 +484,59 @@ describe('getting into the lift and out of it', () => {
         INTERIORS.find((r) => r.id === 'work-veltiston'),
       ).outside,
     )
+  })
+
+  it('keeps the ride on the store while the doors are still opening', () => {
+    /*
+     * The arrival changes the room under shut doors; the ride has to outlive
+     * it, because the far floor's leaves are drawn from it. Clearing it here
+     * is what used to leave them mounting already wide.
+     */
+    callIt()
+    useGame
+      .getState()
+      .pressFloor({ floor: 2, label: 'x', to: 'work-veltiston' })
+
+    const dest = INTERIORS.find((r) => r.id === 'work-veltiston')!
+    const { at } = liftArrival(dest, 'work', car('work'))
+    useGame.getState().arriveLift(at)
+
+    expect(useGame.getState().lift).not.toBeNull()
+    /* And the controls are still the car's until the doors are wide. */
+    expect(useGame.getState().mode).toBe('lift')
+  })
+
+  it('hands the controls back only once the doors have opened', () => {
+    callIt()
+    useGame
+      .getState()
+      .pressFloor({ floor: 2, label: 'x', to: 'work-veltiston' })
+
+    const dest = INTERIORS.find((r) => r.id === 'work-veltiston')!
+    const { at } = liftArrival(dest, 'work', car('work'))
+    useGame.getState().arriveLift(at)
+    useGame.getState().endLift()
+
+    const { lift, mode, area } = useGame.getState()
+    expect(lift).toBeNull()
+    expect(mode).toBe('explore')
+    /* And he stayed where the arrival put him. */
+    expect(area).toBe('work-veltiston')
+  })
+
+  it('arrives once, however many frames call it', () => {
+    /* Two frames in flight at the stop must not bump the spawn token twice
+       and re-teleport him to the doors he has already stepped out of. */
+    callIt()
+    useGame
+      .getState()
+      .pressFloor({ floor: 2, label: 'x', to: 'work-veltiston' })
+
+    const dest = INTERIORS.find((r) => r.id === 'work-veltiston')!
+    const { at } = liftArrival(dest, 'work', car('work'))
+    useGame.getState().arriveLift(at)
+    const once = useGame.getState().spawn.token
+    useGame.getState().arriveLift(at)
+    expect(useGame.getState().spawn.token).toBe(once)
   })
 })

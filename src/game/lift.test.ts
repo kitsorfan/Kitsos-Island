@@ -97,6 +97,43 @@ describe('liftPhase', () => {
     expect(liftPhase(r, r.duration).floor).toBe(1)
   })
 
+  it('arrives with the doors still shut, and opens them after', () => {
+    /*
+     * The gap these two mark out is the whole of the arrival: the car has
+     * stopped, the doors have not opened yet, and that is when the room has
+     * to change. Collapse them and the far floor inherits doors already wide.
+     */
+    const r = ride()
+    const travel = r.duration - LIFT_DOORS * 2
+    const stopped = liftPhase(r, LIFT_DOORS + travel)
+    expect(stopped.arrived).toBe(true)
+    expect(stopped.done).toBe(false)
+    expect(stopped.open).toBeCloseTo(0, 9)
+    expect(stopped.floor).toBe(r.to)
+
+    /* And the doors are seen to open across the gap that follows. */
+    const opening = liftPhase(r, LIFT_DOORS + travel + LIFT_DOORS / 2)
+    expect(opening.arrived).toBe(true)
+    expect(opening.done).toBe(false)
+    expect(opening.open).toBeGreaterThan(0)
+    expect(opening.open).toBeLessThan(1)
+  })
+
+  it('has not arrived while the car is still moving', () => {
+    const r = ride()
+    expect(liftPhase(r, 0).arrived).toBe(false)
+    expect(liftPhase(r, LIFT_DOORS).arrived).toBe(false)
+    expect(liftPhase(r, LIFT_DOORS + LIFT_PER_FLOOR).arrived).toBe(false)
+  })
+
+  it('never reports done without having arrived', () => {
+    const r = ride({ from: 2, to: 6 })
+    for (let now = -1; now <= r.duration + 2; now += 0.03) {
+      const at = liftPhase(r, now)
+      if (at.done) expect(at.arrived).toBe(true)
+    }
+  })
+
   it('keeps open and t inside their own ranges throughout', () => {
     const r = ride({ from: 0, to: 2 })
     for (let now = -2; now <= r.duration + 2; now += 0.05) {

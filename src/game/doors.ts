@@ -130,3 +130,57 @@ export function ease(x: number): number {
   const c = Math.min(1, Math.max(0, x))
   return c * c * (3 - 2 * c)
 }
+
+/**
+ * A travel of the glass: where it set off from, where it is going, and how
+ * far through that move it is.
+ *
+ * A move rather than a position, because `ease` is a curve over a whole
+ * travel. Feed it a position and its gentle ends land wherever the leaf
+ * happens to be rather than on the stops, and feeding the eased result back
+ * in next frame compounds the curve into a leaf that creeps.
+ */
+export interface DoorMove {
+  from: number
+  to: number
+  /** 0 → 1 through this move. */
+  t: number
+}
+
+/** The glass shut and going nowhere: what a door starts life as. */
+export function doorAtRest(): DoorMove {
+  return { from: 0, to: 0, t: 1 }
+}
+
+/**
+ * Advances a travel by `delta` seconds towards `target`, and says how far
+ * open the glass now stands, 0 → 1.
+ *
+ * Timed against the clock rather than eased towards the target, so the glass
+ * takes DOOR_SLIDE to travel on any machine — and actually arrives.
+ *
+ * The exponential this replaces never did: it closed a fixed fraction of the
+ * remaining gap each frame, so the leaves hung short of both stops forever.
+ * A door left ajar by a millimetre it can never cross is the whole of what
+ * read as jammed, and it was worst where it showed most — a wider gap to
+ * close left a wider residue behind.
+ *
+ * `move` is advanced in place: this runs once a frame per door, and a fresh
+ * object each time is garbage the frame loop does not need to make.
+ */
+export function slideDoor(
+  move: DoorMove,
+  target: number,
+  delta: number,
+): number {
+  if (target !== move.to) {
+    /* A new destination mid-travel sets off from wherever the glass has
+       actually got to, so a door reversed halfway carries on from where it
+       was rather than jumping back to a stop it had already left. */
+    move.from = move.to + (move.from - move.to) * (1 - ease(move.t))
+    move.to = target
+    move.t = 0
+  }
+  move.t = Math.min(1, move.t + Math.max(0, delta) / DOOR_SLIDE)
+  return move.from + (move.to - move.from) * ease(move.t)
+}

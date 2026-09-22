@@ -9,7 +9,7 @@ import {
   type MeshStandardMaterial,
 } from 'three'
 import { useGame } from '../../state/store'
-import { DOOR_AJAR, DOOR_OPEN, DOOR_SLIDE } from '../../game/doors'
+import { DOOR_AJAR, DOOR_OPEN, doorAtRest, slideDoor } from '../../game/doors'
 import { TextPlane } from '../TextSign'
 import { GreekFlag } from '../InteriorProps'
 import { IbmMark, NtuaSeal, VeltistonMark } from '../Emblems'
@@ -1062,10 +1062,12 @@ function SlidingDoors({
   const left = useRef<Group>(null)
   const right = useRef<Group>(null)
   const leaf = width / 2
+  /* The travel under way. game/doors.ts owns what it means and how it runs. */
+  const move = useRef(doorAtRest())
 
   useFrame((_, delta) => {
     if (!left.current || !right.current) return
-    const { nearby } = useGame.getState()
+    const { nearby, area } = useGame.getState()
     /*
      * The whole of the door's behaviour: how near he is, and nothing else.
      *
@@ -1074,21 +1076,28 @@ function SlidingDoors({
      * needs no second opinion about it — ajar while he is merely in range,
      * and shut when he walks off. He is never moved by any of it: he walks in
      * through the opening himself, on the same controls he had on the plaza.
+     *
+     * Except at the one moment that matters. Crossing the doorstep clears
+     * `nearby` — the prompt has to go before the lobby arrives — and reading
+     * the target off that alone had the glass start shutting on the very
+     * stride he walked through it. So while he is actually inside this
+     * building the leaves stand wide: a door does not close on the man it
+     * just admitted.
+     *
+     * `area` and not `mode`: he is inside when he is in the lobby, not
+     * whenever the controls are elsewhere. Reading a mode here would hold the
+     * glass open across every journal and map opened out on the plaza.
      */
+    const inside = area === buildingId
     const sensed = nearby?.id === buildingId
-    const target = sensed ? (nearby.silent ? DOOR_OPEN : DOOR_AJAR) : 0
+    const target =
+      sensed || inside ? (sensed && !nearby.silent ? DOOR_AJAR : DOOR_OPEN) : 0
 
-    /*
-     * Eased against the clock rather than a fixed fraction per frame, so the
-     * glass takes DOOR_SLIDE to travel on any machine. The old per-frame lerp
-     * was the whole of the sticking: on a slow frame rate the leaves were
-     * still only part way open by the time he reached them, so the harder the
-     * scene was to draw, the more the door looked jammed.
-     */
-    const want = leaf * 0.92 * target
-    const k = 1 - Math.exp((-delta / DOOR_SLIDE) * 3)
-    left.current.position.x += (-want - left.current.position.x) * k
-    right.current.position.x += (want - right.current.position.x) * k
+    /* How far open the glass stands this frame, timed so it reaches its stop
+       in DOOR_SLIDE on any machine. See slideDoor for why it is not a lerp. */
+    const want = leaf * 0.92 * slideDoor(move.current, target, delta)
+    left.current.position.x = -want
+    right.current.position.x = want
   })
 
   return (

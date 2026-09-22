@@ -6,9 +6,11 @@ import {
   DOOR_OPEN,
   DOOR_SLIDE,
   autoOpens,
+  doorAtRest,
   doorReach,
   doorShut,
   ease,
+  slideDoor,
 } from './doors'
 import { BUILDINGS } from '../data/world'
 import type { Building } from '../types'
@@ -152,5 +154,109 @@ describe('the doors that open by themselves', () => {
        past the plaza becomes walking into the lobby. */
     const prompt = WORK.sentries ? 7 : 4.2
     expect(AUTO_DOOR_REACH).toBeLessThan(prompt)
+  })
+})
+
+describe('slideDoor', () => {
+  /** Runs a door towards `target` for `seconds` at `fps`, in whole frames. */
+  const run = (
+    move: ReturnType<typeof doorAtRest>,
+    target: number,
+    seconds: number,
+    fps = 60,
+  ) => {
+    const delta = 1 / fps
+    let open = 0
+    for (let i = 0; i < Math.round(seconds * fps); i++) {
+      open = slideDoor(move, target, delta)
+    }
+    return open
+  }
+
+  it('starts shut and still', () => {
+    const m = doorAtRest()
+    expect(slideDoor(m, 0, 0)).toBe(0)
+  })
+
+  it('arrives fully open, rather than creeping towards it forever', () => {
+    /*
+     * The bug this is here for. The old travel closed a fixed fraction of the
+     * remaining gap each frame — an exponential, which approaches its target
+     * and never reaches it. The leaves stopped a hair short of the jamb and
+     * stayed there, which is what read as a door jammed part-way.
+     */
+    const m = doorAtRest()
+    expect(run(m, DOOR_OPEN, DOOR_SLIDE)).toBe(DOOR_OPEN)
+  })
+
+  it('arrives fully shut, too', () => {
+    const m = doorAtRest()
+    run(m, DOOR_OPEN, DOOR_SLIDE)
+    expect(run(m, 0, DOOR_SLIDE)).toBe(0)
+  })
+
+  it('takes DOOR_SLIDE to travel, whatever the frame rate', () => {
+    /*
+     * The other half of the same bug: a per-frame fraction moves the glass
+     * further on a fast machine than a slow one, so the harder the scene was
+     * to draw, the more the door looked stuck.
+     */
+    for (const fps of [15, 30, 60, 144]) {
+      /* A whole frame's grace: DOOR_SLIDE rarely divides into a frame time
+         exactly, so the stop is reached on the frame that crosses it. */
+      const m = doorAtRest()
+      expect(run(m, DOOR_OPEN, DOOR_SLIDE + 1 / fps, fps)).toBe(DOOR_OPEN)
+      /* And it is plainly still travelling at half the time. */
+      const half = doorAtRest()
+      const mid = run(half, DOOR_OPEN, DOOR_SLIDE / 2, fps)
+      expect(mid).toBeGreaterThan(0)
+      expect(mid).toBeLessThan(DOOR_OPEN)
+    }
+  })
+
+  it('stands ajar without overshooting to wide', () => {
+    const m = doorAtRest()
+    expect(run(m, DOOR_AJAR, DOOR_SLIDE)).toBeCloseTo(DOOR_AJAR, 9)
+  })
+
+  it('never reports an opening outside the two stops', () => {
+    const m = doorAtRest()
+    for (const target of [DOOR_OPEN, 0, DOOR_AJAR, DOOR_OPEN, 0]) {
+      for (let i = 0; i < 40; i++) {
+        const open = slideDoor(m, target, 1 / 60)
+        expect(open).toBeGreaterThanOrEqual(0)
+        expect(open).toBeLessThanOrEqual(DOOR_OPEN)
+      }
+    }
+  })
+
+  it('carries on from where it was when it is reversed halfway', () => {
+    /* Walk off mid-open and the glass shuts from where it had got to — not
+       from wide, and with no jump back to a stop it had already left. */
+    const m = doorAtRest()
+    const part = run(m, DOOR_OPEN, DOOR_SLIDE / 2)
+    const next = slideDoor(m, 0, 1 / 60)
+    expect(next).toBeLessThan(part)
+    expect(next).toBeGreaterThan(part - 0.2)
+    /* And it still closes the whole way. */
+    expect(run(m, 0, DOOR_SLIDE)).toBe(0)
+  })
+
+  it('settles onto its stops rather than arriving at speed', () => {
+    /* Smoothstep: the last stretch of the travel is slower than the middle,
+       which is what stops the leaves hitting the jamb flat. */
+    const m = doorAtRest()
+    const mid = run(m, DOOR_OPEN, DOOR_SLIDE / 2)
+    const nearlyThere = run(m, DOOR_OPEN, DOOR_SLIDE * 0.4)
+    const middleStep = mid
+    const endStep = DOOR_OPEN - nearlyThere
+    expect(endStep).toBeLessThan(middleStep)
+  })
+
+  it('does not run backwards on a zero or negative delta', () => {
+    const m = doorAtRest()
+    const part = run(m, DOOR_OPEN, DOOR_SLIDE / 2)
+    expect(slideDoor(m, DOOR_OPEN, 0)).toBeCloseTo(part, 9)
+    expect(slideDoor(m, DOOR_OPEN, -1)).toBeCloseTo(part, 9)
   })
 })

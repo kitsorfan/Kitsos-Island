@@ -9,6 +9,7 @@ import { useGame } from '../state/store'
 import { LEVELS } from '../game/audio'
 import { KEYS } from '../data/world'
 import { EL } from '../i18n/el/index'
+import { loadLocale } from '../i18n'
 
 /**
  * Everything the visitor is allowed to turn down.
@@ -58,10 +59,13 @@ describe('the language', () => {
     expect(button(/ελληνικά/i)).toBeInTheDocument()
   })
 
-  it('changes the language when one is chosen', () => {
+  it('changes the language when one is chosen', async () => {
     render(<SettingsCard />)
     act(() => button(/ελληνικά/i).click())
     expect(useGame.getState().locale).toBe('el')
+    /* Choosing Greek sends for the dictionary; let it land inside the test
+       rather than while React is being torn down around it. */
+    await act(() => loadLocale('el'))
   })
 })
 
@@ -150,7 +154,7 @@ describe('taking the visit back', () => {
     expect(localStorage.getItem('island.progress')).toBeNull()
   })
 
-  it('leaves the settings alone when the visit is cleared', () => {
+  it('leaves the settings alone when the visit is cleared', async () => {
     // In Greek, so this also checks the card is still usable in the language
     // somebody chose rather than only in the one it was written in. The
     // labels come from the dictionary rather than being spelled out here, so
@@ -159,6 +163,10 @@ describe('taking the visit back', () => {
     act(() => {
       useGame.getState().setLocale('el')
     })
+    /* The Greek is fetched now. The static EL import above happens to have
+       loaded it already, but leaning on that would make this test pass by
+       accident; asking for it plainly says what it needs. */
+    await act(() => loadLocale('el'))
     render(<SettingsCard />)
     act(() => button(new RegExp(EL['Clear progress'])).click())
     act(() => button(new RegExp(EL['Clear it'])).click())

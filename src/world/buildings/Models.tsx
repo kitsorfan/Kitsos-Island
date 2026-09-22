@@ -1093,25 +1093,48 @@ function SlidingDoors({
 
   return (
     <group position={[x, 1.7, z]}>
-      {[left, right].map((ref, i) => (
-        <group key={i} ref={ref}>
-          <mesh position={[i === 0 ? -leaf / 2 : leaf / 2, 0, 0]}>
-            <boxGeometry args={[leaf, 3.4, 0.12]} />
-            <meshStandardMaterial
-              color="#d6f5ee"
-              transparent
-              opacity={0.8}
-              roughness={0.1}
-              metalness={0.2}
-            />
-          </mesh>
-          {/* The stile on the leading edge: the join you watch travel. */}
-          <mesh position={[i === 0 ? -0.06 : 0.06, 0, 0.08]}>
-            <boxGeometry args={[0.12, 3.4, 0.06]} />
-            <meshStandardMaterial color="#22313f" />
-          </mesh>
-        </group>
-      ))}
+      <DoorLeaf side="left" leaf={leaf} ref={left} />
+      <DoorLeaf side="right" leaf={leaf} ref={right} />
+    </group>
+  )
+}
+
+/**
+ * One leaf of a sliding door.
+ *
+ * The two leaves are the same glass mirrored, and they used to be drawn by
+ * mapping over the pair of refs. That read as accessing a ref during render
+ * to anything looking at the shape rather than at what it does — the refs are
+ * only ever attached here and read in the frame loop — and a component that
+ * takes its ref as a prop says the same thing without the ambiguity.
+ */
+function DoorLeaf({
+  side,
+  leaf,
+  ref,
+}: {
+  side: 'left' | 'right'
+  leaf: number
+  ref: React.Ref<Group>
+}) {
+  const near = side === 'left'
+  return (
+    <group ref={ref}>
+      <mesh position={[near ? -leaf / 2 : leaf / 2, 0, 0]}>
+        <boxGeometry args={[leaf, 3.4, 0.12]} />
+        <meshStandardMaterial
+          color="#d6f5ee"
+          transparent
+          opacity={0.8}
+          roughness={0.1}
+          metalness={0.2}
+        />
+      </mesh>
+      {/* The stile on the leading edge: the join you watch travel. */}
+      <mesh position={[near ? -0.06 : 0.06, 0, 0.08]}>
+        <boxGeometry args={[0.12, 3.4, 0.06]} />
+        <meshStandardMaterial color="#22313f" />
+      </mesh>
     </group>
   )
 }

@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { EN, LOCALES, translator } from './index'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { EN, LOCALES, loadLocale, localeReady, translator } from './index'
 import { EL } from './el/index'
 
 /**
@@ -13,6 +13,14 @@ import { EL } from './el/index'
  */
 
 const el = translator('el')
+
+/*
+ * The Greek is fetched on demand now rather than bundled, so a test that
+ * asserts Greek has to wait for it exactly as the island does. Loading it
+ * once here rather than per test keeps every case below synchronous, which
+ * is also what they are checking: the translator itself never became async.
+ */
+beforeAll(() => loadLocale('el'))
 
 /** An English phrase that really is in the Greek dictionary. */
 const [KNOWN_EN, KNOWN_EL] = Object.entries(EL)[0]
@@ -113,7 +121,16 @@ describe('the Greek translator', () => {
   })
 })
 
-describe('the Greek dictionary', () => {
+describe('the Greek dictionary, fetched on demand', () => {
+  it('is not needed for English, which is always ready', () => {
+    // An English visitor never pays for a dictionary they will not read.
+    expect(localeReady('en')).toBe(true)
+  })
+
+  it('is here once it has been asked for', () => {
+    expect(localeReady('el')).toBe(true)
+  })
+
   it('has something to say', () => {
     expect(Object.keys(EL).length).toBeGreaterThan(0)
   })

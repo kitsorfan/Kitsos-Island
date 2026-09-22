@@ -9,11 +9,32 @@ const root = document.getElementById('root')!
 // first and the app is fetched only once it passes.
 if (hasWebGL2()) {
   void (async () => {
+    /*
+     * A visitor who chose Greek last time gets it fetched alongside the app
+     * rather than after it. The island would render in English and correct
+     * itself a moment later without this, which reads as a flicker on the
+     * one screen where it is least wanted — the first.
+     *
+     * Read straight from storage: the store lives inside the app chunk, and
+     * waiting for it would put this request behind the very download it is
+     * meant to run beside. A stored value that is anything other than Greek,
+     * or no storage at all, costs nothing here.
+     */
+    let greek: Promise<unknown> = Promise.resolve()
+    try {
+      if (localStorage.getItem('island.settings')?.includes('"locale":"el"')) {
+        greek = import('./i18n/el/index')
+      }
+    } catch {
+      /* No storage to read; English it is. */
+    }
+
     const [{ StrictMode, createElement }, { createRoot }, { default: App }] =
       await Promise.all([
         import('react'),
         import('react-dom/client'),
         import('./App.tsx'),
+        greek,
       ])
 
     createRoot(root).render(createElement(StrictMode, null, createElement(App)))

@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Toast } from './Toast'
 import { useGame } from '../state/store'
@@ -79,13 +79,22 @@ describe('Toast', () => {
     }
   })
 
-  it('reads in Greek when Greek is chosen', () => {
+  it('reads in Greek when Greek is chosen', async () => {
     act(() => {
       useGame.setState({ locale: 'el' })
     })
     render(<Toast />)
     raise('journal')
-    // Whatever the Greek for it is, it is not the English.
-    expect(screen.queryByText('Journal updated')).not.toBeInTheDocument()
+
+    /*
+     * The Greek is fetched rather than bundled, so it arrives a tick after
+     * the render that asked for it. Until then the toast reads in English,
+     * which is the point: a visitor sees words either way, never a blank or
+     * a raw key. Waiting here is waiting for exactly what they would see.
+     */
+    await waitFor(() => {
+      // Whatever the Greek for it is, it is not the English.
+      expect(screen.queryByText('Journal updated')).not.toBeInTheDocument()
+    })
   })
 })

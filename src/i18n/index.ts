@@ -1,5 +1,4 @@
-import { useMemo } from 'react'
-import { EL } from './el/index'
+import { useEffect, useMemo, useState } from 'react'
 
 /**
  * Two languages, English first.
@@ -31,6 +30,57 @@ export type Translate = <T>(value: T) => T
 const memo: Record<Locale, WeakMap<object, unknown>> = {
   en: new WeakMap(),
   el: new WeakMap(),
+}
+
+/**
+ * The Greek dictionary, once it has arrived.
+ *
+ * It is a quarter of a megabyte of prose that most visitors never read, so it
+ * is fetched on demand rather than shipped inside the island. Until it lands
+ * this is empty, and an empty dictionary is not a broken one: every lookup
+ * misses and falls through to the English, which is the same thing that
+ * happens to any phrase nobody has translated yet. The island renders,
+ * readably, and re-renders in Greek the moment the words are here.
+ */
+let EL: Record<string, string> = {}
+
+/** The in-flight fetch, so that ten components asking at once make one request. */
+let pending: Promise<void> | null = null
+
+/** Bumped when the dictionary arrives, to wake the hooks waiting on it. */
+let generation = 0
+const listeners = new Set<() => void>()
+
+/**
+ * Fetch the Greek dictionary if it is not already here.
+ *
+ * Resolves immediately once loaded, so a caller may await it without caring
+ * whether it is the first to ask. A failed fetch clears the promise rather
+ * than caching the failure: the island stays in English, and the next attempt
+ * — flicking the language back and forth, say — tries again rather than
+ * inheriting a dead result.
+ */
+export function loadLocale(locale: Locale): Promise<void> {
+  if (locale === 'en' || Object.keys(EL).length > 0) return Promise.resolve()
+  if (!pending) {
+    pending = import('./el/index')
+      .then((m) => {
+        EL = m.EL
+        /* The misses cached before the words arrived are now wrong. */
+        memo.el = new WeakMap()
+        generation++
+        for (const wake of listeners) wake()
+      })
+      .catch(() => {
+        pending = null
+      })
+  }
+  return pending
+}
+
+/** Whether the Greek is here yet. Exported for the tests. */
+export function localeReady(locale: Locale): boolean {
+  return locale === 'en' || Object.keys(EL).length > 0
 }
 
 function convert<T>(value: T, locale: Locale): T {
@@ -67,6 +117,35 @@ export function translator(locale: Locale): Translate {
 
 export const EN: Translate = (value) => value
 
+/**
+ * The translator for a locale, fetching its dictionary if it is not here yet.
+ *
+ * Returns a working translator on the very first render rather than a promise
+ * or a null: before the Greek arrives it reads as English, which is the same
+ * fallback an untranslated phrase already gets. When the words land, every
+ * hook re-renders and the island turns Greek in one pass.
+ */
 export function useTranslate(locale: Locale): Translate {
-  return useMemo(() => (locale === 'en' ? EN : translator(locale)), [locale])
+  const [, bump] = useState(0)
+
+  useEffect(() => {
+    if (locale === 'en' || localeReady(locale)) return
+    let live = true
+    const wake = () => {
+      if (live) bump(generation)
+    }
+    listeners.add(wake)
+    void loadLocale(locale)
+    return () => {
+      live = false
+      listeners.delete(wake)
+    }
+  }, [locale])
+
+  /* generation is read so the memo is rebuilt once the dictionary is in. */
+  return useMemo(
+    () => (locale === 'en' ? EN : translator(locale)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locale, generation],
+  )
 }

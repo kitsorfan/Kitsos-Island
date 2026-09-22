@@ -98,6 +98,21 @@ export interface LiftPhase {
   floor: number
   /** True once the car has arrived and the doors have finished opening. */
   done: boolean
+  /**
+   * True once the car has stopped on the far floor, while the doors are still
+   * shut and yet to open.
+   *
+   * This is the moment the room has to change on, and it is not `done`.
+   * Swapping rooms at the end of the ride meant the far floor's doors mounted
+   * already wide: the shutting half played on the floor he left, the travel
+   * played on a blank screen, and the opening half never played at all,
+   * anywhere. He simply appeared in a lobby beside an open lift.
+   *
+   * Changing the room here instead hands the far floor a ride that still has
+   * its opening to run, so the doors he walks out of are the doors he watched
+   * open.
+   */
+  arrived: boolean
 }
 
 /**
@@ -126,7 +141,13 @@ export function liftPhase(
   const moved = Math.min(1, Math.max(0, (elapsed - LIFT_DOORS) / travel))
   const floor = Math.round(ride.from + (ride.to - ride.from) * moved)
 
-  return { t, open, floor, done: elapsed >= ride.duration }
+  return {
+    t,
+    open,
+    floor,
+    arrived: elapsed >= LIFT_DOORS + travel,
+    done: elapsed >= ride.duration,
+  }
 }
 
 /**

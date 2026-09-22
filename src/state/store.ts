@@ -584,8 +584,10 @@ interface GameState {
   pressFloor: (stop: LiftStop) => void
   /** Shuts the doors and starts the car moving. */
   rideLift: (ride: LiftRide) => void
-  /** The car has arrived: put him out on the far floor. */
-  endLift: (arrive: Vec2, facing?: number) => void
+  /** The car has stopped: swap to the far floor, doors still shut. */
+  arriveLift: (arrive: Vec2, facing?: number) => void
+  /** The doors have finished opening: hand the controls back. */
+  endLift: () => void
   /** Lets a secret out, which is what opens the doors that need one. */
   /**
    * Lets a secret out, which is what opens the doors that need one. The line
@@ -1881,12 +1883,43 @@ export const useGame = create<GameState>((set, get) => ({
     })
   },
 
-  /** Out of the car on the far floor, and back in control. */
-  endLift: (arrive, facing) => {
+  /**
+   * The car has stopped on the far floor. The room changes here, with the
+   * doors still shut, so the opening half of the ride plays on the floor he
+   * has arrived at rather than being lost with the room he left.
+   *
+   * The ride itself stays on the store — `endLift` clears it once the doors
+   * are wide — which is what keeps the far floor's leaves animating instead
+   * of mounting already open.
+   */
+  arriveLift: (arrive, facing) => {
     const ride = get().lift
-    if (!ride) return
-    set({ lift: null })
-    get().goRoom(ride.toRoom, arrive, facing)
+    if (!ride || get().area === ride.toRoom) return
+    if (!INTERIOR_BY_ID.has(ride.toRoom)) return
+    set((s) => ({
+      area: ride.toRoom,
+      nearby: null,
+      panel: null,
+      dialogue: null,
+      spawn: {
+        area: ride.toRoom,
+        position: [...arrive] as Vec2,
+        facing,
+        token: s.spawn.token + 1,
+      },
+      stride: null,
+    }))
+  },
+
+  /**
+   * The doors are wide and he is out of the car: back in control.
+   *
+   * `mode` is held at 'lift' for the whole ride and only released here, so
+   * the walk is his again exactly when the opening he walks through is.
+   */
+  endLift: () => {
+    if (!get().lift) return
+    set({ lift: null, mode: 'explore' })
   },
 
   /**

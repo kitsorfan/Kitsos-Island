@@ -10,7 +10,7 @@
       "vitest/globals",
       "node",
       "vite/client",
-      "@testing-library/jest-dom"
+      "@testing-library/jest-dom/vitest"
     ],
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,

@@ -1,6 +1,7 @@
+import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
-import { buildCvHtml } from './src/data/cvHtml.ts'
+import { buildCvHtml } from '../src/data/cvHtml.ts'
 
 /**
  * Writes the plain HTML CV out beside the island.
@@ -32,6 +33,16 @@ function cvPage(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
+  /*
+   * The island lives a directory up: this file sits in config/ with the rest
+   * of the tooling, but the project it builds is the repo root.
+   *
+   * Resolved off this file's own URL rather than written as '..', because a
+   * relative root is taken against the working directory and not against the
+   * config — so `npm run build` from anywhere but the root looked for
+   * index.html in the wrong place.
+   */
+  root: fileURLToPath(new URL('..', import.meta.url)),
   plugins: [react(), cvPage()],
   build: {
     /**

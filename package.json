@@ -4,16 +4,16 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "start": "vite preview",
-    "preview": "vite preview",
-    "lint": "oxlint",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "dev": "vite --config config/vite.config.ts",
+    "build": "tsc -b && vite build --config config/vite.config.ts",
+    "start": "vite preview --config config/vite.config.ts",
+    "preview": "vite preview --config config/vite.config.ts",
+    "lint": "oxlint --config config/.oxlintrc.json",
+    "format": "prettier --write . --config config/.prettierrc.json --ignore-path config/.prettierignore",
+    "format:check": "prettier --check . --config config/.prettierrc.json --ignore-path config/.prettierignore",
+    "test": "vitest run --config config/vitest.config.ts",
+    "test:watch": "vitest --config config/vitest.config.ts",
+    "test:coverage": "vitest run --coverage --config config/vitest.config.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

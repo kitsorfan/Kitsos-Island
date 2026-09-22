@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "tsBuildInfoFile": "../node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "es2023",
     "lib": ["ES2023", "DOM"],
     "module": "esnext",
@@ -22,9 +22,9 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["../src"],
   /* The tests are their own project (tsconfig.test.json): they want the
      vitest globals and the testing-library types, and the island itself
      must never be able to reach for either. */
-  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test/**"]
+  "exclude": ["../src/**/*.test.ts", "../src/**/*.test.tsx", "../src/test/**"]
 }

@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 
@@ -10,6 +11,9 @@ import { defineConfig } from 'vitest/config'
  * island ships can never quietly change what the tests are running against.
  */
 export default defineConfig({
+  /* As with vite.config.ts: the tooling sits in config/, the code it runs
+     against is the repo root, resolved off this file rather than the cwd. */
+  root: fileURLToPath(new URL('..', import.meta.url)),
   plugins: [react()],
   test: {
     /**

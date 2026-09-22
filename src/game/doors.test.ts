@@ -53,7 +53,11 @@ describe('the doors that open by themselves', () => {
   it('never opens a door that would turn you away', () => {
     /* The invariant, over every building and both hours of the day. */
     for (const b of BUILDINGS) {
-      for (const state of [DAY, NIGHT, { night: false, lighthouseOpen: true }]) {
+      for (const state of [
+        DAY,
+        NIGHT,
+        { night: false, lighthouseOpen: true },
+      ]) {
         if (autoOpens(b, state)) expect(doorShut(b, state)).toBe(false)
       }
     }

@@ -1445,7 +1445,8 @@ export function Player() {
        * have settled. Coming out of a building puts him squarely on its
        * doorstep, and without them the lobby would swallow him straight back.
        */
-      const sensing = best !== null && best.auto !== undefined && bestDist < best.auto
+      const sensing =
+        best !== null && best.auto !== undefined && bestDist < best.auto
       /* Inside the glass itself, not merely inside the sensor's notice. */
       const crossing = sensing && bestDist < DOOR_ADMIT
       if (!crossing) offDoorstep.current = true

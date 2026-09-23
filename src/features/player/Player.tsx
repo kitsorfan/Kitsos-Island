@@ -367,6 +367,16 @@ export function Player() {
   const striding = useRef(0)
   /** Height above the ground, and its rate of change. */
   const hop = useRef({ y: 0, vy: 0 })
+  /**
+   * Where he has drifted to in orbit, and how fast, in world units.
+   *
+   * Its own thing rather than the walking position, because none of the
+   * walking rules apply out here: there is no ground to stand on, no
+   * collider to be pushed out of, and nothing to stop him. The stick is a
+   * thruster - it adds velocity - and what slows him is a light drag rather
+   * than the friction of feet on a floor.
+   */
+  const orbit = useRef({ x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 })
   /** Where his feet ride while he is in the water, eased as he wades out. */
   const swimFloor = useRef(0)
   /** The walk cycle the first-person head and hand ride on. */
@@ -1281,28 +1291,72 @@ export function Player() {
 
     if (group.current) {
       /*
-       * In orbit there is no floor and no down, so he comes off the deck and
-       * turns slowly with nothing holding him - which is the whole of what
-       * says the engines are out. Everything below still runs on the walking
-       * position, so this is applied over the top of it rather than instead:
-       * the drift is added to where the deck put him.
+       * In orbit there is no floor and no down. He comes off the deck and
+       * turns slowly with nothing holding him, which is the whole of what
+       * says the engines are out - and the stick pushes him about the cabin
+       * while the credits play, because being held still through a credits
+       * roll is the difference between an ending and a cutscene.
        */
       if (store.mode === 'orbit') {
-        const drift = clock - (store.launch?.started ?? clock)
+        const o = orbit.current
+        const since = clock - (store.launch?.started ?? clock)
+
+        /*
+         * The stick is a thruster: it adds speed rather than setting it.
+         *
+         * Read here rather than taken from `move` above, which is zeroed
+         * out of `explore` - the walk is not his in orbit and should not
+         * be, but the drift is, and this is the one place that distinction
+         * has to be made by hand.
+         */
+        const stick = readMove()
+        const push = 2.6 * delta
+        /* Screen-relative rather than facing-relative: he is tumbling, and
+           steering by the way his feet happen to be pointing is unusable. */
+        o.vx += stick.x * push
+        o.vz += stick.y * push
+        /* Run takes him up. There is nothing to sprint towards out here and
+           the key is otherwise idle, so it is the one that rises. */
+        if (stick.run) o.vy += push
+
+        /* A light drag, so a nudge coasts a long way and he still comes to
+           rest eventually. Nothing here is frame-rate dependent: the decay
+           is raised to the elapsed time rather than multiplied by it. */
+        const drag = Math.pow(0.22, delta)
+        o.vx *= drag
+        o.vy *= drag
+        o.vz *= drag
+
+        o.x += o.vx * delta
+        o.y += o.vy * delta
+        o.z += o.vz * delta
+
+        /* Held inside the cabin. He is in a room, however weightless. */
+        const REACH = 3.4
+        o.x = Math.max(-REACH, Math.min(REACH, o.x))
+        o.z = Math.max(-REACH, Math.min(REACH, o.z))
+        o.y = Math.max(-0.6, Math.min(2.6, o.y))
+
         group.current.position.set(
-          px + Math.sin(drift * 0.31) * 0.5,
-          py + 0.9 + Math.sin(drift * 0.43) * 0.35,
-          pz + Math.cos(drift * 0.26) * 0.4,
+          px + o.x + Math.sin(since * 0.31) * 0.28,
+          py + 0.9 + o.y + Math.sin(since * 0.43) * 0.2,
+          pz + o.z + Math.cos(since * 0.26) * 0.24,
         )
-        /* A slow tumble on all three axes. A man with nothing under his feet
-           does not stay upright, and holding him level is the one thing that
-           would make the float read as standing on glass. */
+        /* A slow tumble on all three axes, leaned into whichever way he is
+           thrusting. A man with nothing under his feet does not stay
+           upright, and holding him level is the one thing that would make
+           the float read as standing on glass. */
         group.current.rotation.set(
-          Math.sin(drift * 0.23) * 0.22,
-          facing.current + drift * 0.16,
-          Math.sin(drift * 0.19) * 0.3,
+          Math.sin(since * 0.23) * 0.22 - o.vz * 0.12,
+          facing.current + since * 0.16,
+          Math.sin(since * 0.19) * 0.3 - o.vx * 0.12,
         )
       } else {
+        /* Back on the ground: forget where he floated to, so a second
+           flight does not start half a room out of position. */
+        if (orbit.current.x !== 0) {
+          orbit.current = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }
+        }
         group.current.position.set(px, py, pz)
         group.current.rotation.set(0, facing.current, 0)
       }

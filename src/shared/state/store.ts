@@ -487,6 +487,16 @@ interface GameState {
    */
   launch: Launch | null
   /**
+   * True while the credits are playing, which is the whole of the time
+   * between the engines cutting and the certificate coming up.
+   *
+   * He can drift about the cabin for all of it - the roll is something
+   * playing over the window rather than a screen he is held on - and the
+   * card waits until it has finished, because a certificate thrown up over
+   * the first title card is a credits sequence nobody reads.
+   */
+  credits: boolean
+  /**
    * Whether the ship has ever flown, kept apart from `launch` because it
    * outlives the session. A visitor who launched, closed the tab and came
    * back finds the island still there to walk — the save remembers that they
@@ -679,6 +689,8 @@ interface GameState {
   reachOrbit: () => void
   /** At the rack in the airlock: the suit goes on, or comes back off. */
   toggleSuit: () => void
+  /** The roll has played out: the certificate may come up now. */
+  endCredits: () => void
   /** Home. Puts him down in the middle of the island in his new shirt. */
   flyHome: () => void
   /** Which shirt he wears now that he has two. */
@@ -917,6 +929,7 @@ export const useGame = create<GameState>((raw, get) => {
     liftCall: null,
     /* Nobody is in orbit at the title screen, whatever the save remembers. */
     launch: null,
+    credits: false,
     launched: RESTORED.launched,
     /* The suit hangs on its rack at the start of every visit, whatever a
        previous one ended in: he is not born wearing it. */
@@ -2141,7 +2154,20 @@ export const useGame = create<GameState>((raw, get) => {
       if (!launch || launch.arrived) return
       /* Through the seal: launch → orbit is the one move it has to permit. */
       raw({ mode: 'orbit' })
-      set({ launch: { ...launch, arrived: true } })
+      /* The engines cut and the roll starts in the same instant. */
+      set({ launch: { ...launch, arrived: true }, credits: true })
+    },
+
+    /**
+     * The roll has run out.
+     *
+     * Only `CreditsRoll` calls this, because only it knows how long the roll
+     * actually took - a second timer here would drift against the one drawing
+     * the cards and the certificate would arrive early or late.
+     */
+    endCredits: () => {
+      if (!get().credits) return
+      set({ credits: false })
     },
 
     /**
@@ -2189,6 +2215,7 @@ export const useGame = create<GameState>((raw, get) => {
       raw({ mode: 'explore', area: 'island' })
       set((state) => ({
         launch: null,
+        credits: false,
         suited: false,
         starShirt: true,
         outfit: 'star',
@@ -2338,6 +2365,7 @@ export const useGame = create<GameState>((raw, get) => {
         lighthouseOpen: false,
         cvUnlocked: false,
         launch: null,
+        credits: false,
         launched: false,
         starShirt: false,
         suited: false,

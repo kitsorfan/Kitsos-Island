@@ -150,8 +150,11 @@ const VERTEX = /* glsl */ `
     vAlpha = aAlpha;
     vec4 view = modelViewMatrix * vec4(position, 1.0);
     /* Scaled by distance, so a spark is the same size on screen wherever
-       he is standing rather than growing as the camera comes in. */
-    gl_PointSize = 26.0 / -view.z;
+       he is standing rather than growing as the camera comes in. Big
+       enough to read as a spark at a glance: at a handful of pixels the
+       wake looked less like gold coming off him than like dirt on the
+       lens, so the sparks are few and large rather than many and small. */
+    gl_PointSize = 120.0 / -view.z;
     gl_Position = projectionMatrix * view;
   }
 `

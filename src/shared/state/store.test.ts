@@ -756,3 +756,50 @@ describe('unlocking the CV', () => {
     expect(objective).not.toBeNull()
   })
 })
+
+/**
+ * The credits, and the one thing they gate.
+ *
+ * The certificate is the end of the game and so is the roll, so the card
+ * waits for it: throwing the certificate up over the first title card is how
+ * you make sure nobody reads either.
+ */
+describe('the credits', () => {
+  const inOrbit = () => {
+    useGame.setState({ area: 'lighthouse', mode: 'explore' })
+    useGame.getState().toggleSuit()
+    useGame.getState().beginLaunch()
+    useGame.getState().reachOrbit()
+  }
+
+  it('start the moment the engines cut', () => {
+    inOrbit()
+    expect(useGame.getState().credits).toBe(true)
+  })
+
+  it('end when the roll says so, and only once', () => {
+    inOrbit()
+    useGame.getState().endCredits()
+    expect(useGame.getState().credits).toBe(false)
+
+    /* A second call from a frame still in flight changes nothing. */
+    useGame.getState().endCredits()
+    expect(useGame.getState().credits).toBe(false)
+  })
+
+  it('leave him in orbit rather than handing the island back', () => {
+    inOrbit()
+    useGame.getState().endCredits()
+    /* The roll finishing is not the flight finishing: only flyHome is. */
+    expect(useGame.getState().mode).toBe('orbit')
+    expect(useGame.getState().launch?.arrived).toBe(true)
+  })
+
+  it('are over once he lands, however far they got', () => {
+    inOrbit()
+    /* Flying home mid-roll must not leave the credits playing over the
+       island he has just landed on. */
+    useGame.getState().flyHome()
+    expect(useGame.getState().credits).toBe(false)
+  })
+})

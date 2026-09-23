@@ -5617,113 +5617,155 @@ canvas {
 /* --------------------------- the credits -------------------------- */
 
 /*
- * Playing in the cabin while he floats. Fixed to the left so it runs beside
- * the orbit card rather than over it: the certificate is what that card is
- * for, and this is something on in the background.
+ * The roll, over the window while he floats.
  *
- * It takes no pointer events at all — there is nothing to click here, and a
- * panel that swallows clicks beside a card with buttons on it is a panel
- * that eats the button.
+ * It takes no pointer events and swallows no keys: he can push himself about
+ * the cabin for the whole of it, which is the difference between an ending
+ * and a cutscene. The vignette is the only thing it puts over the scene, and
+ * it is there so white text stays readable against the island below.
  */
 .credits {
   position: fixed;
-  left: clamp(0.8rem, 3vw, 2.4rem);
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 72;
+  inset: 0;
+  z-index: 71;
   display: grid;
-  gap: 0.6rem;
-  width: min(230px, 26vw);
-  padding: 1rem 1.1rem;
-  border-left: 2px solid rgba(240, 163, 60, 0.5);
-  color: #dce6f4;
+  place-items: center;
+  padding: clamp(1rem, 5vw, 3rem);
   pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(4, 6, 14, 0.15),
+    rgba(4, 6, 14, 0.72)
+  );
+  /* The whole plate fades with the card, so the darkening arrives with the
+     text rather than sitting there between cards. */
+  opacity: var(--fade, 0);
 }
 
-.credits__kicker {
-  font-size: 0.62rem;
-  letter-spacing: 0.34em;
-  text-transform: uppercase;
-  color: #f0a33c;
-}
-
-/* Held at a fixed height so the roll does not jog the panel about as the
-   cards change length. */
-.credits__stage {
+.credits__card {
   display: grid;
-  align-content: center;
-  min-height: 7.5rem;
-  transition: opacity 0.12s linear;
+  justify-items: center;
+  gap: 0.5rem;
+  width: min(520px, 100%);
+  text-align: center;
+  color: #eef3fb;
+  /* Rising as it plays: what makes it a roll rather than a slideshow. */
+  transform: translateY(var(--rise, 0));
 }
 
-.credits__job {
-  margin: 0 0 0.15rem;
-  font-size: 0.66rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #8fa4c0;
-}
-
-.credits__who {
+/* The opening card carries the island's name, so it is the biggest thing
+   here by a long way. */
+.credits__title {
   margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1.3;
+  font-size: clamp(2rem, 8vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  text-shadow: 0 0 2.4rem rgba(110, 180, 255, 0.45);
 }
 
-.credits__thanks h3 {
-  margin: 0 0 0.4rem;
-  font-size: 0.8rem;
-  letter-spacing: 0.16em;
+.credits__sub {
+  margin: 0;
+  font-size: clamp(0.8rem, 2.6vw, 1rem);
+  letter-spacing: 0.4em;
   text-transform: uppercase;
   color: #f0a33c;
 }
 
-.credits__thanks p {
-  margin: 0 0 0.3rem;
-  font-size: 0.85rem;
-  line-height: 1.45;
-}
-
-.credits__sign {
-  margin-top: 0.5rem !important;
-  color: #8fa4c0;
-  font-size: 0.75rem !important;
-  font-style: italic;
+.credits__heading {
+  margin: 0 0 0.9rem;
+  font-size: clamp(0.68rem, 2.2vw, 0.8rem);
+  font-weight: 700;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: #f0a33c;
 }
 
 /*
- * The roll only sits beside the card where there is genuinely room for it.
- *
- * The card is up to 760px centred, so on anything under about 1400px the two
- * meet in the middle and the credits run across the certificate. Below that
- * width the roll comes off the side and lies along the bottom instead.
- *
- * It stays fixed rather than going static: it is a sibling of the card, not
- * a child of it, so unpinning it would drop it at the foot of the whole app
- * rather than under the certificate.
+ * Roles in two columns — the job on the right of the gutter, the name on the
+ * left of it — so the names line up down the middle the way a real crawl
+ * does. It collapses to one centred column on a narrow screen, where two
+ * columns of four words each are unreadable.
  */
-@media (max-width: 1400px) {
-  .credits {
-    left: 0;
-    right: 0;
-    top: auto;
-    bottom: 0;
-    transform: none;
-    width: 100%;
-    padding: 0.6rem 1rem calc(0.6rem + env(safe-area-inset-bottom, 0px));
-    border-left: 0;
-    border-top: 2px solid rgba(240, 163, 60, 0.5);
-    background: linear-gradient(
-      180deg,
-      rgba(6, 7, 14, 0),
-      rgba(6, 7, 14, 0.92) 35%
-    );
-    text-align: center;
+.credits__roles {
+  display: grid;
+  gap: 0.45rem 1.4rem;
+  margin: 0;
+  width: 100%;
+}
+
+.credits__row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: baseline;
+  gap: 0 1.4rem;
+}
+
+.credits__row dt {
+  grid-column: 1;
+  justify-self: end;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #93a6c2;
+  text-align: right;
+}
+
+.credits__row dd {
+  grid-column: 3;
+  justify-self: start;
+  margin: 0;
+  font-size: clamp(0.92rem, 2.6vw, 1.05rem);
+  font-weight: 700;
+  text-align: left;
+}
+
+/* A role with no job title — the "written and built by" card — centres its
+   one name across the whole width instead of hanging off the gutter.
+   Flagged with a class rather than matched with :has(), which is not
+   dependable enough to hang a layout on. */
+.credits__row--solo dd {
+  grid-column: 1 / -1;
+  justify-self: center;
+  font-size: clamp(1.3rem, 4.5vw, 1.8rem);
+  text-align: center;
+}
+
+.credits__thanks {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.credits__thanks p {
+  margin: 0;
+  font-size: clamp(0.95rem, 3vw, 1.15rem);
+  line-height: 1.5;
+}
+
+/* The last line of the last card, which is the one that is not a joke. */
+.credits__thanks p:last-child {
+  margin-top: 0.5rem;
+  color: #f0a33c;
+  font-style: italic;
+}
+
+@media (max-width: 560px) {
+  .credits__row {
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
     justify-items: center;
   }
 
-  .credits__stage {
-    min-height: 3.4rem;
+  .credits__row dt,
+  .credits__row dd {
+    grid-column: 1;
+    justify-self: center;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .credits__card {
+    transform: none;
   }
 }

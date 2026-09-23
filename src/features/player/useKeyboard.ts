@@ -170,9 +170,16 @@ export function useKeyboard() {
          *
          * This has to be stated rather than left to `default`, which would
          * otherwise hand a man strapped into a rocket the map — and the map
-         * offers fast travel, which is the one thing a one-way trip cannot
-         * be allowed. There is deliberately no Escape here either: the
-         * launch is not a card you can back out of.
+         * offers fast travel, which is the one thing a flight cannot be
+         * allowed. There is deliberately no Escape here either: the launch
+         * is not a card you can back out of, and orbit is left by the ride
+         * home rather than by a keypress.
+         *
+         * The movement keys are not swallowed, though, and do not pass
+         * through here at all: they are recorded above, before the switch,
+         * so `readMove` still sees them. That is what lets him push himself
+         * about the cabin while the credits play — being held still through
+         * a credits roll is the difference between an ending and a cutscene.
          */
         case 'launch':
         case 'orbit':

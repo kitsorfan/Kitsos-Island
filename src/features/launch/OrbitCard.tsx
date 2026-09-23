@@ -25,6 +25,7 @@ import { useT } from '../../shared/i18n/useT'
 export function OrbitCard() {
   const t = useT()
   const launch = useGame((s) => s.launch)
+  const credits = useGame((s) => s.credits)
   const flyHome = useGame((s) => s.flyHome)
   const [name, setName] = useState('')
   const [saved, setSaved] = useState(false)
@@ -49,7 +50,10 @@ export function OrbitCard() {
     setSaved(true)
   }
 
-  if (!launch?.arrived) return null
+  /* Not until the roll has played out. The card is the end of the game and
+     the credits are the end of the game; putting the card up over the first
+     title is how you make sure nobody reads either. */
+  if (!launch?.arrived || credits) return null
 
   return (
     <div className="overlay overlay--orbit">

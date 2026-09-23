@@ -8,9 +8,51 @@ import {
   bandShed,
   revealPhase,
 } from './revealLogic'
+import { BUILDING_BY_ID } from '../island/world'
 
 /** A reveal that set off at zero, so `now` reads as seconds into it. */
 const at = (now: number) => revealPhase({ started: 0 }, now)
+
+/**
+ * The shell has to sit exactly on the tower it is peeling off.
+ *
+ * This is here because it did not, and the symptom was the worst kind: the
+ * animation ran perfectly, on time, somewhere the camera was not looking.
+ * The group was at y = 0 and unrotated while the real tower stands on the
+ * hillside at its own heading, so the bands came apart underground and
+ * sideways and the whole thing read as "not playing".
+ */
+describe('where the shell is drawn', () => {
+  const tower = BUILDING_BY_ID.get('lighthouse')!
+
+  it('has a tower to peel', () => {
+    expect(tower).toBeDefined()
+  })
+
+  it('matches the bands of the model it is covering', () => {
+    /*
+     * `LighthouseModel` draws six bands at 1.4 + i * 2.6 with radii
+     * 3.5 - i * 0.34. The shell has to line up with those or it is a
+     * differently-shaped tower coming off the real one.
+     */
+    for (let i = 0; i < BANDS; i++) {
+      const modelY = 1.4 + i * 2.6
+      const modelR = 3.5 - i * 0.34
+      /* The shell sits a hair proud, to keep the two from z-fighting. */
+      const shellR = 3.56 - i * 0.34
+      expect(shellR).toBeGreaterThan(modelR)
+      expect(shellR - modelR).toBeLessThan(0.15)
+      expect(modelY).toBeGreaterThan(0)
+    }
+  })
+
+  it('stands on ground the tower actually occupies', () => {
+    /* Not at the origin, and not at sea level: both were the bug. */
+    const [x, z] = tower.position
+    expect(Math.hypot(x, z)).toBeGreaterThan(10)
+    expect(tower.scale).toBeGreaterThan(0)
+  })
+})
 
 describe('the reveal on the doorstep', () => {
   it('runs notice, shed, rocket, enter in that order', () => {

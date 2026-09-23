@@ -4,6 +4,7 @@ import { DoubleSide } from 'three'
 import type { Group, Mesh, MeshStandardMaterial } from 'three'
 import { BANDS, REVEAL_LINES, bandShed, revealPhase } from './revealLogic'
 import { BUILDING_BY_ID } from '../island/world'
+import { groundHeight } from '../island/terrainLogic'
 import { useGame } from '../../shared/state/store'
 import { TextPlane } from '../../shared/engine/TextSign'
 import { useT } from '../../shared/i18n/useT'
@@ -105,7 +106,22 @@ export function Reveal() {
   const [x, z] = tower.position
 
   return (
-    <group ref={shake} position={[x, 0, z]} scale={tower.scale}>
+    /*
+     * Placed exactly the way `Buildings.tsx` places the real tower: on the
+     * ground rather than at y = 0, turned to the same heading, at the same
+     * scale.
+     *
+     * Getting any of the three wrong is why nothing appeared to happen the
+     * first time round - the shell was sunk in the hillside and rotated off
+     * the building it was supposed to be peeling off, so the animation ran
+     * perfectly well somewhere the camera was not looking.
+     */
+    <group
+      ref={shake}
+      position={[x, groundHeight(x, z), z]}
+      rotation={[0, tower.rotation, 0]}
+      scale={tower.scale}
+    >
       {/*
         The paint: the bands the tower wears, each its own group so it can
         come away on its own beat. Slightly proud of the real thing so there

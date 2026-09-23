@@ -6,6 +6,7 @@ import { type Group, type Mesh } from 'three'
 import { INTERIOR_BY_ID } from '../interior/interiors'
 import { BOARD } from '../arcade/minigames'
 import { AMALIA, PARTY_BUTTON, TUXEDO } from '../party/partyData'
+import { SPACESUIT, STAR_SHIRT } from '../launch/launch'
 import {
   BUILDINGS,
   BUILDING_BY_ID,
@@ -385,14 +386,20 @@ export function Player() {
   const wearing =
     outfit === 'tuxedo'
       ? { colors: TUXEDO, suit: true }
-      : feasting
-        ? {
-            colors: HOST_SUIT,
-            suit: true,
-            bowTie: HOST_BOW_TIE,
-            buttonhole: HOST_BUTTONHOLE,
-          }
-        : { colors: PLAYER_COLORS, suit: false }
+      : /* The pressure suit beats the good shirt: he is going up, and what
+           he is wearing under it is nobody's business. */
+        outfit === 'spacesuit'
+        ? { colors: SPACESUIT, suit: false, spacesuit: true }
+        : outfit === 'star'
+          ? { colors: STAR_SHIRT, suit: false, starShirt: true }
+          : feasting
+            ? {
+                colors: HOST_SUIT,
+                suit: true,
+                bowTie: HOST_BOW_TIE,
+                buttonhole: HOST_BUTTONHOLE,
+              }
+            : { colors: PLAYER_COLORS, suit: false }
 
   const indoors = area !== 'island'
   const interior = indoors ? INTERIOR_BY_ID.get(area) : undefined

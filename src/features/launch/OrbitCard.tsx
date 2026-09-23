@@ -18,12 +18,14 @@ import { useT } from '../../shared/i18n/useT'
  * The end of it: the island a long way below, and the prize.
  *
  * He types his name, watches it land on the certificate, and takes it away as
- * a picture. There is no button on this card that goes back — the walk is
- * over, and the card says so rather than pretending otherwise.
+ * a picture. Then he flies home, which is the one way off this card: the
+ * island is still down there, and he lands in the middle of it wearing the
+ * shirt they give you for having gone up.
  */
 export function OrbitCard() {
   const t = useT()
   const launch = useGame((s) => s.launch)
+  const flyHome = useGame((s) => s.flyHome)
   const [name, setName] = useState('')
   const [saved, setSaved] = useState(false)
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -110,10 +112,17 @@ export function OrbitCard() {
 
         <p className="orbit__signoff">
           {t('Signed by')} <strong>{CERT_TEXT.signatory}</strong>.{' '}
-          {t(
-            'Thanks for walking the whole of it — there is no way back down from here.',
-          )}
+          {t('Thanks for walking the whole of it.')}
         </p>
+
+        <button className="orbit__home" onClick={flyHome}>
+          {t('Fly back down to the island')}
+          <small>
+            {saved
+              ? t('Certificate saved. The shirt comes with the landing.')
+              : t('You can take the certificate down with you either way.')}
+          </small>
+        </button>
       </section>
     </div>
   )

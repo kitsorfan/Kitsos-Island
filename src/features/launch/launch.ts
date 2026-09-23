@@ -21,6 +21,37 @@
  */
 export const LAUNCH_AREA = 'lighthouse'
 
+/**
+ * The pressure suit, off its rack in the airlock.
+ *
+ * White with the island's own amber at the collar, so the man at the console
+ * reads as dressed for the flight rather than as a townsman who wandered in.
+ */
+export const SPACESUIT = {
+  skin: '#f0c39a',
+  hair: '#3a2a1d',
+  shirt: '#eef2f6',
+  pants: '#e2e8ee',
+} as const
+
+/**
+ * The shirt he brings home: blue with a yellow star, which is the only thing
+ * anybody on the island can be seen to have earned.
+ *
+ * Kept here beside the suit because both are the flight's doing, and because
+ * the greeting card's portrait reads the same table the player does.
+ */
+export const STAR_SHIRT = {
+  skin: '#f0c39a',
+  hair: '#3a2a1d',
+  /* A deep flight blue rather than a bright one: the gold on it is what is
+     meant to catch the eye, and a light blue swallows gold. */
+  shirt: '#1b46a0',
+  /* Trousers a shade under the gold of the star, so the two read as one kit
+     rather than as a yellow that happens to be nearby. */
+  pants: '#c99a1e',
+} as const
+
 /** The stages of a launch, in the order they run. */
 export type LaunchStage =
   /** Strapped in, the count running down, the last moment to look away. */

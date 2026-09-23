@@ -52,6 +52,15 @@ describe('the filename', () => {
   })
 })
 
+describe('who signs it', () => {
+  it('signs as Kitsos Orfanopoulos', () => {
+    /* The nickname is the name on the island, so the certificate is signed
+       the way he signs things rather than the way the CV heads itself: no
+       given name, and no quoted middle. */
+    expect(CERT_TEXT.signatory).toBe('Kitsos Orfanopoulos')
+  })
+})
+
 describe('the date', () => {
   it('is written out long rather than as digits', () => {
     expect(certDate(new Date('2026-09-23T12:00:00Z'))).toContain('September')

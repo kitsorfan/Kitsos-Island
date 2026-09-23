@@ -3,7 +3,7 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useGame } from './store'
-import { KEYS, MISSIONS } from '../../features/island/world'
+import { KEYS, MISSIONS, PLAYER_START } from '../../features/island/world'
 import { BIRTHDAY, FEAST } from '../../features/calendar/calendar'
 import { INTERIORS } from '../../features/interior/interiors'
 import { liftArrival, liftStance } from '../../features/lift/lift'
@@ -544,12 +544,15 @@ describe('getting into the lift and out of it', () => {
 })
 
 /**
- * The launch, and the one rule it exists to enforce: leaving is final.
+ * The launch: the suit that gates it, the flight that cannot be interrupted,
+ * and the shirt he comes home in.
  *
- * Everything else on the island can be walked back out of — a panel closes,
- * a room has a door, a minigame has a quit. This does not, and the store is
- * where that has to be true, because the button is the only thing on the
- * island whose consequences a visitor cannot undo by walking away.
+ * Two rules the rest of the island assumes. The first is that the button does
+ * nothing until he has been to the rack — the walk across the room is the
+ * whole of the ceremony, and skipping it would make the deck a checkbox. The
+ * second is that while he is up there the game is sealed: every other screen
+ * on the island can be backed out of sideways, and this one has exactly one
+ * door, which is the ride home.
  */
 describe('the launch', () => {
   /** On the deck with the walk his, which is where the button is pressed. */
@@ -557,15 +560,48 @@ describe('the launch', () => {
     useGame.setState({ area: 'lighthouse', mode: 'explore' })
   }
 
-  it('is only offered from the deck', () => {
+  /** On the deck and dressed for it: what the button actually answers. */
+  const suited = () => {
+    onDeck()
+    useGame.getState().toggleSuit()
+  }
+
+  it('will not go up in shirtsleeves', () => {
+    onDeck()
+    useGame.getState().beginLaunch()
+
+    expect(useGame.getState().launch).toBeNull()
+    expect(useGame.getState().mode).toBe('explore')
+    /* And it says why, rather than simply not answering. */
+    expect(useGame.getState().toast).not.toBeNull()
+  })
+
+  it('puts the suit on at the rack, and takes it off again', () => {
+    onDeck()
+    useGame.getState().toggleSuit()
+    expect(useGame.getState().suited).toBe(true)
+    expect(useGame.getState().outfit).toBe('spacesuit')
+
+    useGame.getState().toggleSuit()
+    expect(useGame.getState().suited).toBe(false)
+    expect(useGame.getState().outfit).toBe('islander')
+  })
+
+  it('only hands out the suit on the deck', () => {
     useGame.setState({ area: 'island', mode: 'explore' })
+    useGame.getState().toggleSuit()
+    expect(useGame.getState().suited).toBe(false)
+  })
+
+  it('is only offered from the deck', () => {
+    useGame.setState({ area: 'island', mode: 'explore', suited: true })
     useGame.getState().beginLaunch()
     expect(useGame.getState().launch).toBeNull()
     expect(useGame.getState().mode).toBe('explore')
   })
 
   it('starts the count and takes the walk away', () => {
-    onDeck()
+    suited()
     useGame.getState().beginLaunch()
 
     const { launch, mode } = useGame.getState()
@@ -579,7 +615,7 @@ describe('the launch', () => {
   })
 
   it('cannot be started twice', () => {
-    onDeck()
+    suited()
     useGame.getState().beginLaunch()
     const first = useGame.getState().launch
     useGame.getState().beginLaunch()
@@ -588,7 +624,7 @@ describe('the launch', () => {
   })
 
   it('reaches orbit once, however many frames call it', () => {
-    onDeck()
+    suited()
     useGame.getState().beginLaunch()
     useGame.getState().reachOrbit()
 
@@ -607,17 +643,81 @@ describe('the launch', () => {
   })
 
   it('remembers across visits that the ship has flown', () => {
-    onDeck()
+    suited()
     useGame.getState().beginLaunch()
     expect(useGame.getState().launched).toBe(true)
   })
 
   it('is forgotten, like everything else, when the island is cleared', () => {
-    onDeck()
+    suited()
     useGame.getState().beginLaunch()
     useGame.getState().clearProgress()
 
     expect(useGame.getState().launched).toBe(false)
     expect(useGame.getState().launch).toBeNull()
+    expect(useGame.getState().starShirt).toBe(false)
+    expect(useGame.getState().outfit).toBe('islander')
+  })
+})
+
+describe('coming home', () => {
+  const flown = () => {
+    useGame.setState({ area: 'lighthouse', mode: 'explore' })
+    useGame.getState().toggleSuit()
+    useGame.getState().beginLaunch()
+    useGame.getState().reachOrbit()
+  }
+
+  it('will not land a flight that has not arrived', () => {
+    useGame.setState({ area: 'lighthouse', mode: 'explore' })
+    useGame.getState().toggleSuit()
+    useGame.getState().beginLaunch()
+    /* Still climbing: there is nothing to step out of yet. */
+    useGame.getState().flyHome()
+    expect(useGame.getState().mode).toBe('launch')
+  })
+
+  it('puts him down in the middle of the island', () => {
+    flown()
+    useGame.getState().flyHome()
+
+    const { area, mode, spawn, launch } = useGame.getState()
+    expect(area).toBe('island')
+    expect(mode).toBe('explore')
+    expect(spawn.position).toEqual([...PLAYER_START])
+    /* The flight is over rather than merely finished. */
+    expect(launch).toBeNull()
+  })
+
+  it('takes the suit off and leaves the shirt on', () => {
+    flown()
+    useGame.getState().flyHome()
+
+    expect(useGame.getState().suited).toBe(false)
+    expect(useGame.getState().starShirt).toBe(true)
+    expect(useGame.getState().outfit).toBe('star')
+  })
+
+  it('lets him change back out of the shirt, and into it again', () => {
+    flown()
+    useGame.getState().flyHome()
+
+    useGame.getState().wearStarShirt(false)
+    expect(useGame.getState().outfit).toBe('islander')
+    useGame.getState().wearStarShirt(true)
+    expect(useGame.getState().outfit).toBe('star')
+  })
+
+  it('does not offer the shirt to somebody who has not earned it', () => {
+    useGame.getState().wearStarShirt(true)
+    expect(useGame.getState().outfit).toBe('islander')
+  })
+
+  it('leaves the island walkable again', () => {
+    flown()
+    useGame.getState().flyHome()
+    /* The seal is off: the ordinary screens answer once more. */
+    useGame.getState().openMap()
+    expect(useGame.getState().mode).toBe('map')
   })
 })

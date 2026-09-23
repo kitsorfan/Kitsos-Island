@@ -36,6 +36,8 @@ export interface SavedProgress {
   cvUnlocked: boolean
   /** Whether the ship inside the lighthouse has ever flown. */
   launched: boolean
+  /** Whether the blue-and-yellow shirt has been earned. */
+  starShirt: boolean
 }
 
 /**
@@ -127,7 +129,8 @@ export function isEmpty(progress: SavedProgress): boolean {
     Object.keys(progress.missions).length === 0 &&
     !progress.lighthouseOpen &&
     !progress.cvUnlocked &&
-    !progress.launched
+    !progress.launched &&
+    !progress.starShirt
   )
 }
 
@@ -157,6 +160,7 @@ export function loadProgress(): SavedProgress | null {
          adding this did not need a VERSION bump — the field defaults, and
          bumping would have thrown away every island already walked. */
       launched: saved.launched === true,
+      starShirt: saved.starShirt === true,
     }
   } catch {
     return null

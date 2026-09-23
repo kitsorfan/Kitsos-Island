@@ -31,6 +31,7 @@ import {
   LIFT_PER_FLOOR,
   liftStance,
 } from '../../features/lift/lift'
+import { LAUNCH_AREA } from '../../features/launch/launch'
 import type { CalendarDate } from '../../features/calendar/calendar'
 import type { Locale } from '../i18n'
 import { forgetProgress, isEmpty, loadProgress, saveProgress } from './save'
@@ -478,8 +479,11 @@ interface GameState {
   lift: LiftRide | null
   /**
    * The launch under way, or the orbit it ended in. Null until the button
-   * under the glass is pressed, and never null again afterwards: leaving is
-   * the one thing on this island that does not undo.
+   * under the glass is pressed, and null again once he has flown home.
+   *
+   * While it is set the game is sealed — see `isSealed` — so the flight
+   * cannot be walked out of sideways. It ends by the one door it has, which
+   * is the ride back down.
    */
   launch: Launch | null
   /**
@@ -514,8 +518,24 @@ interface GameState {
   party: boolean
   /** True once he has walked into the middle and she has been called down. */
   amaliaHere: boolean
-  /** What he is wearing. The tuxedo is for her arrival and nothing else. */
-  outfit: 'islander' | 'tuxedo'
+  /**
+   * What he is wearing. The tuxedo is for her arrival and nothing else; the
+   * pressure suit is the airlock's doing and comes off when he lands; the
+   * star shirt is the one thing here that is earned, and is his to keep.
+   */
+  outfit: 'islander' | 'tuxedo' | 'spacesuit' | 'star'
+  /**
+   * Whether the suit is on. The airlock is the gate on the whole flight: the
+   * button under the glass does nothing until he has been to the rack at the
+   * side of the room and put it on.
+   */
+  suited: boolean
+  /**
+   * Whether the blue-and-yellow shirt has been earned, which is the flight
+   * itself. Saved, so he is still wearing it on a later visit, and the one
+   * reward on the island that shows.
+   */
+  starShirt: boolean
   /**
    * The beach proposal, and how far through it he is. Null almost always:
    * there is one way to start it and it is not written down anywhere.
@@ -657,6 +677,12 @@ interface GameState {
   beginLaunch: () => void
   /** The climb is over: he is in orbit and the certificate can be signed. */
   reachOrbit: () => void
+  /** At the rack in the airlock: the suit goes on, or comes back off. */
+  toggleSuit: () => void
+  /** Home. Puts him down in the middle of the island in his new shirt. */
+  flyHome: () => void
+  /** Which shirt he wears now that he has two. */
+  wearStarShirt: (on: boolean) => void
   /** Lets a secret out, which is what opens the doors that need one. */
   /**
    * Lets a secret out, which is what opens the doors that need one. The line
@@ -800,6 +826,7 @@ const RESTORED = {
   lighthouseOpen: SAVED_PROGRESS?.lighthouseOpen ?? false,
   cvUnlocked: SAVED_PROGRESS?.cvUnlocked ?? false,
   launched: SAVED_PROGRESS?.launched ?? false,
+  starShirt: SAVED_PROGRESS?.starShirt ?? false,
 }
 
 /**
@@ -891,6 +918,10 @@ export const useGame = create<GameState>((raw, get) => {
     /* Nobody is in orbit at the title screen, whatever the save remembers. */
     launch: null,
     launched: RESTORED.launched,
+    /* The suit hangs on its rack at the start of every visit, whatever a
+       previous one ended in: he is not born wearing it. */
+    suited: false,
+    starShirt: RESTORED.starShirt,
     calendar: SAVED.calendar,
     christmas: isFeast(SAVED.calendar),
     firstPerson: false,
@@ -2058,7 +2089,21 @@ export const useGame = create<GameState>((raw, get) => {
      */
     beginLaunch: () => {
       if (get().launch) return
-      if (get().area !== 'lighthouse') return
+      if (get().area !== LAUNCH_AREA) return
+      /* The airlock is the gate. Pressing the button in shirtsleeves does
+         nothing but say so — the rack is at the side of the room, and going
+         to it is the step that turns a tourist into a pilot. */
+      if (!get().suited) {
+        sfx.dry()
+        set({
+          toast: {
+            title: 'Not like that',
+            body: 'The suit is on its rack by the airlock. Nobody goes up in shirtsleeves.',
+            kind: 'progress',
+          },
+        })
+        return
+      }
       sfx.jingle()
       /* Through the seal, which is not yet closed — this is what closes it. */
       set({
@@ -2086,6 +2131,81 @@ export const useGame = create<GameState>((raw, get) => {
       /* Through the seal: launch → orbit is the one move it has to permit. */
       raw({ mode: 'orbit' })
       set({ launch: { ...launch, arrived: true } })
+    },
+
+    /**
+     * The suit, on or off, at the rack by the airlock.
+     *
+     * It is a change of clothes and nothing else: no mode, no seal, no
+     * teleport. He can put it on, wander back to the logbook, think better of
+     * the whole thing and hang it up again.
+     */
+    toggleSuit: () => {
+      /* Not mid-flight. There is no taking it off up there. */
+      if (get().launch) return
+      if (get().area !== LAUNCH_AREA) return
+      const on = !get().suited
+      sfx.confirm()
+      set({
+        suited: on,
+        outfit: on ? 'spacesuit' : get().starShirt ? 'star' : 'islander',
+        toast: on
+          ? {
+              title: 'Suited',
+              body: 'Sealed, checked and green. The button under the glass will answer you now.',
+              kind: 'progress',
+            }
+          : null,
+      })
+    },
+
+    /**
+     * Home: down out of orbit and onto the island, in the middle of it.
+     *
+     * This is the one door out of the flight, which is why it reaches past
+     * the seal rather than going around it. He lands at the crossroads rather
+     * than back in the lighthouse — the ship came down where there is room to
+     * put it, and the island is what he is being given back.
+     *
+     * The suit comes off on the way and the shirt stays on: the flight is
+     * over, and the only thing he keeps is the thing he earned.
+     */
+    flyHome: () => {
+      if (!get().launch?.arrived) return
+      sfx.jingle()
+      const first = !get().starShirt
+      /* Through the seal, which this is the end of. */
+      raw({ mode: 'explore', area: 'island' })
+      set((state) => ({
+        launch: null,
+        suited: false,
+        starShirt: true,
+        outfit: 'star',
+        nearby: null,
+        panel: null,
+        dialogue: null,
+        stride: null,
+        spawn: {
+          area: 'island',
+          position: [...PLAYER_START] as Vec2,
+          token: state.spawn.token + 1,
+        },
+        toast: first
+          ? {
+              title: 'Blue and yellow',
+              body: 'Back on the ground, in the shirt they give you for going up. It is yours — the settings card will swap it back if you would rather.',
+              kind: 'progress',
+            }
+          : null,
+      }))
+    },
+
+    /** Which of the two shirts he wears. Only offered once both exist. */
+    wearStarShirt: (on) => {
+      if (!get().starShirt) return
+      if (get().outfit === 'tuxedo' || get().outfit === 'spacesuit') return
+      sfx.confirm()
+      set({ outfit: on ? 'star' : 'islander' })
     },
 
     /**
@@ -2208,6 +2328,9 @@ export const useGame = create<GameState>((raw, get) => {
         cvUnlocked: false,
         launch: null,
         launched: false,
+        starShirt: false,
+        suited: false,
+        outfit: 'islander',
         toast: {
           title: 'Starting over',
           body: 'The journal, the keyring and everything found have been forgotten.',
@@ -2229,6 +2352,7 @@ type Progressed = Pick<
   | 'lighthouseOpen'
   | 'cvUnlocked'
   | 'launched'
+  | 'starShirt'
 >
 
 /** The store's progress in the shape the save file keeps it in. */
@@ -2246,6 +2370,7 @@ function snapshot(s: Progressed): SavedProgress {
     lighthouseOpen: s.lighthouseOpen,
     cvUnlocked: s.cvUnlocked,
     launched: s.launched,
+    starShirt: s.starShirt,
   }
 }
 
@@ -2264,7 +2389,8 @@ useGame.subscribe((state, previous) => {
     state.secrets === previous.secrets &&
     state.lighthouseOpen === previous.lighthouseOpen &&
     state.cvUnlocked === previous.cvUnlocked &&
-    state.launched === previous.launched
+    state.launched === previous.launched &&
+    state.starShirt === previous.starShirt
   ) {
     return
   }

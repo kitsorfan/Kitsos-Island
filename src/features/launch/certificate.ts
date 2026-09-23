@@ -63,7 +63,9 @@ export const CERT_TEXT = {
   title: 'Certificate of Completion',
   lead: 'This certifies that',
   body: 'walked every road of Kitsos Island, opened all five locks of the Old Lighthouse, and left the island under their own power aboard the ship inside it.',
-  signatory: `${PROFILE.firstName} "${PROFILE.nickname}" ${PROFILE.lastName}`,
+  /* Signed the way he signs things, not the way the CV heads itself: the
+     nickname is the name here, so no quoted middle and no given name. */
+  signatory: `${PROFILE.nickname} ${PROFILE.lastName}`,
   signatoryRole: PROFILE.title,
 }
 

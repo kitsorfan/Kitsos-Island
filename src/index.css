@@ -5574,3 +5574,42 @@ canvas {
     animation: none;
   }
 }
+
+/*
+ * The way home, at the foot of the orbit card.
+ *
+ * Deliberately the widest thing on the card and the last thing read: the
+ * certificate is what he came up for, and this is what he does next.
+ */
+.orbit__home {
+  display: grid;
+  gap: 0.15rem;
+  width: min(420px, 100%);
+  margin-top: 0.2rem;
+  padding: 0.7rem 1.2rem;
+  border: 1px solid rgba(140, 190, 255, 0.45);
+  border-radius: 0.8rem;
+  background: linear-gradient(
+    180deg,
+    rgba(58, 96, 170, 0.5),
+    rgba(30, 52, 104, 0.6)
+  );
+  color: #eaf2ff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease;
+}
+
+.orbit__home small {
+  font-weight: 400;
+  font-size: 0.75rem;
+  color: #a8bcd8;
+}
+
+.orbit__home:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}

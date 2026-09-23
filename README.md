@@ -63,7 +63,7 @@ people and — in five of them — a key.
 | **Army Camp** (SE)               | Service record and the Battalion Commander's letter, under the Greek flag · 🔑 Footlocker Key                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | **Town School** (W)              | The hall: his first teacher, two cups, volunteering and the foundation's letter · 🔑 Cabinet Key. West door: the Evangeliki classroom, the principal, the Pascal tutor, the robotics bench and the after-school clubs. East door: the Ionidios classroom, three teachers and their scholarship letters, the EUSO bench and the machine he learned C++ on                                                                                                                                                                |
 | **Radio Center** (S)             | The transmitter — email, LinkedIn and a message desk                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| **The Old Lighthouse** (NW cape) | Sealed with five locks. Inside: the career summary, the keeper's logbook — and a flight deck. The tower is a gantry, and the button under the glass launches it                                                                                                                                                                                                                                                                                                                                                         |
+| **The Old Lighthouse** (NW cape) | Sealed with five locks, and not a lighthouse. Inside is a flight deck: a hologram of the tower cut away to show the ship inside it, an airlock with a pressure suit on the rack, and the button under the glass. Suit up, launch, sign the certificate in orbit, fly home in the star shirt                                                                                                                                                                                                                             |
 
 ### Missions and keys
 
@@ -134,19 +134,41 @@ Some notes on how it hangs together:
   indoor scenes light themselves and the draw call count stays low. The player
   controller is shared and picks its colliders, bounds, ground height and camera
   from whichever area is active.
-- **The lighthouse is a spaceship, and leaving is final.** The summit room is
-  a flight deck (`features/launch/FlightDeck.tsx`): a console, a window, and a
-  button under glass. Pressing it starts a sequence that cannot be stopped —
-  hold, ignition, climb, orbit — timed by `features/launch/launch.ts` off one
-  clock, so the count on the screen, the shake on the camera and the island
-  shrinking in the window all agree. At the top he signs a certificate in his
-  own name, drawn to a canvas and handed over as a PNG
-  (`features/launch/certificate.ts`); the full CV is on the same card. There is
-  no way back to the island from orbit, and that is enforced in one place
-  rather than a dozen: `isSealed` wraps the store's own `set`, so every
-  existing way back to `explore` — a panel closing, the map, walking out of a
-  building — silently drops the mode change and keeps the rest of its patch.
-  A path added later is covered without anybody having to remember it.
+- **The lighthouse is a spaceship.** The summit room is a flight deck
+  (`features/launch/FlightDeck.tsx`), and it says so before a word is read: a
+  hologram turns on a plinth in the middle of the floor with the painted tower
+  in translucent bands and the ship inside it in wireframe, engines and all.
+  Ribbed bulkheads, a lit floor strip and cold lighting do the rest.
+
+- **The airlock is the gate, and the walk across the room is the point.** The
+  suit hangs on a rack in a lit alcove on the west wall, as far from the
+  console as the room allows. The button is dull and reads `SUIT UP FIRST`
+  until he has been over and put it on; press it in shirtsleeves and the deck
+  says so. Suited, he gets a bubble helmet, a life-support pack and an amber
+  collar (`Character.tsx`), the rack stands empty, and its lamp goes green.
+
+- **The flight is one clock.** `features/launch/launch.ts` times hold,
+  ignition, climb and orbit, so the count on the screen, the shake on the
+  camera and the island shrinking in the window all agree. A phase is
+  arithmetic on elapsed time rather than a frame-stepped machine, so a dropped
+  frame or a backgrounded tab costs nothing.
+
+- **The prize is a certificate and a shirt.** In orbit he types his name onto
+  a certificate drawn to a canvas and handed over as a PNG
+  (`features/launch/certificate.ts`), signed by Kitsos Orfanopoulos; the full
+  CV is on the same card. Then he flies home, landing at the crossroads in the
+  blue-and-yellow star shirt: deep flight blue, a gold star extruded off the
+  chest, gold collar, cuffs and hem, and a mission patch on the sleeve. It is
+  the only thing on the island that has to be earned, and the settings card
+  will swap it back for anybody who would rather have the red one.
+
+- **While he is up there the game is sealed.** Every other screen can be
+  backed out of sideways; this one has exactly one door, which is the ride
+  home. That is enforced in one place rather than a dozen: `isSealed` wraps
+  the store’s own `set`, so every existing way back to `explore` — a panel
+  closing, the map, walking out of a building — silently drops the mode change
+  and keeps the rest of its patch, the functional-updater form included. A
+  path added later is covered without anybody having to remember it.
 
 - **The lift is the one way through that takes time.** Every other door and
   flight swaps the room the moment you walk into it. Walking into the car

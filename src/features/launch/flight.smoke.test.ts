@@ -33,7 +33,8 @@ describe('a whole flight', () => {
   it('runs from the button to the certificate', () => {
     useGame.setState({ area: 'lighthouse', mode: 'explore' })
 
-    /* The button. */
+    /* The rack, then the button: in that order, which is the point of it. */
+    useGame.getState().toggleSuit()
     useGame.getState().beginLaunch()
     const launch = useGame.getState().launch!
     expect(useGame.getState().mode).toBe('launch')
@@ -57,15 +58,16 @@ describe('a whole flight', () => {
     expect(useGame.getState().launched).toBe(true)
   })
 
-  it('leaves no way back to the island', () => {
+  it('has exactly one door out of it, and this is not it', () => {
     useGame.setState({ area: 'lighthouse', mode: 'explore' })
+    useGame.getState().toggleSuit()
     useGame.getState().beginLaunch()
     useGame.getState().reachOrbit()
 
     /*
      * The ways off every other screen on the island, tried in turn. None of
-     * them may hand the walk back: this is the rule the whole feature is
-     * built to keep.
+     * them may hand the walk back sideways: the flight ends by the ride
+     * home or it does not end at all.
      */
     const escapes = [
       () => useGame.getState().closePanel(),
@@ -78,5 +80,10 @@ describe('a whole flight', () => {
       escape()
       expect(useGame.getState().mode).toBe('orbit')
     }
+
+    /* And the one that is the door. */
+    useGame.getState().flyHome()
+    expect(useGame.getState().mode).toBe('explore')
+    expect(useGame.getState().area).toBe('island')
   })
 })

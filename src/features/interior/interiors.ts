@@ -1919,29 +1919,68 @@ export const INTERIORS: Interior[] = [
   {
     id: 'lighthouse',
     name: 'The Old Lighthouse',
-    kicker: 'Summit room',
+    /*
+     * Not a summit room any more. The kicker is the first thing the HUD says
+     * when he walks in, so it is the first place the reveal lands.
+     */
+    kicker: 'Flight deck',
     half: [10, 10],
-    floor: '#d8cfc0',
-    rug: '#f0a33c',
-    wall: '#efe2cc',
-    accent: '#f0a33c',
-    spawn: [0, 4.5],
+    /*
+     * Painted like a hull rather than a keeper's parlour: plate grey
+     * underfoot, cold panelling on the walls, and the amber kept for the
+     * things that are still the lighthouse - the logbook, the collar of the
+     * suit, the lamp at the top of the hologram.
+     */
+    floor: '#39414b',
+    rug: '#1f5f9e',
+    wall: '#5a6672',
+    accent: '#6fc3ff',
+    spawn: [0, 8.2],
+    /*
+     * A keeper's room that stopped being one. The north half is the flight
+     * deck — console, window and the button, all drawn by
+     * `features/launch/FlightDeck.tsx` rather than declared here, because
+     * they read the launch clock — and what is left of the lighthouse is
+     * pushed to the edges: the logbook on the east wall, the globe and the
+     * shelf behind him, the stairs he came up by.
+     *
+     * The west wall is the airlock. That is the one part of the room the
+     * visitor has to walk to before anything happens, so it is kept well
+     * clear of the console and given the whole side to itself.
+     */
     props: [
-      { kind: 'stairs', position: [8, 7], rotation: -Math.PI / 2 },
-      { kind: 'rug', position: [0, 0], scale: 1.5, solid: false },
-      { kind: 'table', position: [0, 1] },
-      { kind: 'chair', position: [0, 3.4], rotation: Math.PI },
-      { kind: 'bookshelf', position: [-8.8, -2], rotation: Math.PI / 2 },
-      { kind: 'lamp', position: [-8, 6] },
-      { kind: 'plant', position: [8.6, -6] },
-      { kind: 'globe', position: [-6.5, -7.5] },
+      { kind: 'stairs', position: [8, 8], rotation: -Math.PI / 2 },
+      /* The flight chair, facing the console and the window beyond it. */
+      { kind: 'chair', position: [0, -3.6], rotation: Math.PI },
+      { kind: 'bookshelf', position: [8.8, 2], rotation: -Math.PI / 2 },
+      /* The globe stays. It is the one instrument on the deck that was
+         already here, and it is still the right one. */
+      { kind: 'globe', position: [6.6, 6.4] },
+      /* The airlock: lockers for the suits, a bench to sit on to pull them
+         on, and the crate of everything that did not fit in either. */
+      { kind: 'locker', position: [-9, -1], rotation: Math.PI / 2 },
+      { kind: 'locker', position: [-9, 0.9], rotation: Math.PI / 2 },
+      { kind: 'crate', position: [-8.6, -4.4] },
+      { kind: 'table', position: [-6.6, 2.6], scale: 0.8 },
+      /* Avionics down both sides: the racks that fly the thing. */
+      { kind: 'serverRack', position: [9, -4], rotation: -Math.PI / 2 },
+      { kind: 'serverRack', position: [9, -6], rotation: -Math.PI / 2 },
+      { kind: 'serverRack', position: [-9, -6], rotation: Math.PI / 2 },
+      { kind: 'monitor', position: [6.6, -7.6], rotation: Math.PI },
+      { kind: 'monitor', position: [-6.6, -7.6], rotation: Math.PI },
+      /* One green thing, in a tank by the stairs. Every crew keeps one. */
+      { kind: 'plant', position: [-8.6, 8.4] },
     ],
     exhibits: [
       {
         id: 'lh-summary',
         kind: 'cv',
         label: 'the keeper’s logbook',
-        position: [0, -9.3],
+        /* Off the east wall now: the south wall in front of the window is
+           the flight deck's, and a logbook there would be read through the
+           console. */
+        position: [9.3, 0],
+        rotation: -Math.PI / 2,
         panel: {
           kicker: 'The Old Lighthouse',
           title: 'The short version',
@@ -1950,6 +1989,24 @@ export const INTERIORS: Interior[] = [
         journal: {
           title: 'The Old Lighthouse',
           body: 'Opened with all five district keys. The keeper’s logbook holds the career summary, what he is good at, and what he is looking for.',
+        },
+      },
+      {
+        id: 'lh-notice',
+        kind: 'board',
+        label: 'the departure notice',
+        position: [-9.3, 5],
+        rotation: Math.PI / 2,
+        lines: [
+          'PRE-FLIGHT — read it in order, there is no second try.',
+          'One. The suit is on the rack behind you. Put it on; the console will not answer a man in shirtsleeves.',
+          'Two. The button is under the glass on the console. Press it and the count starts.',
+          'Three. There is no abort. Once the gantry lets go you are going up.',
+          'Signed, the keeper. He has done it once and says the view is worth it.',
+        ],
+        journal: {
+          title: 'The departure notice',
+          body: 'The lighthouse is a gantry and the summit room is a flight deck. The suit goes on first, then the button under the glass. There is no abort.',
         },
       },
     ],

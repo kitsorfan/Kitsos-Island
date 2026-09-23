@@ -416,4 +416,39 @@ export const UI: Record<string, string> = {
   throttle: 'γκάζι',
   chart: 'χάρτης',
   'put in': 'επιστροφή',
+
+  /* The lighthouse, once it turns out to be a ship. */
+  Orbit: 'Τροχιά',
+  'In orbit': 'Σε τροχιά',
+  'You made it off the island': 'Έφυγες από το νησί',
+  'The lighthouse was a gantry all along, and the summit room was the flight deck. Kitsos Island is the blue-green shape under the window now, with every road you walked on it.':
+    'Ο φάρος ήταν ικρίωμα από την αρχή, και η αίθουσα της κορυφής ήταν το πιλοτήριο. Το Νησί του Κίτσου είναι τώρα το γαλαζοπράσινο σχήμα κάτω από το παράθυρο, με κάθε δρόμο που περπάτησες πάνω του.',
+  'Put your name on it': 'Βάλε το όνομά σου',
+  'your name here': 'το όνομά σου εδώ',
+  'Take your certificate': 'Πάρε το πιστοποιητικό σου',
+  'Saved — take another': 'Αποθηκεύτηκε — πάρε κι άλλο',
+  'And the full CV': 'Και το πλήρες βιογραφικό',
+  'Preview of your certificate': 'Προεπισκόπηση του πιστοποιητικού σου',
+  'Signed by': 'Υπογραφή',
+  'Thanks for walking the whole of it.':
+    'Ευχαριστώ που το περπάτησες ολόκληρο.',
+  'Fly back down to the island': 'Πέτα πίσω στο νησί',
+  'Certificate saved. The shirt comes with the landing.':
+    'Το πιστοποιητικό αποθηκεύτηκε. Η μπλούζα έρχεται με την προσγείωση.',
+  'You can take the certificate down with you either way.':
+    'Μπορείς να πάρεις το πιστοποιητικό μαζί σου ούτως ή άλλως.',
+  'to launch': 'για εκτόξευση',
+  'Hold. Strapped in and counting.': 'Αναμονή. Δεμένος και μετράει αντίστροφα.',
+  'Ignition. The gantry has let go.': 'Ανάφλεξη. Το ικρίωμα άφησε.',
+  'Climbing. The island is getting smaller.': 'Ανέρχεται. Το νησί μικραίνει.',
+  'Orbit. Nothing out here but the hum.':
+    'Τροχιά. Τίποτα εδώ έξω πέρα από το βουητό.',
+  LAUNCH: 'ΕΚΤΟΞΕΥΣΗ',
+  'SUIT UP FIRST': 'ΦΟΡΕΣΕ ΣΤΟΛΗ ΠΡΩΤΑ',
+  'PRESSURE SUIT': 'ΣΤΟΛΗ ΠΙΕΣΗΣ',
+  'SUIT ON': 'ΣΤΟΛΗ ΦΟΡΕΜΕΝΗ',
+  'KITSOS ISLAND · DEPARTURE': 'ΝΗΣΙ ΚΙΤΣΟΥ · ΑΝΑΧΩΡΗΣΗ',
+  Shirt: 'Μπλούζα',
+  Star: 'Αστέρι',
+  Original: 'Αρχική',
 }

@@ -1,9 +1,10 @@
-import { useEffect, useRef, type RefObject } from 'react'
+import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { DoubleSide } from 'three'
 import type { Group, Object3D, PointLight, SpotLight } from 'three'
 import { partyBeat } from '../party/partyLogic'
 import { RING } from '../party/partyData'
+import { starShape } from '../launch/starShape'
 import type { HandLight, Npc } from '../../types'
 
 export interface CharacterMotion {
@@ -79,6 +80,24 @@ interface CharacterProps {
   helmet?: string
   /** Match kit in a team colour: a bib over the shirt and a mask over the eyes. */
   kit?: string
+  /**
+   * Dressed for vacuum: a bubble helmet over the whole head, a life-support
+   * pack on the back, and the hard collar the two meet at.
+   *
+   * Its own flag rather than a colour, because unlike a crash helmet none of
+   * it is a matter of taste — a pressure suit is the same suit for everybody
+   * who goes up, and what varies is only whether you are wearing one.
+   */
+  spacesuit?: boolean
+  /**
+   * The shirt they give you for having gone up: deep blue, with a gold star
+   * across the chest, gold cuffs and collar, and a mission patch on the arm.
+   *
+   * Its own flag for the same reason the suit is. It is not a colour scheme
+   * somebody chose — it is the one thing on the island that has to be earned,
+   * and it has to look like it from across a field.
+   */
+  starShirt?: boolean
 }
 
 const IDLE: CharacterMotion = { moving: false, speed: 0, airborne: false }
@@ -132,6 +151,8 @@ export function Character({
   buttonhole,
   bouquet = false,
   helmet,
+  spacesuit,
+  starShirt,
   kit,
   ring = false,
 }: CharacterProps) {
@@ -788,6 +809,49 @@ export function Character({
                 roughness={0.9}
               />
             </mesh>
+            {/* What makes the blue shirt the prize rather than a blue shirt:
+                a gold star on the chest, gold at the collar and cuffs, and
+                the mission patch on the sleeve. */}
+            {starShirt && !spacesuit && <StarKit />}
+
+            {/* The pack on his back, and the chest rig that answers it. */}
+            {spacesuit && (
+              <group position={[0, 1.05, 0]}>
+                <LifeSupport />
+                {/* A control box on the chest, where a pilot's is. */}
+                <mesh position={[0, 0.04, 0.21]} castShadow>
+                  <boxGeometry args={[0.3, 0.2, 0.06]} />
+                  <meshStandardMaterial
+                    color="#c3ccd6"
+                    flatShading
+                    roughness={0.6}
+                  />
+                </mesh>
+                <mesh position={[-0.07, 0.04, 0.25]}>
+                  <boxGeometry args={[0.05, 0.05, 0.02]} />
+                  <meshStandardMaterial
+                    color="#6fd08a"
+                    emissive="#6fd08a"
+                    emissiveIntensity={0.9}
+                  />
+                </mesh>
+                <mesh position={[0.05, 0.04, 0.25]}>
+                  <boxGeometry args={[0.05, 0.05, 0.02]} />
+                  <meshStandardMaterial
+                    color="#f0a33c"
+                    emissive="#f0a33c"
+                    emissiveIntensity={0.7}
+                  />
+                </mesh>
+                {/* Amber bands at the shoulders, matching the collar. */}
+                {[-0.31, 0.31].map((x) => (
+                  <mesh key={x} position={[x, 0.22, 0]}>
+                    <boxGeometry args={[0.04, 0.16, 0.39]} />
+                    <meshStandardMaterial color="#f0a33c" flatShading />
+                  </mesh>
+                ))}
+              </group>
+            )}
 
             {/* Match kit: a team bib over whatever they turned up in */}
             {kit && (
@@ -1018,8 +1082,8 @@ export function Character({
                   roughness={0.85}
                 />
               </mesh>
-              {/* Hair, unless a helmet has swallowed it */}
-              {!helmet && (
+              {/* Hair, unless a helmet or a bubble has swallowed it */}
+              {!helmet && !spacesuit && (
                 <group>
                   <mesh position={[0, 0.2, -0.03]} castShadow>
                     <boxGeometry args={[0.6, 0.24, 0.56]} />
@@ -1039,7 +1103,7 @@ export function Character({
                   </mesh>
                 </group>
               )}
-              {hair === 'long' && !helmet && (
+              {hair === 'long' && !helmet && !spacesuit && (
                 <group>
                   {/* Down the back, past the shoulders */}
                   <mesh position={[0, -0.52, -0.28]} castShadow>
@@ -1094,13 +1158,179 @@ export function Character({
                   ))}
                 </group>
               )}
-              {helmet && <Helmet color={helmet} />}
-              {kit && !helmet && <Mask color={kit} />}
-              {!helmet && <Accessory prop={prop} />}
+              {spacesuit && <SpaceHelmet />}
+              {helmet && !spacesuit && <Helmet color={helmet} />}
+              {kit && !helmet && !spacesuit && <Mask color={kit} />}
+              {!helmet && !spacesuit && <Accessory prop={prop} />}
             </group>
           </group>
         </group>
       </group>
+    </group>
+  )
+}
+
+/** The gold on the blue: star, collar, cuffs and the patch on the arm. */
+function StarKit() {
+  const star = useMemo(() => starShape(0.2, 0.085), [])
+
+  return (
+    <group position={[0, 1.05, 0]}>
+      {/* The star across the chest, standing a hair off the shirt so it
+          catches the light rather than reading as a printed decal. */}
+      <mesh position={[0, 0.06, 0.196]}>
+        <extrudeGeometry args={[star, { depth: 0.022, bevelEnabled: false }]} />
+        <meshStandardMaterial
+          color="#f5c518"
+          emissive="#f0a33c"
+          emissiveIntensity={0.45}
+          metalness={0.5}
+          roughness={0.3}
+        />
+      </mesh>
+
+      {/* Gold at the collar. */}
+      <mesh position={[0, 0.355, 0]}>
+        <boxGeometry args={[0.64, 0.07, 0.4]} />
+        <meshStandardMaterial
+          color="#f2c230"
+          flatShading
+          metalness={0.4}
+          roughness={0.4}
+        />
+      </mesh>
+
+      {/* A gold band round the hem, which is what ties it to the trousers. */}
+      <mesh position={[0, -0.33, 0]}>
+        <boxGeometry args={[0.635, 0.06, 0.395]} />
+        <meshStandardMaterial color="#f2c230" flatShading metalness={0.35} />
+      </mesh>
+
+      {/* Cuffs, at the end of each sleeve. */}
+      {[-0.33, 0.33].map((x) => (
+        <mesh key={x} position={[x, 0.24, 0]}>
+          <boxGeometry args={[0.06, 0.12, 0.4]} />
+          <meshStandardMaterial color="#f2c230" flatShading metalness={0.35} />
+        </mesh>
+      ))}
+
+      {/* The mission patch on the left arm: a small disc with its own star. */}
+      <group position={[-0.325, 0.08, 0.02]} rotation={[0, -Math.PI / 2, 0]}>
+        <mesh>
+          <circleGeometry args={[0.1, 16]} />
+          <meshStandardMaterial color="#0f2c5c" />
+        </mesh>
+        <mesh position={[0, 0, 0.004]}>
+          <extrudeGeometry
+            args={[
+              starShape(0.068, 0.029),
+              { depth: 0.008, bevelEnabled: false },
+            ]}
+          />
+          <meshStandardMaterial
+            color="#f5c518"
+            emissive="#f0a33c"
+            emissiveIntensity={0.4}
+            metalness={0.4}
+          />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
+/**
+ * The bubble a man wears in vacuum.
+ *
+ * A sphere rather than a box, which is the whole of why it reads as a space
+ * helmet beside a crash helmet built out of the same kit: nothing else on
+ * this island is round. The glass is transparent enough to keep his face —
+ * losing the face to a mirrored visor loses the person inside the suit, and
+ * the point of the suit is that it is still him.
+ */
+function SpaceHelmet() {
+  return (
+    <group position={[0, 0.06, 0]}>
+      {/* The hard collar the bubble seats on. */}
+      <mesh position={[0, -0.36, 0]} castShadow>
+        <cylinderGeometry args={[0.36, 0.38, 0.12, 14]} />
+        <meshStandardMaterial
+          color="#f0a33c"
+          flatShading
+          roughness={0.5}
+          metalness={0.25}
+        />
+      </mesh>
+      {/* The glass. Drawn from the inside as well, so the back of it is
+          there behind his head rather than an open shell. */}
+      <mesh castShadow>
+        <sphereGeometry args={[0.46, 18, 16]} />
+        <meshStandardMaterial
+          color="#cfe6fa"
+          transparent
+          opacity={0.36}
+          roughness={0.08}
+          metalness={0.2}
+          side={DoubleSide}
+        />
+      </mesh>
+      {/* The sunshade over the brow, and the lamp clipped to it. */}
+      <mesh position={[0, 0.3, 0.08]} castShadow>
+        <cylinderGeometry args={[0.34, 0.34, 0.14, 14]} />
+        <meshStandardMaterial color="#eef2f6" flatShading roughness={0.7} />
+      </mesh>
+      <mesh position={[0, 0.3, 0.36]}>
+        <cylinderGeometry args={[0.07, 0.07, 0.06, 10]} />
+        <meshStandardMaterial
+          color="#fff4d0"
+          emissive="#ffd98a"
+          emissiveIntensity={0.9}
+        />
+      </mesh>
+    </group>
+  )
+}
+
+/**
+ * The life-support pack, and the two hoses that run from it to the collar.
+ * Worn on the back, where it is the silhouette that says "spacesuit" from
+ * behind — which is the angle this game is played from.
+ */
+function LifeSupport() {
+  return (
+    <group position={[0, 0, -0.3]}>
+      <mesh position={[0, 0, -0.12]} castShadow>
+        <boxGeometry args={[0.6, 0.72, 0.26]} />
+        <meshStandardMaterial color="#dbe3ea" flatShading roughness={0.8} />
+      </mesh>
+      {/* Two tanks down the back of it. */}
+      {[-0.16, 0.16].map((x) => (
+        <mesh key={x} position={[x, 0, -0.28]} castShadow>
+          <cylinderGeometry args={[0.1, 0.1, 0.62, 10]} />
+          <meshStandardMaterial
+            color="#b9c4cf"
+            flatShading
+            metalness={0.35}
+            roughness={0.5}
+          />
+        </mesh>
+      ))}
+      {/* A live readout, so the pack is running rather than luggage. */}
+      <mesh position={[0.18, 0.28, 0.02]}>
+        <boxGeometry args={[0.14, 0.08, 0.04]} />
+        <meshStandardMaterial
+          color="#6fd08a"
+          emissive="#6fd08a"
+          emissiveIntensity={0.8}
+        />
+      </mesh>
+      {/* The hoses up to the collar. */}
+      {[-0.2, 0.2].map((x) => (
+        <mesh key={x} position={[x, 0.42, -0.02]} rotation={[0.3, 0, 0]}>
+          <cylinderGeometry args={[0.05, 0.05, 0.36, 8]} />
+          <meshStandardMaterial color="#8d949a" roughness={0.6} />
+        </mesh>
+      ))}
     </group>
   )
 }

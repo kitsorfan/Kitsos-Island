@@ -33,6 +33,12 @@ export function OrbitCard() {
 
   const ready = nameReady(name)
 
+  /*
+   * Whether the card is on screen at all, which the early return below acts
+   * on — but the effect has to know it too. See the dependency list.
+   */
+  const showing = Boolean(launch?.arrived) && !credits
+
   /* The preview is the certificate itself, drawn by the same function that
      writes the file — so what he is looking at cannot differ from what he
      gets. It redraws as he types, which is most of why the box is worth
@@ -41,7 +47,18 @@ export function OrbitCard() {
     const ctx = canvas.current?.getContext('2d')
     if (!ctx) return
     drawCertificate(ctx, ready ? cleanName(name) : t('your name here'))
-  }, [name, ready, t])
+    /*
+     * `showing` is in here because the canvas does not exist until it is
+     * true.
+     *
+     * The card is behind an early return: while the credits are rolling
+     * this component renders null, so the first runs of this effect find
+     * no canvas to draw on and quietly give up. Then the credits end, the
+     * canvas mounts for the first time - and none of `name`, `ready` or `t`
+     * has changed, so without `showing` the effect never runs again and the
+     * certificate stays blank until the first keystroke paints it.
+     */
+  }, [name, ready, t, showing])
 
   const take = () => {
     if (!ready) return
@@ -53,7 +70,7 @@ export function OrbitCard() {
   /* Not until the roll has played out. The card is the end of the game and
      the credits are the end of the game; putting the card up over the first
      title is how you make sure nobody reads either. */
-  if (!launch?.arrived || credits) return null
+  if (!showing) return null
 
   return (
     <div className="overlay overlay--orbit">

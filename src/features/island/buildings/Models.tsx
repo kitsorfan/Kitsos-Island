@@ -1932,87 +1932,129 @@ export function LighthouseModel() {
           <Door position={[0, 0, 0]} width={1.6} height={2.8} color="#7a4a2c" />
         </group>
 
-        {/* And the hatch behind it. */}
-        <group ref={hatch} visible={false} position={[0, 0, -0.14]}>
-          {/* The collar it is set into. */}
-          <mesh castShadow>
-            <torusGeometry args={[1.25, 0.22, 10, 28]} />
+        {/*
+          And the hatch behind it: a way into a spacecraft, at the size of a
+          way into a spacecraft.
+
+          The first version was a ring of bolts round a wheel, which at this
+          scale read as a ship's helm bolted to the wall rather than a door -
+          it was narrower than the wooden door it replaced, so the thing that
+          had plainly been a doorway a second earlier stopped looking like
+          one. It is squarer and taller than a man now, set into a frame of
+          its own, and the wheel is a detail on it instead of the whole of it.
+        */}
+        <group ref={hatch} visible={false}>
+          {/* The frame, sunk into the hull: a rounded arch of plate. */}
+          <mesh position={[0, 0, -0.34]} castShadow receiveShadow>
+            <boxGeometry args={[2.5, 3.4, 0.5]} />
             <meshStandardMaterial
               color="#8d949a"
-              metalness={0.65}
-              roughness={0.35}
+              metalness={0.55}
+              roughness={0.45}
               flatShading
             />
           </mesh>
-          {/* The plug itself, dished, with a wheel on the front. */}
-          <mesh position={[0, 0, 0.08]} castShadow>
-            <cylinderGeometry args={[1.18, 1.18, 0.22, 24]} />
+          {/* A chamfer round the opening, so the frame is not a slab. */}
+          <mesh position={[0, 0, -0.06]}>
+            <boxGeometry args={[2.16, 3.06, 0.14]} />
+            <meshStandardMaterial
+              color="#5c6670"
+              metalness={0.5}
+              roughness={0.5}
+              flatShading
+            />
+          </mesh>
+
+          {/* The door itself: a slab of plate with a long window in it. */}
+          <mesh position={[0, 0, 0.04]} castShadow>
+            <boxGeometry args={[1.94, 2.84, 0.16]} />
             <meshStandardMaterial
               color="#c3ccd6"
-              metalness={0.55}
-              roughness={0.4}
+              metalness={0.5}
+              roughness={0.42}
               flatShading
             />
           </mesh>
-          {/* Eight bolts round the rim. */}
-          {Array.from({ length: 8 }, (_, i) => {
-            const a = (i / 8) * Math.PI * 2
-            return (
-              <mesh
-                key={i}
-                position={[Math.cos(a) * 0.95, Math.sin(a) * 0.95, 0.22]}
-              >
-                <cylinderGeometry args={[0.09, 0.09, 0.12, 8]} />
+          {/* Two ribs across it, which is what says plate rather than panel. */}
+          {[-0.72, 0.72].map((y) => (
+            <mesh key={y} position={[0, y, 0.13]}>
+              <boxGeometry args={[1.84, 0.16, 0.06]} />
+              <meshStandardMaterial
+                color="#9aa5ad"
+                metalness={0.55}
+                roughness={0.4}
+                flatShading
+              />
+            </mesh>
+          ))}
+          {/* The port: a tall slot of lit glass, at head height. */}
+          <mesh position={[0, 0.62, 0.14]}>
+            <boxGeometry args={[0.78, 0.62, 0.05]} />
+            <meshStandardMaterial
+              color="#bfe4ff"
+              emissive="#6fc3ff"
+              emissiveIntensity={1.2}
+              metalness={0.3}
+              roughness={0.12}
+            />
+          </mesh>
+
+          {/* Bolts down both jambs rather than round a circle. */}
+          {[-1.04, 1.04].map((x) =>
+            [-1.15, -0.4, 0.4, 1.15].map((y) => (
+              <mesh key={`${x}-${y}`} position={[x, y, 0.06]}>
+                <cylinderGeometry args={[0.09, 0.09, 0.14, 8]} />
                 <meshStandardMaterial
                   color="#6b7480"
                   metalness={0.7}
                   roughness={0.3}
                 />
               </mesh>
-            )
-          })}
-          {/* The wheel you would turn to open it. */}
-          <mesh position={[0, 0, 0.3]} castShadow>
-            <torusGeometry args={[0.46, 0.08, 8, 20]} />
-            <meshStandardMaterial
-              color="#f0a33c"
-              metalness={0.5}
-              roughness={0.4}
-            />
-          </mesh>
-          {[0, 1, 2].map((i) => {
-            const a = (i / 3) * Math.PI * 2
-            return (
-              <mesh key={i} position={[0, 0, 0.3]} rotation={[0, 0, a]}>
-                <boxGeometry args={[0.92, 0.07, 0.07]} />
+            )),
+          )}
+
+          {/* The wheel, low and off to one side the way a handle is. */}
+          <group position={[0.52, -0.62, 0.2]}>
+            <mesh castShadow>
+              <torusGeometry args={[0.34, 0.07, 8, 20]} />
+              <meshStandardMaterial
+                color="#f0a33c"
+                metalness={0.5}
+                roughness={0.4}
+              />
+            </mesh>
+            {[0, 1, 2].map((i) => (
+              <mesh key={i} rotation={[0, 0, (i / 3) * Math.PI * 2]}>
+                <boxGeometry args={[0.66, 0.06, 0.06]} />
                 <meshStandardMaterial
                   color="#f0a33c"
                   metalness={0.5}
                   roughness={0.4}
                 />
               </mesh>
-            )
-          })}
-          {/* A port in the middle of it, lit from inside. */}
-          <mesh position={[0, 0, 0.33]}>
-            <circleGeometry args={[0.24, 16]} />
-            <meshStandardMaterial
-              color="#bfe4ff"
-              emissive="#6fc3ff"
-              emissiveIntensity={1.1}
-              metalness={0.3}
-              roughness={0.15}
-            />
-          </mesh>
-          {/* And a lamp over it, green once the locks are open. */}
-          <mesh position={[0, 1.5, 0.1]}>
-            <cylinderGeometry args={[0.13, 0.13, 0.1, 10]} />
+            ))}
+          </group>
+
+          {/* And the lamp over the frame, green because the locks are open. */}
+          <mesh position={[0, 1.86, 0.06]}>
+            <boxGeometry args={[0.5, 0.16, 0.12]} />
             <meshStandardMaterial
               color="#6fd08a"
               emissive="#6fd08a"
-              emissiveIntensity={1.4}
+              emissiveIntensity={1.5}
             />
           </mesh>
+          {/* Hazard stripes along the sill: the one thing that says this is
+              equipment and not architecture. */}
+          {[-0.7, -0.24, 0.24, 0.7].map((x, i) => (
+            <mesh key={`sill-${x}`} position={[x, -1.62, 0.12]}>
+              <boxGeometry args={[0.22, 0.14, 0.05]} />
+              <meshStandardMaterial
+                color={i % 2 === 0 ? '#f0a33c' : '#2b333c'}
+                flatShading
+              />
+            </mesh>
+          ))}
         </group>
       </group>
 

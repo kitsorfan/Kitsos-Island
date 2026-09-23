@@ -136,12 +136,12 @@ export function RevealMark() {
         the first in plain white - the eye reads down.
       */}
       {saying && (
-        <group ref={billboard} key={spoken} position={[0, 5.2, 0]}>
+        <group ref={billboard} key={spoken} position={[0, 4.8, 0]}>
           {saying.map((row, i) => (
             <TextPlane
               key={row}
               text={t(row)}
-              position={[0, -i * 1.5, 0]}
+              position={[0, -i * 1.05, 0]}
               /*
                * A fixed, wide plane rather than one measured off the string.
                *
@@ -153,7 +153,7 @@ export function RevealMark() {
                * makes the letters big; `draw` shrinks the font to fit the
                * width on its own.
                */
-              width={11}
+              width={7}
               aspect={7}
               color={i === 0 ? '#ffffff' : '#ffd23f'}
             />

@@ -1677,6 +1677,20 @@ export function LighthouseModel() {
    * paint has to leave the actual tower.
    */
   const reveal = useGame((s) => s.reveal)
+  /*
+   * The tower owns the end of the cutscene, because the tower is what plays
+   * it. Nothing else runs for the whole of one — the component that used to
+   * hold this was an overlay, and when the overlay went so did the only call
+   * to `endReveal`, which left the reveal running forever with him stood on
+   * the doorstep watching a rocket he was never let into.
+   */
+  const endReveal = useGame((s) => s.endReveal)
+  /** Fires the arrival once, however many frames are in flight. */
+  const landed = useRef(false)
+  /** The doorway, the wooden door on it, and the hatch behind that. */
+  const door = useRef<Group>(null)
+  const woodDoor = useRef<Group>(null)
+  const hatch = useRef<Group>(null)
   /** Every painted band, so each can be flown off on its own beat. */
   const shell = useRef<(Group | null)[]>([])
   /** The lamp, the gallery and the cottage: everything that is not the hull. */
@@ -1696,6 +1710,7 @@ export function LighthouseModel() {
     /* Put back together whenever nothing is playing, so leaving the room
        does not leave a half-dismantled lighthouse on the cape. */
     if (!phase) {
+      landed.current = false
       for (const band of shell.current) {
         if (!band) continue
         band.visible = true
@@ -1708,6 +1723,13 @@ export function LighthouseModel() {
         trim.current.position.y = 0
       }
       if (ship.current) ship.current.visible = false
+      if (woodDoor.current) {
+        woodDoor.current.visible = true
+        woodDoor.current.position.z = 0
+        woodDoor.current.rotation.x = 0
+      }
+      if (hatch.current) hatch.current.visible = false
+      if (door.current) door.current.position.z = 3.75
       if (shake.current) shake.current.position.set(0, 0, 0)
       for (const seam of seams.current) {
         if (seam) seam.visible = false
@@ -1729,6 +1751,25 @@ export function LighthouseModel() {
       band.rotation.y = gone * 2.6 * way
       band.rotation.x = gone * 1.1 * way
       band.scale.setScalar(1 + gone * 0.2)
+    }
+
+    /*
+     * The door goes over early - with the first band rather than the last -
+     * because it is the thing he is standing in front of. Leaving it wooden
+     * until the end would have him watching a rocket assemble itself around
+     * a cottage door.
+     */
+    const swap = bandShed(0, phase.shed)
+    if (woodDoor.current) {
+      woodDoor.current.visible = swap < 0.5
+      woodDoor.current.position.z = swap * 2.4
+      woodDoor.current.rotation.x = swap * 1.2
+    }
+    if (hatch.current) hatch.current.visible = swap >= 0.5
+    if (door.current) {
+      /* It settles back a little as the hull takes its place, since the
+         hatch is set into steel rather than hung on plaster. */
+      door.current.position.z = 3.75 - swap * 0.35
     }
 
     /* The lamp room and the cottage lift away with the last of the paint. */
@@ -1755,6 +1796,12 @@ export function LighthouseModel() {
       seam.visible = phase.seam > 0.02
       const mat = seam.material as MeshStandardMaterial
       mat.opacity = phase.seam * 0.9
+    }
+
+    /* And when it is over, he goes in. */
+    if (phase.done && !landed.current) {
+      landed.current = true
+      endReveal()
     }
   })
 
@@ -1874,13 +1921,100 @@ export function LighthouseModel() {
         </mesh>
       </group>
 
-      {/* Keeper's door, facing the road */}
-      <Door
-        position={[0, 1.4, 3.75]}
-        width={1.6}
-        height={2.8}
-        color="#7a4a2c"
-      />
+      {/*
+        The door. A keeper's door until the paint comes off it, and an
+        airlock hatch underneath - so the one thing he has been walking up to
+        all game turns out to have been a piece of the ship as well.
+      */}
+      <group ref={door} position={[0, 1.4, 3.75]}>
+        {/* The wooden one, which goes with the rest of the paint. */}
+        <group ref={woodDoor}>
+          <Door position={[0, 0, 0]} width={1.6} height={2.8} color="#7a4a2c" />
+        </group>
+
+        {/* And the hatch behind it. */}
+        <group ref={hatch} visible={false} position={[0, 0, -0.14]}>
+          {/* The collar it is set into. */}
+          <mesh castShadow>
+            <torusGeometry args={[1.25, 0.22, 10, 28]} />
+            <meshStandardMaterial
+              color="#8d949a"
+              metalness={0.65}
+              roughness={0.35}
+              flatShading
+            />
+          </mesh>
+          {/* The plug itself, dished, with a wheel on the front. */}
+          <mesh position={[0, 0, 0.08]} castShadow>
+            <cylinderGeometry args={[1.18, 1.18, 0.22, 24]} />
+            <meshStandardMaterial
+              color="#c3ccd6"
+              metalness={0.55}
+              roughness={0.4}
+              flatShading
+            />
+          </mesh>
+          {/* Eight bolts round the rim. */}
+          {Array.from({ length: 8 }, (_, i) => {
+            const a = (i / 8) * Math.PI * 2
+            return (
+              <mesh
+                key={i}
+                position={[Math.cos(a) * 0.95, Math.sin(a) * 0.95, 0.22]}
+              >
+                <cylinderGeometry args={[0.09, 0.09, 0.12, 8]} />
+                <meshStandardMaterial
+                  color="#6b7480"
+                  metalness={0.7}
+                  roughness={0.3}
+                />
+              </mesh>
+            )
+          })}
+          {/* The wheel you would turn to open it. */}
+          <mesh position={[0, 0, 0.3]} castShadow>
+            <torusGeometry args={[0.46, 0.08, 8, 20]} />
+            <meshStandardMaterial
+              color="#f0a33c"
+              metalness={0.5}
+              roughness={0.4}
+            />
+          </mesh>
+          {[0, 1, 2].map((i) => {
+            const a = (i / 3) * Math.PI * 2
+            return (
+              <mesh key={i} position={[0, 0, 0.3]} rotation={[0, 0, a]}>
+                <boxGeometry args={[0.92, 0.07, 0.07]} />
+                <meshStandardMaterial
+                  color="#f0a33c"
+                  metalness={0.5}
+                  roughness={0.4}
+                />
+              </mesh>
+            )
+          })}
+          {/* A port in the middle of it, lit from inside. */}
+          <mesh position={[0, 0, 0.33]}>
+            <circleGeometry args={[0.24, 16]} />
+            <meshStandardMaterial
+              color="#bfe4ff"
+              emissive="#6fc3ff"
+              emissiveIntensity={1.1}
+              metalness={0.3}
+              roughness={0.15}
+            />
+          </mesh>
+          {/* And a lamp over it, green once the locks are open. */}
+          <mesh position={[0, 1.5, 0.1]}>
+            <cylinderGeometry args={[0.13, 0.13, 0.1, 10]} />
+            <meshStandardMaterial
+              color="#6fd08a"
+              emissive="#6fd08a"
+              emissiveIntensity={1.4}
+            />
+          </mesh>
+        </group>
+      </group>
 
       {/* Keeper's cottage tucked against the base */}
       <group position={[5.4, 0, 2.6]} rotation={[0, -0.5, 0]}>

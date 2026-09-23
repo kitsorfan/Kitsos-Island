@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { nextObjective, resetReveal, useGame } from './store'
+import { isInteractive, nextObjective, resetReveal, useGame } from './store'
 import { KEYS, MISSIONS, PLAYER_START } from '../../features/island/world'
 import { BIRTHDAY, FEAST } from '../../features/calendar/calendar'
 import { INTERIORS } from '../../features/interior/interiors'
@@ -832,6 +832,22 @@ describe('the reveal', () => {
     expect(useGame.getState().area).toBe('lighthouse')
     expect(useGame.getState().mode).toBe('explore')
     expect(useGame.getState().reveal).toBeNull()
+  })
+
+  it('leaves him somewhere he can act if nothing ever ends it', () => {
+    /*
+     * A guard on the shape of the bug rather than on the wiring, which is
+     * what actually broke: `endReveal` is called from the tower's own frame
+     * loop, and when the component that used to hold that call was deleted
+     * the cutscene ran forever with him stood outside watching.
+     *
+     * A store test cannot see a missing caller - it is the one calling. So
+     * what is pinned here is that the mode a stuck reveal leaves him in is
+     * one the rest of the game refuses input in, which is why the symptom
+     * was "left outside" rather than something subtler and worse.
+     */
+    useGame.getState().enterBuilding('lighthouse')
+    expect(isInteractive(useGame.getState().mode)).toBe(false)
   })
 
   it('plays again the next time he walks in', () => {

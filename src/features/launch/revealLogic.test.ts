@@ -95,9 +95,21 @@ describe('the reveal on the doorstep', () => {
 
   it('says the line on the card that is showing the rocket', () => {
     /* The joke only works once there is a rocket on screen to point at. */
-    expect(REVEAL_LINES.rocket).toContain('not a lighthouse')
-    expect(REVEAL_LINES.rocket).toContain('rocket')
+    const said = (REVEAL_LINES.rocket ?? []).join(' ').toLowerCase()
+    expect(said).toContain('not a lighthouse')
+    expect(said).toContain('space rocket')
     expect(REVEAL_LINES.notice).toBeUndefined()
+  })
+
+  it('breaks the punchline over two lines', () => {
+    /*
+     * The turn between the halves is the whole joke, and it needs the break
+     * to land - as one sentence it came out a long strip of small text
+     * across the sky and read as a caption rather than a realisation.
+     */
+    expect(REVEAL_LINES.rocket).toHaveLength(2)
+    expect(REVEAL_LINES.rocket?.[0].toLowerCase()).toContain('not a lighthouse')
+    expect(REVEAL_LINES.rocket?.[1].toLowerCase()).toContain('space rocket')
   })
 
   it('sheds the bands one after another from the bottom up', () => {

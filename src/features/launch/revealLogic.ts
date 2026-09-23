@@ -182,8 +182,16 @@ export function revealPhase(
   }
 }
 
-/** What he says to himself, one line per stage that has something to say. */
-export const REVEAL_LINES: Partial<Record<RevealStage, string>> = {
-  shed: 'Hang on.',
-  rocket: 'This is not a lighthouse. This is a space rocket.',
+/**
+ * What he says to himself, per stage that has something to say.
+ *
+ * The punchline is two lines rather than one sentence. Set as a single
+ * string it came out as one long strip of small text across the sky - and
+ * the whole joke is the turn between the two halves, which needs the break
+ * to land. "This is not a lighthouse" wants a beat after it before the
+ * answer arrives underneath.
+ */
+export const REVEAL_LINES: Partial<Record<RevealStage, string[]>> = {
+  shed: ['Hang on...'],
+  rocket: ['THIS IS NOT A LIGHTHOUSE', 'IT IS A SPACE ROCKET'],
 }

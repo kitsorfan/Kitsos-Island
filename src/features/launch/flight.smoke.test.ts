@@ -59,8 +59,15 @@ describe('a whole flight', () => {
     expect(mid.altitude).toBeGreaterThan(0)
     expect(useGame.getState().mode).toBe('launch')
 
-    /* The climb ends, and the overlay calls it in. */
-    expect(launchPhase(launch, started + LAUNCH_TOTAL).arrived).toBe(true)
+    /*
+     * The climb ends, and the overlay calls it in.
+     *
+     * Read a hair past the boundary rather than exactly on it: `started` is
+     * stamped from performance.now(), so `started + LAUNCH_TOTAL` lands on
+     * the knife edge between climbing and arrived and answers whichever way
+     * the float rounds that run.
+     */
+    expect(launchPhase(launch, started + LAUNCH_TOTAL + 0.1).arrived).toBe(true)
     useGame.getState().reachOrbit()
 
     expect(useGame.getState().mode).toBe('orbit')

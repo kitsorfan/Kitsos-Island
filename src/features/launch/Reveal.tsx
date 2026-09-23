@@ -32,7 +32,9 @@ export function RevealMark() {
   /* What he is saying, as state rather than read off the clock at render
      time: the frame loop owns the clock, and a render that samples it is a
      render whose output depends on when React happened to run it. */
-  const [saying, setSaying] = useState<string | null>(null)
+  const [saying, setSaying] = useState<string[] | null>(null)
+  /** The stage it belongs to, so a change of line restarts its entrance. */
+  const [spoken, setSpoken] = useState<string>('')
 
   useFrame((state) => {
     if (!reveal) return
@@ -54,6 +56,7 @@ export function RevealMark() {
     /* The line under it only exists once there is something to say, and it
        is only set when it actually changes - this runs every frame. */
     const wanted = REVEAL_LINES[phase.stage] ?? null
+    setSpoken((was) => (was === phase.stage ? was : phase.stage))
     setSaying((was) => (was === wanted ? was : wanted))
   })
 
@@ -84,14 +87,26 @@ export function RevealMark() {
       </group>
 
       {/* What he says, hung above the mark and facing the camera. */}
+      {/*
+        What he says, stacked over the mark.
+
+        Each line is its own plane rather than one long strip: the punchline
+        is a turn between two halves and it needs the break to land. The
+        second line is the answer, so it is drawn in the island's amber and
+        the first in plain white - the eye reads down.
+      */}
       {saying && (
-        <group position={[0, 4.3, 0]}>
-          <TextPlane
-            text={t(saying)}
-            width={saying.length > 20 ? 7 : 3}
-            aspect={saying.length > 20 ? 14 : 7}
-            color="#fff3d8"
-          />
+        <group key={spoken} position={[0, 4.4, 0]}>
+          {saying.map((row, i) => (
+            <TextPlane
+              key={row}
+              text={t(row)}
+              position={[0, -i * 0.78, 0]}
+              width={Math.min(9, Math.max(3.5, row.length * 0.33))}
+              aspect={row.length * 0.62}
+              color={i === 0 ? '#ffffff' : '#ffd23f'}
+            />
+          ))}
         </group>
       )}
     </group>

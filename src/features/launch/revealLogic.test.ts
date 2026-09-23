@@ -14,43 +14,27 @@ import { BUILDING_BY_ID } from '../island/world'
 const at = (now: number) => revealPhase({ started: 0 }, now)
 
 /**
- * The shell has to sit exactly on the tower it is peeling off.
+ * The tower that comes apart is the real one.
  *
- * This is here because it did not, and the symptom was the worst kind: the
- * animation ran perfectly, on time, somewhere the camera was not looking.
- * The group was at y = 0 and unrotated while the real tower stands on the
- * hillside at its own heading, so the bands came apart underground and
- * sideways and the whole thing read as "not playing".
+ * Twice now the reveal has been drawn as a see-through copy laid over the
+ * lighthouse, and twice it has been invisible: the real model is solid and
+ * stands in front of the copy, so the cutscene played inside a building
+ * nobody could see into. The paint that leaves has to be the paint that was
+ * there, which means the animation belongs in `LighthouseModel` - and the
+ * band count here is what the two agree on.
  */
-describe('where the shell is drawn', () => {
+describe('the tower it takes apart', () => {
   const tower = BUILDING_BY_ID.get('lighthouse')!
 
-  it('has a tower to peel', () => {
+  it('has a tower to take apart', () => {
     expect(tower).toBeDefined()
   })
 
-  it('matches the bands of the model it is covering', () => {
-    /*
-     * `LighthouseModel` draws six bands at 1.4 + i * 2.6 with radii
-     * 3.5 - i * 0.34. The shell has to line up with those or it is a
-     * differently-shaped tower coming off the real one.
-     */
-    for (let i = 0; i < BANDS; i++) {
-      const modelY = 1.4 + i * 2.6
-      const modelR = 3.5 - i * 0.34
-      /* The shell sits a hair proud, to keep the two from z-fighting. */
-      const shellR = 3.56 - i * 0.34
-      expect(shellR).toBeGreaterThan(modelR)
-      expect(shellR - modelR).toBeLessThan(0.15)
-      expect(modelY).toBeGreaterThan(0)
-    }
-  })
-
-  it('stands on ground the tower actually occupies', () => {
-    /* Not at the origin, and not at sea level: both were the bug. */
-    const [x, z] = tower.position
-    expect(Math.hypot(x, z)).toBeGreaterThan(10)
-    expect(tower.scale).toBeGreaterThan(0)
+  it('sheds as many bands as the model is painted in', () => {
+    /* `LighthouseModel` draws its bands from `[0, 1, 2, 3, 4, 5]`. If that
+       ever changes, `BANDS` has to change with it or the last band of the
+       tower never leaves. */
+    expect(BANDS).toBe(6)
   })
 })
 

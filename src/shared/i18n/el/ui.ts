@@ -454,6 +454,13 @@ export const UI: Record<string, string> = {
   'And to you, for walking the whole of it.':
     'Και σε σένα, που το περπάτησες ολόκληρο.',
   Movement: 'Κίνηση',
+  Cast: 'Διανομή',
+  Engineering: 'Μηχανική',
+  'Art department': 'Καλλιτεχνικό τμήμα',
+  Production: 'Παραγωγή',
+  'Special effects': 'Ειδικά εφέ',
+  Catering: 'Τροφοδοσία',
+  'Written and built by': 'Γράφτηκε και χτίστηκε από',
   'To my family, for all of it.': 'Στην οικογένειά μου, για όλα.',
   'Thanks for walking the island.': 'Ευχαριστώ που περπάτησες το νησί.',
   'DEPARTURE IN PROGRESS': 'ΑΝΑΧΩΡΗΣΗ ΣΕ ΕΞΕΛΙΞΗ',

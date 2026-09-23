@@ -161,12 +161,19 @@ Some notes on how it hangs together:
   engines light under it. It is the only place the launch can be watched from
   outside — he is strapped in behind the glass for the whole of it.
 
-- **In orbit he floats, and the credits roll.** The engines cut and he comes
-  off the deck, tumbling slowly on all three axes with the blob shadow gone,
-  because holding a weightless man upright is the one thing that would make
-  the float read as standing on glass. Beside him a credits panel plays
-  (`features/launch/credits.ts`) — every job on a game's crew list, all of
-  them him, ending on the one card that is not a joke.
+- **In orbit he is outside the ship.** The engines cut and the room is
+  replaced by open space (`features/launch/Space.tsx`): a starfield, the sun,
+  the island turning under him as a blue-green globe with a band of air round
+  its rim, and the ship he came up in holding station a little way off. That
+  is why he can move freely out there — a cabin is a room with walls, and
+  nothing about weightlessness survives being boxed in. He sculls along with
+  his forearms, drawn half again as big, with nothing to bump into.
+
+- **And the credits roll.** `features/launch/credits.ts` — a crew list as
+  long as a real one with almost nobody on it, which is the joke; his own
+  name appears twice. The last credit before the thanks is Movement, You,
+  which is the only line on the roll that is literally true of whoever is
+  reading it.
 
 - **The prize is a certificate and a shirt.** In orbit he types his name onto
   a certificate drawn to a canvas and handed over as a PNG

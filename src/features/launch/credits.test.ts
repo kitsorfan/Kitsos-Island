@@ -65,10 +65,20 @@ describe('the roll', () => {
 })
 
 describe('what the roll says', () => {
-  it('credits the man himself with most of it', () => {
+  it('says his name sparingly', () => {
+    /*
+     * The joke is a crew list this long with almost nobody on it. Printing
+     * the same name against twenty jobs stops being funny about three in and
+     * starts reading as a man listing himself, so the rule is the opposite
+     * of what it looks like: his name is rare on here, and the gags carry
+     * the rest.
+     */
     const roles = ROLL.flatMap((c) => c.roles ?? [])
     const his = roles.filter((r) => r.who.includes('Kitsos'))
-    expect(his.length).toBeGreaterThan(roles.length / 3)
+    expect(his.length).toBeLessThanOrEqual(3)
+    /* But he is on it at least once, under the credit that matters. */
+    const built = ROLL.find((c) => c.heading === 'Written and built by')
+    expect(built?.roles?.[0].who).toContain('Kitsos')
   })
 
   it('thanks Amalia and the family by name', () => {

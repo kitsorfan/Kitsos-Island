@@ -47,6 +47,18 @@ export interface CharacterMotion {
    * rather than floating.
    */
   floating?: number
+  /**
+   * 0 to 1: under the cape, and going somewhere.
+   *
+   * Its own channel rather than `floating` or `swimming`, for the same
+   * reason those two are apart. A man in orbit hangs upright and sculls to
+   * stay put; a swimmer lies flat and pulls. This one lies flat like the
+   * swimmer but with everything trailing straight behind him and nothing
+   * stroking at all - the cape is doing the work, not his arms.
+   */
+  flying?: number
+  /** -1 diving to 1 climbing: which way the cape is taking him. */
+  climb?: number
 }
 
 interface CharacterProps {
@@ -132,6 +144,19 @@ const SWIM_PITCH = 1.36
 const SWIM_LIFT = 1.02
 const SWIM_SHIFT = -0.78
 
+/**
+ * The same three for the cape, and for the same reason: the rig turns about
+ * the soles of his boots, so laying him flat without putting his middle back
+ * over his feet would swing him round his own ankles.
+ *
+ * Pitched a shade past the swimmer's - he is driving through the air rather
+ * than lying on water - and lifted further, because nothing is holding him
+ * up at the waist.
+ */
+const FLY_PITCH = 1.46
+const FLY_LIFT = 1.12
+const FLY_SHIFT = -0.82
+
 /** Leg measurements, shared by the rig and the crouch that folds it. */
 const HIP = 0.85
 const THIGH = 0.42
@@ -205,6 +230,10 @@ export function Character({
   const ovation = useRef(0)
   /** Eased swim, so going in and wading out are both a settle, not a snap. */
   const paddle = useRef(0)
+  /** Eased flight, likewise: the cape takes him and gives him back slowly. */
+  const soar = useRef(0)
+  /** Eased climb, -1 diving to 1 climbing. */
+  const tilt = useRef(0)
   /** Eased, like the paddle: how weightless he is. */
   const adrift = useRef(0)
   /** The wrist that whatever he is carrying hangs in, and a torch's flame. */
@@ -243,6 +272,12 @@ export function Character({
       ((m.cheer ?? 0) - ovation.current) * Math.min(1, delta * 5)
     paddle.current +=
       ((m.swimming ?? 0) - paddle.current) * Math.min(1, delta * 5)
+    /* Slower than the swim: going into a dive and pulling out of one are
+       both a long change of shape, not a snap. */
+    soar.current += ((m.flying ?? 0) - soar.current) * Math.min(1, delta * 3)
+    /* And the climb angle eases on its own, so pointing up and levelling
+       off do not jerk the whole body round. */
+    tilt.current += ((m.climb ?? 0) - tilt.current) * Math.min(1, delta * 2.5)
     adrift.current +=
       ((m.floating ?? 0) - adrift.current) * Math.min(1, delta * 2.5)
 
@@ -816,6 +851,95 @@ export function Character({
           SWIM_LIFT + Math.sin(t * 1.7) * 0.05,
         )
         body.current.position.z = blend(body.current.position.z, SWIM_SHIFT)
+      }
+    }
+
+    /*
+     * Under the cape.
+     *
+     * The whole pose is one idea: everything trails. One arm forward and one
+     * back is the picture everybody has of this, and it beats both arms out
+     * front because it tells you which way is forward even in silhouette.
+     * The legs go straight out behind with the knees all but locked - a
+     * flying man with his knees up is a man sitting in an invisible chair.
+     *
+     * Last of the body poses, so it wins over the swim and the stride: he
+     * can leave the water flying, and the two must not average out into a
+     * man doing the crawl through the air.
+     */
+    if (soar.current > 0.01) {
+      const mix = soar.current
+      const blend = (current: number, wanted: number) =>
+        current * (1 - mix) + wanted * mix
+      /* A slow wallow, so holding a hover is never perfectly still. */
+      const wallow = Math.sin(t * 1.4)
+      const climb = tilt.current
+
+      if (armL.current) {
+        /* The leading arm, straight out past his head. Pulled a little
+           wider as he climbs, which is what makes a climb read as effort. */
+        armL.current.rotation.x = blend(
+          armL.current.rotation.x,
+          -2.85 + climb * 0.12 + wallow * 0.05,
+        )
+        armL.current.rotation.z = blend(armL.current.rotation.z, -0.16)
+      }
+      if (armR.current) {
+        /* And the trailing arm, back along his side. */
+        armR.current.rotation.x = blend(
+          armR.current.rotation.x,
+          0.28 - climb * 0.1 - wallow * 0.05,
+        )
+        armR.current.rotation.z = blend(armR.current.rotation.z, 0.2)
+      }
+      /* Legs together and trailing, with the faintest scissor so he is not
+         a mannequin. */
+      if (legL.current) {
+        legL.current.rotation.x = blend(
+          legL.current.rotation.x,
+          -0.12 + wallow * 0.045,
+        )
+      }
+      if (legR.current) {
+        legR.current.rotation.x = blend(
+          legR.current.rotation.x,
+          -0.12 - wallow * 0.045,
+        )
+      }
+      if (kneeL.current) {
+        kneeL.current.rotation.x = blend(kneeL.current.rotation.x, 0.06)
+      }
+      if (kneeR.current) {
+        kneeR.current.rotation.x = blend(kneeR.current.rotation.x, 0.06)
+      }
+      if (torso.current) {
+        /* Arched, the way a body held up by its chest is. */
+        torso.current.rotation.x = blend(torso.current.rotation.x, -0.16)
+      }
+      if (head.current) {
+        /* Chin up and looking where he is going. Flat out he is face-down,
+           so the neck has to lift most of the pitch back off. */
+        head.current.rotation.x = blend(
+          head.current.rotation.x,
+          -0.72 + climb * 0.18,
+        )
+        head.current.rotation.y = blend(head.current.rotation.y, 0)
+        head.current.rotation.z = blend(head.current.rotation.z, 0)
+      }
+      if (body.current) {
+        /* Flat out, less the climb: pointing up at the sky takes pitch off
+           the same angle that laid him down in the first place. */
+        body.current.rotation.x = blend(
+          body.current.rotation.x,
+          FLY_PITCH - climb * 0.42,
+        )
+        /* A slow bank, so a hover drifts rather than hangs. */
+        body.current.rotation.z = blend(body.current.rotation.z, wallow * 0.1)
+        body.current.position.y = blend(
+          body.current.position.y,
+          FLY_LIFT + Math.sin(t * 1.2) * 0.06,
+        )
+        body.current.position.z = blend(body.current.position.z, FLY_SHIFT)
       }
     }
 

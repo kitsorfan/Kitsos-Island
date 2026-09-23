@@ -13,6 +13,8 @@ import {
   consumeInteract,
   consumeJump,
   consumeTripleJump,
+  doubleTapped,
+  forgetTaps,
   forgetLongSpace,
   isCrouching,
   isDown,
@@ -227,6 +229,60 @@ describe('the triple tap', () => {
     }
     expect(consumeTripleJump()).toBe(true)
     expect(consumeTripleJump()).toBe(false)
+  })
+})
+
+describe('the double tap', () => {
+  it('reads on the second of two quick taps', () => {
+    const now = vi.spyOn(performance, 'now')
+    let clock = 1000
+    now.mockImplementation(() => clock)
+    queueJump()
+    expect(doubleTapped()).toBe(false)
+    clock += 100
+    queueJump()
+    expect(doubleTapped()).toBe(true)
+  })
+
+  it('does not read for two taps spread out over a walk', () => {
+    const now = vi.spyOn(performance, 'now')
+    let clock = 1000
+    now.mockImplementation(() => clock)
+    queueJump()
+    clock += 5000
+    queueJump()
+    expect(doubleTapped()).toBe(false)
+  })
+
+  it('leaves the count alone, so the third tap still dives', () => {
+    /*
+     * The one that matters. A double tap is the front half of a triple one:
+     * the cape reads the second tap to go down, and the jetty reads the
+     * third to go over the side. If reading the double spent the count,
+     * the dive would lose the tap it was waiting for and never fire.
+     */
+    const now = vi.spyOn(performance, 'now')
+    let clock = 1000
+    now.mockImplementation(() => clock)
+    queueJump()
+    clock += 100
+    queueJump()
+    expect(doubleTapped()).toBe(true)
+    clock += 100
+    queueJump()
+    expect(consumeTripleJump()).toBe(true)
+  })
+
+  it('stops reading once the gesture has claimed the taps', () => {
+    const now = vi.spyOn(performance, 'now')
+    let clock = 1000
+    now.mockImplementation(() => clock)
+    queueJump()
+    clock += 100
+    queueJump()
+    expect(doubleTapped()).toBe(true)
+    forgetTaps()
+    expect(doubleTapped()).toBe(false)
   })
 })
 

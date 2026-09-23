@@ -385,6 +385,14 @@ export function Player() {
   const boom = useRef(1)
   /** Eased 0 to 1: how much of the shot belongs to the defence. */
   const podium = useRef(0)
+  /**
+   * Eased 0 to 1: how much of his height the camera is tracking.
+   *
+   * 0 on the ground, where a jump must not move the frame, and 1 under the
+   * cape, where it must. Eased rather than switched so taking off is the
+   * camera lifting with him, not a cut.
+   */
+  const chase = useRef(0)
   const spawnToken = useRef(-1)
   /** How long the current step-by-himself has been going. */
   const striding = useRef(0)
@@ -1323,7 +1331,16 @@ export function Player() {
     } else {
       floor = groundHeight(px, pz)
     }
-    motion.current.airborne = hop.current.y > 0.02 && !SWIM.afloat
+    // Under the cape he is flying, not falling: `airborne` tucks the legs
+    // up for a jump, which is the opposite of what a flyer's do.
+    motion.current.airborne =
+      hop.current.y > 0.02 && !SWIM.afloat && !flying.current
+    motion.current.flying = flying.current ? 1 : 0
+    // Which way the cape is taking him, normalised off the climb rate so
+    // levelling out reads as level rather than as a slow dive.
+    motion.current.climb = flying.current
+      ? Math.max(-1, Math.min(1, hop.current.vy / FLY_UP))
+      : 0
     motion.current.swimming = SWIM.afloat ? 1 : 0
     /* Weightless, which is its own pose rather than a swim: see `floating`
        on CharacterMotion for why the two are not the same flag. */
@@ -1643,15 +1660,34 @@ export function Player() {
       // is a shot opening out rather than a cut.
       const stage = LECTURE.active ? 1 : 0
       podium.current += (stage - podium.current) * Math.min(1, delta * 2)
+      // Faster in than out: the camera should be with him the moment he
+      // goes up, and let him back down gently when he lands.
+      const wantChase = flying.current ? 1 : 0
+      chase.current +=
+        (wantChase - chase.current) *
+        Math.min(1, delta * (flying.current ? 3.5 : 1.6))
       const show = podium.current
 
-      const reach = dolly * framing * boom.current * (1 + show * 0.5)
+      // Under the cape the camera goes up with him.
+      //
+      // Everywhere else it deliberately ignores `hop` — see below — because
+      // tracking a jump makes the whole frame bounce twice a second. Flight
+      // is the one case where that rule is wrong: he climbs tens of units
+      // and a camera pinned to the ground loses him off the top of the
+      // screen inside a second. So the subtraction is eased out as he takes
+      // off, which also means a hop stays a hop right up until it turns out
+      // to be a launch.
+      const aloft = chase.current
+
+      const reach =
+        dolly * framing * boom.current * (1 + show * 0.5) * (1 + aloft * 0.22)
       const targetX = px + Math.sin(yaw.current) * reach
       const targetZ = pz + Math.cos(yaw.current) * reach
-      // Track the ground, not the hop, so the camera does not bounce.
+      // Track the ground, not the hop, so the camera does not bounce —
+      // except under the cape, where `aloft` hands the height back.
       const targetY =
         py -
-        hop.current.y +
+        hop.current.y * (1 - aloft) +
         rise * framing * (0.72 + 0.28 * boom.current) * (1 + show * 0.34)
 
       if (!camReady.current) {
@@ -1665,7 +1701,9 @@ export function Player() {
       // And what it is pointed at slides off him and down the hall, to a
       // point between the lectern and the back of the class.
       const aimZ = pz + show * (LECTURE_LOOK - pz)
-      camera.lookAt(px, py - hop.current.y + 1.4, aimZ)
+      // And it looks at him rather than at the ground under him, by the
+      // same easing, so the climb is centred instead of running off the top.
+      camera.lookAt(px, py - hop.current.y * (1 - aloft) + 1.4, aimZ)
     }
 
     /* -------------------------- thresholds -------------------------- */

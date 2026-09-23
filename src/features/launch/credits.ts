@@ -49,36 +49,42 @@ export const ROLL: CreditCard[] = [
     sub: 'A playable CV',
     hold: 4.5,
   },
+  /*
+   * His name appears three times on the whole roll and not once on this
+   * card, which is the joke: a crew list this long with nobody on it.
+   */
   {
     kind: 'roles',
-    heading: 'Design',
+    heading: 'Cast',
     roles: [
-      { role: 'Game Design', who: HIM },
-      { role: 'Level Design', who: HIM },
-      { role: 'Software Architecture', who: HIM },
-    ],
-    hold: 5,
-  },
-  {
-    kind: 'roles',
-    heading: 'Engineering',
-    roles: [
-      { role: 'Frontend', who: HIM },
-      { role: 'Engine & Rendering', who: HIM },
-      { role: 'Physics & Collision', who: HIM },
-      { role: 'Terrain', who: 'One function, shared by everything' },
+      { role: 'The island', who: 'Played by itself' },
+      { role: 'Townspeople', who: 'Seventy boxes in hats' },
+      { role: 'The sea', who: 'One sine wave, working hard' },
+      { role: 'The lift', who: 'As itself, slowly' },
     ],
     hold: 5.5,
   },
   {
     kind: 'roles',
-    heading: 'Art & Sound',
+    heading: 'Engineering',
     roles: [
-      { role: 'Character Art', who: `${HIM}, and a great many boxes` },
-      { role: 'Lighting', who: HIM },
-      { role: 'Original Soundtrack', who: `${HIM}, in code` },
+      { role: 'Everything', who: HIM },
+      { role: 'Code review', who: 'The same guy, next morning' },
+      { role: 'Terrain', who: 'One function nobody dares touch' },
+      { role: 'Collision', who: 'Mostly working' },
     ],
-    hold: 5,
+    hold: 5.5,
+  },
+  {
+    kind: 'roles',
+    heading: 'Art department',
+    roles: [
+      { role: 'Modelling', who: 'Cubes' },
+      { role: 'Texturing', who: 'No' },
+      { role: 'Lighting', who: 'Turned up until it looked fine' },
+      { role: 'Soundtrack', who: 'Written in JavaScript, regrettably' },
+    ],
+    hold: 5.5,
   },
   {
     kind: 'roles',
@@ -86,24 +92,33 @@ export const ROLL: CreditCard[] = [
     roles: [
       {
         role: 'Quality Assurance',
-        who: 'A suite that will not be argued with',
+        who: 'A test suite with no sense of humour',
       },
-      { role: 'Chief Door Opener', who: 'A sensor in the Work District' },
-      { role: 'Lift Timing Consultant', who: HIM },
-      { role: 'Head of Vertical Transport', who: 'Also the lift' },
+      { role: 'Bug triage', who: 'Renaming them features' },
+      { role: 'Scope control', who: 'Abandoned early on' },
+      { role: 'Deadline', who: 'Passed. Twice' },
     ],
     hold: 5.5,
   },
   {
     kind: 'roles',
-    heading: 'Also',
+    heading: 'Special effects',
     roles: [
-      { role: 'Rocket Science', who: `${HIM}, optimistically` },
-      { role: 'Stunt Double', who: 'Him. There was no budget' },
-      { role: 'Catering', who: 'The Christmas basement, once a year' },
-      { role: 'Keeper of the Lighthouse', who: 'Vacant, as of today' },
+      { role: 'Rocket', who: 'A lighthouse that lied to you' },
+      { role: 'Zero gravity', who: 'Turning the gravity off' },
+      { role: 'Stunt double', who: 'There was no budget' },
+      { role: 'Explosions', who: 'Cut for being unrealistic' },
     ],
     hold: 5.5,
+  },
+  {
+    kind: 'roles',
+    heading: 'Catering',
+    roles: [
+      { role: 'Christmas dinner', who: 'The basement, once a year' },
+      { role: 'Everything else', who: 'Coffee' },
+    ],
+    hold: 4.5,
   },
   {
     kind: 'roles',

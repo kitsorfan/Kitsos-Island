@@ -825,8 +825,11 @@ export function Character({
             {spacesuit && (
               <group position={[0, 1.05, 0]}>
                 <LifeSupport />
-                {/* A control box on the chest, where a pilot's is. */}
-                <mesh position={[0, 0.04, 0.21]} castShadow>
+                {/* A control box on the chest, where a pilot's is. It does
+                    not cast either, for the reason the star does not: flat
+                    trim worn on the front throws its own hard shape onto the
+                    ground, and the torso behind it is already casting. */}
+                <mesh position={[0, 0.04, 0.21]}>
                   <boxGeometry args={[0.3, 0.2, 0.06]} />
                   <meshStandardMaterial
                     color="#c3ccd6"
@@ -1213,7 +1216,16 @@ function StarKit() {
 
       {/* The star itself, bevelled so its arms catch the light separately
           rather than reading as one flat shape. */}
-      <mesh ref={glow} position={[0, 0.05, 0.196]} castShadow>
+      {/*
+        No castShadow on any of this.
+
+        The star is a raised badge a couple of centimetres off the chest, and
+        a shadow-casting one throws a sharp five-pointed star onto the ground
+        beside the player's own soft blob - so he walks the island trailing
+        stars across the grass. Trim on a shirt is not a thing that casts;
+        the body under it already does.
+      */}
+      <mesh ref={glow} position={[0, 0.05, 0.196]}>
         <extrudeGeometry
           args={[
             star,

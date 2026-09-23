@@ -8,7 +8,7 @@
  */
 
 /** How many sparks are in the air at once, at most. */
-export const SPARKS = 18
+export const SPARKS = 14
 
 /** How long one spark lives, in seconds. */
 export const LIFE = 0.9
@@ -20,7 +20,7 @@ export const LIFE = 0.9
  * big spark every other frame is a gold stripe painted along the grass
  * rather than a scatter of light falling off him.
  */
-export const EVERY = 0.16
+export const EVERY = 0.2
 
 /** Below this he is ambling and sheds nothing: a trail is for moving. */
 export const MIN_SPEED = 0.6

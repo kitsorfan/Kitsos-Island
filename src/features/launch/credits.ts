@@ -107,15 +107,27 @@ export const ROLL: CreditCard[] = [
   },
   {
     kind: 'roles',
-    heading: 'Written, built and walked by',
+    heading: 'Written and built by',
     roles: [{ role: '', who: HIM }],
-    hold: 4.5,
+    hold: 4,
+  },
+  /*
+   * The one credit that is not his. Everybody who reaches this card walked
+   * every road on the island to get here, so the last name before the
+   * thanks is theirs - and it is the only card that is literally true of
+   * the person reading it.
+   */
+  {
+    kind: 'roles',
+    heading: 'Movement',
+    roles: [{ role: '', who: 'You' }],
+    hold: 4,
   },
   {
     kind: 'thanks',
     heading: 'Special thanks',
     lines: [
-      'To Amalia, who said yes on the beach.',
+      'To the love of my life, Amalia.',
       'To my family, for all of it.',
       'And to you, for walking the whole of it.',
     ],

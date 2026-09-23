@@ -450,8 +450,10 @@ export const UI: Record<string, string> = {
   'KITSOS ISLAND · DEPARTURE': 'ΝΗΣΙ ΚΙΤΣΟΥ · ΑΝΑΧΩΡΗΣΗ',
   Credits: 'Συντελεστές',
   'Special thanks': 'Ιδιαίτερες ευχαριστίες',
-  'To Amalia, who said yes on the beach.':
-    'Στην Αμαλία, που είπε ναι στην παραλία.',
+  'To the love of my life, Amalia.': 'Στον έρωτα της ζωής μου, την Αμαλία.',
+  'And to you, for walking the whole of it.':
+    'Και σε σένα, που το περπάτησες ολόκληρο.',
+  Movement: 'Κίνηση',
   'To my family, for all of it.': 'Στην οικογένειά μου, για όλα.',
   'Thanks for walking the island.': 'Ευχαριστώ που περπάτησες το νησί.',
   'DEPARTURE IN PROGRESS': 'ΑΝΑΧΩΡΗΣΗ ΣΕ ΕΞΕΛΙΞΗ',

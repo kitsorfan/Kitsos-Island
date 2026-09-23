@@ -78,6 +78,22 @@ describe('what the roll says', () => {
     expect(said).toContain('family')
   })
 
+  it('credits the player with the one thing that was theirs', () => {
+    /*
+     * Everybody who reaches this card walked every road on the island to get
+     * here, so the movement is honestly theirs - and it is the only credit
+     * on the roll that is literally true of the person reading it.
+     */
+    const movement = ROLL.find((c) => c.heading === 'Movement')
+    expect(movement?.roles?.[0].who).toBe('You')
+  })
+
+  it('puts the player last of the credits, before the thanks', () => {
+    const order = ROLL.map((c) => c.heading)
+    expect(order[order.length - 2]).toBe('Movement')
+    expect(ROLL[ROLL.length - 1].kind).toBe('thanks')
+  })
+
   it('gives every role somebody to have done it', () => {
     for (const role of ROLL.flatMap((c) => c.roles ?? [])) {
       expect(role.who.trim()).not.toBe('')

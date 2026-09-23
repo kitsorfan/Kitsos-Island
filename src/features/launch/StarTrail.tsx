@@ -154,7 +154,7 @@ const VERTEX = /* glsl */ `
        enough to read as a spark at a glance: at a handful of pixels the
        wake looked less like gold coming off him than like dirt on the
        lens, so the sparks are few and large rather than many and small. */
-    gl_PointSize = 120.0 / -view.z;
+    gl_PointSize = 220.0 / -view.z;
     gl_Position = projectionMatrix * view;
   }
 `

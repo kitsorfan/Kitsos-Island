@@ -377,6 +377,8 @@ export function Player() {
    * than the friction of feet on a floor.
    */
   const orbit = useRef({ x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 })
+  /** Eased 0 to 1: how much of the shot belongs to the float. */
+  const orbitShot = useRef(0)
   /** Where his feet ride while he is in the water, eased as he wades out. */
   const swimFloor = useRef(0)
   /** The walk cycle the first-person head and hand ride on. */
@@ -1310,19 +1312,26 @@ export function Player() {
          * has to be made by hand.
          */
         const stick = readMove()
-        const push = 2.6 * delta
         /* Screen-relative rather than facing-relative: he is tumbling, and
            steering by the way his feet happen to be pointing is unusable. */
+        const push = 1.9 * delta
         o.vx += stick.x * push
         o.vz += stick.y * push
         /* Run takes him up. There is nothing to sprint towards out here and
            the key is otherwise idle, so it is the one that rises. */
         if (stick.run) o.vy += push
 
-        /* A light drag, so a nudge coasts a long way and he still comes to
-           rest eventually. Nothing here is frame-rate dependent: the decay
-           is raised to the elapsed time rather than multiplied by it. */
-        const drag = Math.pow(0.22, delta)
+        /*
+         * Almost no drag at all.
+         *
+         * This is the whole difference between floating and walking
+         * underwater. A push has to still be carrying him seconds later, so
+         * the decay is per-second rather than the brisk stop a walker wants
+         * - he coasts, and what turns him round at the end of the cabin is
+         * the wall, not friction. Raised to the elapsed time, so it behaves
+         * the same at any frame rate.
+         */
+        const drag = Math.pow(0.72, delta)
         o.vx *= drag
         o.vy *= drag
         o.vz *= drag
@@ -1331,25 +1340,55 @@ export function Player() {
         o.y += o.vy * delta
         o.z += o.vz * delta
 
-        /* Held inside the cabin. He is in a room, however weightless. */
-        const REACH = 3.4
-        o.x = Math.max(-REACH, Math.min(REACH, o.x))
-        o.z = Math.max(-REACH, Math.min(REACH, o.z))
-        o.y = Math.max(-0.6, Math.min(2.6, o.y))
+        /*
+         * The cabin walls, which he bounces off rather than sticking to.
+         * Clamping alone parks him against the limit with the stick still
+         * held, which reads as leaning on glass; giving back a little of his
+         * speed the other way turns the wall into something he pushed off.
+         */
+        const REACH = 3.1
+        const CEIL = 2.4
+        const FLOOR = -0.5
+        if (o.x < -REACH || o.x > REACH) {
+          o.x = Math.max(-REACH, Math.min(REACH, o.x))
+          o.vx *= -0.45
+        }
+        if (o.z < -REACH || o.z > REACH) {
+          o.z = Math.max(-REACH, Math.min(REACH, o.z))
+          o.vz *= -0.45
+        }
+        if (o.y < FLOOR || o.y > CEIL) {
+          o.y = Math.max(FLOOR, Math.min(CEIL, o.y))
+          o.vy *= -0.45
+        }
 
+        /* The idle drift underneath it, slower and wider than the twitchy
+           bob it replaces: weightless is a long slow wander, not a hover. */
         group.current.position.set(
-          px + o.x + Math.sin(since * 0.31) * 0.28,
-          py + 0.9 + o.y + Math.sin(since * 0.43) * 0.2,
-          pz + o.z + Math.cos(since * 0.26) * 0.24,
+          px + o.x + Math.sin(since * 0.21) * 0.34,
+          py + 1.1 + o.y + Math.sin(since * 0.27) * 0.26,
+          pz + o.z + Math.cos(since * 0.17) * 0.3,
         )
-        /* A slow tumble on all three axes, leaned into whichever way he is
-           thrusting. A man with nothing under his feet does not stay
-           upright, and holding him level is the one thing that would make
-           the float read as standing on glass. */
+
+        /*
+         * The tumble.
+         *
+         * Two parts. Underneath, a slow turn on all three axes that never
+         * repeats, because the three rates do not divide into one another -
+         * a man with nothing under his feet does not stay upright, and
+         * holding him level is the one thing that would make the float read
+         * as standing on glass.
+         *
+         * Over that, a lean into whatever he is doing: pitching into the
+         * direction of travel and rolling out of the turn, so a push on the
+         * stick visibly moves him rather than sliding him along.
+         */
+        const tumbleX = Math.sin(since * 0.19) * 0.26
+        const tumbleZ = Math.sin(since * 0.13) * 0.34
         group.current.rotation.set(
-          Math.sin(since * 0.23) * 0.22 - o.vz * 0.12,
-          facing.current + since * 0.16,
-          Math.sin(since * 0.19) * 0.3 - o.vx * 0.12,
+          tumbleX + o.vz * 0.3,
+          facing.current + since * 0.11,
+          tumbleZ - o.vx * 0.3,
         )
       } else {
         /* Back on the ground: forget where he floated to, so a second
@@ -1453,8 +1492,22 @@ export function Player() {
       if (active) zoomBy(readZoomHold(delta))
 
       const zoom = cameraZoom.level
-      const dolly = cam.distance * zoom
-      const rise = cam.height * zoom
+      /*
+       * In orbit the lens comes in close and drops nearly level with him.
+       *
+       * He is the whole of the shot out here - there is no island to hold in
+       * frame, the room behind him is a wall of instruments, and he is
+       * turning slowly in the middle of it while the credits play over the
+       * top. The usual third-person standoff leaves him a small figure in
+       * the corner of his own ending, so it eases in to about a third of it
+       * and the boom comes down to head height.
+       */
+      const floating = store.mode === 'orbit' ? 1 : 0
+      orbitShot.current +=
+        (floating - orbitShot.current) * Math.min(1, delta * 1.4)
+      const close = orbitShot.current
+      const dolly = cam.distance * zoom * (1 - close * 0.62)
+      const rise = cam.height * zoom * (1 - close * 0.55)
 
       let span = 1
       if (!indoors) {

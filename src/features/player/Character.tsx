@@ -819,7 +819,7 @@ export function Character({
             {/* What makes the blue shirt the prize rather than a blue shirt:
                 a gold star on the chest, gold at the collar and cuffs, and
                 the mission patch on the sleeve. */}
-            {starShirt && !spacesuit && <StarKit />}
+            {starShirt && !spacesuit && <StarKit motion={motion} />}
 
             {/* The pack on his back, and the chest rig that answers it. */}
             {spacesuit && (
@@ -1180,12 +1180,18 @@ export function Character({
   )
 }
 
-/** The gold on the blue: star, collar, cuffs and the patch on the arm. */
-function StarKit() {
+/**
+ * The gold on the blue: star, cape, collar, cuffs and the patch on the arm.
+ *
+ * Takes `motion` because the cape is the one part of the kit that has to know
+ * how fast he is going - a cape that hangs dead still while he runs is a
+ * towel pinned to his back.
+ */
+function StarKit({ motion }: { motion?: RefObject<CharacterMotion> }) {
   /* Big. This is the only thing on the island that has to be earned, and it
      is read from across a green at the camera's usual distance, so the star
      is most of the width of the chest rather than a badge on it. */
-  const star = useMemo(() => starShape(0.26, 0.112), [])
+  const star = useMemo(() => starShape(0.3, 0.128), [])
   const patch = useMemo(() => starShape(0.07, 0.03), [])
   const glow = useRef<Mesh>(null)
 
@@ -1199,14 +1205,16 @@ function StarKit() {
 
   return (
     <group position={[0, 1.05, 0]}>
+      <Cape motion={motion} />
+
       {/* A darker field behind the star, so the gold has something to sit on
           rather than floating on the blue. */}
       <mesh position={[0, 0.05, 0.192]}>
-        <circleGeometry args={[0.29, 24]} />
+        <circleGeometry args={[0.305, 24]} />
         <meshStandardMaterial color="#12306b" roughness={0.85} />
       </mesh>
       <mesh position={[0, 0.05, 0.194]}>
-        <ringGeometry args={[0.285, 0.305, 24]} />
+        <ringGeometry args={[0.3, 0.318, 24]} />
         <meshStandardMaterial
           color="#f2c230"
           metalness={0.5}
@@ -1287,11 +1295,10 @@ function StarKit() {
         <meshStandardMaterial color="#f2c230" metalness={0.4} />
       </mesh>
 
-      {/* A gold band round the hem, which ties the shirt to the trousers. */}
-      <mesh position={[0, -0.33, 0]}>
-        <boxGeometry args={[0.638, 0.07, 0.398]} />
-        <meshStandardMaterial color="#f2c230" flatShading metalness={0.4} />
-      </mesh>
+      {/* No separate gold hem band any more: it sat at the same height as
+          the belt below and the two z-fought through each other. The belt
+          does that job now, and does it better - a buckle says waist where
+          a stripe only said edge-of-shirt. */}
 
       {/* Cuffs, at the end of each sleeve. */}
       {[-0.33, 0.33].map((x) => (
@@ -1301,11 +1308,68 @@ function StarKit() {
         </mesh>
       ))}
 
-      {/* Nothing on the shoulders. There were gold bars down the top of each
-          arm and they made the shirt busy: with the collar, the cuffs and the
-          hem already gold, a fourth line across the top turned the whole
-          silhouette into stripes and the star stopped being the thing you
-          look at. The shoulders stay blue. */}
+      {/* Shoulders.
+
+          Flat gold bars along the top of each arm were tried once and cut:
+          with the collar and cuffs already gold, a fourth horizontal line
+          turned the silhouette into stripes. These are not that. They are
+          pauldrons - caps that sit over the top of the shoulder joint and
+          square off the top of him, so the shape reads as armour at the
+          distance the camera actually sits at.
+
+          Placed at the arm's own pivot, x +-0.38 and y 0.33 in this group's
+          space (the arms hang at y 1.38 and this whole kit is a group at
+          1.05), and a shade wider than the 0.18 shoulder cap underneath so
+          they cover it rather than sink into it. They do not swing with the
+          arm - they are armour strapped to the shoulder, and the joint
+          rotates under them, which is what a real pauldron does. */}
+      {[-1, 1].map((side) => (
+        <group key={side} position={[side * 0.38, 0.33, 0]}>
+          <mesh castShadow rotation={[0, 0, side * -0.16]}>
+            <boxGeometry args={[0.22, 0.12, 0.24]} />
+            <meshStandardMaterial
+              color="#1b4694"
+              flatShading
+              metalness={0.35}
+              roughness={0.5}
+            />
+          </mesh>
+          {/* Gold only on the top bevel, so it catches the light from above
+              without drawing another line across the front of him. */}
+          <mesh position={[0, 0.07, 0]} rotation={[0, 0, side * -0.16]}>
+            <boxGeometry args={[0.23, 0.035, 0.25]} />
+            <meshStandardMaterial
+              color="#f2c230"
+              flatShading
+              metalness={0.5}
+              roughness={0.3}
+            />
+          </mesh>
+        </group>
+      ))}
+
+      {/* The belt: a gold buckle on a dark band at the waist, which is what
+          finally separates the shirt from the trousers instead of letting
+          the blue run all the way down. */}
+      <group position={[0, -0.3, 0]}>
+        <mesh>
+          <boxGeometry args={[0.648, 0.1, 0.408]} />
+          <meshStandardMaterial color="#14224a" flatShading roughness={0.7} />
+        </mesh>
+        <mesh position={[0, 0, 0.2]}>
+          <boxGeometry args={[0.16, 0.13, 0.03]} />
+          <meshStandardMaterial
+            color="#f2c230"
+            flatShading
+            metalness={0.55}
+            roughness={0.28}
+          />
+        </mesh>
+        <mesh position={[0, 0, 0.218]}>
+          <boxGeometry args={[0.07, 0.06, 0.01]} />
+          <meshStandardMaterial color="#12306b" roughness={0.6} />
+        </mesh>
+      </group>
 
       {/* The mission patch on the left arm: a disc with its own star. */}
       <group position={[-0.325, 0.06, 0.02]} rotation={[0, -Math.PI / 2, 0]}>
@@ -1326,6 +1390,126 @@ function StarKit() {
             emissive="#f0a33c"
             emissiveIntensity={0.4}
             metalness={0.45}
+          />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
+/**
+ * The cape.
+ *
+ * Hung from a yoke across the shoulders and built as a lathe of stacked
+ * rings rather than a flat plane, so it wraps the back and falls away from
+ * him instead of reading as a rectangle stuck on with tape.
+ *
+ * Two conventions decide every number in here, and getting either backwards
+ * puts the cape on his chest:
+ *
+ * - Negative Z is behind him (the life-support pack is built the same way).
+ * - In cylinder space theta runs from +Z toward +X, so the arc that covers
+ *   his back is the half centred on PI - a window of PI/2 to 3*PI/2.
+ * - A positive `rotation.x` on something hanging swings its bottom edge
+ *   backward. So streaming the cape out behind him is a POSITIVE angle;
+ *   negative drapes it forward over his front.
+ *
+ * Every frame it does two things. It swings back by how fast he is going, so
+ * a sprint streams it out behind him and standing still lets it drop; and it
+ * breathes on a slow sine whatever he is doing, because a cape that is
+ * perfectly still whenever he stops moving is a plank.
+ */
+function Cape({ motion }: { motion?: RefObject<CharacterMotion> }) {
+  const swing = useRef<Group>(null)
+  /* Eased, so setting off and pulling up are a settle rather than a snap:
+     the cape has weight and arrives a moment after he does. */
+  const lift = useRef(0)
+
+  useFrame((state, delta) => {
+    const g = swing.current
+    if (!g) return
+    const m = motion?.current
+    const speed = m?.moving ? (m.speed ?? 0) : 0
+
+    /* How far out it streams, capped: past a jog it is already near
+       horizontal and more speed should not tear it off over his head. */
+    const wanted = Math.min(1, speed / 5)
+    lift.current += (wanted - lift.current) * Math.min(1, delta * 4)
+
+    const t = state.clock.elapsedTime
+    /* Positive, so it lifts BEHIND him. At rest it hangs a few degrees off
+       his back rather than clipping into it; at a sprint it is most of the
+       way to horizontal. The billow is faster and deeper the harder he is
+       going, the way cloth loaded with air behaves. */
+    g.rotation.x =
+      0.06 +
+      lift.current * 1.15 +
+      Math.sin(t * (1.6 + lift.current * 4)) * (0.03 + lift.current * 0.09)
+    /* And a lazy side-to-side, so it is never a flat pendulum. */
+    g.rotation.z = Math.sin(t * 0.9 + 1.1) * (0.02 + lift.current * 0.06)
+  })
+
+  /* The back half, centred on PI. Shared by all three layers so the cape,
+     its lining and its hem are the same sheet of cloth and cannot part
+     company at the edges. */
+  const FROM = Math.PI * 0.5
+  const SPAN = Math.PI
+
+  return (
+    /* Pivoting at the top edge, high on his back, so it swings from the
+       shoulders the way it is fastened rather than from his middle. */
+    <group position={[0, 0.33, -0.17]} ref={swing}>
+      {/* The clasp: a gold bar across the shoulders holding the thing on.
+          Without it the cape floats a centimetre off his back and the eye
+          goes straight to the gap. */}
+      <mesh position={[0, 0.01, 0.05]}>
+        <boxGeometry args={[0.42, 0.055, 0.1]} />
+        <meshStandardMaterial
+          color="#f2c230"
+          flatShading
+          metalness={0.5}
+          roughness={0.3}
+        />
+      </mesh>
+
+      <group position={[0, -0.62, 0]}>
+        {/* The cape proper: a half-open cone, widening as it falls. Drawn
+            on both sides, because once it lifts you see the inside of it. */}
+        <mesh castShadow>
+          <cylinderGeometry args={[0.3, 0.66, 1.24, 18, 1, true, FROM, SPAN]} />
+          <meshStandardMaterial
+            color="#b3202e"
+            flatShading
+            roughness={0.82}
+            side={DoubleSide}
+          />
+        </mesh>
+        {/* The lining, a shade darker and a hair OUTSIDE the cape rather
+            than inside it: inside, it sits between the cloth and the camera
+            and you see the lining instead of the cape. */}
+        <mesh>
+          <cylinderGeometry
+            args={[0.312, 0.672, 1.235, 18, 1, true, FROM, SPAN]}
+          />
+          <meshStandardMaterial
+            color="#6d1420"
+            flatShading
+            roughness={0.9}
+            side={DoubleSide}
+          />
+        </mesh>
+        {/* A gold hem at the bottom, which is what ties the red back to the
+            rest of the kit rather than leaving it a separate garment. */}
+        <mesh position={[0, -0.605, 0]}>
+          <cylinderGeometry
+            args={[0.662, 0.674, 0.07, 18, 1, true, FROM, SPAN]}
+          />
+          <meshStandardMaterial
+            color="#f2c230"
+            flatShading
+            metalness={0.45}
+            roughness={0.35}
+            side={DoubleSide}
           />
         </mesh>
       </group>

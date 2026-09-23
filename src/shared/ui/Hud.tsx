@@ -74,6 +74,8 @@ export function Hud() {
   const missions = useGame((s) => s.missions)
   const lighthouseOpen = useGame((s) => s.lighthouseOpen)
   const hasMoved = useGame((s) => s.hasMoved)
+  const hasDived = useGame((s) => s.hasDived)
+  const outfit = useGame((s) => s.outfit)
   const openJournal = useGame((s) => s.openJournal)
   const openMap = useGame((s) => s.openMap)
   const openGreeting = useGame((s) => s.openGreeting)
@@ -334,6 +336,27 @@ export function Hud() {
             : t('WASD to walk · Shift to sprint · M for the map')}
         </p>
       )}
+
+      {/* The cape.
+
+          Flying is the one thing on the island no sign explains, and the way
+          back down is the half nobody guesses - you can take off by accident
+          and then be stuck up there. Shown from the moment he earns the
+          shirt until the first time he dives, and never again that session.
+
+          It waits for `hasMoved` so a new player is not handed two hints at
+          once, and sits out the on-screen-stick layout, where there is no
+          space bar to press. */}
+      {mode === 'explore' &&
+        outfit === 'star' &&
+        hasMoved &&
+        !hasDived &&
+        !playing &&
+        !coarse && (
+          <p className="nudge">
+            {t('Space to fly · double-tap Space to drop · hold to pull up')}
+          </p>
+        )}
 
       {party && (
         <p className="party-banner">

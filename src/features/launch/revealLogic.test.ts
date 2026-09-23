@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
+  BANDS,
   NOTICE,
   REVEAL_LINES,
   REVEAL_TOTAL,
   SHED,
+  bandShed,
   revealPhase,
 } from './revealLogic'
 
@@ -72,9 +74,51 @@ describe('the reveal on the doorstep', () => {
     expect(REVEAL_LINES.notice).toBeUndefined()
   })
 
-  it('is short enough to sit through', () => {
-    /* It stands between him and a door he has just unlocked five times
-       over, so it has to be a beat rather than a film. */
-    expect(REVEAL_TOTAL).toBeLessThan(8)
+  it('sheds the bands one after another from the bottom up', () => {
+    /* All at once is a texture fading out; in sequence is a tower coming
+       apart, which is the whole point of the shot. */
+    const early = bandShed(0, 0.3)
+    const late = bandShed(BANDS - 1, 0.3)
+    expect(early).toBeGreaterThan(late)
+  })
+
+  it('has every band gone by the end of the shed', () => {
+    for (let i = 0; i < BANDS; i++) {
+      expect(bandShed(i, 1)).toBe(1)
+      expect(bandShed(i, 0)).toBe(0)
+    }
+  })
+
+  it('keeps more than one band in the air at a time', () => {
+    /* They overlap. One-at-a-time-in-full would read as a machine
+       unbolting itself rather than a shell breaking up. */
+    const midway = Array.from({ length: BANDS }, (_, i) => bandShed(i, 0.45))
+    const moving = midway.filter((v) => v > 0 && v < 1)
+    expect(moving.length).toBeGreaterThan(1)
+  })
+
+  it('shakes hardest as the shell goes, not at the end', () => {
+    const shedding = at(NOTICE + SHED * 0.5).rumble
+    expect(shedding).toBeGreaterThan(0.5)
+    expect(at(0.5).rumble).toBe(0)
+    /* It has died away under the rocket. */
+    expect(at(REVEAL_TOTAL - 0.2).rumble).toBeLessThan(0.1)
+  })
+
+  it('lights the seams only while the shell is splitting', () => {
+    expect(at(0.5).seam).toBe(0)
+    expect(at(NOTICE + SHED * 0.5).seam).toBeGreaterThan(0.8)
+    expect(at(NOTICE + SHED + 0.5).seam).toBe(0)
+  })
+
+  it('is short enough to sit through more than once', () => {
+    /*
+     * It plays every single time he walks in, not just the first, so the
+     * budget is tighter than it would be for a one-off: long enough to
+     * watch, short enough that the fourth viewing is not a toll on the door.
+     */
+    expect(REVEAL_TOTAL).toBeLessThan(7.5)
+    /* And long enough that the shed is not a flicker. */
+    expect(SHED).toBeGreaterThan(2)
   })
 })

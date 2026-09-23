@@ -489,16 +489,18 @@ interface GameState {
    */
   launch: Launch | null
   /**
-   * The reveal on the doorstep, or null.
+   * The reveal on the doorstep, or null. Holds the clock the cutscene reads.
    *
-   * Set the first time he goes through the lighthouse door, and it holds the
-   * clock the whole cutscene reads. `revealed` remembers that it has played,
-   * because a surprise is only a surprise once - every visit after this the
-   * door simply opens.
+   * It plays every time he walks in, not just the first. The tower coming
+   * apart is the best thing on the island and there is no reason to show it
+   * once and then never again - and since it is what the door does, a second
+   * visit that skipped it would make the first one look like a fluke.
+   *
+   * `revealing` is what stops it starting on top of itself, and it is per
+   * entry rather than per save: it is set while the cutscene runs and
+   * cleared the moment he is through the door.
    */
   reveal: { started: number } | null
-  /** Whether the tower has already shown him what it is. Saved. */
-  revealed: boolean
   /**
    * True while the credits are playing, which is the whole of the time
    * between the engines cutting and the certificate coming up.
@@ -571,9 +573,20 @@ interface GameState {
    */
   proposalRound: number
   hasMoved: boolean
+  /**
+   * True once he has dived under the cape.
+   *
+   * Session-only, like `hasMoved`, and deliberately not saved: flying is
+   * the one control on the island that nothing else teaches, and somebody
+   * coming back a fortnight later has every chance of having forgotten how
+   * to come down. Cheap to show again; expensive to be stuck in the sky.
+   */
+  hasDived: boolean
 
   start: () => void
   setNearby: (n: Nearby | null) => void
+  /** Called the first time he dives, which retires the flying hint. */
+  noteDived: () => void
   talk: (d: Omit<DialogueState, 'page'>) => void
   advance: () => void
   /** Picks one of the answers on the last page of the dialogue. */
@@ -856,7 +869,6 @@ const RESTORED = {
   cvUnlocked: SAVED_PROGRESS?.cvUnlocked ?? false,
   launched: SAVED_PROGRESS?.launched ?? false,
   starShirt: SAVED_PROGRESS?.starShirt ?? false,
-  revealed: SAVED_PROGRESS?.revealed ?? false,
 }
 
 /**
@@ -870,6 +882,28 @@ const RESTORED = {
  * covered without anybody having to think of it.
  */
 export const isSealed = (mode: Mode) => mode === 'launch' || mode === 'orbit'
+
+/**
+ * True while the doorstep cutscene is running, or finishing.
+ *
+ * Module state rather than a field on the store because nothing draws off it
+ * - it exists only to stop `enterBuilding` re-entering the reveal it is being
+ * called from at the end of one. A field would put a re-render on the path
+ * for something no component reads.
+ */
+let revealing = false
+
+/**
+ * Forgets that a cutscene was running.
+ *
+ * Exported for the tests, which reset the store wholesale between cases and
+ * cannot reach module state any other way - a case that leaves a reveal
+ * half-run would otherwise stop the next one from ever starting, and the
+ * failure would look like the replay being broken rather than the test.
+ */
+export function resetReveal() {
+  revealing = false
+}
 
 export const useGame = create<GameState>((raw, get) => {
   /*
@@ -950,7 +984,6 @@ export const useGame = create<GameState>((raw, get) => {
     credits: false,
     /* Nothing is playing at the title screen, whatever the save remembers. */
     reveal: null,
-    revealed: RESTORED.revealed,
     launched: RESTORED.launched,
     /* The suit hangs on its rack at the start of every visit, whatever a
        previous one ended in: he is not born wearing it. */
@@ -967,8 +1000,13 @@ export const useGame = create<GameState>((raw, get) => {
     proposal: null,
     proposalRound: 0,
     hasMoved: false,
+    hasDived: false,
 
     start: () => set({ mode: 'explore' }),
+
+    noteDived: () => {
+      if (!get().hasDived) set({ hasDived: true })
+    },
 
     setNearby: (n) => {
       const current = get().nearby
@@ -1947,7 +1985,7 @@ export const useGame = create<GameState>((raw, get) => {
        * of it, by which point `revealed` is set and it falls straight
        * through - so the door is never blocked, only delayed.
        */
-      if (id === LAUNCH_AREA && !get().revealed && !get().reveal) {
+      if (id === LAUNCH_AREA && !get().reveal && !revealing) {
         get().beginReveal()
         return
       }
@@ -1968,6 +2006,30 @@ export const useGame = create<GameState>((raw, get) => {
 
     leaveBuilding: () => {
       const { area } = get()
+      /*
+       * Sealed for vacuum, and not going for a walk in it.
+       *
+       * A man in a pressure suit strolling back down the cape and round the
+       * island in it is the one thing that would make the suit look like a
+       * costume rather than equipment. So the door refuses while it is on -
+       * and says so, because a door that simply does nothing reads as broken.
+       *
+       * It is a refusal and not a trap: the rack is three strides away and
+       * hanging the suit back up always works, so there is no way to be shut
+       * in here. That matters because the keeper's logbook is in this room,
+       * and the CV with it.
+       */
+      if (area === LAUNCH_AREA && get().suited) {
+        sfx.dry()
+        set({
+          toast: {
+            title: 'Sealed for vacuum',
+            body: 'You are not walking the island in this. Hang it back on the rack, or press the button.',
+            kind: 'progress',
+          },
+        })
+        return
+      }
       // A room two floors down still belongs to a door on the island, and this
       // is what puts the player back on the right doorstep rather than nowhere.
       const interior = INTERIOR_BY_ID.get(area)
@@ -2198,7 +2260,8 @@ export const useGame = create<GameState>((raw, get) => {
      * thing is him standing still and looking at something.
      */
     beginReveal: () => {
-      if (get().reveal || get().revealed) return
+      if (get().reveal || revealing) return
+      revealing = true
       sfx.jingle()
       set({
         reveal: { started: performance.now() / 1000 },
@@ -2213,14 +2276,16 @@ export const useGame = create<GameState>((raw, get) => {
     /**
      * The cutscene is over: he goes in.
      *
-     * `revealed` is set before the door is opened, so the `enterBuilding`
-     * below falls through the check that sent us here rather than starting
-     * the whole thing again.
+     * `revealing` is still set while `enterBuilding` runs, which is what
+     * makes the call below fall through the check that sent us here rather
+     * than starting the whole thing over. It is cleared once he is inside,
+     * so the next time he walks up to the door it plays again.
      */
     endReveal: () => {
       if (!get().reveal) return
-      set({ reveal: null, revealed: true, mode: 'explore' })
+      set({ reveal: null, mode: 'explore' })
       get().enterBuilding(LAUNCH_AREA)
+      revealing = false
     },
 
     /**
@@ -2432,7 +2497,6 @@ export const useGame = create<GameState>((raw, get) => {
         launch: null,
         credits: false,
         reveal: null,
-        revealed: false,
         launched: false,
         starShirt: false,
         suited: false,
@@ -2459,7 +2523,6 @@ type Progressed = Pick<
   | 'cvUnlocked'
   | 'launched'
   | 'starShirt'
-  | 'revealed'
 >
 
 /** The store's progress in the shape the save file keeps it in. */
@@ -2478,7 +2541,6 @@ function snapshot(s: Progressed): SavedProgress {
     cvUnlocked: s.cvUnlocked,
     launched: s.launched,
     starShirt: s.starShirt,
-    revealed: s.revealed,
   }
 }
 
@@ -2498,8 +2560,7 @@ useGame.subscribe((state, previous) => {
     state.lighthouseOpen === previous.lighthouseOpen &&
     state.cvUnlocked === previous.cvUnlocked &&
     state.launched === previous.launched &&
-    state.starShirt === previous.starShirt &&
-    state.revealed === previous.revealed
+    state.starShirt === previous.starShirt
   ) {
     return
   }

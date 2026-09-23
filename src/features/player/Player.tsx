@@ -213,15 +213,60 @@ const FLY_UP = 7.5
  * like riding a lift.
  */
 const FLY_DOWN = 34
-/** How hard he snaps into the dive: much quicker than he eases anywhere
-    else, because the whole point of it is that it is abrupt. */
-const DIVE_EASE = 14
+/**
+ * How hard he goes into the dive.
+ *
+ * Quicker than he eases anywhere else, because the point of a dive is that
+ * it commits - but not so quick that the velocity lurches. At 14 the first
+ * frame of a dive moved him nearly 8 units a second, which the camera sees
+ * as a jolt; this spreads the same drop over about a third of a second and
+ * reads as weight rather than as a snap.
+ */
+const DIVE_EASE = 9
+/**
+ * The boost a double tap gives from standing: the same gesture that dives
+ * him in the air throws him upward off the ground.
+ *
+ * Big enough to clear LEAP_BELOW comfortably, so the leap puts him into
+ * real flight rather than into the band where another double tap would
+ * read as a second leap. At 15 it topped out at barely two units, which
+ * beside an ordinary jump looked like nothing had happened.
+ */
+const FLY_LEAP = 28
 /** What he settles at with nothing held: a hover that leaks a little. */
 const FLY_SINK = 1.1
-/** How fast he reaches the rate he is asking for; a cape has some give. */
-const FLY_EASE = 7
+/**
+ * How fast he reaches the rate he is asking for; a cape has some give.
+ *
+ * Gentler than it was: the cape is meant to carry him, and a climb that
+ * arrives at full speed in a couple of frames feels like a lift rather
+ * than like flying.
+ */
+const FLY_EASE = 5
 /** As high as the cape will take him. */
 const FLY_CEILING = 26
+/**
+ * Below this a double tap is a leap rather than a dive.
+ *
+ * Generous on purpose: it is the height of a decent hop, so tapping twice
+ * on the way up off the ground reads as "go on then" rather than turning
+ * the launch straight back round. Diving from ankle height would only have
+ * put him back where he already was.
+ */
+const LEAP_BELOW = 3
+/** The last few units of sky, over which the climb bleeds away. */
+const FLY_TAPER = 4
+/**
+ * The last stretch above the grass, over which a dive is flared off.
+ *
+ * Generous, because the flare is eased onto rather than clamped to: it
+ * needs room to actually catch a 34-unit dive before the ground arrives.
+ * At 3.5 he was still doing 15 units a second on touchdown, which lands
+ * like a dropped sack; over 8 he arrives at a third of that.
+ */
+const FLARE = 8
+/** How hard the flare pulls him out of a dive. */
+const FLARE_EASE = 20
 
 const OUTDOOR_CAM = { distance: 22, height: 15.5 }
 /** A match needs to see further out than a stroll does. */
@@ -420,6 +465,8 @@ export function Player() {
   const flying = useRef(false)
   /** Latched by a double tap: dropping out of the sky until he pulls out. */
   const diving = useRef(false)
+  /** The dive's own key, still down from the tap that started it. */
+  const diveKey = useRef(false)
   /**
    * Where he has drifted to in orbit, and how fast, in world units.
    *
@@ -1272,14 +1319,52 @@ export function Player() {
       !SWIM.active
 
     if (caped) {
-      // Two quick taps is the way down, and it claims the run of taps so
-      // the tap that started it cannot also read as a fresh climb.
+      const held = isDown('Space')
+
+      /*
+       * Two quick taps, which means opposite things at opposite ends of a
+       * flight - and reads as the same gesture either way: twice on the key
+       * is "more of what you are already doing".
+       *
+       * Low down it is a leap: off the ground, or barely off it, the second
+       * tap throws him upward. On the ground the FIRST tap has already put
+       * him into a hover by the time the second arrives, so without this
+       * the pair read as launch-then-dive and he bounced straight back
+       * into the grass.
+       *
+       * Up in the air it is the dive.
+       */
       if (doubleTapped()) {
         forgetTaps()
-        // Latched: one gesture, and he is diving until something ends it.
-        if (flying.current) diving.current = true
+        if (flying.current && hop.current.y > LEAP_BELOW) {
+          // Latched: one gesture, and he is diving until something ends it.
+          diving.current = true
+          // He has worked out how to come down; the hint can retire.
+          store.noteDived()
+          /*
+           * And the key that just dived is dead until it is let go.
+           *
+           * The second tap of the double is still physically down for
+           * something like a tenth of a second after it registers - five or
+           * six frames. Holding space is how he pulls OUT of a dive, so
+           * without this the very tap that starts the dive also cancels it,
+           * on the same frame, every single time. The dive never survived
+           * to the physics at all.
+           */
+          diveKey.current = true
+        } else {
+          // The leap. Straight into the velocity rather than through the
+          // easing, because a kick off the ground is the one part of this
+          // that should be instant.
+          flying.current = true
+          diving.current = false
+          hop.current.vy = Math.max(hop.current.vy, FLY_LEAP)
+          sfx.hop()
+        }
       }
-      const up = isDown('Space')
+      // A fresh hold, rather than the tail of the tap that began the dive.
+      const up = held && !diveKey.current
+      if (!held) diveKey.current = false
       // Holding space is how he pulls out of it — the same key that took
       // him up in the first place, so recovering is the obvious thing to
       // do rather than something that has to be learnt.
@@ -1302,9 +1387,40 @@ export function Player() {
           Math.min(1, delta * (down ? DIVE_EASE : FLY_EASE))
         hop.current.y += hop.current.vy * delta
 
+        /*
+         * The ceiling, approached rather than hit.
+         *
+         * Clamping the height and zeroing the climb makes the top of the
+         * sky a shelf he bumps into. Instead the climb is bled off over the
+         * last few units, so he runs out of lift and settles - which is
+         * what thin air feels like, and costs one multiply.
+         */
+        if (hop.current.vy > 0) {
+          const room = (FLY_CEILING - hop.current.y) / FLY_TAPER
+          if (room < 1) hop.current.vy *= Math.max(0, room)
+        }
         if (hop.current.y >= FLY_CEILING) {
           hop.current.y = FLY_CEILING
           hop.current.vy = Math.min(0, hop.current.vy)
+        }
+        /*
+         * And the ground, flared into rather than struck.
+         *
+         * A dive arrives at 34 units a second and used to stop dead in a
+         * single frame, which the camera reads as the whole world jarring.
+         * Inside the last stretch the fall is eased off against the height
+         * that is left, so he touches down fast but not instantly.
+         */
+        if (hop.current.vy < 0 && hop.current.y < FLARE) {
+          const room = hop.current.y / FLARE
+          const ceiling = -(FLY_SINK + (FLY_DOWN - FLY_SINK) * room * room)
+          /* Eased onto the limit rather than clamped to it: snapping the
+             velocity down to the flare curve is itself a jolt, and a bigger
+             one than the dive it was meant to soften. */
+          if (hop.current.vy < ceiling) {
+            hop.current.vy +=
+              (ceiling - hop.current.vy) * Math.min(1, delta * FLARE_EASE)
+          }
         }
         if (hop.current.y <= 0) {
           // Down, and the cape hands him back to the ground.

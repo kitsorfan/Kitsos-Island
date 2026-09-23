@@ -29,7 +29,6 @@ const blank: SavedProgress = {
   cvUnlocked: false,
   launched: false,
   starShirt: false,
-  revealed: false,
 }
 
 /** A visit with something in every field. */
@@ -43,7 +42,6 @@ const visit: SavedProgress = {
   cvUnlocked: true,
   launched: true,
   starShirt: true,
-  revealed: true,
 }
 
 beforeEach(() => {
@@ -65,7 +63,6 @@ describe('isEmpty', () => {
     expect(isEmpty({ ...blank, cvUnlocked: true })).toBe(false)
     expect(isEmpty({ ...blank, launched: true })).toBe(false)
     expect(isEmpty({ ...blank, starShirt: true })).toBe(false)
-    expect(isEmpty({ ...blank, revealed: true })).toBe(false)
   })
 })
 
@@ -186,14 +183,12 @@ describe('what a save is allowed to contain', () => {
       cvUnlocked: 1 as unknown as boolean,
       launched: 'true' as unknown as boolean,
       starShirt: 'yes' as unknown as boolean,
-      revealed: 1 as unknown as boolean,
     })
     const back = loadProgress()
     expect(back?.lighthouseOpen).toBe(false)
     expect(back?.cvUnlocked).toBe(false)
     expect(back?.launched).toBe(false)
     expect(back?.starShirt).toBe(false)
-    expect(back?.revealed).toBe(false)
   })
 
   it('reads a save written before the ship was found', () => {
@@ -202,12 +197,7 @@ describe('what a save is allowed to contain', () => {
      * a save that predates it still reads — as a visit that never launched,
      * with everything else it remembers intact.
      */
-    const {
-      launched: _launched,
-      starShirt: _starShirt,
-      revealed: _revealed,
-      ...old
-    } = visit
+    const { launched: _launched, starShirt: _starShirt, ...old } = visit
     saveProgress(old as unknown as SavedProgress)
 
     const back = loadProgress()

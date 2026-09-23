@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { nextObjective, useGame } from './store'
+import { nextObjective, resetReveal, useGame } from './store'
 import { KEYS, MISSIONS, PLAYER_START } from '../../features/island/world'
 import { BIRTHDAY, FEAST } from '../../features/calendar/calendar'
 import { INTERIORS } from '../../features/interior/interiors'
@@ -54,6 +54,9 @@ const PRISTINE = useGame.getState()
 beforeEach(() => {
   localStorage.clear()
   useGame.setState(PRISTINE, true)
+  /* The doorstep cutscene keeps a flag outside the store, so resetting the
+     store alone leaves it set and the next case never sees a reveal. */
+  resetReveal()
 })
 
 const state = () => useGame.getState()
@@ -805,14 +808,15 @@ describe('the credits', () => {
 })
 
 /**
- * The reveal on the doorstep, and the rule that matters: it plays once.
+ * The reveal on the doorstep.
  *
- * A surprise is only a surprise the first time, and this one stands between
- * him and a door he has just unlocked five keys' worth. Every visit after
- * the first, the door simply opens.
+ * It plays every time he walks in, which is the rule worth pinning: the
+ * tower coming apart is the best thing on the island and there is no reason
+ * to show it once and never again. What must not happen is it starting on
+ * top of itself, which is what the guard inside `enterBuilding` is for.
  */
 describe('the reveal', () => {
-  it('holds him on the doorstep the first time', () => {
+  it('holds him on the doorstep', () => {
     useGame.getState().enterBuilding('lighthouse')
 
     /* Not inside yet: the cutscene has the screen. */
@@ -828,18 +832,28 @@ describe('the reveal', () => {
     expect(useGame.getState().area).toBe('lighthouse')
     expect(useGame.getState().mode).toBe('explore')
     expect(useGame.getState().reveal).toBeNull()
-    expect(useGame.getState().revealed).toBe(true)
   })
 
-  it('does not play a second time', () => {
+  it('plays again the next time he walks in', () => {
     useGame.getState().enterBuilding('lighthouse')
     useGame.getState().endReveal()
     useGame.getState().leaveBuilding()
 
-    /* Straight in, no cutscene. */
+    /* Every visit, not just the first. */
     useGame.getState().enterBuilding('lighthouse')
-    expect(useGame.getState().reveal).toBeNull()
+    expect(useGame.getState().reveal).not.toBeNull()
+    expect(useGame.getState().mode).toBe('reveal')
+    expect(useGame.getState().area).toBe('island')
+  })
+
+  it('does not restart itself on the way through the door', () => {
+    /* `endReveal` calls `enterBuilding`, which is the call that started the
+       cutscene in the first place - it must fall through rather than loop. */
+    useGame.getState().enterBuilding('lighthouse')
+    useGame.getState().endReveal()
+
     expect(useGame.getState().area).toBe('lighthouse')
+    expect(useGame.getState().reveal).toBeNull()
   })
 
   it('never plays for any other door', () => {
@@ -855,12 +869,64 @@ describe('the reveal', () => {
     expect(useGame.getState().reveal).toBe(first)
   })
 
-  it('is forgotten when the island is cleared', () => {
+  it('is not left running when the island is cleared', () => {
     useGame.getState().enterBuilding('lighthouse')
-    useGame.getState().endReveal()
     useGame.getState().clearProgress()
 
-    expect(useGame.getState().revealed).toBe(false)
     expect(useGame.getState().reveal).toBeNull()
+  })
+})
+
+/**
+ * The suit, and the door.
+ *
+ * Sealed for vacuum is not a state you walk the island in, so the front door
+ * refuses while it is on. What it must never be is a trap: the keeper's
+ * logbook and the CV are in that room, and the rack is what gets him out.
+ */
+describe('leaving the deck while suited', () => {
+  const suitedOnDeck = () => {
+    useGame.setState({ area: 'lighthouse', mode: 'explore' })
+    useGame.getState().toggleSuit()
+  }
+
+  it('refuses, and says why', () => {
+    suitedOnDeck()
+    useGame.getState().leaveBuilding()
+
+    expect(useGame.getState().area).toBe('lighthouse')
+    /* A door that simply does nothing reads as broken. */
+    expect(useGame.getState().toast).not.toBeNull()
+  })
+
+  it('lets him out again the moment the suit is off', () => {
+    suitedOnDeck()
+    useGame.getState().leaveBuilding()
+    expect(useGame.getState().area).toBe('lighthouse')
+
+    /* The rack is the way out, and it always works. */
+    useGame.getState().toggleSuit()
+    useGame.getState().leaveBuilding()
+    expect(useGame.getState().area).toBe('island')
+  })
+
+  it('never shuts anybody in', () => {
+    /*
+     * The rule the whole thing hangs on. However he got suited, hanging it
+     * up is available - so there is no arrangement of presses that leaves a
+     * visitor in a room they cannot leave.
+     */
+    suitedOnDeck()
+    expect(useGame.getState().suited).toBe(true)
+    useGame.getState().toggleSuit()
+    expect(useGame.getState().suited).toBe(false)
+  })
+
+  it('does not lock any other building', () => {
+    /* The suit only exists on the deck, but the guard has to be specific to
+       it rather than to being dressed oddly. */
+    useGame.setState({ area: 'house', mode: 'explore', suited: true })
+    useGame.getState().leaveBuilding()
+    expect(useGame.getState().area).toBe('island')
   })
 })

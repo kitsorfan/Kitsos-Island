@@ -142,9 +142,17 @@ Some notes on how it hangs together:
   up through them — both on screen at once, so it reads as one thing becoming
   another rather than a swap. "This is not a lighthouse. This is a space
   rocket." Then the screen goes and the deck takes over.
-  `features/launch/revealLogic.ts` times it; it plays exactly once and the
-  save remembers, because a surprise standing between you and a door you have
-  just unlocked five keys' worth is only welcome the first time.
+  `features/launch/revealLogic.ts` times it. The bands come away one at a
+  time from the bottom up, turning as they go, with the seams lit and the
+  ground shaking hardest in the middle of it — all at once would be a texture
+  fading out rather than a tower coming apart. It plays every time he walks
+  in, not just the first, so it is kept to seven seconds.
+
+- **Suited, the front door refuses.** A man in a pressure suit walking the
+  island in it would make the suit a costume rather than equipment, so the
+  door says no while it is on. It is a refusal and not a trap: the rack is
+  three strides away, hanging the suit up always works, and the keeper's
+  logbook is in that room.
 
 - **The lighthouse is a spaceship.** The summit room is a flight deck
   (`features/launch/FlightDeck.tsx`), and it says so before a word is read: a

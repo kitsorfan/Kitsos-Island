@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { DoubleSide } from 'three'
 import type { Group, Mesh, MeshStandardMaterial } from 'three'
-import { REVEAL_LINES, revealPhase } from './revealLogic'
+import { BANDS, REVEAL_LINES, bandShed, revealPhase } from './revealLogic'
 import { BUILDING_BY_ID } from '../island/world'
 import { useGame } from '../../shared/state/store'
 import { TextPlane } from '../../shared/engine/TextSign'
@@ -22,42 +22,76 @@ import * as sfx from '../../shared/engine/audio'
 export function Reveal() {
   const reveal = useGame((s) => s.reveal)
   const endReveal = useGame((s) => s.endReveal)
-  const shell = useRef<Group>(null)
+  /* One group per band, so each can leave on its own beat. */
+  const bands = useRef<(Group | null)[]>([])
+  const seams = useRef<(Mesh | null)[]>([])
   const ship = useRef<Group>(null)
+  const shake = useRef<Group>(null)
   const done = useRef(false)
   const spoke = useRef('')
 
   const tower = BUILDING_BY_ID.get('lighthouse')
 
-  useFrame(() => {
+  useFrame((state) => {
     if (!reveal || !tower) return
-    const phase = revealPhase(reveal, performance.now() / 1000)
+    const now = performance.now() / 1000
+    const phase = revealPhase(reveal, now)
+    const time = state.clock.elapsedTime
 
-    /* The paint lifts off and thins away. */
-    if (shell.current) {
-      shell.current.visible = phase.shed < 0.99
-      shell.current.position.y = phase.shed * 9
-      shell.current.scale.setScalar(1 + phase.shed * 0.6)
-      shell.current.traverse((part) => {
-        const mat = (part as Mesh).material as MeshStandardMaterial | undefined
-        if (mat && 'opacity' in mat) mat.opacity = 0.85 * (1 - phase.shed)
-      })
+    /*
+     * The bands come away one at a time from the bottom up, each turning as
+     * it goes and tipping over as it climbs — which is the difference
+     * between a tower coming apart and a texture fading out. They do not
+     * all leave the same way, either: the odd ones spin the other way.
+     */
+    for (let i = 0; i < BANDS; i++) {
+      const band = bands.current[i]
+      if (!band) continue
+      const gone = bandShed(i, phase.shed)
+      band.visible = gone < 0.995
+      const way = i % 2 === 0 ? 1 : -1
+      /* Up, out and over. */
+      band.position.y = 1.4 + i * 2.6 + gone * (7 + i * 1.4)
+      band.position.x = Math.sin(i * 2.1) * gone * 4.5
+      band.position.z = Math.cos(i * 2.1) * gone * 4.5
+      band.rotation.y = gone * 2.4 * way
+      band.rotation.x = gone * 0.9 * way
+      band.scale.setScalar(1 + gone * 0.25)
+
+      const mat = (band.children[0] as Mesh | undefined)?.material as
+        MeshStandardMaterial | undefined
+      if (mat && 'opacity' in mat) mat.opacity = 0.92 * (1 - gone)
     }
 
-    /* And the ship comes up underneath it. */
+    /* Light at the seams while the shell is splitting. */
+    for (const seam of seams.current) {
+      if (!seam) continue
+      const mat = seam.material as MeshStandardMaterial
+      mat.opacity = phase.seam * 0.85
+      seam.visible = phase.seam > 0.02
+    }
+
+    /* The whole tower shudders as it lets go. */
+    if (shake.current) {
+      const r = phase.rumble
+      shake.current.position.x = Math.sin(time * 43) * r * 0.22
+      shake.current.position.z = Math.sin(time * 37) * r * 0.22
+    }
+
+    /* And the ship comes up underneath it, rising a little as it firms. */
     if (ship.current) {
       ship.current.visible = phase.ship > 0.01
-      ship.current.scale.setScalar(0.85 + phase.ship * 0.15)
+      ship.current.scale.setScalar(0.9 + phase.ship * 0.1)
       ship.current.traverse((part) => {
         const mat = (part as Mesh).material as MeshStandardMaterial | undefined
         if (mat && 'opacity' in mat) mat.opacity = phase.ship
       })
     }
 
-    /* One note as the paint starts to go, and one as it lands. */
+    /* A note as the paint starts to go, and one as the rocket lands. */
     if (phase.stage !== spoke.current) {
       spoke.current = phase.stage
-      if (phase.stage === 'shed') sfx.confirm()
+      if (phase.stage === 'shed') sfx.thud()
       if (phase.stage === 'rocket') sfx.jingle()
     }
 
@@ -71,29 +105,60 @@ export function Reveal() {
   const [x, z] = tower.position
 
   return (
-    <group position={[x, 0, z]} scale={tower.scale}>
+    <group ref={shake} position={[x, 0, z]} scale={tower.scale}>
       {/*
-        The paint: the bands the tower wears, as a shell that lifts off it.
-        Slightly proud of the real thing so there is no z-fighting between
-        the two while both are on screen.
+        The paint: the bands the tower wears, each its own group so it can
+        come away on its own beat. Slightly proud of the real thing so there
+        is no z-fighting between the two while both are on screen.
       */}
-      <group ref={shell}>
-        {[0, 1, 2, 3, 4, 5].map((i) => (
-          <mesh key={i} position={[0, 1.4 + i * 2.6, 0]}>
+      {Array.from({ length: BANDS }, (_, i) => (
+        <group
+          key={i}
+          ref={(g) => {
+            bands.current[i] = g
+          }}
+          position={[0, 1.4 + i * 2.6, 0]}
+        >
+          <mesh>
             <cylinderGeometry
               args={[3.56 - i * 0.34, 3.91 - i * 0.34, 2.6, 16, 1, true]}
             />
             <meshStandardMaterial
               color={i % 2 === 0 ? '#f6f1e4' : '#c0392b'}
               transparent
-              opacity={0.85}
+              opacity={0.92}
               depthWrite={false}
               side={DoubleSide}
               flatShading
             />
           </mesh>
-        ))}
-      </group>
+        </group>
+      ))}
+
+      {/* The seams between the bands, lit while the shell splits along
+          them. They are what says the tower came apart on purpose rather
+          than simply falling to bits. */}
+      {Array.from({ length: BANDS }, (_, i) => (
+        <mesh
+          key={`seam-${i}`}
+          ref={(m) => {
+            seams.current[i] = m
+          }}
+          position={[0, 2.7 + i * 2.6, 0]}
+          rotation={[Math.PI / 2, 0, 0]}
+          visible={false}
+        >
+          <torusGeometry args={[3.6 - i * 0.34, 0.1, 6, 24]} />
+          <meshStandardMaterial
+            color="#ffd9a0"
+            emissive="#f0a33c"
+            emissiveIntensity={2.2}
+            transparent
+            opacity={0}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
 
       {/* What was underneath. The same hull the hologram shows and the same
           one he will float beside, so all three are one object. */}

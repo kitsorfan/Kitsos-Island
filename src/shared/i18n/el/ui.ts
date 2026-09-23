@@ -76,6 +76,8 @@ export const UI: Record<string, string> = {
     'Σύρε τον μοχλό για να περπατήσεις, πάτα A για αλληλεπίδραση',
   'WASD to walk · Shift to sprint · M for the map':
     'WASD για περπάτημα · Shift για τρέξιμο · M για τον χάρτη',
+  'Space to fly · double-tap Space to drop · hold to pull up':
+    'Space για πτήση · διπλό Space για βουτιά · κράτα το για ανάκαμψη',
   'Party in the plaza': 'Γλέντι στην πλατεία',
   'Press the button again to call it a night':
     'Πάτα ξανά το κουμπί για να σχολάσει το γλέντι',

@@ -352,12 +352,27 @@ function Bulkheads() {
         />
       </mesh>
 
+      {/*
+        The deck's own lighting.
+        
+        It used to be these two alone - one cold overhead at the middle of
+        the room and one blue up the hologram - and between them the far end
+        of the deck fell away to nothing. The console sits five metres south
+        of the overhead, past the edge of its falloff, so the one thing in
+        the room the visitor has come to press was a black slab with a few
+        lit pips on it. The lamps read; the desk they are set into did not.
+        
+        So: the overhead is brighter and reaches further, and there is a
+        warm key over the console itself. Warm on purpose - everything else
+        in here is blue, and a panel lit the same colour as the glow off the
+        floor has nothing to separate it from the room behind it.
+      */}
       <pointLight
         position={[0, 4.2, -1]}
-        intensity={22}
-        distance={22}
-        decay={2}
-        color="#bcdcff"
+        intensity={30}
+        distance={30}
+        decay={1.8}
+        color="#cfe4ff"
       />
       <pointLight
         position={[HOLOGRAM[0], 2.2, HOLOGRAM[1]]}
@@ -365,6 +380,24 @@ function Bulkheads() {
         distance={10}
         decay={2}
         color="#5fb4ff"
+      />
+      {/* Over the console, so the desk has a front face and the button on
+          it is something you can see before you are standing on top of it. */}
+      <pointLight
+        position={[CONSOLE[0], 3.1, CONSOLE[1] + 1.6]}
+        intensity={18}
+        distance={13}
+        decay={1.9}
+        color="#ffd9a8"
+      />
+      {/* And a soft fill from the window end, which keeps the south wall and
+          the backs of the chairs from going to pure black. */}
+      <pointLight
+        position={[0, 2.4, -8.6]}
+        intensity={9}
+        distance={14}
+        decay={2}
+        color="#9fc4e8"
       />
     </group>
   )

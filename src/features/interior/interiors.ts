@@ -1949,16 +1949,24 @@ export const INTERIORS: Interior[] = [
      * clear of the console and given the whole side to itself.
      */
     props: [
-      { kind: 'stairs', position: [8, 8], rotation: -Math.PI / 2 },
+      /*
+       * No stairs, and no globe.
+       *
+       * Both were the keeper's room still showing through. The flight to
+       * the deck is a hatch and a ladder now, not a wooden staircase with a
+       * handrail, and a flight of steps standing in the corner of a launch
+       * cabin reads as a cottage somebody parked a rocket in - which is the
+       * one thing the rest of this room works to undo. The globe went with
+       * them: a blue ball on a turned wooden stand is a parlour ornament,
+       * and it sat in the eyeline between the door and the console.
+       */
       /* The flight chair, facing the console and the window beyond it. */
       { kind: 'chair', position: [0, -3.6], rotation: Math.PI },
       /* No shelf of books. The keeper's library was the last thing in here
          still furnishing a parlour, and a wall of paperbacks behind a flight
          console reads as a study somebody parked a rocket in. The logbook on
          the east wall is what is left of him, and it is enough. */
-      /* The globe stays, though. It is the one instrument on the deck that
-         was already here, and it is still the right one. */
-      { kind: 'globe', position: [6.6, 6.4] },
+
       /*
        * The west wall is the airlock and nothing else. The rack stands at
        * z = -2 in its own lit alcove and the whole side is left to it -
@@ -1972,7 +1980,7 @@ export const INTERIORS: Interior[] = [
       { kind: 'serverRack', position: [-9, -6], rotation: Math.PI / 2 },
       { kind: 'monitor', position: [6.6, -7.6], rotation: Math.PI },
       { kind: 'monitor', position: [-6.6, -7.6], rotation: Math.PI },
-      /* One green thing, in a tank by the stairs. Every crew keeps one. */
+      /* One green thing, in a tank by the door. Every crew keeps one. */
       { kind: 'plant', position: [-8.6, 8.4] },
     ],
     exhibits: [

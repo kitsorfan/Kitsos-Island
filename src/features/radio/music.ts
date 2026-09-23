@@ -15,7 +15,6 @@ import { LEVELS, audioContext, isMuted } from '../../shared/engine/audio'
 export type Mood =
   | 'island'
   | 'indoor'
-  | 'lighthouse'
   | 'night'
   | 'party'
   | 'hide'
@@ -26,9 +25,17 @@ export type Mood =
   /** The basement, on the one day of the year it is decorated. */
   | 'christmas'
   /**
-   * In orbit, with the island behind him. The lighthouse's own piece with
-   * the floor taken out of it: no bass and no percussion, the pad opened
-   * right up, and the cutoff low enough that what is left is mostly air.
+   * On the flight deck, with a rocket standing over him.
+   *
+   * The one heroic piece on the island: brass, timpani and a rising line in
+   * a big major key. Everything else here is a village in the sun - this is
+   * what the village turns into when it puts a spacecraft in its lighthouse.
+   */
+  | 'deck'
+  /**
+   * In orbit, with the island behind him. The island's own piece with the
+   * floor taken out of it: no bass and no percussion, the pad opened right
+   * up, and the cutoff low enough that what is left is mostly air.
    */
   | 'orbit'
 
@@ -1026,6 +1033,107 @@ const RELAXED: IslandFeel = {
   shimmer: false,
 }
 
+/* --------------------------- the flight deck -------------------------- */
+
+/**
+ * Brass in B flat, four bars of it, climbing.
+ *
+ * A fanfare is a shape rather than a tune: a rising triad hammered out over
+ * a held bass, answered an octave up, with the timpani underneath. It does
+ * not need to be clever and it must not be busy - what carries it is that
+ * every voice arrives on the beat together, which is the opposite of how
+ * the island's own music is written.
+ */
+const DECK: Chord[] = [
+  { bass: 34, triad: [58, 62, 65] }, // Bb
+  { bass: 34, triad: [58, 62, 65] }, // Bb, held
+  { bass: 39, triad: [58, 63, 67] }, // Eb
+  { bass: 41, triad: [57, 60, 65] }, // F
+]
+
+/**
+ * The call, in eighths. Nulls are rests and the rests matter as much as the
+ * notes: a fanfare is mostly silence with brass in it.
+ */
+const DECK_CALL: (number | null)[][] = [
+  [70, null, 70, null, 74, null, 77, null],
+  [null, null, 77, null, 75, null, 74, null],
+  [75, null, 75, null, 79, null, 82, null],
+  [null, 81, 79, null, 77, null, null, null],
+]
+
+function scheduleDeck(ac: AudioContext, index: number, at: number) {
+  const chord = DECK[index % DECK.length]
+  const call = DECK_CALL[index % DECK_CALL.length]
+
+  /* The bass, held the whole bar: brass sits on something. */
+  tone(ac, {
+    freq: midi(chord.bass - 12),
+    at,
+    duration: BAR * 1.02,
+    type: 'sawtooth',
+    level: 0.16,
+    attack: 0.05,
+  })
+  tone(ac, {
+    freq: midi(chord.bass),
+    at,
+    duration: BAR * 0.98,
+    type: 'sawtooth',
+    level: 0.12,
+    attack: 0.04,
+  })
+
+  /* The chord under the call, stabbed on the downbeat rather than held -
+     which is what makes it read as a section playing together. */
+  for (const note of chord.triad) {
+    for (const detune of [-8, 9]) {
+      tone(ac, {
+        freq: midi(note),
+        at,
+        duration: BEAT * 1.6,
+        type: 'sawtooth',
+        level: 0.055,
+        attack: 0.02,
+        detune,
+      })
+    }
+  }
+
+  /* The call itself, doubled an octave up at half the level: one trumpet is
+     a solo, two an octave apart is a fanfare. */
+  for (let i = 0; i < call.length; i++) {
+    const note = call[i]
+    if (note === null) continue
+    const when = at + i * (BEAT / 2)
+    tone(ac, {
+      freq: midi(note),
+      at: when,
+      duration: BEAT * 0.9,
+      type: 'sawtooth',
+      level: 0.085,
+      attack: 0.015,
+    })
+    tone(ac, {
+      freq: midi(note + 12),
+      at: when,
+      duration: BEAT * 0.8,
+      type: 'square',
+      level: 0.026,
+      attack: 0.012,
+    })
+  }
+
+  /* Timpani on one and three, and a roll into the top of the loop. */
+  thump(ac, at, 0.38, 150, 52)
+  thump(ac, at + BEAT * 2, 0.3, 140, 50)
+  if (index % DECK.length === DECK.length - 1) {
+    for (let i = 0; i < 4; i++) {
+      thump(ac, at + BEAT * (2.5 + i * 0.16), 0.12 + i * 0.05, 130, 48)
+    }
+  }
+}
+
 const TRACKS: Record<Mood, Track> = {
   island: {
     gain: 0.13,
@@ -1038,17 +1146,7 @@ const TRACKS: Record<Mood, Track> = {
     play: (ac, i, at) =>
       scheduleIsland(ac, i, at, { ...RELAXED, percussion: false }),
   },
-  lighthouse: {
-    gain: 0.115,
-    cutoff: 1700,
-    play: (ac, i, at) =>
-      scheduleIsland(ac, i, at, {
-        arpeggio: true,
-        percussion: false,
-        sparse: true,
-        shimmer: true,
-      }),
-  },
+  deck: { gain: 0.2, cutoff: 5200, play: scheduleDeck },
   orbit: {
     gain: 0.1,
     cutoff: 1200,

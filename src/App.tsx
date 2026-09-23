@@ -119,8 +119,12 @@ export default function App() {
                 : night
                   ? 'night'
                   : 'island'
-              : area === 'lighthouse'
-                ? 'lighthouse'
+              : /* The summit room is a flight deck and gets the fanfare.
+                   'lighthouse' - the quiet, shimmering one - was written for
+                   a keeper's room, and it is the wrong music for a man
+                   standing under a rocket. */
+                area === 'lighthouse'
+                ? 'deck'
                 : // The one room on the island with a date attached to it.
                   area === FEAST_AREA && christmas
                   ? 'christmas'

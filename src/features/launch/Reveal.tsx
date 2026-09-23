@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import type { Group } from 'three'
+import { Quaternion } from 'three'
 import { REVEAL_LINES, revealPhase } from './revealLogic'
 import { useGame } from '../../shared/state/store'
 import { TextPlane } from '../../shared/engine/TextSign'
@@ -25,10 +26,24 @@ import { useT } from '../../shared/i18n/useT'
  * it is the first thing that happens, before anything it could be a reaction
  * to, because the whole job of it is to say that the man has noticed.
  */
+/** Scratch, so squaring the text to the camera allocates nothing a frame. */
+const faceAway = new Quaternion()
+
 export function RevealMark() {
   const t = useT()
   const reveal = useGame((s) => s.reveal)
   const mark = useRef<Group>(null)
+  /**
+   * The text, kept square to the camera.
+   *
+   * It has to be, and this is the second reason the lines were invisible:
+   * the whole rig sits inside the player's group, which is turned to
+   * whichever way he is facing. Walking up to the door turns him away from
+   * the camera, which turns the lettering edge-on - so a flat plane parented
+   * to him is readable from exactly one angle and that is not the one he is
+   * standing at.
+   */
+  const billboard = useRef<Group>(null)
   /* What he is saying, as state rather than read off the clock at render
      time: the frame loop owns the clock, and a render that samples it is a
      render whose output depends on when React happened to run it. */
@@ -47,6 +62,31 @@ export function RevealMark() {
       const overshoot = Math.sin(Math.min(1, pop) * Math.PI) * 0.35
       mark.current.position.y = 2.6 + pop * 0.7 + overshoot
       mark.current.scale.setScalar(pop * (1 + overshoot * 0.5))
+      /* Square to the camera, whichever way he is facing. The group's own
+         rotation is undone rather than the camera's applied, because the
+         camera also pitches down and text tilted to match reads as lying
+         on the ground. */
+      if (billboard.current) {
+        /*
+         * Square to the camera in world terms, not local ones.
+         *
+         * The parent is the player group and it yaws with his facing, so
+         * writing the camera's quaternion straight onto this would be
+         * composed with that turn and come out wrong by exactly his heading.
+         * Taking the parent's world rotation out first is what makes it hold
+         * still whichever way he is pointed.
+         */
+        const parent = billboard.current.parent
+        if (parent) {
+          parent.getWorldQuaternion(faceAway)
+          faceAway.invert()
+          billboard.current.quaternion
+            .copy(faceAway)
+            .multiply(state.camera.quaternion)
+        } else {
+          billboard.current.quaternion.copy(state.camera.quaternion)
+        }
+      }
       /* A small bob once it has arrived, so it is not a frozen decal. */
       if (pop >= 1) {
         mark.current.position.y += Math.sin(state.clock.elapsedTime * 4) * 0.08
@@ -96,14 +136,25 @@ export function RevealMark() {
         the first in plain white - the eye reads down.
       */}
       {saying && (
-        <group key={spoken} position={[0, 4.4, 0]}>
+        <group ref={billboard} key={spoken} position={[0, 5.2, 0]}>
           {saying.map((row, i) => (
             <TextPlane
               key={row}
               text={t(row)}
-              position={[0, -i * 0.78, 0]}
-              width={Math.min(9, Math.max(3.5, row.length * 0.33))}
-              aspect={row.length * 0.62}
+              position={[0, -i * 1.5, 0]}
+              /*
+               * A fixed, wide plane rather than one measured off the string.
+               *
+               * Sizing it by character count was how this ended up invisible:
+               * a 24-character line came out at aspect 15, which is a plane
+               * 8 units across and half a unit tall - a sliver of text seen
+               * from thirty metres away and edge-on to boot. The canvas is
+               * 768 wide whatever happens, so a low aspect is what actually
+               * makes the letters big; `draw` shrinks the font to fit the
+               * width on its own.
+               */
+              width={11}
+              aspect={7}
               color={i === 0 ? '#ffffff' : '#ffd23f'}
             />
           ))}

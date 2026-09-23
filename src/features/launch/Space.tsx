@@ -28,7 +28,7 @@ export function Space() {
 
       {/* A little fill so he is not a silhouette, and one hard key light
           standing in for the sun. */}
-      <ambientLight intensity={0.55} color="#9fb6d8" />
+      <ambientLight intensity={0.78} color="#9fb6d8" />
       <directionalLight
         position={[18, 10, 14]}
         intensity={2.4}
@@ -38,8 +38,23 @@ export function Space() {
           astronaut in low orbit - cold on top, blue-green underneath. */}
       <directionalLight
         position={[-6, -14, -4]}
-        intensity={0.9}
+        intensity={1.15}
         color="#6fd4c0"
+      />
+      {/*
+        A cold rim from behind.
+        
+        Vacuum has no air to scatter light, so anything facing away from the
+        sun goes to the background colour exactly - which out here is almost
+        black. With only a key and the planet's bounce, the whole shadowed
+        half of the ship and of him disappeared into the starfield and the
+        silhouette stopped closing. This is not physical; it is the standard
+        cheat for the same reason film crews use it, and it costs one light.
+      */}
+      <directionalLight
+        position={[-14, 6, -16]}
+        intensity={0.85}
+        color="#93b6e8"
       />
 
       <Starfield />

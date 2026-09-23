@@ -39,10 +39,20 @@ describe('a whole flight', () => {
     const launch = useGame.getState().launch!
     expect(useGame.getState().mode).toBe('launch')
 
-    /* The count, read the way the overlay reads it. */
+    /*
+     * The count, read the way the overlay reads it.
+     *
+     * Every instant below is offset off `launch.started` rather than off a
+     * fresh clock reading, and the stage boundaries are crossed rather than
+     * landed on exactly. `beginLaunch` stamps `started` from
+     * `performance.now()`, so a boundary tested at precisely `started + HOLD`
+     * sits on the knife edge between two stages and answers 'hold' or
+     * 'ignition' depending on nothing at all.
+     */
     const started = launch.started
     expect(launchPhase(launch, started).count).toBe(HOLD)
-    expect(launchPhase(launch, started + HOLD).stage).toBe('ignition')
+    expect(launchPhase(launch, started + HOLD - 0.1).stage).toBe('hold')
+    expect(launchPhase(launch, started + HOLD + 0.1).stage).toBe('ignition')
 
     /* Mid-climb the deck is still shaking and he is off the ground. */
     const mid = launchPhase(launch, started + HOLD + 6)

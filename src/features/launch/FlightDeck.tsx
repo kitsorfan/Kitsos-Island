@@ -10,6 +10,7 @@ import type {
 } from 'three'
 import { launchPhase } from './launch'
 import { useGame } from '../../shared/state/store'
+import { CONSOLE, CONSOLE_TOP, HOLOGRAM, SUIT_RACK } from './deck'
 import { TextPlane } from '../../shared/engine/TextSign'
 import { useT } from '../../shared/i18n/useT'
 
@@ -23,26 +24,6 @@ import { useT } from '../../shared/i18n/useT'
  * animation that has to read the launch clock every frame. Both want the
  * frame loop, and the furniture kit deliberately does not have it.
  */
-
-/** Where the console stands in the room, and how high its top sits. */
-const CONSOLE: [number, number] = [0, -6.2]
-const CONSOLE_TOP = 1.05
-
-/**
- * The suit rack, against the west wall and a long way from the button.
- *
- * The distance is the point: see `SuitRack`.
- */
-const SUIT_RACK: [number, number] = [-9.1, -2]
-
-/**
- * The hologram plinth, in the middle of the floor.
- *
- * Dead centre on purpose: he comes in at the south door and it stands between
- * him and everything else, so the reveal happens on the way to the console
- * rather than needing to be sought out.
- */
-const HOLOGRAM: [number, number] = [0, 1]
 
 /**
  * How close he has to be to press it. Generous: the console is wide, and a
@@ -330,48 +311,90 @@ function SuitRack() {
       position={[SUIT_RACK[0], 0, SUIT_RACK[1]]}
       rotation={[0, Math.PI / 2, 0]}
     >
-      {/* The alcove it stands in: a lit recess with a rail over it, so the
-          airlock is somewhere he walks into rather than a peg on a wall. */}
-      <mesh position={[0, 1.4, -0.42]} receiveShadow>
-        <boxGeometry args={[3.1, 3.2, 0.5]} />
-        <meshStandardMaterial color="#323a44" flatShading roughness={0.85} />
+      {/*
+        The alcove: a box of deck plating sunk into the wall, lit from
+        inside.
+
+        The back panel has to be deep enough to stand behind the suit and
+        tall enough to reach the floor, or the room's own wall shows through
+        around the edges of it and the recess reads as a poster of a recess.
+        So it is a full-height slab set back behind where the suit hangs,
+        with a floor, a lintel and two jambs closing the other four sides.
+      */}
+      <mesh position={[0, 1.6, -0.62]} receiveShadow>
+        <boxGeometry args={[3.2, 3.4, 0.3]} />
+        <meshStandardMaterial color="#2a323b" flatShading roughness={0.9} />
       </mesh>
-      {[-1.5, 1.5].map((x) => (
-        <mesh key={x} position={[x, 1.4, -0.1]} castShadow>
-          <boxGeometry args={[0.22, 3.2, 0.9]} />
+      {/* Floor of the recess, so nothing is standing on the room's carpet. */}
+      <mesh position={[0, 0.03, -0.3]} receiveShadow>
+        <boxGeometry args={[3.2, 0.06, 0.95]} />
+        <meshStandardMaterial color="#3a434e" flatShading roughness={0.9} />
+      </mesh>
+      {/* Lintel across the top. */}
+      <mesh position={[0, 3.22, -0.2]} castShadow>
+        <boxGeometry args={[3.2, 0.36, 1.15]} />
+        <meshStandardMaterial color="#4a545f" flatShading roughness={0.7} />
+      </mesh>
+      {/* The two jambs. */}
+      {[-1.55, 1.55].map((x) => (
+        <mesh key={x} position={[x, 1.6, -0.2]} castShadow>
+          <boxGeometry args={[0.24, 3.4, 1.15]} />
           <meshStandardMaterial color="#4a545f" flatShading roughness={0.7} />
         </mesh>
       ))}
-      {/* Strip lights down both jambs. */}
-      {[-1.32, 1.32].map((x) => (
-        <mesh key={x} position={[x, 1.4, 0.3]}>
-          <boxGeometry args={[0.06, 2.6, 0.05]} />
+      {/* Strip lights down both jambs, and one along the lintel. */}
+      {[-1.36, 1.36].map((x) => (
+        <mesh key={x} position={[x, 1.55, 0.3]}>
+          <boxGeometry args={[0.07, 2.9, 0.06]} />
           <meshStandardMaterial
             color="#6fc3ff"
             emissive="#3aa0ff"
-            emissiveIntensity={1.1}
+            emissiveIntensity={1.3}
           />
         </mesh>
       ))}
+      <mesh position={[0, 3.04, 0.3]}>
+        <boxGeometry args={[2.8, 0.07, 0.06]} />
+        <meshStandardMaterial
+          color="#6fc3ff"
+          emissive="#3aa0ff"
+          emissiveIntensity={1.3}
+        />
+      </mesh>
+      {/* Tread plate on the floor of it, so the step in is felt. */}
+      {[-0.9, -0.3, 0.3, 0.9].map((x) => (
+        <mesh key={x} position={[x, 0.07, -0.3]}>
+          <boxGeometry args={[0.12, 0.02, 0.85]} />
+          <meshStandardMaterial color="#59636f" flatShading />
+        </mesh>
+      ))}
       <pointLight
-        position={[0, 2.1, 0.7]}
-        intensity={9}
+        position={[0, 2.2, 0.2]}
+        intensity={11}
         distance={7}
         decay={2}
         color="#cfe4f5"
       />
 
-      {/* The frame it hangs off. */}
-      <mesh position={[0, 1.15, 0]} castShadow>
-        <boxGeometry args={[2.3, 0.12, 0.12]} />
-        <meshStandardMaterial color="#8d949a" metalness={0.5} roughness={0.5} />
+      {/* The rail it hangs off, over head height so the suit hangs clear of
+          the floor the way one actually does. */}
+      <mesh
+        position={[0, 2.62, -0.12]}
+        rotation={[0, 0, Math.PI / 2]}
+        castShadow
+      >
+        <cylinderGeometry args={[0.05, 0.05, 2.4, 10]} />
+        <meshStandardMaterial color="#9aa5ad" metalness={0.6} roughness={0.4} />
       </mesh>
-      {[-1.05, 1.05].map((x) => (
-        <mesh key={x} position={[x, 0.6, 0]} castShadow>
-          <cylinderGeometry args={[0.07, 0.07, 1.2, 8]} />
-          <meshStandardMaterial color="#8d949a" metalness={0.5} />
-        </mesh>
-      ))}
+      {/* The hanger, which stays behind when the suit goes. */}
+      <mesh position={[0, 2.5, -0.12]}>
+        <boxGeometry args={[0.5, 0.05, 0.05]} />
+        <meshStandardMaterial color="#9aa5ad" metalness={0.5} />
+      </mesh>
+      <mesh position={[0, 2.58, -0.12]}>
+        <torusGeometry args={[0.07, 0.015, 6, 12]} />
+        <meshStandardMaterial color="#9aa5ad" metalness={0.5} />
+      </mesh>
 
       {/* The backboard, which is what lights up. */}
       <mesh position={[0, 1.1, -0.16]}>
@@ -387,7 +410,7 @@ function SuitRack() {
 
       {/* The suit, while it is still on the rack. */}
       {!suited && (
-        <group position={[0, 1.02, 0.06]}>
+        <group position={[0, 1.42, 0.02]}>
           {/* Torso */}
           <mesh position={[0, 0.34, 0]} castShadow>
             <boxGeometry args={[0.62, 0.72, 0.3]} />
@@ -446,7 +469,7 @@ function SuitRack() {
       {/* A lamp over the rack: amber while the suit is hanging, green once
           it is on. The console's button reads the same fact, so the two
           lights agree across the room and neither has to be trusted alone. */}
-      <mesh position={[0, 2.16, 0.1]}>
+      <mesh position={[0, 0.62, 0.34]}>
         <cylinderGeometry args={[0.1, 0.1, 0.06, 12]} />
         <meshStandardMaterial
           color={suited ? '#6fd08a' : '#f0a33c'}
@@ -457,9 +480,9 @@ function SuitRack() {
 
       <TextPlane
         text={t(suited ? 'SUIT ON - GO' : 'PRESSURE SUIT')}
-        position={[0, 2.45, 0]}
-        width={1.9}
-        aspect={8}
+        position={[0, 3.22, 0.46]}
+        width={2.4}
+        aspect={9}
         color={suited ? '#b6f0c6' : '#ffd9a0'}
       />
     </group>

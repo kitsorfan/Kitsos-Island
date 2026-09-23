@@ -1956,12 +1956,17 @@ export const INTERIORS: Interior[] = [
       /* The globe stays. It is the one instrument on the deck that was
          already here, and it is still the right one. */
       { kind: 'globe', position: [6.6, 6.4] },
-      /* The airlock: lockers for the suits, a bench to sit on to pull them
-         on, and the crate of everything that did not fit in either. */
-      { kind: 'locker', position: [-9, -1], rotation: Math.PI / 2 },
-      { kind: 'locker', position: [-9, 0.9], rotation: Math.PI / 2 },
-      { kind: 'crate', position: [-8.6, -4.4] },
-      { kind: 'table', position: [-6.6, 2.6], scale: 0.8 },
+      /*
+       * The airlock. The rack stands at z = -2 in an alcove of its own and
+       * the floor in front of it is left empty, because the one thing this
+       * wall has to do is show a suit hanging on it - furniture parked in the
+       * mouth of the recess hides the suit and the walk to it both.
+       *
+       * So the spare lockers are pushed north, past the alcove and out of the
+       * approach, and there is nothing at all between the door and the rack.
+       */
+      { kind: 'locker', position: [-9, 3.6], rotation: Math.PI / 2 },
+      { kind: 'locker', position: [-9, 5.4], rotation: Math.PI / 2 },
       /* Avionics down both sides: the racks that fly the thing. */
       { kind: 'serverRack', position: [9, -4], rotation: -Math.PI / 2 },
       { kind: 'serverRack', position: [9, -6], rotation: -Math.PI / 2 },

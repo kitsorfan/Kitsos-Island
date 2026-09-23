@@ -6,7 +6,8 @@ import { type Group, type Mesh } from 'three'
 import { INTERIOR_BY_ID } from '../interior/interiors'
 import { BOARD } from '../arcade/minigames'
 import { AMALIA, PARTY_BUTTON, TUXEDO } from '../party/partyData'
-import { SPACESUIT, STAR_SHIRT } from '../launch/launch'
+import { LAUNCH_AREA, SPACESUIT, STAR_SHIRT } from '../launch/launch'
+import { SUIT_RACK } from '../launch/deck'
 import {
   BUILDINGS,
   BUILDING_BY_ID,
@@ -332,6 +333,9 @@ export function Player() {
   /** The knee he is on and the ring in his hand are both renders, not frames. */
   const proposal = useGame((s) => s.proposal)
   const outfit = useGame((s) => s.outfit)
+  /* Read here rather than in the trigger: the rack's prompt says "Put on"
+     or "Hang up", so the target list has to change when the suit does. */
+  const suited = useGame((s) => s.suited)
   /** Nothing stays alight out there, so the hand it was in is a render. */
   const swimming = useGame((s) => s.swimming)
   /** Who is in the room, and what is in it to walk into, both turn on it. */
@@ -763,6 +767,32 @@ export function Player() {
       const building = BUILDING_BY_ID.get(interior.building ?? interior.id)
       const accent = building?.accent ?? interior.accent
 
+      /*
+       * The suit on its rack. It is a target rather than an exhibit because
+       * it opens no panel and files no journal entry - but it has to be in
+       * this list all the same, because this list is what the keyboard
+       * reaches. A thing you can only click is a thing half the visitors
+       * cannot use.
+       */
+      if (interior.id === LAUNCH_AREA) {
+        list.push({
+          id: 'suit-rack',
+          kind: 'exhibit',
+          label: 'the pressure suit',
+          /* The reactive value, not getState(): read through the store here
+             and the verb would be frozen at whatever it was when the list
+             was last built, so the rack would go on offering to put on a
+             suit he is already wearing. */
+          verb: suited ? 'Hang up' : 'Put on',
+          x: SUIT_RACK[0],
+          z: SUIT_RACK[1],
+          /* Wide: the rack stands in an alcove set into the wall, so the
+             floor he can actually reach it from starts a stride out. */
+          range: 3.6,
+          trigger: () => useGame.getState().toggleSuit(),
+        })
+      }
+
       for (const exhibit of interior.exhibits) {
         if (exhibit.kind === 'key') {
           list.push({
@@ -862,7 +892,18 @@ export function Player() {
 
     void store
     return list
-  }, [area, indoors, interior, amaliaHere, night, lighthouseOpen, christmas])
+  }, [
+    area,
+    indoors,
+    interior,
+    amaliaHere,
+    night,
+    lighthouseOpen,
+    christmas,
+    /* The rack's own verb reads off this, so the prompt has to be rebuilt
+       when it changes: otherwise it offers to put on a suit he is wearing. */
+    suited,
+  ])
 
   /* ------------------------------- frame ------------------------------ */
 

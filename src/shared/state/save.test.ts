@@ -29,6 +29,7 @@ const blank: SavedProgress = {
   cvUnlocked: false,
   launched: false,
   starShirt: false,
+  trophies: [],
 }
 
 /** A visit with something in every field. */
@@ -42,6 +43,7 @@ const visit: SavedProgress = {
   cvUnlocked: true,
   launched: true,
   starShirt: true,
+  trophies: ['paintball', 'hide-hiding'],
 }
 
 beforeEach(() => {
@@ -63,6 +65,7 @@ describe('isEmpty', () => {
     expect(isEmpty({ ...blank, cvUnlocked: true })).toBe(false)
     expect(isEmpty({ ...blank, launched: true })).toBe(false)
     expect(isEmpty({ ...blank, starShirt: true })).toBe(false)
+    expect(isEmpty({ ...blank, trophies: ['moto'] })).toBe(false)
   })
 })
 

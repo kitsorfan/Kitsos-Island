@@ -38,6 +38,8 @@ export interface SavedProgress {
   launched: boolean
   /** Whether the blue-and-yellow shirt has been earned. */
   starShirt: boolean
+  /** Minigames won at least once, as trophy ids. */
+  trophies: string[]
 }
 
 /**
@@ -130,7 +132,8 @@ export function isEmpty(progress: SavedProgress): boolean {
     !progress.lighthouseOpen &&
     !progress.cvUnlocked &&
     !progress.launched &&
-    !progress.starShirt
+    !progress.starShirt &&
+    progress.trophies.length === 0
   )
 }
 
@@ -161,6 +164,7 @@ export function loadProgress(): SavedProgress | null {
          bumping would have thrown away every island already walked. */
       launched: saved.launched === true,
       starShirt: saved.starShirt === true,
+      trophies: ids(saved.trophies),
     }
   } catch {
     return null

@@ -5769,3 +5769,13 @@ canvas {
     transform: none;
   }
 }
+
+/* One line under the certificate saying how many stickers are on it. */
+.orbit__stickers {
+  margin: 0;
+  color: #f0a33c;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+}

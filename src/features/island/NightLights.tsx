@@ -1,18 +1,15 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import type { Group, Mesh, Object3D, SpotLight } from 'three'
-import { BUILDINGS, BUILDING_BY_ID } from './world'
+import { BUILDING_BY_ID } from './world'
 import { groundHeight } from './terrainLogic'
 import { useGame } from '../../shared/state/store'
 
-import type { Building } from '../../types'
-
-const WINDOW_WARM = '#ffd487'
-const WINDOW_COLD = '#bcd8ff'
-
 /**
- * Everything that only exists after dark: lit windows on the buildings, the
- * beam off the lighthouse, and the searchlight going round the camp.
+ * Everything that only exists after dark: the beam off the lighthouse and the
+ * searchlight going round the camp. The lit windows are not here — each
+ * building lights its own, on its own walls, so that they sit in their frames
+ * instead of floating in front of the model.
  */
 export function NightLights() {
   // Hide and seek is played with every light on the island put out — the lit
@@ -23,9 +20,6 @@ export function NightLights() {
 
   return (
     <group>
-      {BUILDINGS.map((building) => (
-        <Windows key={building.id} building={building} />
-      ))}
       <LighthouseBeam />
       <CampSearchlight />
     </group>
@@ -127,86 +121,6 @@ function CampSearchlight() {
         />
         <object3D ref={aim} position={[0, -MAST, SWEEP_RADIUS]} />
       </group>
-    </group>
-  )
-}
-
-/**
- * Lit windows, placed off the building's own data rather than its model: the
- * face that carries the door is the face that faces the town, so that is the
- * side the light shows on.
- */
-function Windows({ building }: { building: Building }) {
-  const rows = useMemo(() => {
-    const [bx, bz] = building.position
-    const [dx, dz] = building.door
-    const away = Math.hypot(dx - bx, dz - bz) || 1
-    // Outward normal of the door face, and the direction along that wall.
-    const nx = (dx - bx) / away
-    const nz = (dz - bz) / away
-    const sx = -nz
-    const sz = nx
-
-    // Just clear of the wall, so a window never sinks into the model.
-    const reach = Math.min(building.half[0], building.half[1]) + 0.12
-    const wide = Math.max(building.half[0], building.half[1])
-    const floors = building.height > 14 ? 3 : building.height > 9 ? 2 : 1
-    const across = wide > 12 ? 3 : 2
-
-    const out: {
-      position: [number, number, number]
-      rotation: [number, number, number]
-      lit: boolean
-      cold: boolean
-    }[] = []
-
-    for (let f = 0; f < floors; f++) {
-      for (let a = 0; a < across; a++) {
-        const offset = (a - (across - 1) / 2) * Math.min(4.6, wide * 0.62)
-        const x = bx + nx * reach + sx * offset
-        const z = bz + nz * reach + sz * offset
-        const y = groundHeight(bx, bz) + 2.6 + f * 3.4
-        out.push({
-          position: [x, y, z],
-          rotation: [0, Math.atan2(nx, nz), 0],
-          // A couple of windows are dark, which reads as a real building —
-          // and one that shuts for the night keeps a single light burning,
-          // for whoever is left standing on the gate.
-          lit: building.closesAtNight
-            ? f === 0 && a === 0
-            : (f * 7 + a * 3 + building.id.length) % 5 !== 0,
-          cold: building.id === 'work' || building.id === 'radio',
-        })
-      }
-    }
-    return out
-  }, [building])
-
-  return (
-    <group>
-      {rows.map((row, i) =>
-        row.lit ? (
-          <group key={i} position={row.position} rotation={row.rotation}>
-            <mesh>
-              <planeGeometry args={[1.5, 1.1]} />
-              <meshBasicMaterial
-                color={row.cold ? WINDOW_COLD : WINDOW_WARM}
-                transparent
-                opacity={0.92}
-              />
-            </mesh>
-            {/* A wider, fainter pane behind it stands in for spill. */}
-            <mesh position={[0, 0, -0.02]}>
-              <planeGeometry args={[3.2, 2.6]} />
-              <meshBasicMaterial
-                color={row.cold ? WINDOW_COLD : WINDOW_WARM}
-                transparent
-                opacity={0.12}
-              />
-            </mesh>
-          </group>
-        ) : null,
-      )}
     </group>
   )
 }

@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
+import { formatSerial, mintSerial, sign } from './certId'
+import { TROPHIES } from './trophies'
 import {
   CERT_TEXT,
   NAME_LIMIT,
@@ -130,5 +132,58 @@ describe('wrapping the citation', () => {
   it('keeps short text on one line', () => {
     const ctx = stubContext()
     expect(wrapText(ctx, 'short', 0, 0, 9999, 40)).toBe(1)
+  })
+})
+
+/**
+ * A context that also records the circles drawn on it, which is how the
+ * sticker rings are checked without a raster to look at.
+ */
+function detailContext() {
+  const filled: string[] = []
+  const ctx = {
+    filled,
+    fillStyle: '',
+    strokeStyle: '',
+    lineWidth: 0,
+    font: '',
+    textAlign: '',
+    lineJoin: '',
+    lineCap: '',
+    fillRect: vi.fn(),
+    strokeRect: vi.fn(),
+    fillText: vi.fn((text: string) => filled.push(text)),
+    measureText: vi.fn((text: string) => ({ width: text.length * 18 })),
+    beginPath: vi.fn(),
+    moveTo: vi.fn(),
+    lineTo: vi.fn(),
+    closePath: vi.fn(),
+    stroke: vi.fn(),
+    fill: vi.fn(),
+    arc: vi.fn(),
+  }
+  return ctx as unknown as CanvasRenderingContext2D & { filled: string[] }
+}
+
+describe('the stickers and the serial on it', () => {
+  it('draws all six sticker names whatever was won', () => {
+    /* The gaps are the point of a sticker sheet: somebody who won four
+       should be able to see which two they did not. */
+    const ctx = detailContext()
+    drawCertificate(ctx, 'Ada', '1 Jan 2026', { trophies: { moto: true } })
+    for (const t of TROPHIES) expect(ctx.filled).toContain(t.label)
+  })
+
+  it('prints the reference', () => {
+    const ctx = detailContext()
+    const serial = mintSerial(() => 0.5)
+    const stamp = { serial, signature: sign(serial) }
+    drawCertificate(ctx, 'Ada', '1 Jan 2026', { serial: stamp })
+    expect(ctx.filled).toContain(formatSerial(stamp.serial, stamp.signature))
+  })
+
+  it('works with nothing won and no serial', () => {
+    const ctx = detailContext()
+    expect(() => drawCertificate(ctx, 'Ada', '1 Jan 2026')).not.toThrow()
   })
 })

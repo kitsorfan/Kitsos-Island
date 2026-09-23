@@ -53,6 +53,11 @@ interface WindowProps {
   rotation?: [number, number, number]
   frame?: string
   glass?: string
+  /**
+   * Whether anybody is home behind this pane. It is not a colour — it is a
+   * switch that only does anything once the lamps come on: a window marked
+   * `lit` is ordinary glass all day and burns after dark.
+   */
   lit?: boolean
 }
 
@@ -64,6 +69,11 @@ function Win({
   glass = '#bfe4f5',
   lit = false,
 }: WindowProps) {
+  // A window is only ever lit after dark, and never during hide and seek,
+  // when every lamp on the island is put out.
+  const night = useGame((s) => s.night && s.hide === null)
+  const burning = lit && night
+
   return (
     <group position={position} rotation={rotation}>
       <mesh position={[0, 0, 0.02]}>
@@ -71,14 +81,14 @@ function Win({
         <meshStandardMaterial color={frame} flatShading roughness={0.8} />
       </mesh>
       <mesh position={[0, 0, 0.1]}>
-        <planeGeometry args={size} />
         <meshStandardMaterial
-          color={lit ? '#ffe9a8' : glass}
-          emissive={lit ? '#ffbe4d' : '#000000'}
-          emissiveIntensity={lit ? 0.7 : 0}
+          color={burning ? '#ffe4a2' : glass}
+          emissive={burning ? '#ffc65a' : '#000000'}
+          emissiveIntensity={burning ? 1.5 : 0}
           roughness={0.25}
           metalness={0.1}
         />
+        <planeGeometry args={size} />
       </mesh>
     </group>
   )
@@ -1487,10 +1497,15 @@ export function RadioModel() {
         height={2.4}
         color="#7a3f92"
       />
-      {[-2.2, 2.2].map((x) => (
+      {/* The drum is round, so the windows go round it too: each one is set
+          at its own angle on the curve and turned to face straight out. Laid
+          out on a flat line instead, as they used to be, they sank back
+          inside the wall and their light never got out. */}
+      {[-0.62, 0.62].map((turn) => (
         <Win
-          key={x}
-          position={[x, 2.6, D / 2 - 1.1]}
+          key={turn}
+          position={[Math.sin(turn) * 3.95, 2.6, Math.cos(turn) * 3.95]}
+          rotation={[0, turn, 0]}
           size={[1, 1]}
           frame="#c9a6d6"
           lit
@@ -1860,6 +1875,23 @@ export function LighthouseModel() {
               roughness={0.9}
             />
           </mesh>
+          {/* A slot for the stairwell on every other band, set on the taper
+              at that height and turned a little further round as it climbs,
+              the way the stair inside it winds. It belongs to the band, so
+              the reveal carries it off with the paint. */}
+          {i % 2 === 1 && (
+            <Win
+              position={[
+                Math.sin(0.5 + i * 0.5) * (3.6 - i * 0.34),
+                1.4 + i * 2.6,
+                Math.cos(0.5 + i * 0.5) * (3.6 - i * 0.34),
+              ]}
+              rotation={[0, 0.5 + i * 0.5, 0]}
+              size={[0.8, 1.2]}
+              frame="#8d6b45"
+              lit
+            />
+          )}
         </group>
       ))}
 

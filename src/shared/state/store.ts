@@ -32,6 +32,8 @@ import {
   liftStance,
 } from '../../features/lift/lift'
 import { LAUNCH_AREA } from '../../features/launch/launch'
+import { TROPHIES, trophyCount } from '../../features/launch/trophies'
+import type { TrophyId } from '../../features/launch/trophies'
 import type { CalendarDate } from '../../features/calendar/calendar'
 import type { Locale } from '../i18n'
 import { forgetProgress, isEmpty, loadProgress, saveProgress } from './save'
@@ -556,6 +558,14 @@ interface GameState {
    */
   suited: boolean
   /**
+   * Every minigame won at least once, as a set of trophy ids.
+   *
+   * Awarded once and kept: losing afterwards does not take one back, because
+   * this is a record of what somebody managed rather than a current
+   * standing. They are the stickers on the certificate.
+   */
+  trophies: Record<string, true>
+  /**
    * Whether the blue-and-yellow shirt has been earned, which is the flight
    * itself. Saved, so he is still wearing it on a later visit, and the one
    * reward on the island that shows.
@@ -715,6 +725,8 @@ interface GameState {
   reachOrbit: () => void
   /** At the rack in the airlock: the suit goes on, or comes back off. */
   toggleSuit: () => void
+  /** A minigame won: the sticker goes on the certificate. */
+  winTrophy: (id: TrophyId) => void
   /** The roll has played out: the certificate may come up now. */
   endCredits: () => void
   /** On the doorstep: the tower shows him what it actually is. */
@@ -869,6 +881,7 @@ const RESTORED = {
   cvUnlocked: SAVED_PROGRESS?.cvUnlocked ?? false,
   launched: SAVED_PROGRESS?.launched ?? false,
   starShirt: SAVED_PROGRESS?.starShirt ?? false,
+  trophies: found(SAVED_PROGRESS?.trophies),
 }
 
 /**
@@ -989,6 +1002,7 @@ export const useGame = create<GameState>((raw, get) => {
        previous one ended in: he is not born wearing it. */
     suited: false,
     starShirt: RESTORED.starShirt,
+    trophies: RESTORED.trophies,
     calendar: SAVED.calendar,
     christmas: isFeast(SAVED.calendar),
     firstPerson: false,
@@ -1525,6 +1539,8 @@ export const useGame = create<GameState>((raw, get) => {
           best: MOTO.best,
         },
       })
+      /* First of four, and nothing else counts as winning a race. */
+      if (MOTO.finish === 1) get().winTrophy('moto')
     },
 
     /** Steps off the bike, wherever it ended up. */
@@ -1608,6 +1624,8 @@ export const useGame = create<GameState>((raw, get) => {
           seconds: BALLOON.elapsed,
         },
       })
+      /* Nobody left waiting: every gathering on the island got its drop. */
+      if (BALLOON.count >= CALL_TOTAL) get().winTrophy('balloon')
     },
 
     /** Sets him down on the grass under wherever the basket ended up. */
@@ -1686,6 +1704,8 @@ export const useGame = create<GameState>((raw, get) => {
           won: RESCUE.won,
         },
       })
+      /* Everybody out of the water before the last flare burned down. */
+      if (RESCUE.won) get().winTrophy('rescue')
     },
 
     /** Ties her up again and puts him back on the dock. */
@@ -1768,6 +1788,14 @@ export const useGame = create<GameState>((raw, get) => {
       if (!game || game.status !== 'playing') return
       if (won) sfx.jingle()
       else sfx.hurt()
+      /*
+       * Two stickers rather than one. Finding people in the dark and not
+       * being found are different games under one name, so winning at one
+       * says nothing about the other and each is worth its own.
+       */
+      if (won) {
+        get().winTrophy(game.role === 'hider' ? 'hide-hiding' : 'hide-seeking')
+      }
       set({
         mode: 'hide',
         hide: {
@@ -1925,6 +1953,8 @@ export const useGame = create<GameState>((raw, get) => {
       const mine = by === 'player'
       const friendly = team === 'friend'
       const won = game.enemies.every((e) => out[e])
+      /* The last of them painted, which is the whole of the match. */
+      if (won) get().winTrophy('paintball')
 
       set({
         mode: won ? 'paintball' : 'explore',
@@ -2289,6 +2319,28 @@ export const useGame = create<GameState>((raw, get) => {
     },
 
     /**
+     * A minigame won for the first time.
+     *
+     * Idempotent, like everything else the island records: winning the
+     * circuit four times is one sticker, and the fourth win must not re-fire
+     * the toast that announces the first.
+     */
+    winTrophy: (id) => {
+      if (get().trophies[id]) return
+      set((state) => ({
+        trophies: { ...state.trophies, [id]: true as const },
+        toast: {
+          title: 'Sticker earned',
+          body: `That one goes on the certificate. ${trophyCount({
+            ...state.trophies,
+            [id]: true,
+          })} of ${TROPHIES.length}.`,
+          kind: 'progress',
+        },
+      }))
+    },
+
+    /**
      * The roll has run out.
      *
      * Only `CreditsRoll` calls this, because only it knows how long the roll
@@ -2499,6 +2551,7 @@ export const useGame = create<GameState>((raw, get) => {
         reveal: null,
         launched: false,
         starShirt: false,
+        trophies: {},
         suited: false,
         outfit: 'islander',
         toast: {
@@ -2523,6 +2576,7 @@ type Progressed = Pick<
   | 'cvUnlocked'
   | 'launched'
   | 'starShirt'
+  | 'trophies'
 >
 
 /** The store's progress in the shape the save file keeps it in. */
@@ -2541,6 +2595,7 @@ function snapshot(s: Progressed): SavedProgress {
     cvUnlocked: s.cvUnlocked,
     launched: s.launched,
     starShirt: s.starShirt,
+    trophies: Object.keys(s.trophies),
   }
 }
 
@@ -2560,7 +2615,8 @@ useGame.subscribe((state, previous) => {
     state.lighthouseOpen === previous.lighthouseOpen &&
     state.cvUnlocked === previous.cvUnlocked &&
     state.launched === previous.launched &&
-    state.starShirt === previous.starShirt
+    state.starShirt === previous.starShirt &&
+    state.trophies === previous.trophies
   ) {
     return
   }

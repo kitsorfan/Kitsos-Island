@@ -4,12 +4,15 @@ import {
   CERT_TEXT,
   CERT_WIDTH,
   cleanName,
+  certDate,
   downloadCertificate,
   drawCertificate,
   nameReady,
 } from './certificate'
 import { NAME_LIMIT } from './certificate'
 import { downloadCv } from '../cv/downloadCv'
+import { mintSerial, sign } from './certId'
+import { TROPHIES, trophyCount } from './trophies'
 import * as sfx from '../../shared/engine/audio'
 import { useGame } from '../../shared/state/store'
 import { useT } from '../../shared/i18n/useT'
@@ -27,6 +30,20 @@ export function OrbitCard() {
   const launch = useGame((s) => s.launch)
   const credits = useGame((s) => s.credits)
   const flyHome = useGame((s) => s.flyHome)
+  const trophies = useGame((s) => s.trophies)
+  /*
+   * The serial, minted once when the card is first built rather than on
+   * every render.
+   *
+   * It has to be stable: the preview he is looking at and the file he takes
+   * away carry the same reference, and a number redrawn each frame would
+   * make the certificate a different document every time he typed a letter
+   * of his name.
+   */
+  const [stamp] = useState(() => {
+    const serial = mintSerial()
+    return { serial, signature: sign(serial) }
+  })
   const [name, setName] = useState('')
   const [saved, setSaved] = useState(false)
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -46,7 +63,12 @@ export function OrbitCard() {
   useEffect(() => {
     const ctx = canvas.current?.getContext('2d')
     if (!ctx) return
-    drawCertificate(ctx, ready ? cleanName(name) : t('your name here'))
+    drawCertificate(
+      ctx,
+      ready ? cleanName(name) : t('your name here'),
+      certDate(),
+      { trophies, serial: stamp },
+    )
     /*
      * `showing` is in here because the canvas does not exist until it is
      * true.
@@ -58,12 +80,12 @@ export function OrbitCard() {
      * has changed, so without `showing` the effect never runs again and the
      * certificate stays blank until the first keystroke paints it.
      */
-  }, [name, ready, t, showing])
+  }, [name, ready, t, showing, trophies, stamp])
 
   const take = () => {
     if (!ready) return
     sfx.jingle()
-    downloadCertificate(name)
+    downloadCertificate(name, { trophies, serial: stamp })
     setSaved(true)
   }
 
@@ -130,6 +152,16 @@ export function OrbitCard() {
             {t('And the full CV')}
           </button>
         </div>
+
+        <p className="orbit__stickers">
+          {trophyCount(trophies) === TROPHIES.length
+            ? t('Every island game won. All six stickers are on it.')
+            : trophyCount(trophies) === 0
+              ? t(
+                  'No stickers on this one — the island games are still down there.',
+                )
+              : `${trophyCount(trophies)} / ${TROPHIES.length} ${t('island games won, and on the certificate.')}`}
+        </p>
 
         <p className="orbit__signoff">
           {t('Signed by')} <strong>{CERT_TEXT.signatory}</strong>.{' '}

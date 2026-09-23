@@ -946,3 +946,45 @@ describe('leaving the deck while suited', () => {
     expect(useGame.getState().area).toBe('island')
   })
 })
+
+/**
+ * The stickers, which are the record of what somebody managed rather than
+ * how they are doing now.
+ */
+describe('winning a sticker', () => {
+  it('records a win', () => {
+    useGame.getState().winTrophy('moto')
+    expect(useGame.getState().trophies.moto).toBe(true)
+  })
+
+  it('does not award the same one twice', () => {
+    useGame.getState().winTrophy('moto')
+    const first = useGame.getState().trophies
+    useGame.getState().winTrophy('moto')
+    /* The same object, so nothing re-rendered and no second toast fired. */
+    expect(useGame.getState().trophies).toBe(first)
+  })
+
+  it('keeps a sticker after a later loss', () => {
+    /*
+     * There is no `loseTrophy`, and that is the rule: the certificate says
+     * what somebody managed, not what they last did. Losing the circuit
+     * four times after winning it once takes nothing off the sheet.
+     */
+    useGame.getState().winTrophy('rescue')
+    useGame.setState({ rescue: null })
+    expect(useGame.getState().trophies.rescue).toBe(true)
+  })
+
+  it('treats the two halves of hide and seek separately', () => {
+    useGame.getState().winTrophy('hide-seeking')
+    expect(useGame.getState().trophies['hide-seeking']).toBe(true)
+    expect(useGame.getState().trophies['hide-hiding']).toBeUndefined()
+  })
+
+  it('is forgotten when the island is cleared', () => {
+    useGame.getState().winTrophy('balloon')
+    useGame.getState().clearProgress()
+    expect(useGame.getState().trophies).toEqual({})
+  })
+})

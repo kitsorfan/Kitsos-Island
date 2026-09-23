@@ -1,4 +1,7 @@
 import { PROFILE } from '../cv/profile'
+import { TROPHIES } from './trophies'
+import type { Trophy } from './trophies'
+import { formatSerial } from './certId'
 
 /**
  * The prize: a certificate, in the visitor's own name, saying they walked the
@@ -76,10 +79,18 @@ export const CERT_TEXT = {
  * what was drawn without a document to draw into, and so the card can show
  * the very same drawing as a preview rather than an approximation of it.
  */
+export interface CertificateDetail {
+  /** Trophy ids the visitor has actually won. */
+  trophies?: Record<string, true>
+  /** The serial and its signature, as minted for this certificate. */
+  serial?: { serial: number; signature: number }
+}
+
 export function drawCertificate(
   ctx: CanvasRenderingContext2D,
   name: string,
   date: string = certDate(),
+  detail: CertificateDetail = {},
 ): void {
   const W = CERT_WIDTH
   const H = CERT_HEIGHT
@@ -134,8 +145,11 @@ export function drawCertificate(
 
   /* The citation, wrapped by hand: canvas will not do it. */
   ctx.fillStyle = '#3c4650'
-  ctx.font = '32px Georgia, "Times New Roman", serif'
-  wrapText(ctx, CERT_TEXT.body, mid, 716, W - 380, 46)
+  ctx.font = '30px Georgia, "Times New Roman", serif'
+  wrapText(ctx, CERT_TEXT.body, mid, 706, W - 380, 42)
+
+  /* The stickers, in a row under the citation. */
+  drawTrophies(ctx, mid, 872, detail.trophies ?? {})
 
   /* Signed, bottom right; dated, bottom left. */
   ctx.textAlign = 'left'
@@ -166,6 +180,187 @@ export function drawCertificate(
   ctx.fillStyle = '#8a929a'
   ctx.font = '22px Georgia, "Times New Roman", serif'
   ctx.fillText('Keeper of the island', W - 150, H - 104)
+
+  /*
+   * The reference, centred along the very bottom.
+   *
+   * Small and monospaced, the way a serial on a real document is: it is not
+   * meant to be read so much as typed back in, and the eye should pass over
+   * it on the way to the signature.
+   */
+  if (detail.serial) {
+    ctx.textAlign = 'center'
+    ctx.fillStyle = '#a89a80'
+    ctx.font = '20px "Courier New", Courier, monospace'
+    ctx.fillText(
+      formatSerial(detail.serial.serial, detail.serial.signature),
+      mid,
+      H - 52,
+    )
+  }
+}
+
+/**
+ * The row of stickers: one per minigame won, greyed where it was not.
+ *
+ * All six are always drawn rather than only the won ones. A row that grows
+ * says nothing about what is missing, and the point of a sticker sheet is
+ * the gaps as much as the stickers — somebody who won four should be able to
+ * see which two they did not.
+ */
+function drawTrophies(
+  ctx: CanvasRenderingContext2D,
+  mid: number,
+  y: number,
+  won: Record<string, true>,
+): void {
+  const gap = 132
+  const left = mid - ((TROPHIES.length - 1) * gap) / 2
+
+  ctx.textAlign = 'center'
+  ctx.fillStyle = '#a89a80'
+  ctx.font = '600 20px Georgia, "Times New Roman", serif'
+  ctx.fillText('ISLAND GAMES', mid, y - 66)
+
+  for (let i = 0; i < TROPHIES.length; i++) {
+    const trophy = TROPHIES[i]
+    drawTrophy(ctx, left + i * gap, y, trophy, Boolean(won[trophy.id]))
+  }
+}
+
+/** How wide the ring round one sticker is. */
+const TROPHY_RADIUS = 40
+
+/** One sticker: a ring, a mark inside it, and the name under it. */
+function drawTrophy(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  trophy: Trophy,
+  won: boolean,
+): void {
+  /* Unwon ones stay on the sheet in outline, so the gaps are legible. */
+  const ink = won ? trophy.color : '#cfc6b6'
+
+  /* The disc. */
+  ctx.beginPath()
+  ctx.arc(x, y, TROPHY_RADIUS, 0, Math.PI * 2)
+  ctx.fillStyle = won ? '#fffdf8' : '#f4efe4'
+  ctx.fill()
+  ctx.lineWidth = won ? 4 : 2
+  ctx.strokeStyle = ink
+  ctx.stroke()
+
+  drawTrophyIcon(ctx, x, y, trophy.icon, ink)
+
+  /* The name under it. */
+  ctx.fillStyle = won ? '#5c6670' : '#b8ae9c'
+  ctx.font = `${won ? '600' : '400'} 17px Georgia, "Times New Roman", serif`
+  ctx.fillText(trophy.label, x, y + TROPHY_RADIUS + 26)
+}
+
+/**
+ * The mark inside a sticker.
+ *
+ * Six small line drawings rather than emoji: the emoji for half of these
+ * render as a blank box on Windows, which is the same trap the flags in
+ * `PanelBlock` were built to dodge — and a certificate is the one thing here
+ * somebody might print.
+ */
+function drawTrophyIcon(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  icon: Trophy['icon'],
+  ink: string,
+): void {
+  ctx.strokeStyle = ink
+  ctx.fillStyle = ink
+  ctx.lineWidth = 3
+  ctx.lineJoin = 'round'
+  ctx.lineCap = 'round'
+
+  switch (icon) {
+    /* Paintball: a target, and a splat off centre. */
+    case 'target': {
+      for (const r of [18, 11]) {
+        ctx.beginPath()
+        ctx.arc(x, y, r, 0, Math.PI * 2)
+        ctx.stroke()
+      }
+      ctx.beginPath()
+      ctx.arc(x + 7, y - 8, 4.5, 0, Math.PI * 2)
+      ctx.fill()
+      break
+    }
+    /* The circuit: two wheels and a bar over them. */
+    case 'bike': {
+      for (const dx of [-12, 12]) {
+        ctx.beginPath()
+        ctx.arc(x + dx, y + 8, 8, 0, Math.PI * 2)
+        ctx.stroke()
+      }
+      ctx.beginPath()
+      ctx.moveTo(x - 12, y + 8)
+      ctx.lineTo(x - 2, y - 6)
+      ctx.lineTo(x + 12, y + 8)
+      ctx.moveTo(x - 2, y - 6)
+      ctx.lineTo(x + 9, y - 9)
+      ctx.stroke()
+      break
+    }
+    /* The balloon: an envelope and the basket under it. */
+    case 'balloon': {
+      ctx.beginPath()
+      ctx.arc(x, y - 6, 13, Math.PI * 0.05, Math.PI * 0.95, true)
+      ctx.lineTo(x + 5, y + 8)
+      ctx.lineTo(x - 5, y + 8)
+      ctx.closePath()
+      ctx.stroke()
+      ctx.strokeRect(x - 5, y + 9, 10, 8)
+      break
+    }
+    /* Sea rescue: a hull on a wave. */
+    case 'boat': {
+      ctx.beginPath()
+      ctx.moveTo(x - 16, y)
+      ctx.lineTo(x + 16, y)
+      ctx.lineTo(x + 9, y + 11)
+      ctx.lineTo(x - 9, y + 11)
+      ctx.closePath()
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(x, y)
+      ctx.lineTo(x, y - 14)
+      ctx.lineTo(x + 11, y - 5)
+      ctx.lineTo(x, y - 5)
+      ctx.stroke()
+      break
+    }
+    /* Seeking: a torch, and the beam out of it. */
+    case 'torch': {
+      ctx.beginPath()
+      ctx.moveTo(x - 14, y + 10)
+      ctx.lineTo(x - 2, y - 2)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(x - 2, y - 2)
+      ctx.lineTo(x + 14, y - 12)
+      ctx.lineTo(x + 14, y + 4)
+      ctx.closePath()
+      ctx.fill()
+      break
+    }
+    /* Hiding: a moon, cut out of itself. */
+    case 'moon': {
+      ctx.beginPath()
+      ctx.arc(x + 2, y, 15, Math.PI * 0.35, Math.PI * 1.65)
+      ctx.arc(x + 9, y, 16, Math.PI * 1.3, Math.PI * 0.7, true)
+      ctx.closePath()
+      ctx.fill()
+      break
+    }
+  }
 }
 
 /** The lighthouse, small, in the bands it is painted in outside. */
@@ -238,14 +433,17 @@ export function wrapText(
  * Touches the document, so it sits apart from the drawing above the way
  * `downloadCv` sits apart from the CV data.
  */
-export function downloadCertificate(name: string): void {
+export function downloadCertificate(
+  name: string,
+  detail: CertificateDetail = {},
+): void {
   const canvas = document.createElement('canvas')
   canvas.width = CERT_WIDTH
   canvas.height = CERT_HEIGHT
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  drawCertificate(ctx, name)
+  drawCertificate(ctx, name, certDate(), detail)
 
   canvas.toBlob((blob) => {
     if (!blob) return

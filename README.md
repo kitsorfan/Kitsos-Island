@@ -136,6 +136,16 @@ Some notes on how it hangs together:
   indoor scenes light themselves and the draw call count stays low. The player
   controller is shared and picks its colliders, bounds, ground height and camera
   from whichever area is active.
+- **The tower tells you what it is before it lets you in.** The first time
+  the door opens, he stops on the doorstep, a `!` springs up over his head,
+  and the painted bands lift off the tower while the rocket underneath fades
+  up through them — both on screen at once, so it reads as one thing becoming
+  another rather than a swap. "This is not a lighthouse. This is a space
+  rocket." Then the screen goes and the deck takes over.
+  `features/launch/revealLogic.ts` times it; it plays exactly once and the
+  save remembers, because a surprise standing between you and a door you have
+  just unlocked five keys' worth is only welcome the first time.
+
 - **The lighthouse is a spaceship.** The summit room is a flight deck
   (`features/launch/FlightDeck.tsx`), and it says so before a word is read: a
   hologram turns on a plinth in the middle of the floor with the painted tower

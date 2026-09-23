@@ -1,6 +1,7 @@
 import { BalloonGame } from '../balloon/Balloon'
 import { BoatGame } from '../rescue/Boat'
 import { Hide } from '../hide/Hide'
+import { Reveal } from '../launch/Reveal'
 import { Buildings } from './Buildings'
 import { Daylight } from './Daylight'
 import { Foliage } from './Foliage'
@@ -43,6 +44,8 @@ export function Island() {
       <Foliage />
       <Props />
       <Buildings />
+      {/* The tower coming apart, the once, on the doorstep. */}
+      <Reveal />
       <GamesBoard />
       <PartyButton />
       <Npcs area="island" />

@@ -803,3 +803,64 @@ describe('the credits', () => {
     expect(useGame.getState().credits).toBe(false)
   })
 })
+
+/**
+ * The reveal on the doorstep, and the rule that matters: it plays once.
+ *
+ * A surprise is only a surprise the first time, and this one stands between
+ * him and a door he has just unlocked five keys' worth. Every visit after
+ * the first, the door simply opens.
+ */
+describe('the reveal', () => {
+  it('holds him on the doorstep the first time', () => {
+    useGame.getState().enterBuilding('lighthouse')
+
+    /* Not inside yet: the cutscene has the screen. */
+    expect(useGame.getState().mode).toBe('reveal')
+    expect(useGame.getState().reveal).not.toBeNull()
+    expect(useGame.getState().area).toBe('island')
+  })
+
+  it('lets him in when it has run', () => {
+    useGame.getState().enterBuilding('lighthouse')
+    useGame.getState().endReveal()
+
+    expect(useGame.getState().area).toBe('lighthouse')
+    expect(useGame.getState().mode).toBe('explore')
+    expect(useGame.getState().reveal).toBeNull()
+    expect(useGame.getState().revealed).toBe(true)
+  })
+
+  it('does not play a second time', () => {
+    useGame.getState().enterBuilding('lighthouse')
+    useGame.getState().endReveal()
+    useGame.getState().leaveBuilding()
+
+    /* Straight in, no cutscene. */
+    useGame.getState().enterBuilding('lighthouse')
+    expect(useGame.getState().reveal).toBeNull()
+    expect(useGame.getState().area).toBe('lighthouse')
+  })
+
+  it('never plays for any other door', () => {
+    useGame.getState().enterBuilding('house')
+    expect(useGame.getState().reveal).toBeNull()
+    expect(useGame.getState().area).toBe('house')
+  })
+
+  it('cannot be started twice over', () => {
+    useGame.getState().enterBuilding('lighthouse')
+    const first = useGame.getState().reveal
+    useGame.getState().enterBuilding('lighthouse')
+    expect(useGame.getState().reveal).toBe(first)
+  })
+
+  it('is forgotten when the island is cleared', () => {
+    useGame.getState().enterBuilding('lighthouse')
+    useGame.getState().endReveal()
+    useGame.getState().clearProgress()
+
+    expect(useGame.getState().revealed).toBe(false)
+    expect(useGame.getState().reveal).toBeNull()
+  })
+})

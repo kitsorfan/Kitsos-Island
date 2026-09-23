@@ -125,7 +125,7 @@ export function Hud() {
    * relights an island he can no longer see — and the certificate wants the
    * screen to itself besides.
    */
-  if (mode === 'launch' || mode === 'orbit') return null
+  if (mode === 'reveal' || mode === 'launch' || mode === 'orbit') return null
 
   return (
     <div

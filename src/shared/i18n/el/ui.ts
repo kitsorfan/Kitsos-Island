@@ -454,6 +454,9 @@ export const UI: Record<string, string> = {
   'And to you, for walking the whole of it.':
     'Και σε σένα, που το περπάτησες ολόκληρο.',
   Movement: 'Κίνηση',
+  'Hang on.': 'Μια στιγμή.',
+  'This is not a lighthouse. This is a space rocket.':
+    'Αυτό δεν είναι φάρος. Είναι διαστημικός πύραυλος.',
   Cast: 'Διανομή',
   Engineering: 'Μηχανική',
   'Art department': 'Καλλιτεχνικό τμήμα',

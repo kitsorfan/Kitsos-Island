@@ -156,6 +156,9 @@ const SWIM_SHIFT = -0.78
 const FLY_PITCH = 1.46
 const FLY_LIFT = 1.12
 const FLY_SHIFT = -0.82
+/** The arch of the torso in flight. The cape hangs inside it, and subtracts
+    it back off to sit level with the world. */
+const FLY_ARCH = -0.16
 
 /** Leg measurements, shared by the rig and the crouch that folds it. */
 const HIP = 0.85
@@ -913,8 +916,9 @@ export function Character({
         kneeR.current.rotation.x = blend(kneeR.current.rotation.x, 0.06)
       }
       if (torso.current) {
-        /* Arched, the way a body held up by its chest is. */
-        torso.current.rotation.x = blend(torso.current.rotation.x, -0.16)
+        /* Arched, the way a body held up by its chest is. Named, because
+           the cape hangs inside this pivot and has to take it back off. */
+        torso.current.rotation.x = blend(torso.current.rotation.x, FLY_ARCH)
       }
       if (head.current) {
         /* Chin up and looking where he is going. Flat out he is face-down,
@@ -1642,19 +1646,53 @@ function Cape({ motion }: { motion?: RefObject<CharacterMotion> }) {
   /* Eased, so setting off and pulling up are a settle rather than a snap:
      the cape has weight and arrives a moment after he does. */
   const lift = useRef(0)
+  /* Eased flight, on the cape's own clock rather than read raw: the body
+     pitches over a good half second and a cape that snapped upright on the
+     first frame of a launch would arrive before he did. */
+  const aloft = useRef(0)
 
   useFrame((state, delta) => {
     const g = swing.current
     if (!g) return
     const m = motion?.current
-    const speed = m?.moving ? (m.speed ?? 0) : 0
+    const fly = m?.flying ?? 0
+    aloft.current += (fly - aloft.current) * Math.min(1, delta * 3)
+    const air = aloft.current
 
-    /* How far out it streams, capped: past a jog it is already near
-       horizontal and more speed should not tear it off over his head. */
-    const wanted = Math.min(1, speed / 5)
+    /* On the ground the wake is all about how fast he is walking. In the
+       air it is not: a hover is still flying, and a cape that drops the
+       moment he stops pushing a direction reads as the thing switching off.
+       So flight floors it - most of the way out at a standstill, the rest
+       of the way as he actually travels. */
+    const speed = m?.moving ? (m.speed ?? 0) : 0
+    const walked = Math.min(1, speed / 5)
+    const wanted = air > 0.01 ? Math.max(0.72 + air * 0.2, walked) : walked
     lift.current += (wanted - lift.current) * Math.min(1, delta * 4)
 
     const t = state.clock.elapsedTime
+
+    /*
+     * The counter-rotation, which is the whole of why this needs to know
+     * about flight at all.
+     *
+     * The cape hangs inside the body, and in the air the body is pitched
+     * face-down by FLY_PITCH. Everything this computes is relative to that,
+     * so the swing that streams the cape out behind him on the grass points
+     * it at the ground once he is flying. Taking the body's own pitch back
+     * off puts the cape level with the world again, which is where a cape
+     * held out by the air it is moving through actually sits.
+     *
+     * Two rotations to undo, not one: the body's pitch, and the torso arch
+     * of FLY_ARCH on the pivot this hangs inside. Both stack onto the cape
+     * before it gets a say.
+     *
+     * Not quite the whole of it either - 0.92 of the pitch rather than all
+     * of it, so the cape still rides a few degrees off level and reads as
+     * trailing from his shoulders rather than as a plank bolted on square.
+     */
+    const climb = m?.climb ?? 0
+    const upright = (-(FLY_PITCH - climb * 0.42) * 0.92 - FLY_ARCH) * air
+
     /* Positive, so it lifts BEHIND him. At rest it hangs a few degrees off
        his back rather than clipping into it; at a sprint it is most of the
        way to horizontal. The billow is faster and deeper the harder he is
@@ -1662,9 +1700,17 @@ function Cape({ motion }: { motion?: RefObject<CharacterMotion> }) {
     g.rotation.x =
       0.06 +
       lift.current * 1.15 +
+      upright +
       Math.sin(t * (1.6 + lift.current * 4)) * (0.03 + lift.current * 0.09)
-    /* And a lazy side-to-side, so it is never a flat pendulum. */
-    g.rotation.z = Math.sin(t * 0.9 + 1.1) * (0.02 + lift.current * 0.06)
+    /* And a lazy side-to-side, so it is never a flat pendulum. In the air
+       it ripples harder and faster: there is a great deal more wind in it
+       up there than there is on a walk. */
+    g.rotation.z =
+      Math.sin(t * (0.9 + air * 1.6) + 1.1) *
+      (0.02 + lift.current * 0.06 + air * 0.1)
+    /* A slow roll along its own length while flying, which is the thing
+       that stops a big flat sheet reading as cardboard. */
+    g.rotation.y = Math.sin(t * 1.15 + 0.4) * air * 0.09
   })
 
   /* The back half, centred on PI. Shared by all three layers so the cape,

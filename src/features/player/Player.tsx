@@ -8,6 +8,7 @@ import { BOARD } from '../arcade/minigames'
 import { AMALIA, PARTY_BUTTON, TUXEDO } from '../party/partyData'
 import { LAUNCH_AREA, SPACESUIT, STAR_SHIRT } from '../launch/launch'
 import { StarTrail } from '../launch/StarTrail'
+import { RevealMark } from '../launch/Reveal'
 import { CONSOLE, SUIT_RACK } from '../launch/deck'
 import {
   BUILDINGS,
@@ -197,7 +198,24 @@ const GRAVITY = 26
  */
 /** Climb and descent rates, in units a second. */
 const FLY_UP = 7.5
-const FLY_DOWN = 9
+/**
+ * The dive: double-tap space and he drops, fast.
+ *
+ * Latched rather than held. It used to be a rate that applied only on the
+ * frame the second tap landed, which at FLY_EASE meant the velocity had
+ * moved a fraction of the way toward it before reverting to the gentle
+ * sink - so the gesture read as a nudge rather than as dropping out of the
+ * sky. Now the tap commits him to the dive and he stays in it until he
+ * pulls out or hits the ground.
+ *
+ * Well past the climb rate and past gravity's terminal drift too: going up
+ * is work and coming down is not, and a dive that matched the climb felt
+ * like riding a lift.
+ */
+const FLY_DOWN = 34
+/** How hard he snaps into the dive: much quicker than he eases anywhere
+    else, because the whole point of it is that it is abrupt. */
+const DIVE_EASE = 14
 /** What he settles at with nothing held: a hover that leaks a little. */
 const FLY_SINK = 1.1
 /** How fast he reaches the rate he is asking for; a cape has some give. */
@@ -400,6 +418,8 @@ export function Player() {
   const hop = useRef({ y: 0, vy: 0 })
   /** True once the cape has taken over: gravity is off until he lands. */
   const flying = useRef(false)
+  /** Latched by a double tap: dropping out of the sky until he pulls out. */
+  const diving = useRef(false)
   /**
    * Where he has drifted to in orbit, and how fast, in world units.
    *
@@ -421,6 +441,15 @@ export function Player() {
    * rather than a pop.
    */
   const orbitShot = useRef(0)
+  /**
+   * How far he is leaning into his own drift, eased behind the velocity.
+   *
+   * Kept rather than read off the velocity each frame so the lean arrives
+   * after the push and leaves after the stop — taken straight, it snaps him
+   * upright the instant the stick is released, which is the one moment he
+   * should look most weightless.
+   */
+  const lean = useRef({ x: 0, z: 0 })
   /** Where his feet ride while he is in the water, eased as he wades out. */
   const swimFloor = useRef(0)
   /** The walk cycle the first-person head and hand ride on. */
@@ -1243,24 +1272,34 @@ export function Player() {
       !SWIM.active
 
     if (caped) {
-      const down = doubleTapped()
       // Two quick taps is the way down, and it claims the run of taps so
       // the tap that started it cannot also read as a fresh climb.
-      if (down) forgetTaps()
+      if (doubleTapped()) {
+        forgetTaps()
+        // Latched: one gesture, and he is diving until something ends it.
+        if (flying.current) diving.current = true
+      }
       const up = isDown('Space')
+      // Holding space is how he pulls out of it — the same key that took
+      // him up in the first place, so recovering is the obvious thing to
+      // do rather than something that has to be learnt.
+      if (up) diving.current = false
 
       // Off the ground on a tap, which is what turns a hop into a launch.
       if (!flying.current && (consumeJump() || up) && hop.current.y <= 0.001) {
         flying.current = true
+        diving.current = false
         sfx.hop()
       }
 
       if (flying.current) {
         // Gravity is off. He goes where he is asked, easing into it rather
         // than snapping, and drifts down when nothing is asked at all.
+        const down = diving.current
         const wanted = down ? -FLY_DOWN : up ? FLY_UP : -FLY_SINK
         hop.current.vy +=
-          (wanted - hop.current.vy) * Math.min(1, delta * FLY_EASE)
+          (wanted - hop.current.vy) *
+          Math.min(1, delta * (down ? DIVE_EASE : FLY_EASE))
         hop.current.y += hop.current.vy * delta
 
         if (hop.current.y >= FLY_CEILING) {
@@ -1272,6 +1311,7 @@ export function Player() {
           hop.current.y = 0
           hop.current.vy = 0
           flying.current = false
+          diving.current = false
           if (SWIM.falling) {
             SWIM.falling = false
             sfx.splash()
@@ -1282,6 +1322,7 @@ export function Player() {
       // Out of the cape mid-air — a change of clothes, or stepping inside —
       // gives him back to gravity rather than leaving him hanging.
       flying.current = false
+      diving.current = false
     }
 
     // Space throws paint during a match, so hopping sits it out. So does
@@ -1338,8 +1379,17 @@ export function Player() {
     motion.current.flying = flying.current ? 1 : 0
     // Which way the cape is taking him, normalised off the climb rate so
     // levelling out reads as level rather than as a slow dive.
+    // Scaled by which way he is going: the dive is far faster than the
+    // climb, and measuring both against FLY_UP would peg a descent at full
+    // tilt the instant it began and lose every shade of it.
     motion.current.climb = flying.current
-      ? Math.max(-1, Math.min(1, hop.current.vy / FLY_UP))
+      ? Math.max(
+          -1,
+          Math.min(
+            1,
+            hop.current.vy / (hop.current.vy < 0 ? FLY_DOWN : FLY_UP),
+          ),
+        )
       : 0
     motion.current.swimming = SWIM.afloat ? 1 : 0
     /* Weightless, which is its own pose rather than a swim: see `floating`
@@ -1495,12 +1545,37 @@ export function Player() {
          * direction of travel and rolling out of the turn, so a push on the
          * stick visibly moves him rather than sliding him along.
          */
-        const tumbleX = Math.sin(since * 0.19) * 0.26
-        const tumbleZ = Math.sin(since * 0.13) * 0.34
+        /*
+         * Three rates that share no common multiple, so the tumble never
+         * comes back round to where it started - a loop you can spot is the
+         * one thing that makes a drift read as an animation.
+         */
+        const tumbleX =
+          Math.sin(since * 0.19) * 0.3 + Math.sin(since * 0.07) * 0.12
+        const tumbleZ =
+          Math.sin(since * 0.13) * 0.38 + Math.cos(since * 0.05) * 0.14
+
+        /*
+         * The lean into the push, eased rather than taken straight off the
+         * velocity.
+         *
+         * Reading the velocity directly ties the lean to the stick: let go
+         * and he snaps upright mid-coast, which is the one moment he should
+         * look most weightless. Chasing it instead means the lean arrives
+         * after the push and leaves after the stop, the way a body with mass
+         * actually turns.
+         */
+        lean.current.x +=
+          (o.vz * 0.34 - lean.current.x) * Math.min(1, delta * 1.6)
+        lean.current.z +=
+          (-o.vx * 0.34 - lean.current.z) * Math.min(1, delta * 1.6)
+
         group.current.rotation.set(
-          tumbleX + o.vz * 0.3,
-          facing.current + since * 0.11,
-          tumbleZ - o.vx * 0.3,
+          tumbleX + lean.current.x,
+          /* A slow yaw of his own, plus a little of the turn he is making:
+             he swings round to face the way he is going, eventually. */
+          facing.current + since * 0.09 + o.vx * 0.06,
+          tumbleZ + lean.current.z,
         )
       } else {
         /* Back on the ground: his own size again, and forget where he
@@ -1681,12 +1756,34 @@ export function Player() {
 
       const reach =
         dolly * framing * boom.current * (1 + show * 0.5) * (1 + aloft * 0.22)
-      const targetX = px + Math.sin(yaw.current) * reach
-      const targetZ = pz + Math.cos(yaw.current) * reach
+
+      /*
+       * In orbit the camera follows the drift as well as the walk.
+       *
+       * The walking position is pinned to the deck he launched from and the
+       * float is an offset on top of it, so a camera aimed at `px, pz` alone
+       * watches an empty spot while he sails off the side of the screen.
+       * There are no walls out there to keep him in shot any more, which is
+       * what made this urgent: the only thing holding the frame on him is
+       * this.
+       *
+       * It lags him, rather than locking on. A camera welded to a tumbling
+       * man has no fixed point in it and reads as the universe shaking; a
+       * camera a beat behind lets him move within the frame and still never
+       * leaves it.
+       */
+      const o = orbit.current
+      const chaseX = o.x * orbitShot.current
+      const chaseY = o.y * orbitShot.current
+      const chaseZ = o.z * orbitShot.current
+
+      const targetX = px + chaseX + Math.sin(yaw.current) * reach
+      const targetZ = pz + chaseZ + Math.cos(yaw.current) * reach
       // Track the ground, not the hop, so the camera does not bounce —
       // except under the cape, where `aloft` hands the height back.
       const targetY =
-        py -
+        py +
+        chaseY -
         hop.current.y * (1 - aloft) +
         rise * framing * (0.72 + 0.28 * boom.current) * (1 + show * 0.34)
 
@@ -1694,16 +1791,26 @@ export function Player() {
         camera.position.set(targetX, targetY, targetZ)
         camReady.current = true
       }
-      const ease = 1 - Math.pow(0.0015, delta)
+      /* Softer in orbit: the chase is meant to lag, so it eases towards
+         him over about a second rather than snapping onto him. */
+      const ease = 1 - Math.pow(orbitShot.current > 0.01 ? 0.12 : 0.0015, delta)
       camera.position.x += (targetX - camera.position.x) * ease
       camera.position.y += (targetY - camera.position.y) * ease
       camera.position.z += (targetZ - camera.position.z) * ease
       // And what it is pointed at slides off him and down the hall, to a
       // point between the lectern and the back of the class.
-      const aimZ = pz + show * (LECTURE_LOOK - pz)
+      const aimZ = pz + chaseZ + show * (LECTURE_LOOK - pz)
       // And it looks at him rather than at the ground under him, by the
       // same easing, so the climb is centred instead of running off the top.
-      camera.lookAt(px, py - hop.current.y * (1 - aloft) + 1.4, aimZ)
+      //
+      // The chase is added here too. Following him with the lens but aiming
+      // it at the deck would keep him in the world and still swing him out
+      // of the middle of the frame, which is most of the way to losing him.
+      camera.lookAt(
+        px + chaseX,
+        py + chaseY - hop.current.y * (1 - aloft) + 1.4,
+        aimZ,
+      )
     }
 
     /* -------------------------- thresholds -------------------------- */
@@ -1845,6 +1952,10 @@ export function Player() {
           hand={carrying}
           danceStyle={amaliaHere ? 3 : undefined}
         />
+        {/* The mark over his head while the tower comes apart in front of
+            him. Inside the group so it rides with him. */}
+        <RevealMark />
+
         {/* Soft blob shadow so the player never looks like it floats. */}
         <mesh
           ref={shadow}

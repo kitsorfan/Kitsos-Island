@@ -188,6 +188,8 @@ export type Mode =
   | 'calendar'
   /** Inside the lift car with the doors shut, between floors. */
   | 'lift'
+  /** On the lighthouse doorstep, watching it turn into a rocket. */
+  | 'reveal'
   /**
    * Strapped into the ship inside the lighthouse, with the count running.
    * Held for the whole of the launch, and released only into 'orbit'.
@@ -487,6 +489,17 @@ interface GameState {
    */
   launch: Launch | null
   /**
+   * The reveal on the doorstep, or null.
+   *
+   * Set the first time he goes through the lighthouse door, and it holds the
+   * clock the whole cutscene reads. `revealed` remembers that it has played,
+   * because a surprise is only a surprise once - every visit after this the
+   * door simply opens.
+   */
+  reveal: { started: number } | null
+  /** Whether the tower has already shown him what it is. Saved. */
+  revealed: boolean
+  /**
    * True while the credits are playing, which is the whole of the time
    * between the engines cutting and the certificate coming up.
    *
@@ -691,6 +704,10 @@ interface GameState {
   toggleSuit: () => void
   /** The roll has played out: the certificate may come up now. */
   endCredits: () => void
+  /** On the doorstep: the tower shows him what it actually is. */
+  beginReveal: () => void
+  /** The cutscene has run: let him through the door. */
+  endReveal: () => void
   /** Home. Puts him down in the middle of the island in his new shirt. */
   flyHome: () => void
   /** Which shirt he wears now that he has two. */
@@ -839,6 +856,7 @@ const RESTORED = {
   cvUnlocked: SAVED_PROGRESS?.cvUnlocked ?? false,
   launched: SAVED_PROGRESS?.launched ?? false,
   starShirt: SAVED_PROGRESS?.starShirt ?? false,
+  revealed: SAVED_PROGRESS?.revealed ?? false,
 }
 
 /**
@@ -930,6 +948,9 @@ export const useGame = create<GameState>((raw, get) => {
     /* Nobody is in orbit at the title screen, whatever the save remembers. */
     launch: null,
     credits: false,
+    /* Nothing is playing at the title screen, whatever the save remembers. */
+    reveal: null,
+    revealed: RESTORED.revealed,
     launched: RESTORED.launched,
     /* The suit hangs on its rack at the start of every visit, whatever a
        previous one ended in: he is not born wearing it. */
@@ -1920,6 +1941,16 @@ export const useGame = create<GameState>((raw, get) => {
       if (get().hide) return
       const interior = INTERIOR_BY_ID.get(id)
       if (!interior) return
+      /*
+       * The lighthouse shows him what it is before it lets him in, once.
+       * `beginReveal` puts the cutscene up and calls this again at the end
+       * of it, by which point `revealed` is set and it falls straight
+       * through - so the door is never blocked, only delayed.
+       */
+      if (id === LAUNCH_AREA && !get().revealed && !get().reveal) {
+        get().beginReveal()
+        return
+      }
       get().discover(id)
       set((s) => ({
         area: id,
@@ -2159,6 +2190,40 @@ export const useGame = create<GameState>((raw, get) => {
     },
 
     /**
+     * On the doorstep, the first time: he stops, and the tower comes apart
+     * in front of him.
+     *
+     * The walk is taken off him for the length of it - `mode` goes to
+     * 'reveal', which `isInteractive` does not answer to - because the whole
+     * thing is him standing still and looking at something.
+     */
+    beginReveal: () => {
+      if (get().reveal || get().revealed) return
+      sfx.jingle()
+      set({
+        reveal: { started: performance.now() / 1000 },
+        mode: 'reveal',
+        nearby: null,
+        panel: null,
+        dialogue: null,
+        stride: null,
+      })
+    },
+
+    /**
+     * The cutscene is over: he goes in.
+     *
+     * `revealed` is set before the door is opened, so the `enterBuilding`
+     * below falls through the check that sent us here rather than starting
+     * the whole thing again.
+     */
+    endReveal: () => {
+      if (!get().reveal) return
+      set({ reveal: null, revealed: true, mode: 'explore' })
+      get().enterBuilding(LAUNCH_AREA)
+    },
+
+    /**
      * The roll has run out.
      *
      * Only `CreditsRoll` calls this, because only it knows how long the roll
@@ -2366,6 +2431,8 @@ export const useGame = create<GameState>((raw, get) => {
         cvUnlocked: false,
         launch: null,
         credits: false,
+        reveal: null,
+        revealed: false,
         launched: false,
         starShirt: false,
         suited: false,
@@ -2392,6 +2459,7 @@ type Progressed = Pick<
   | 'cvUnlocked'
   | 'launched'
   | 'starShirt'
+  | 'revealed'
 >
 
 /** The store's progress in the shape the save file keeps it in. */
@@ -2410,6 +2478,7 @@ function snapshot(s: Progressed): SavedProgress {
     cvUnlocked: s.cvUnlocked,
     launched: s.launched,
     starShirt: s.starShirt,
+    revealed: s.revealed,
   }
 }
 
@@ -2429,7 +2498,8 @@ useGame.subscribe((state, previous) => {
     state.lighthouseOpen === previous.lighthouseOpen &&
     state.cvUnlocked === previous.cvUnlocked &&
     state.launched === previous.launched &&
-    state.starShirt === previous.starShirt
+    state.starShirt === previous.starShirt &&
+    state.revealed === previous.revealed
   ) {
     return
   }

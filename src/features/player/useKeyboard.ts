@@ -181,6 +181,9 @@ export function useKeyboard() {
          * about the cabin while the credits play — being held still through
          * a credits roll is the difference between an ending and a cutscene.
          */
+        /* And the reveal, which is him standing still and looking at
+           something: there is nothing to press and nothing to skip. */
+        case 'reveal':
         case 'launch':
         case 'orbit':
           if (event.code === 'KeyN') state.toggleMute()

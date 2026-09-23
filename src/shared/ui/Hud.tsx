@@ -118,6 +118,15 @@ export function Hud() {
   // banner reads "Kitsos Island" while you are standing under the house.
   const room = t(indoors ? INTERIOR_BY_ID.get(area) : undefined)
 
+  /*
+   * The whole HUD steps off the screen for the launch and stays off in
+   * orbit. Every one of its buttons is a way back to a game that is over —
+   * the map fast-travels, the arcade opens a board, the day/night switch
+   * relights an island he can no longer see — and the certificate wants the
+   * screen to itself besides.
+   */
+  if (mode === 'launch' || mode === 'orbit') return null
+
   return (
     <div
       className="hud"

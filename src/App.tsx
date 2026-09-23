@@ -13,6 +13,8 @@ import { FeastCheer } from './features/party/FeastCheer'
 import { LectureHud } from './features/lecture/LectureHud'
 import { LiftPanel } from './features/lift/LiftPanel'
 import { LiftRide } from './features/lift/LiftRide'
+import { LaunchSequence } from './features/launch/LaunchSequence'
+import { OrbitCard } from './features/launch/OrbitCard'
 import { BalloonCard } from './features/balloon/BalloonCard'
 import { HideCard } from './features/hide/HideCard'
 import { MotoCard } from './features/moto/MotoCard'
@@ -52,6 +54,7 @@ export default function App() {
   const balloon = useGame((s) => s.balloon?.status)
   const hide = useGame((s) => s.hide?.status)
   const rescue = useGame((s) => s.rescue?.status)
+  const launch = useGame((s) => s.launch)
   useKeyboard()
 
   useEffect(() => {
@@ -104,21 +107,36 @@ export default function App() {
                 : null
 
     setMood(
-      playing ??
-        (area === 'island'
-          ? party
-            ? 'party'
-            : night
-              ? 'night'
-              : 'island'
-          : area === 'lighthouse'
-            ? 'lighthouse'
-            : // The one room on the island with a date attached to it.
-              area === FEAST_AREA && christmas
-              ? 'christmas'
-              : 'indoor'),
+      /* A launch outranks every other piece: the island's tune has no
+         business playing over a rocket, and orbit has one of its own. */
+      launch
+        ? 'orbit'
+        : (playing ??
+            (area === 'island'
+              ? party
+                ? 'party'
+                : night
+                  ? 'night'
+                  : 'island'
+              : area === 'lighthouse'
+                ? 'lighthouse'
+                : // The one room on the island with a date attached to it.
+                  area === FEAST_AREA && christmas
+                  ? 'christmas'
+                  : 'indoor')),
     )
-  }, [area, night, party, christmas, paintball, moto, balloon, hide, rescue])
+  }, [
+    area,
+    night,
+    party,
+    christmas,
+    paintball,
+    moto,
+    balloon,
+    hide,
+    rescue,
+    launch,
+  ])
 
   return (
     <div className="app">
@@ -158,6 +176,8 @@ export default function App() {
           <LectureHud />
           <LiftPanel />
           <LiftRide />
+          <LaunchSequence />
+          <OrbitCard />
           <Toast />
         </>
       )}

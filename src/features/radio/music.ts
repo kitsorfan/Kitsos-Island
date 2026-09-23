@@ -25,6 +25,12 @@ export type Mood =
   | 'boat'
   /** The basement, on the one day of the year it is decorated. */
   | 'christmas'
+  /**
+   * In orbit, with the island behind him. The lighthouse's own piece with
+   * the floor taken out of it: no bass and no percussion, the pad opened
+   * right up, and the cutoff low enough that what is left is mostly air.
+   */
+  | 'orbit'
 
 export const BPM = 104
 const BEAT = 60 / BPM
@@ -1038,6 +1044,17 @@ const TRACKS: Record<Mood, Track> = {
     play: (ac, i, at) =>
       scheduleIsland(ac, i, at, {
         arpeggio: true,
+        percussion: false,
+        sparse: true,
+        shimmer: true,
+      }),
+  },
+  orbit: {
+    gain: 0.1,
+    cutoff: 1200,
+    play: (ac, i, at) =>
+      scheduleIsland(ac, i, at, {
+        arpeggio: false,
         percussion: false,
         sparse: true,
         shimmer: true,

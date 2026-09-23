@@ -542,3 +542,82 @@ describe('getting into the lift and out of it', () => {
     expect(useGame.getState().spawn.token).toBe(once)
   })
 })
+
+/**
+ * The launch, and the one rule it exists to enforce: leaving is final.
+ *
+ * Everything else on the island can be walked back out of — a panel closes,
+ * a room has a door, a minigame has a quit. This does not, and the store is
+ * where that has to be true, because the button is the only thing on the
+ * island whose consequences a visitor cannot undo by walking away.
+ */
+describe('the launch', () => {
+  /** On the deck with the walk his, which is where the button is pressed. */
+  const onDeck = () => {
+    useGame.setState({ area: 'lighthouse', mode: 'explore' })
+  }
+
+  it('is only offered from the deck', () => {
+    useGame.setState({ area: 'island', mode: 'explore' })
+    useGame.getState().beginLaunch()
+    expect(useGame.getState().launch).toBeNull()
+    expect(useGame.getState().mode).toBe('explore')
+  })
+
+  it('starts the count and takes the walk away', () => {
+    onDeck()
+    useGame.getState().beginLaunch()
+
+    const { launch, mode } = useGame.getState()
+    expect(launch).not.toBeNull()
+    expect(launch?.arrived).toBe(false)
+    expect(mode).toBe('launch')
+    /* Nothing is left on the screen to click through mid-count. */
+    expect(useGame.getState().nearby).toBeNull()
+    expect(useGame.getState().panel).toBeNull()
+    expect(useGame.getState().dialogue).toBeNull()
+  })
+
+  it('cannot be started twice', () => {
+    onDeck()
+    useGame.getState().beginLaunch()
+    const first = useGame.getState().launch
+    useGame.getState().beginLaunch()
+    /* The same flight, not a second one that restarts the clock. */
+    expect(useGame.getState().launch).toBe(first)
+  })
+
+  it('reaches orbit once, however many frames call it', () => {
+    onDeck()
+    useGame.getState().beginLaunch()
+    useGame.getState().reachOrbit()
+
+    const arrived = useGame.getState().launch
+    expect(arrived?.arrived).toBe(true)
+    expect(useGame.getState().mode).toBe('orbit')
+
+    useGame.getState().reachOrbit()
+    expect(useGame.getState().launch).toBe(arrived)
+  })
+
+  it('does not reach orbit without a flight', () => {
+    useGame.getState().reachOrbit()
+    expect(useGame.getState().launch).toBeNull()
+    expect(useGame.getState().mode).not.toBe('orbit')
+  })
+
+  it('remembers across visits that the ship has flown', () => {
+    onDeck()
+    useGame.getState().beginLaunch()
+    expect(useGame.getState().launched).toBe(true)
+  })
+
+  it('is forgotten, like everything else, when the island is cleared', () => {
+    onDeck()
+    useGame.getState().beginLaunch()
+    useGame.getState().clearProgress()
+
+    expect(useGame.getState().launched).toBe(false)
+    expect(useGame.getState().launch).toBeNull()
+  })
+})

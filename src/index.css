@@ -5295,3 +5295,282 @@ canvas {
   border-color: rgba(255, 255, 255, 0.3);
   color: #e6eeec;
 }
+
+/* --------------------------- the launch --------------------------- */
+
+/*
+ * The count over the button, and the stage the flight has got to.
+ *
+ * It does not take the pointer: the deck behind it is still being drawn and
+ * still being shaken, and this is a readout laid over that rather than a
+ * card in front of it. The one thing it does own is the vignette, which
+ * closes in as the engines light.
+ */
+.launch {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: clamp(1.4rem, 9vh, 5rem) 1rem 0;
+  pointer-events: none;
+}
+
+/*
+ * The shake, driven off the --shake the sequence writes each frame. The
+ * camera does the honest half of this in the scene; what the frame adds is
+ * the edge of the screen moving, which is what sells it on a small one.
+ */
+.launch__frame {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 calc(6rem + var(--shake, 0) * 9rem)
+    rgba(192, 57, 43, calc(0.1 + var(--shake, 0) * 0.42));
+  transition: box-shadow 0.12s linear;
+}
+
+.launch--ignition .launch__frame,
+.launch--climb .launch__frame {
+  animation: launch-rattle 0.09s steps(2, end) infinite;
+}
+
+.launch__count {
+  display: grid;
+  justify-items: center;
+  padding: 0.6rem 2.2rem;
+  border: 1px solid rgba(240, 163, 60, 0.55);
+  border-radius: 0.7rem;
+  background: rgba(14, 12, 18, 0.8);
+  backdrop-filter: blur(3px);
+  color: #f0a33c;
+  text-shadow: 0 0 0.9rem rgba(240, 163, 60, 0.6);
+}
+
+.launch__countNum {
+  font-size: clamp(2.6rem, 11vw, 4.6rem);
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  animation: launch-tick 1s ease-out infinite;
+}
+
+.launch__countLabel {
+  font-size: 0.72rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.launch__stage {
+  font-size: clamp(2rem, 9vw, 3.4rem);
+  color: #ffd9a0;
+  text-shadow: 0 0 1.2rem rgba(240, 163, 60, 0.7);
+  animation: launch-rise 0.9s ease-in-out infinite;
+}
+
+.launch__line {
+  margin: 0;
+  padding: 0.35rem 1rem;
+  border-radius: 0.5rem;
+  background: rgba(14, 12, 18, 0.7);
+  color: #f3e6d2;
+  font-size: clamp(0.82rem, 2.6vw, 1rem);
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+@keyframes launch-tick {
+  0% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+  40% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+}
+
+@keyframes launch-rise {
+  0%,
+  100% {
+    transform: translateY(0.18rem);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translateY(-0.18rem);
+    opacity: 1;
+  }
+}
+
+@keyframes launch-rattle {
+  0% {
+    transform: translate3d(calc(var(--shake, 0) * -2px), 0, 0);
+  }
+  100% {
+    transform: translate3d(calc(var(--shake, 0) * 2px), 0, 0);
+  }
+}
+
+/* ---------------------------- in orbit ---------------------------- */
+
+/*
+ * Darker than every other overlay on the island, and the only one with no
+ * way out of it. There is no close button here on purpose.
+ */
+.overlay--orbit {
+  background: radial-gradient(
+    ellipse at 50% 30%,
+    rgba(24, 28, 54, 0.88),
+    rgba(6, 7, 14, 0.96)
+  );
+  backdrop-filter: blur(6px);
+  z-index: 70;
+  overflow: auto;
+  place-items: start center;
+}
+
+.orbit {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  width: min(760px, 100%);
+  margin: auto;
+  padding: clamp(1.1rem, 3.5vw, 2rem);
+  border: 1px solid rgba(240, 163, 60, 0.35);
+  border-radius: 20px;
+  background: rgba(16, 18, 30, 0.82);
+  box-shadow:
+    0 0 4rem rgba(80, 120, 220, 0.18),
+    var(--shadow);
+  color: #eef2f8;
+  text-align: center;
+  animation: pop-in 0.3s ease both;
+}
+
+.orbit__kicker {
+  font-size: 0.7rem;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: #f0a33c;
+}
+
+.orbit__title {
+  margin: 0;
+  font-size: clamp(1.4rem, 5vw, 2.1rem);
+  line-height: 1.15;
+}
+
+.orbit__lead {
+  margin: 0;
+  max-width: 54ch;
+  color: #c3ccdc;
+  font-size: clamp(0.86rem, 2.4vw, 0.98rem);
+  line-height: 1.5;
+}
+
+/* The certificate itself, shown at whatever width the card has going. */
+.orbit__cert {
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0.6rem 2rem rgba(0, 0, 0, 0.5);
+}
+
+.orbit__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.orbit__field {
+  display: grid;
+  gap: 0.3rem;
+  width: min(420px, 100%);
+  text-align: left;
+}
+
+.orbit__label {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #9fb0c8;
+}
+
+.orbit__input {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid rgba(160, 180, 210, 0.35);
+  border-radius: 0.5rem;
+  background: rgba(8, 10, 18, 0.8);
+  color: #fff;
+  font: inherit;
+  font-size: 1rem;
+}
+
+.orbit__input:focus-visible {
+  outline: 2px solid #f0a33c;
+  outline-offset: 1px;
+}
+
+.orbit__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.orbit__take,
+.orbit__cv {
+  padding: 0.62rem 1.3rem;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease;
+}
+
+.orbit__take {
+  background: linear-gradient(180deg, #f6b85a, #e08c22);
+  color: #2b1d08;
+}
+
+.orbit__cv {
+  border: 1px solid rgba(180, 200, 230, 0.4);
+  background: transparent;
+  color: #dbe5f3;
+}
+
+.orbit__take:hover:not(:disabled),
+.orbit__cv:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.orbit__take:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.orbit__signoff {
+  margin: 0;
+  max-width: 52ch;
+  color: #94a2b8;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launch__countNum,
+  .launch__stage,
+  .launch--ignition .launch__frame,
+  .launch--climb .launch__frame {
+    animation: none;
+  }
+}

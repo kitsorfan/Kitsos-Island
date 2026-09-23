@@ -3,8 +3,8 @@
 A frontend-only 3D personal site for **Christos "Kitsos" Orfanopoulos**, built as a
 Pokémon-style island you walk around. Townspeople tell you about him, seven
 buildings open up and let you walk **inside**, five hidden keys unlock the Old
-Lighthouse, and the Radio Center hands your message straight to your own mail
-client.
+Lighthouse — which turns out to be a spaceship — and the Radio Center hands
+your message straight to your own mail client.
 
 No backend, no API keys, no runtime network calls beyond the Google Fonts
 stylesheet — it deploys as static files anywhere.
@@ -63,7 +63,7 @@ people and — in five of them — a key.
 | **Army Camp** (SE)               | Service record and the Battalion Commander's letter, under the Greek flag · 🔑 Footlocker Key                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | **Town School** (W)              | The hall: his first teacher, two cups, volunteering and the foundation's letter · 🔑 Cabinet Key. West door: the Evangeliki classroom, the principal, the Pascal tutor, the robotics bench and the after-school clubs. East door: the Ionidios classroom, three teachers and their scholarship letters, the EUSO bench and the machine he learned C++ on                                                                                                                                                                |
 | **Radio Center** (S)             | The transmitter — email, LinkedIn and a message desk                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| **The Old Lighthouse** (NW cape) | Sealed with five locks. Inside: the career summary, what he is good at, what he is looking for, and a CV download                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **The Old Lighthouse** (NW cape) | Sealed with five locks. Inside: the career summary, the keeper's logbook — and a flight deck. The tower is a gantry, and the button under the glass launches it                                                                                                                                                                                                                                                                                                                                                         |
 
 ### Missions and keys
 
@@ -99,6 +99,7 @@ src/
     npc/          the townspeople, the guards, and who is standing where
     cv/           the CV itself: the journal, the panels, the downloads
     lift/         the car, its panel, and the one journey that takes time
+    launch/       the ship in the lighthouse, the flight, and the certificate
     map/          the minimap and the full map overlay
     arcade/       the games board and the list it offers
     paintball/  moto/  balloon/  hide/  rescue/     one minigame each
@@ -133,6 +134,20 @@ Some notes on how it hangs together:
   indoor scenes light themselves and the draw call count stays low. The player
   controller is shared and picks its colliders, bounds, ground height and camera
   from whichever area is active.
+- **The lighthouse is a spaceship, and leaving is final.** The summit room is
+  a flight deck (`features/launch/FlightDeck.tsx`): a console, a window, and a
+  button under glass. Pressing it starts a sequence that cannot be stopped —
+  hold, ignition, climb, orbit — timed by `features/launch/launch.ts` off one
+  clock, so the count on the screen, the shake on the camera and the island
+  shrinking in the window all agree. At the top he signs a certificate in his
+  own name, drawn to a canvas and handed over as a PNG
+  (`features/launch/certificate.ts`); the full CV is on the same card. There is
+  no way back to the island from orbit, and that is enforced in one place
+  rather than a dozen: `isSealed` wraps the store's own `set`, so every
+  existing way back to `explore` — a panel closing, the map, walking out of a
+  building — silently drops the mode change and keeps the rest of its patch.
+  A path added later is covered without anybody having to remember it.
+
 - **The lift is the one way through that takes time.** Every other door and
   flight swaps the room the moment you walk into it. Walking into the car
   instead raises its panel (`features/lift/LiftPanel.tsx`) with a button per floor; press

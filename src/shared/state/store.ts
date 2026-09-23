@@ -187,6 +187,16 @@ export type Mode =
   | 'calendar'
   /** Inside the lift car with the doors shut, between floors. */
   | 'lift'
+  /**
+   * Strapped into the ship inside the lighthouse, with the count running.
+   * Held for the whole of the launch, and released only into 'orbit'.
+   */
+  | 'launch'
+  /**
+   * In orbit, the island behind him. The one mode there is no way out of:
+   * the certificate is signed here, and the walk does not come back.
+   */
+  | 'orbit'
 
 export type MissionState = 'idle' | 'active' | 'done'
 
@@ -374,6 +384,20 @@ export interface LiftRide {
   duration: number
 }
 
+/**
+ * A launch under way, or one that has finished and left him in orbit.
+ *
+ * `started` is on the same clock `launchPhase` reads, and it is the only
+ * thing the sequence needs: every stage, the count, the shake and the
+ * altitude are arithmetic on it. There is no field for aborting, because
+ * there is no aborting.
+ */
+export interface Launch {
+  started: number
+  /** True once the climb is over: the certificate can be signed. */
+  arrived: boolean
+}
+
 interface GameState {
   mode: Mode
   area: AreaId
@@ -452,6 +476,20 @@ interface GameState {
   lecture: { slide: number; ovation: boolean } | null
   /** The lift ride under way, or null when nobody is in the car. */
   lift: LiftRide | null
+  /**
+   * The launch under way, or the orbit it ended in. Null until the button
+   * under the glass is pressed, and never null again afterwards: leaving is
+   * the one thing on this island that does not undo.
+   */
+  launch: Launch | null
+  /**
+   * Whether the ship has ever flown, kept apart from `launch` because it
+   * outlives the session. A visitor who launched, closed the tab and came
+   * back finds the island still there to walk — the save remembers that they
+   * left, so the certificate is theirs again without a second flight, but it
+   * does not strand them in orbit on a page they only reopened.
+   */
+  launched: boolean
   /** The panel, while he is in the car and has not pressed anything. */
   liftCall: LiftCall | null
   /**
@@ -612,6 +650,13 @@ interface GameState {
   arriveLift: (arrive: Vec2, facing?: number) => void
   /** The doors have finished opening: hand the controls back. */
   endLift: () => void
+  /**
+   * The button under the glass. Starts the count, and there is no companion
+   * action that stops it.
+   */
+  beginLaunch: () => void
+  /** The climb is over: he is in orbit and the certificate can be signed. */
+  reachOrbit: () => void
   /** Lets a secret out, which is what opens the doors that need one. */
   /**
    * Lets a secret out, which is what opens the doors that need one. The line
@@ -754,1319 +799,1424 @@ const RESTORED = {
   secrets: found(SAVED_PROGRESS?.secrets),
   lighthouseOpen: SAVED_PROGRESS?.lighthouseOpen ?? false,
   cvUnlocked: SAVED_PROGRESS?.cvUnlocked ?? false,
+  launched: SAVED_PROGRESS?.launched ?? false,
 }
 
-export const useGame = create<GameState>((set, get) => ({
-  mode: 'title',
-  area: 'island',
-  dialogue: null,
-  panel: null,
-  nearby: null,
-  spawn: { area: 'island', position: [...PLAYER_START] as Vec2, token: 0 },
-  stride: null,
+/**
+ * True while the game is somewhere there is no walking back from: strapped
+ * into the ship with the count running, or in orbit afterwards.
+ *
+ * This exists because "back to explore" is written in a dozen places — every
+ * panel close, the journal, the map, the way out of a building — and a launch
+ * has to be proof against all of them rather than against the ones that were
+ * remembered. The guard goes in `set` itself, below, so a path added later is
+ * covered without anybody having to think of it.
+ */
+export const isSealed = (mode: Mode) => mode === 'launch' || mode === 'orbit'
 
-  visited: Object.fromEntries(RESTORED.entries.map((e) => [e.id, true])),
-  entries: RESTORED.entries,
-  toast: null,
+export const useGame = create<GameState>((raw, get) => {
+  /*
+   * The seal. Every action still writes what it always wrote; this drops the
+   * one field a sealed game will not accept a change to, and lets the rest of
+   * the patch through — so closing a panel mid-flight still clears the panel,
+   * it just does not hand the walk back with it.
+   *
+   * `clearProgress` and the launch's own actions reach past it by writing the
+   * mode they want through `raw`, which is how starting over still works from
+   * orbit.
+   */
+  const seal = (patch: Partial<GameState>): Partial<GameState> => {
+    if (!patch || !('mode' in patch) || !isSealed(get().mode)) return patch
+    const { mode: _mode, ...rest } = patch
+    return rest as Partial<GameState>
+  }
 
-  keys: RESTORED.keys,
-  missions: RESTORED.missions,
-  discovered: RESTORED.discovered,
-  secrets: RESTORED.secrets,
-  // Nothing is standing open at the title screen, whatever the save holds.
-  swung: {},
-  lighthouseOpen: RESTORED.lighthouseOpen,
-  cvUnlocked: RESTORED.cvUnlocked,
-  greetingReturn: 'explore',
-  paintball: null,
-  moto: null,
-  motoSetup: { laps: LAPS, difficulty: 'normal' },
-  balloon: null,
-  hide: null,
-  rescue: null,
-
-  muted: false,
-  musicOn: true,
-  quality: SAVED.quality,
-  autoDropped: false,
-  musicLevel: SAVED.musicLevel,
-  sfxLevel: SAVED.sfxLevel,
-  locale: SAVED.locale,
-  night: false,
-  cheer: null,
-  lecture: null,
-  lift: null,
-  liftCall: null,
-  calendar: SAVED.calendar,
-  christmas: isFeast(SAVED.calendar),
-  firstPerson: false,
-  handLight: 'flashlight',
-  swimming: false,
-  party: false,
-  amaliaHere: false,
-  outfit: 'islander',
-  proposal: null,
-  proposalRound: 0,
-  hasMoved: false,
-
-  start: () => set({ mode: 'explore' }),
-
-  setNearby: (n) => {
-    const current = get().nearby
-    if (current?.id === n?.id && current?.blocked === n?.blocked) return
-    set({ nearby: n })
-  },
-
-  talk: (d) => set({ mode: 'dialogue', dialogue: { ...d, page: 0 } }),
-
-  advance: () => {
-    const { dialogue } = get()
-    if (!dialogue) return
-    if (dialogue.page < dialogue.lines.length - 1) {
-      set({ dialogue: { ...dialogue, page: dialogue.page + 1 } })
-    } else if (dialogue.choices) {
-      // A question waits for an answer; Enter does not close it.
-      return
-    } else {
-      set({ mode: 'explore', dialogue: null })
+  const set: typeof raw = (partial, replace?) => {
+    /* A wholesale replace is the store being rebuilt — a test, or the page
+       starting over — and is not an action trying to walk out of a flight. */
+    if (replace) {
+      return (raw as (p: unknown, r?: boolean) => void)(partial, replace)
     }
-  },
-
-  choose: (index) => {
-    const { dialogue } = get()
-    const choice = dialogue?.choices?.[index]
-    if (!dialogue || !choice) return
-    if (choice.reveals) {
-      const { id, title, body } = choice.reveals
-      get().revealSecret(id, { title, body })
-    } else {
-      sfx.cancel()
+    /* The updater form has to be sealed through its result rather than
+       waved past: `leaveBuilding` and its like are written that way, and
+       they are exactly the ways back to the island that must not work. */
+    if (typeof partial === 'function') {
+      const fn = partial as (s: GameState) => Partial<GameState>
+      return raw((prev: GameState) => seal(fn(prev)))
     }
-    if (choice.journal) get().record(choice.journal)
-    set({
-      dialogue: {
-        speaker: dialogue.speaker,
-        role: dialogue.role,
-        lines: choice.lines,
-        page: 0,
-      },
-    })
-  },
+    return raw(seal(partial as Partial<GameState>))
+  }
 
-  closeDialogue: () => set({ mode: 'explore', dialogue: null }),
+  return {
+    mode: 'title',
+    area: 'island',
+    dialogue: null,
+    panel: null,
+    nearby: null,
+    spawn: { area: 'island', position: [...PLAYER_START] as Vec2, token: 0 },
+    stride: null,
 
-  openPanel: (panel) => set({ mode: 'panel', panel, dialogue: null }),
-  closePanel: () => set({ mode: 'explore', panel: null }),
+    visited: Object.fromEntries(RESTORED.entries.map((e) => [e.id, true])),
+    entries: RESTORED.entries,
+    toast: null,
 
-  openJournal: () => set({ mode: 'journal' }),
-  closeJournal: () => set({ mode: 'explore' }),
-  openMap: () => set({ mode: 'map' }),
-  closeMap: () => set({ mode: 'explore' }),
+    keys: RESTORED.keys,
+    missions: RESTORED.missions,
+    discovered: RESTORED.discovered,
+    secrets: RESTORED.secrets,
+    // Nothing is standing open at the title screen, whatever the save holds.
+    swung: {},
+    lighthouseOpen: RESTORED.lighthouseOpen,
+    cvUnlocked: RESTORED.cvUnlocked,
+    greetingReturn: 'explore',
+    paintball: null,
+    moto: null,
+    motoSetup: { laps: LAPS, difficulty: 'normal' },
+    balloon: null,
+    hide: null,
+    rescue: null,
 
-  openGreeting: () =>
-    set((s) => ({
-      mode: 'greeting',
-      greetingReturn: s.mode === 'title' ? 'title' : 'explore',
-    })),
+    muted: false,
+    musicOn: true,
+    quality: SAVED.quality,
+    autoDropped: false,
+    musicLevel: SAVED.musicLevel,
+    sfxLevel: SAVED.sfxLevel,
+    locale: SAVED.locale,
+    night: false,
+    cheer: null,
+    lecture: null,
+    lift: null,
+    liftCall: null,
+    /* Nobody is in orbit at the title screen, whatever the save remembers. */
+    launch: null,
+    launched: RESTORED.launched,
+    calendar: SAVED.calendar,
+    christmas: isFeast(SAVED.calendar),
+    firstPerson: false,
+    handLight: 'flashlight',
+    swimming: false,
+    party: false,
+    amaliaHere: false,
+    outfit: 'islander',
+    proposal: null,
+    proposalRound: 0,
+    hasMoved: false,
 
-  closeGreeting: () => set((s) => ({ mode: s.greetingReturn })),
+    start: () => set({ mode: 'explore' }),
 
-  /** Hands over the whole CV without the key hunt. */
-  unlockCv: () => {
-    set({ lighthouseOpen: true, cvUnlocked: true })
-    get().openPanel({
-      kicker: 'The full CV',
-      title: `${PROFILE.firstName} "${PROFILE.nickname}" ${PROFILE.lastName}`,
-      sections: FULL_CV_SECTIONS,
-      accent: '#f0a33c',
-      kind: 'cv',
-    })
-  },
+    setNearby: (n) => {
+      const current = get().nearby
+      if (current?.id === n?.id && current?.blocked === n?.blocked) return
+      set({ nearby: n })
+    },
 
-  /** The Radio Center's message desk, without walking there. */
-  openContact: () =>
-    get().openPanel({
-      kicker: 'Radio Center',
-      title: 'Get in touch',
-      sections: RADIO_SECTIONS,
-      accent: '#b95fd0',
-      kind: 'radio',
-    }),
+    talk: (d) => set({ mode: 'dialogue', dialogue: { ...d, page: 0 } }),
 
-  record: (entry) => {
-    if (get().visited[entry.id]) return
-    set((s) => ({
-      visited: { ...s.visited, [entry.id]: true },
-      entries: [...s.entries, entry],
-      toast: { title: entry.title, body: entry.body, kind: 'journal' },
-    }))
-  },
+    advance: () => {
+      const { dialogue } = get()
+      if (!dialogue) return
+      if (dialogue.page < dialogue.lines.length - 1) {
+        set({ dialogue: { ...dialogue, page: dialogue.page + 1 } })
+      } else if (dialogue.choices) {
+        // A question waits for an answer; Enter does not close it.
+        return
+      } else {
+        set({ mode: 'explore', dialogue: null })
+      }
+    },
 
-  dismissToast: () => set({ toast: null }),
-  toggleMute: () => set((s) => ({ muted: !s.muted })),
-  toggleMusic: () => set((s) => ({ musicOn: !s.musicOn })),
+    choose: (index) => {
+      const { dialogue } = get()
+      const choice = dialogue?.choices?.[index]
+      if (!dialogue || !choice) return
+      if (choice.reveals) {
+        const { id, title, body } = choice.reveals
+        get().revealSecret(id, { title, body })
+      } else {
+        sfx.cancel()
+      }
+      if (choice.journal) get().record(choice.journal)
+      set({
+        dialogue: {
+          speaker: dialogue.speaker,
+          role: dialogue.role,
+          lines: choice.lines,
+          page: 0,
+        },
+      })
+    },
 
-  /**
-   * Choosing anything by hand clears what 'auto' decided earlier, so picking
-   * 'auto' a second time is a way to ask for a fresh verdict rather than a
-   * no-op that leaves the island stuck where one bad patch left it.
-   */
-  setQuality: (quality) => {
-    const { musicLevel, sfxLevel, locale, calendar } = get()
-    remember({ quality, musicLevel, sfxLevel, locale, calendar })
-    set({ quality, autoDropped: false })
-  },
+    closeDialogue: () => set({ mode: 'explore', dialogue: null }),
 
-  /**
-   * Both levels drive the audio graph directly rather than through an effect,
-   * so a drag across the steps is heard as it happens instead of one step
-   * behind.
-   */
-  setMusicLevel: (level) => {
-    const musicLevel = Math.max(0, Math.min(LEVELS, Math.round(level)))
-    const { quality, sfxLevel, locale, calendar } = get()
-    remember({ quality, musicLevel, sfxLevel, locale, calendar })
-    applyMusicLevel(musicLevel)
-    set({ musicLevel })
-  },
+    openPanel: (panel) => set({ mode: 'panel', panel, dialogue: null }),
+    closePanel: () => set({ mode: 'explore', panel: null }),
 
-  setSfxLevel: (level) => {
-    const sfxLevel = Math.max(0, Math.min(LEVELS, Math.round(level)))
-    const { quality, musicLevel, locale, calendar } = get()
-    remember({ quality, musicLevel, sfxLevel, locale, calendar })
-    applySfxLevel(sfxLevel)
-    set({ sfxLevel })
-    // Let them hear what they just chose.
-    if (sfxLevel > 0) sfx.confirm()
-  },
+    openJournal: () => set({ mode: 'journal' }),
+    closeJournal: () => set({ mode: 'explore' }),
+    openMap: () => set({ mode: 'map' }),
+    closeMap: () => set({ mode: 'explore' }),
 
-  /**
-   * What the frame-time watcher calls once it has seen enough. Advisory: it
-   * only marks the verdict, and a visitor who disagrees can overrule it.
-   */
-  setLocale: (locale) => {
-    const { quality, musicLevel, sfxLevel, calendar } = get()
-    remember({ quality, musicLevel, sfxLevel, locale, calendar })
-    set({ locale })
-  },
+    openGreeting: () =>
+      set((s) => ({
+        mode: 'greeting',
+        greetingReturn: s.mode === 'title' ? 'title' : 'explore',
+      })),
 
-  reportSlow: () => {
-    if (get().quality !== 'auto') return
-    set({
-      autoDropped: true,
-      toast: {
-        title: 'Shadows off',
-        body: 'The island was running slow, so it stepped itself down. The Quality button puts it back.',
-        kind: 'quality',
-      },
-    })
-  },
-  /**
-   * Turning the lights back on ends the party, which needs the dark — and is
-   * refused outright mid hide-and-seek, which needs the dark rather more.
-   */
-  toggleFirstPerson: () => {
-    sfx.blip()
-    set((s) => ({ firstPerson: !s.firstPerson }))
-  },
+    closeGreeting: () => set((s) => ({ mode: s.greetingReturn })),
 
-  toggleNight: () => {
-    const game = get()
-    // The dark is the whole point of one of these games and the ruin of the
-    // rest: hide-and-seek is played in it, and a race, a flight, a match or
-    // a rescue lit differently halfway through is a different one. The
-    // switch is out of bounds while any of them is on.
-    if (game.hide || game.paintball || game.moto) return
-    if (game.balloon || game.rescue) return
-    sfx.confirm()
-    // The candles and the party both belong to the dark. Putting the sun
-    // back up ends whichever of them is going on.
-    set((s) => {
-      const night = !s.night
-      if (night) return { night }
-      if (s.party) stopParty()
-      if (s.proposal) endProposal()
-      if (!s.party && !s.proposal) return { night }
-      return {
-        night,
-        party: false,
+    /** Hands over the whole CV without the key hunt. */
+    unlockCv: () => {
+      set({ lighthouseOpen: true, cvUnlocked: true })
+      get().openPanel({
+        kicker: 'The full CV',
+        title: `${PROFILE.firstName} "${PROFILE.nickname}" ${PROFILE.lastName}`,
+        sections: FULL_CV_SECTIONS,
+        accent: '#f0a33c',
+        kind: 'cv',
+      })
+    },
+
+    /** The Radio Center's message desk, without walking there. */
+    openContact: () =>
+      get().openPanel({
+        kicker: 'Radio Center',
+        title: 'Get in touch',
+        sections: RADIO_SECTIONS,
+        accent: '#b95fd0',
+        kind: 'radio',
+      }),
+
+    record: (entry) => {
+      if (get().visited[entry.id]) return
+      set((s) => ({
+        visited: { ...s.visited, [entry.id]: true },
+        entries: [...s.entries, entry],
+        toast: { title: entry.title, body: entry.body, kind: 'journal' },
+      }))
+    },
+
+    dismissToast: () => set({ toast: null }),
+    toggleMute: () => set((s) => ({ muted: !s.muted })),
+    toggleMusic: () => set((s) => ({ musicOn: !s.musicOn })),
+
+    /**
+     * Choosing anything by hand clears what 'auto' decided earlier, so picking
+     * 'auto' a second time is a way to ask for a fresh verdict rather than a
+     * no-op that leaves the island stuck where one bad patch left it.
+     */
+    setQuality: (quality) => {
+      const { musicLevel, sfxLevel, locale, calendar } = get()
+      remember({ quality, musicLevel, sfxLevel, locale, calendar })
+      set({ quality, autoDropped: false })
+    },
+
+    /**
+     * Both levels drive the audio graph directly rather than through an effect,
+     * so a drag across the steps is heard as it happens instead of one step
+     * behind.
+     */
+    setMusicLevel: (level) => {
+      const musicLevel = Math.max(0, Math.min(LEVELS, Math.round(level)))
+      const { quality, sfxLevel, locale, calendar } = get()
+      remember({ quality, musicLevel, sfxLevel, locale, calendar })
+      applyMusicLevel(musicLevel)
+      set({ musicLevel })
+    },
+
+    setSfxLevel: (level) => {
+      const sfxLevel = Math.max(0, Math.min(LEVELS, Math.round(level)))
+      const { quality, musicLevel, locale, calendar } = get()
+      remember({ quality, musicLevel, sfxLevel, locale, calendar })
+      applySfxLevel(sfxLevel)
+      set({ sfxLevel })
+      // Let them hear what they just chose.
+      if (sfxLevel > 0) sfx.confirm()
+    },
+
+    /**
+     * What the frame-time watcher calls once it has seen enough. Advisory: it
+     * only marks the verdict, and a visitor who disagrees can overrule it.
+     */
+    setLocale: (locale) => {
+      const { quality, musicLevel, sfxLevel, calendar } = get()
+      remember({ quality, musicLevel, sfxLevel, locale, calendar })
+      set({ locale })
+    },
+
+    reportSlow: () => {
+      if (get().quality !== 'auto') return
+      set({
+        autoDropped: true,
+        toast: {
+          title: 'Shadows off',
+          body: 'The island was running slow, so it stepped itself down. The Quality button puts it back.',
+          kind: 'quality',
+        },
+      })
+    },
+    /**
+     * Turning the lights back on ends the party, which needs the dark — and is
+     * refused outright mid hide-and-seek, which needs the dark rather more.
+     */
+    toggleFirstPerson: () => {
+      sfx.blip()
+      set((s) => ({ firstPerson: !s.firstPerson }))
+    },
+
+    toggleNight: () => {
+      const game = get()
+      // The dark is the whole point of one of these games and the ruin of the
+      // rest: hide-and-seek is played in it, and a race, a flight, a match or
+      // a rescue lit differently halfway through is a different one. The
+      // switch is out of bounds while any of them is on.
+      if (game.hide || game.paintball || game.moto) return
+      if (game.balloon || game.rescue) return
+      sfx.confirm()
+      // The candles and the party both belong to the dark. Putting the sun
+      // back up ends whichever of them is going on.
+      set((s) => {
+        const night = !s.night
+        if (night) return { night }
+        if (s.party) stopParty()
+        if (s.proposal) endProposal()
+        if (!s.party && !s.proposal) return { night }
+        return {
+          night,
+          party: false,
+          proposal: null,
+          amaliaHere: false,
+          outfit: 'islander',
+        }
+      })
+    },
+
+    toggleParty: () => {
+      const { night, party, hide } = get()
+      if (!night) return
+      // A party walks every islander into the square to dance, which would
+      // empty every hiding place on the island. Not during a game.
+      if (hide) return
+      if (party) {
+        stopParty()
+        sfx.cancel()
+        set({ party: false, amaliaHere: false, outfit: 'islander' })
+        return
+      }
+      // She cannot be in two places at once, and a square full of speakers is
+      // not where the candles are.
+      endProposal()
+      startParty()
+      sfx.jingle()
+      set({
+        party: true,
         proposal: null,
         amaliaHere: false,
         outfit: 'islander',
+      })
+    },
+
+    /**
+     * He has walked into the middle of the floor. She comes down out of the
+     * sky, and he is suddenly dressed for it.
+     */
+    callAmalia: () => {
+      if (get().amaliaHere) return
+      callAmalia()
+      sfx.jingle()
+      set({ amaliaHere: true, outfit: 'tuxedo' })
+    },
+
+    /**
+     * The gesture, made on the sand after dark, and she comes up the beach to
+     * him. Refused anywhere but on the sand, in the dark, on his own — and it
+     * answers so the keyboard knows whether anything came of it.
+     */
+    canPropose: (x, z) => {
+      const s = get()
+      if (s.mode !== 'explore' || !s.night || s.area !== 'island') return false
+      // Nothing doing in the middle of a game, or a party.
+      if (s.party || s.hide || s.paintball || s.moto) return false
+      if (s.balloon || s.rescue) return false
+      // Not in the middle of a proposal either — but once one has played out
+      // he can ask her again, anywhere on the sand, as often as he likes.
+      if (s.proposal !== null && s.proposal !== 'done') return false
+      // And she cannot be called down to the beach while she is already here
+      // for the dancing, which is the other way she turns up.
+      if (s.amaliaHere && s.proposal === null) return false
+      return beachAt(x, z)
+    },
+
+    proposeToAmalia: (x, z, facing) => {
+      if (!get().canPropose(x, z)) return false
+      // The candles he lit last time go out as the new ones catch.
+      endProposal()
+      beginProposal(x, z, facing)
+      sfx.jingle()
+      set((was) => ({
+        proposal: 'arriving',
+        proposalRound: was.proposalRound + 1,
+        amaliaHere: true,
+        outfit: 'tuxedo',
+      }))
+      return true
+    },
+
+    /** She has walked up out of the dark and he is down on one knee. */
+    askAmalia: () => {
+      if (get().proposal !== 'arriving') return
+      set({ proposal: 'asking' })
+      get().talk({
+        speaker: 'Kitsos',
+        role: 'On one knee',
+        lines: AMALIA.question,
+      })
+    },
+
+    /** Her answer. The ring changes hands on the same beat. */
+    answerAmalia: () => {
+      if (get().proposal !== 'asking') return
+      sfx.jingle()
+      set({ proposal: 'yes' })
+      get().talk({
+        speaker: AMALIA.name,
+        role: 'Already nodding',
+        lines: AMALIA.answer,
+      })
+    },
+
+    /** And afterwards: the two of them, and the candles, and all night. */
+    finishProposal: () => {
+      if (get().proposal !== 'yes') return
+      settleProposal()
+      set({ proposal: 'done' })
+      get().record({
+        id: 'beach-ring',
+        title: 'A ring, on the beach',
+        body: 'Candles in a heart in the sand, her walking up out of the dark, and a yes before the question was properly out. The island has had a lot of firsts on it. This is the one that counts.',
+        source: 'The west beach',
+      })
+    },
+    /**
+     * Enough. The candles go out, she goes home, and he is back in his own
+     * clothes — which is all Escape has ever meant on this island.
+     */
+    clearProposal: () => {
+      if (!get().proposal) return
+      endProposal()
+      sfx.cancel()
+      set({ proposal: null, amaliaHere: false, outfit: 'islander' })
+    },
+
+    /** Flashlight, torch, then nothing at all — which the camp run needs. */
+    /**
+     * Flashlight, torch, then nothing at all — which the camp run needs.
+     *
+     * Refused in the water. Both hands are busy out there and neither of them
+     * is holding anything that would still be alight. Refused indoors too:
+     * the rooms light themselves after dark, so there is nothing to carry.
+     */
+    toggleHandLight: () => {
+      const s0 = get()
+      if (s0.swimming || s0.area !== 'island') return
+      sfx.confirm()
+      set((s) => ({
+        handLight:
+          s.handLight === 'flashlight'
+            ? 'torch'
+            : s.handLight === 'torch'
+              ? 'none'
+              : 'flashlight',
+      }))
+    },
+
+    setSwimming: (value) => {
+      if (get().swimming === value) return
+      set({ swimming: value })
+    },
+    markMoved: () => {
+      if (!get().hasMoved) set({ hasMoved: true })
+    },
+
+    /* ----------------------------- arcade ----------------------------- */
+
+    /**
+     * The board in the plaza, and the P key, both land here. It reads at any
+     * hour now — three of the four want daylight and one wants the dark, and
+     * the card itself says which is which.
+     */
+    openArcade: () => {
+      const state = get()
+      if (state.area !== 'island') state.leaveBuilding()
+      sfx.confirm()
+      set({ mode: 'arcade', dialogue: null, panel: null, nearby: null })
+    },
+
+    closeArcade: () => {
+      sfx.cancel()
+      set({ mode: 'explore' })
+    },
+
+    /* ----------------------------- calendar --------------------------- */
+
+    openCalendar: () => {
+      sfx.confirm()
+      set({ mode: 'calendar', dialogue: null, panel: null, nearby: null })
+    },
+
+    closeCalendar: () => {
+      sfx.cancel()
+      set({ mode: 'explore' })
+    },
+
+    /**
+     * Turns the calendar to a day and remembers it, so the basement is still
+     * decorated on the next visit rather than only until the tab closes.
+     *
+     * Arriving on the twenty-fifth of December is the whole point of the thing,
+     * so it announces itself: a jingle, and a journal entry that stays found
+     * even after the calendar is turned back.
+     */
+    setCalendar: (next) => {
+      const calendar = clampDate(next)
+      const christmas = isFeast(calendar)
+      const { quality, musicLevel, sfxLevel, locale } = get()
+      remember({ quality, musicLevel, sfxLevel, locale, calendar })
+      const arriving = christmas && !get().christmas
+      if (arriving) sfx.jingle()
+      else sfx.blip()
+      set({ calendar, christmas })
+      if (arriving) get().record(CHRISTMAS_FOUND)
+    },
+
+    /**
+     * Called from the frame loop the moment the last of them is in place, so
+     * it has to be idempotent — it is asked again every frame after that.
+     */
+    cheerFeast: () => {
+      if (get().cheer !== null) return
+      sfx.jingle()
+      set({ cheer: Date.now() })
+    },
+
+    endCheer: () => {
+      if (get().cheer === null) return
+      set({ cheer: null })
+    },
+
+    /**
+     * Called from the frame loop while he is at the lectern, so it has to be
+     * cheap to call on a frame that changes nothing: the slide only turns
+     * every eight seconds or so, and the ovation once.
+     */
+    setLecture: (slide, ovation) => {
+      const at = get().lecture
+      if (at && at.slide === slide && at.ovation === ovation) return
+      // The room comes to its feet once, not on every frame it stays on them.
+      if (ovation && !at?.ovation) {
+        sfx.applause()
+        get().record(DEFENCE_GIVEN)
       }
-    })
-  },
+      set({ lecture: { slide, ovation } })
+    },
 
-  toggleParty: () => {
-    const { night, party, hide } = get()
-    if (!night) return
-    // A party walks every islander into the square to dance, which would
-    // empty every hiding place on the island. Not during a game.
-    if (hide) return
-    if (party) {
-      stopParty()
-      sfx.cancel()
-      set({ party: false, amaliaHere: false, outfit: 'islander' })
-      return
-    }
-    // She cannot be in two places at once, and a square full of speakers is
-    // not where the candles are.
-    endProposal()
-    startParty()
-    sfx.jingle()
-    set({
-      party: true,
-      proposal: null,
-      amaliaHere: false,
-      outfit: 'islander',
-    })
-  },
+    endLecture: () => {
+      if (get().lecture === null) return
+      set({ lecture: null })
+    },
 
-  /**
-   * He has walked into the middle of the floor. She comes down out of the
-   * sky, and he is suddenly dressed for it.
-   */
-  callAmalia: () => {
-    if (get().amaliaHere) return
-    callAmalia()
-    sfx.jingle()
-    set({ amaliaHere: true, outfit: 'tuxedo' })
-  },
+    resetCalendar: () => {
+      const calendar = { ...BIRTHDAY }
+      const { quality, musicLevel, sfxLevel, locale } = get()
+      remember({ quality, musicLevel, sfxLevel, locale, calendar })
+      set({ calendar, christmas: false })
+    },
 
-  /**
-   * The gesture, made on the sand after dark, and she comes up the beach to
-   * him. Refused anywhere but on the sand, in the dark, on his own — and it
-   * answers so the keyboard knows whether anything came of it.
-   */
-  canPropose: (x, z) => {
-    const s = get()
-    if (s.mode !== 'explore' || !s.night || s.area !== 'island') return false
-    // Nothing doing in the middle of a game, or a party.
-    if (s.party || s.hide || s.paintball || s.moto) return false
-    if (s.balloon || s.rescue) return false
-    // Not in the middle of a proposal either — but once one has played out
-    // he can ask her again, anywhere on the sand, as often as he likes.
-    if (s.proposal !== null && s.proposal !== 'done') return false
-    // And she cannot be called down to the beach while she is already here
-    // for the dancing, which is the other way she turns up.
-    if (s.amaliaHere && s.proposal === null) return false
-    return beachAt(x, z)
-  },
+    /* ---------------------------- motocross --------------------------- */
 
-  proposeToAmalia: (x, z, facing) => {
-    if (!get().canPropose(x, z)) return false
-    // The candles he lit last time go out as the new ones catch.
-    endProposal()
-    beginProposal(x, z, facing)
-    sfx.jingle()
-    set((was) => ({
-      proposal: 'arriving',
-      proposalRound: was.proposalRound + 1,
-      amaliaHere: true,
-      outfit: 'tuxedo',
-    }))
-    return true
-  },
-
-  /** She has walked up out of the dark and he is down on one knee. */
-  askAmalia: () => {
-    if (get().proposal !== 'arriving') return
-    set({ proposal: 'asking' })
-    get().talk({
-      speaker: 'Kitsos',
-      role: 'On one knee',
-      lines: AMALIA.question,
-    })
-  },
-
-  /** Her answer. The ring changes hands on the same beat. */
-  answerAmalia: () => {
-    if (get().proposal !== 'asking') return
-    sfx.jingle()
-    set({ proposal: 'yes' })
-    get().talk({
-      speaker: AMALIA.name,
-      role: 'Already nodding',
-      lines: AMALIA.answer,
-    })
-  },
-
-  /** And afterwards: the two of them, and the candles, and all night. */
-  finishProposal: () => {
-    if (get().proposal !== 'yes') return
-    settleProposal()
-    set({ proposal: 'done' })
-    get().record({
-      id: 'beach-ring',
-      title: 'A ring, on the beach',
-      body: 'Candles in a heart in the sand, her walking up out of the dark, and a yes before the question was properly out. The island has had a lot of firsts on it. This is the one that counts.',
-      source: 'The west beach',
-    })
-  },
-  /**
-   * Enough. The candles go out, she goes home, and he is back in his own
-   * clothes — which is all Escape has ever meant on this island.
-   */
-  clearProposal: () => {
-    if (!get().proposal) return
-    endProposal()
-    sfx.cancel()
-    set({ proposal: null, amaliaHere: false, outfit: 'islander' })
-  },
-
-  /** Flashlight, torch, then nothing at all — which the camp run needs. */
-  /**
-   * Flashlight, torch, then nothing at all — which the camp run needs.
-   *
-   * Refused in the water. Both hands are busy out there and neither of them
-   * is holding anything that would still be alight. Refused indoors too:
-   * the rooms light themselves after dark, so there is nothing to carry.
-   */
-  toggleHandLight: () => {
-    const s0 = get()
-    if (s0.swimming || s0.area !== 'island') return
-    sfx.confirm()
-    set((s) => ({
-      handLight:
-        s.handLight === 'flashlight'
-          ? 'torch'
-          : s.handLight === 'torch'
-            ? 'none'
-            : 'flashlight',
-    }))
-  },
-
-  setSwimming: (value) => {
-    if (get().swimming === value) return
-    set({ swimming: value })
-  },
-  markMoved: () => {
-    if (!get().hasMoved) set({ hasMoved: true })
-  },
-
-  /* ----------------------------- arcade ----------------------------- */
-
-  /**
-   * The board in the plaza, and the P key, both land here. It reads at any
-   * hour now — three of the four want daylight and one wants the dark, and
-   * the card itself says which is which.
-   */
-  openArcade: () => {
-    const state = get()
-    if (state.area !== 'island') state.leaveBuilding()
-    sfx.confirm()
-    set({ mode: 'arcade', dialogue: null, panel: null, nearby: null })
-  },
-
-  closeArcade: () => {
-    sfx.cancel()
-    set({ mode: 'explore' })
-  },
-
-  /* ----------------------------- calendar --------------------------- */
-
-  openCalendar: () => {
-    sfx.confirm()
-    set({ mode: 'calendar', dialogue: null, panel: null, nearby: null })
-  },
-
-  closeCalendar: () => {
-    sfx.cancel()
-    set({ mode: 'explore' })
-  },
-
-  /**
-   * Turns the calendar to a day and remembers it, so the basement is still
-   * decorated on the next visit rather than only until the tab closes.
-   *
-   * Arriving on the twenty-fifth of December is the whole point of the thing,
-   * so it announces itself: a jingle, and a journal entry that stays found
-   * even after the calendar is turned back.
-   */
-  setCalendar: (next) => {
-    const calendar = clampDate(next)
-    const christmas = isFeast(calendar)
-    const { quality, musicLevel, sfxLevel, locale } = get()
-    remember({ quality, musicLevel, sfxLevel, locale, calendar })
-    const arriving = christmas && !get().christmas
-    if (arriving) sfx.jingle()
-    else sfx.blip()
-    set({ calendar, christmas })
-    if (arriving) get().record(CHRISTMAS_FOUND)
-  },
-
-  /**
-   * Called from the frame loop the moment the last of them is in place, so
-   * it has to be idempotent — it is asked again every frame after that.
-   */
-  cheerFeast: () => {
-    if (get().cheer !== null) return
-    sfx.jingle()
-    set({ cheer: Date.now() })
-  },
-
-  endCheer: () => {
-    if (get().cheer === null) return
-    set({ cheer: null })
-  },
-
-  /**
-   * Called from the frame loop while he is at the lectern, so it has to be
-   * cheap to call on a frame that changes nothing: the slide only turns
-   * every eight seconds or so, and the ovation once.
-   */
-  setLecture: (slide, ovation) => {
-    const at = get().lecture
-    if (at && at.slide === slide && at.ovation === ovation) return
-    // The room comes to its feet once, not on every frame it stays on them.
-    if (ovation && !at?.ovation) {
-      sfx.applause()
-      get().record(DEFENCE_GIVEN)
-    }
-    set({ lecture: { slide, ovation } })
-  },
-
-  endLecture: () => {
-    if (get().lecture === null) return
-    set({ lecture: null })
-  },
-
-  resetCalendar: () => {
-    const calendar = { ...BIRTHDAY }
-    const { quality, musicLevel, sfxLevel, locale } = get()
-    remember({ quality, musicLevel, sfxLevel, locale, calendar })
-    set({ calendar, christmas: false })
-  },
-
-  /* ---------------------------- motocross --------------------------- */
-
-  openMoto: () => {
-    const state = get()
-    if (state.night) return
-    if (state.area !== 'island') state.leaveBuilding()
-    sfx.confirm()
-    // Puts all four bikes back on the grid, so the briefing shows the island
-    // exactly as the race will start it.
-    const setup = state.motoSetup
-    openRide(setup.laps, setup.difficulty)
-    set((s) => ({
-      mode: 'moto',
-      dialogue: null,
-      panel: null,
-      nearby: null,
-      moto: {
-        status: 'briefing',
-        laps: setup.laps,
-        difficulty: setup.difficulty,
-        place: 0,
-        seconds: 0,
-        best: 0,
-        round: (s.moto?.round ?? 0) + 1,
-      },
-    }))
-  },
-
-  /**
-   * Changes the board at the briefing. The grid is laid out again as well,
-   * so the island behind the card is always showing the race you picked.
-   */
-  setMotoSetup: (next: Partial<MotoSetup>) => {
-    const state = get()
-    const setup = { ...state.motoSetup, ...next }
-    sfx.blip()
-    openRide(setup.laps, setup.difficulty)
-    set((s) => ({
-      motoSetup: setup,
-      moto: s.moto
-        ? { ...s.moto, laps: setup.laps, difficulty: setup.difficulty }
-        : s.moto,
-    }))
-  },
-
-  beginMoto: () => {
-    const state = get()
-    const run = state.moto
-    if (!run) return
-    openRide(state.motoSetup.laps, state.motoSetup.difficulty)
-    sfx.jingle()
-    set((s) => ({
-      mode: 'explore',
-      area: 'island',
-      nearby: null,
-      moto: { ...run, status: 'riding', place: 0, seconds: 0, best: 0 },
-      spawn: {
-        area: 'island',
-        position: [MOTO_START.x, MOTO_START.z] as Vec2,
-        token: s.spawn.token + 1,
-      },
-    }))
-  },
-
-  /** The flag is out: park the bike and show the race's card. */
-  finishMoto: () => {
-    const run = get().moto
-    if (!run || run.status !== 'riding') return
-    sfx.jingle()
-    set({
-      mode: 'moto',
-      moto: {
-        ...run,
-        status: 'done',
-        place: MOTO.finish,
-        seconds: MOTO.elapsed,
-        best: MOTO.best,
-      },
-    })
-  },
-
-  /** Steps off the bike, wherever it ended up. */
-  exitMoto: () => {
-    const parked: Vec2 = [MOTO.x, MOTO.z]
-    closeRide()
-    sfx.cancel()
-    set((s) => ({
-      mode: 'explore',
-      moto: null,
-      nearby: null,
-      spawn: { area: 'island', position: parked, token: s.spawn.token + 1 },
-    }))
-  },
-
-  /* ----------------------------- balloon ---------------------------- */
-
-  openBalloon: () => {
-    const state = get()
-    if (state.night) return
-    if (state.area !== 'island') state.leaveBuilding()
-    sfx.confirm()
-    // Puts the balloon back over the plaza with every gathering still
-    // waiting, so the briefing shows the island the flight will start on.
-    openFlight()
-    set((s) => ({
-      mode: 'balloon',
-      dialogue: null,
-      panel: null,
-      nearby: null,
-      balloon: {
-        status: 'briefing',
-        served: 0,
-        wrong: 0,
-        dropped: 0,
-        seconds: 0,
-        round: (s.balloon?.round ?? 0) + 1,
-      },
-    }))
-  },
-
-  beginBalloon: () => {
-    const flight = get().balloon
-    if (!flight) return
-    openFlight()
-    sfx.jingle()
-    set((s) => ({
-      mode: 'explore',
-      area: 'island',
-      nearby: null,
-      balloon: { ...flight, status: 'flying', served: 0, wrong: 0, dropped: 0 },
-      // He is in the basket, not on the grass, but the token still draws the
-      // curtain over the moment the camera jumps into the sky.
-      spawn: {
-        area: 'island',
-        position: [BALLOON_START.x, BALLOON_START.z] as Vec2,
-        token: s.spawn.token + 1,
-      },
-    }))
-  },
-
-  /** The last gathering has had its parcel: bring the card up. */
-  finishBalloon: () => {
-    const flight = get().balloon
-    if (!flight || flight.status !== 'flying') return
-    sfx.jingle()
-    set({
-      mode: 'balloon',
-      balloon: {
-        ...flight,
-        status: 'done',
-        served: Math.min(CALL_TOTAL, BALLOON.count),
-        wrong: BALLOON.wrong,
-        dropped: BALLOON.dropped,
-        seconds: BALLOON.elapsed,
-      },
-    })
-  },
-
-  /** Sets him down on the grass under wherever the basket ended up. */
-  exitBalloon: () => {
-    const parked = landingSpot()
-    closeFlight()
-    sfx.cancel()
-    set((s) => ({
-      mode: 'explore',
-      balloon: null,
-      nearby: null,
-      spawn: { area: 'island', position: parked, token: s.spawn.token + 1 },
-    }))
-  },
-
-  /* --------------------------- the sea rescue ------------------------ */
-
-  /**
-   * The lifeboat. She is tied up off the end of the dock, so opening the
-   * briefing puts the boat and the sea back the way the run will start them.
-   */
-  openRescue: () => {
-    const state = get()
-    if (state.night) return
-    if (state.area !== 'island') state.leaveBuilding()
-    sfx.confirm()
-    openWater()
-    set((s) => ({
-      mode: 'rescue',
-      dialogue: null,
-      panel: null,
-      nearby: null,
-      rescue: {
-        status: 'briefing',
-        saved: 0,
-        seconds: 0,
-        won: false,
-        round: (s.rescue?.round ?? 0) + 1,
-      },
-    }))
-  },
-
-  beginRescue: () => {
-    const run = get().rescue
-    if (!run) return
-    openWater()
-    sfx.jingle()
-    set((s) => ({
-      mode: 'explore',
-      area: 'island',
-      nearby: null,
-      rescue: { ...run, status: 'sailing', saved: 0, seconds: 0, won: false },
-      // He is aboard rather than on the sand, but the token still draws the
-      // curtain over the moment the camera goes out to sea.
-      spawn: {
-        area: 'island',
-        position: [BOAT_START.x, BOAT_START.z] as Vec2,
-        token: s.spawn.token + 1,
-      },
-    }))
-  },
-
-  /** Everyone out of the water, or a flare that went out. */
-  finishRescue: () => {
-    const run = get().rescue
-    if (!run || run.status !== 'sailing') return
-    if (RESCUE.won) sfx.jingle()
-    else sfx.hurt()
-    set({
-      mode: 'rescue',
-      rescue: {
-        ...run,
-        status: 'done',
-        saved: Math.min(SOULS, RESCUE.saved),
-        seconds: RESCUE.elapsed,
-        won: RESCUE.won,
-      },
-    })
-  },
-
-  /** Ties her up again and puts him back on the dock. */
-  exitRescue: () => {
-    closeWater()
-    sfx.cancel()
-    set((s) => ({
-      mode: 'explore',
-      rescue: null,
-      nearby: null,
-      spawn: {
-        area: 'island',
-        position: [-100, 22] as Vec2,
-        token: s.spawn.token + 1,
-      },
-    }))
-  },
-
-  /* ------------------------- hide and seek -------------------------- */
-
-  /**
-   * The night game. Either they hide and you go looking, or you hide and
-   * every one of them does — and either way the island's lights go out for
-   * the duration, so a torch is the only thing burning on it.
-   */
-  openHide: () => {
-    const state = get()
-    if (!state.night) return
-    if (state.area !== 'island') state.leaveBuilding()
-    // Nobody can hide while they are all dancing in the middle of the plaza.
-    if (state.party) state.toggleParty()
-    sfx.confirm()
-    const role = state.hide?.role ?? 'seeker'
-    openHide(role)
-    set((s) => ({
-      mode: 'hide',
-      dialogue: null,
-      panel: null,
-      nearby: null,
-      hide: {
-        status: 'briefing',
-        role,
-        found: 0,
-        seconds: 0,
-        won: false,
-        round: (s.hide?.round ?? 0) + 1,
-      },
-    }))
-  },
-
-  /** Swapping ends, on the briefing card. */
-  setRole: (role) => {
-    const game = get().hide
-    if (!game || game.status !== 'briefing' || game.role === role) return
-    sfx.blip()
-    openHide(role)
-    set({ hide: { ...game, role } })
-  },
-
-  beginHide: () => {
-    const game = get().hide
-    if (!game) return
-    openHide(game.role)
-    sfx.jingle()
-    set((s) => ({
-      mode: 'explore',
-      area: 'island',
-      nearby: null,
-      hide: { ...game, status: 'playing', found: 0, won: false },
-      spawn: {
-        area: 'island',
-        position: [0, 22] as Vec2,
-        token: s.spawn.token + 1,
-      },
-    }))
-  },
-
-  finishHide: (won) => {
-    const game = get().hide
-    if (!game || game.status !== 'playing') return
-    if (won) sfx.jingle()
-    else sfx.hurt()
-    set({
-      mode: 'hide',
-      hide: {
-        ...game,
-        status: 'done',
-        won,
-        found: Math.min(COUNT, HIDE.found),
-        seconds:
-          game.role === 'hider'
-            ? Math.max(0, HIDE.elapsed - HEAD_START)
-            : HIDE.elapsed,
-      },
-    })
-  },
-
-  exitHide: () => {
-    closeHide()
-    sfx.cancel()
-    set((s) => ({
-      mode: 'explore',
-      hide: null,
-      nearby: null,
-      spawn: {
-        area: 'island',
-        position: [0, 22] as Vec2,
-        token: s.spawn.token + 1,
-      },
-    }))
-  },
-
-  /* ---------------------------- paintball --------------------------- */
-
-  /** Draws the teams and shows the briefing. Always fought on the island. */
-  openPaintball: () => {
-    const state = get()
-    if (state.night) return
-    if (state.area !== 'island') state.leaveBuilding()
-    sfx.confirm()
-    set((s) => ({
-      mode: 'paintball',
-      dialogue: null,
-      panel: null,
-      nearby: null,
-      paintball: {
-        ...pickTeams(),
-        out: {},
-        lives: START_LIVES,
-        ammo: MAG_SIZE,
-        reloadAt: null,
-        status: 'briefing',
-        hits: 0,
-        friendlyFire: 0,
-        feed: null,
-        round: (s.paintball?.round ?? 0) + 1,
-      },
-    }))
-  },
-
-  /**
-   * The three ways the briefing lets you change the sides before the whistle:
-   * put somebody on your side or take them off it, set how many are against
-   * you, or throw the whole thing back in the hat.
-   */
-  toggleAlly: (id) => {
-    const game = get().paintball
-    if (!game || game.status !== 'briefing') return
-    const on = game.friends.includes(id)
-    const wanted = on
-      ? game.friends.filter((f) => f !== id)
-      : [...game.friends, id]
-    // Silently refuses a sixth: the card greys the rest out to say so.
-    if (!on && wanted.length > MAX_FRIENDS) {
-      sfx.cancel()
-      return
-    }
-    sfx.blip()
-    set({ paintball: { ...game, ...buildTeams(wanted, game.enemies.length) } })
-  },
-
-  setEnemyCount: (count) => {
-    const game = get().paintball
-    if (!game || game.status !== 'briefing') return
-    if (count === game.enemies.length) return
-    set({ paintball: { ...game, ...buildTeams(game.friends, count) } })
-  },
-
-  redrawTeams: () => {
-    const game = get().paintball
-    if (!game || game.status !== 'briefing') return
-    sfx.confirm()
-    set({ paintball: { ...game, ...pickTeams() } })
-  },
-
-  beginPaintball: () => {
-    const game = get().paintball
-    if (!game) return
-    openArena(game.friends, game.enemies)
-    sfx.jingle()
-    set((s) => ({
-      mode: 'explore',
-      area: 'island',
-      nearby: null,
-      paintball: {
-        ...game,
-        out: {},
-        lives: START_LIVES,
-        ammo: MAG_SIZE,
-        reloadAt: null,
-        status: 'playing',
-        hits: 0,
-        friendlyFire: 0,
-        feed: null,
-      },
-      spawn: {
-        area: 'island',
-        position: [ARENA_CENTER.x, ARENA_CENTER.z] as Vec2,
-        token: s.spawn.token + 1,
-      },
-    }))
-  },
-
-  exitPaintball: () => {
-    closeArena()
-    sfx.cancel()
-    set({ mode: 'explore', paintball: null, nearby: null })
-  },
-
-  /** Spends one round; emptying the hopper starts the six-second refill. */
-  fireRound: () => {
-    const game = get().paintball
-    if (!game || game.ammo <= 0 || game.reloadAt) return
-    const ammo = game.ammo - 1
-    set({
-      paintball: {
-        ...game,
-        ammo,
-        reloadAt: ammo === 0 ? Date.now() + RELOAD_MS : game.reloadAt,
-      },
-    })
-  },
-
-  finishReload: () => {
-    const game = get().paintball
-    if (!game || !game.reloadAt) return
-    set({ paintball: { ...game, ammo: MAG_SIZE, reloadAt: null } })
-  },
-
-  splatCombatant: (id, team, by) => {
-    const game = get().paintball
-    if (!game || game.status !== 'playing' || game.out[id]) return
-    const name = combatantName(id)
-    const out = { ...game.out, [id]: true as const }
-    const mine = by === 'player'
-    const friendly = team === 'friend'
-    const won = game.enemies.every((e) => out[e])
-
-    set({
-      mode: won ? 'paintball' : 'explore',
-      paintball: {
-        ...game,
-        out,
-        status: won ? 'won' : 'playing',
-        hits: game.hits + (mine && !friendly ? 1 : 0),
-        friendlyFire: game.friendlyFire + (mine && friendly ? 1 : 0),
-        feed: {
-          text: friendly
-            ? `${name} was on your side!`
-            : mine
-              ? `You painted ${name}`
-              : `${name} is out`,
-          kind: friendly ? 'bad' : 'good',
-          at: Date.now(),
+    openMoto: () => {
+      const state = get()
+      if (state.night) return
+      if (state.area !== 'island') state.leaveBuilding()
+      sfx.confirm()
+      // Puts all four bikes back on the grid, so the briefing shows the island
+      // exactly as the race will start it.
+      const setup = state.motoSetup
+      openRide(setup.laps, setup.difficulty)
+      set((s) => ({
+        mode: 'moto',
+        dialogue: null,
+        panel: null,
+        nearby: null,
+        moto: {
+          status: 'briefing',
+          laps: setup.laps,
+          difficulty: setup.difficulty,
+          place: 0,
+          seconds: 0,
+          best: 0,
+          round: (s.moto?.round ?? 0) + 1,
         },
-      },
-    })
-  },
+      }))
+    },
 
-  hitPlayer: () => {
-    const game = get().paintball
-    if (!game || game.status !== 'playing') return
-    const lives = Math.max(0, game.lives - 1)
-    const lost = lives === 0
+    /**
+     * Changes the board at the briefing. The grid is laid out again as well,
+     * so the island behind the card is always showing the race you picked.
+     */
+    setMotoSetup: (next: Partial<MotoSetup>) => {
+      const state = get()
+      const setup = { ...state.motoSetup, ...next }
+      sfx.blip()
+      openRide(setup.laps, setup.difficulty)
+      set((s) => ({
+        motoSetup: setup,
+        moto: s.moto
+          ? { ...s.moto, laps: setup.laps, difficulty: setup.difficulty }
+          : s.moto,
+      }))
+    },
 
-    set({
-      mode: lost ? 'paintball' : 'explore',
-      paintball: {
-        ...game,
-        lives,
-        status: lost ? 'lost' : 'playing',
-        feed: {
-          text: lost
-            ? 'Painted out.'
-            : `Hit! ${lives} ${lives === 1 ? 'life' : 'lives'} left`,
-          kind: 'bad',
-          at: Date.now(),
+    beginMoto: () => {
+      const state = get()
+      const run = state.moto
+      if (!run) return
+      openRide(state.motoSetup.laps, state.motoSetup.difficulty)
+      sfx.jingle()
+      set((s) => ({
+        mode: 'explore',
+        area: 'island',
+        nearby: null,
+        moto: { ...run, status: 'riding', place: 0, seconds: 0, best: 0 },
+        spawn: {
+          area: 'island',
+          position: [MOTO_START.x, MOTO_START.z] as Vec2,
+          token: s.spawn.token + 1,
         },
-      },
-    })
-  },
+      }))
+    },
 
-  /* ------------------------------ areas ----------------------------- */
+    /** The flag is out: park the bike and show the race's card. */
+    finishMoto: () => {
+      const run = get().moto
+      if (!run || run.status !== 'riding') return
+      sfx.jingle()
+      set({
+        mode: 'moto',
+        moto: {
+          ...run,
+          status: 'done',
+          place: MOTO.finish,
+          seconds: MOTO.elapsed,
+          best: MOTO.best,
+        },
+      })
+    },
 
-  enterBuilding: (id) => {
-    // Every door on the island is locked while hide and seek is on. The game
-    // is played out in the dark between the buildings, and a room nobody can
-    // follow you into is not a hiding place.
-    if (get().hide) return
-    const interior = INTERIOR_BY_ID.get(id)
-    if (!interior) return
-    get().discover(id)
-    set((s) => ({
-      area: id,
-      mode: 'explore',
-      nearby: null,
-      panel: null,
-      dialogue: null,
-      spawn: {
+    /** Steps off the bike, wherever it ended up. */
+    exitMoto: () => {
+      const parked: Vec2 = [MOTO.x, MOTO.z]
+      closeRide()
+      sfx.cancel()
+      set((s) => ({
+        mode: 'explore',
+        moto: null,
+        nearby: null,
+        spawn: { area: 'island', position: parked, token: s.spawn.token + 1 },
+      }))
+    },
+
+    /* ----------------------------- balloon ---------------------------- */
+
+    openBalloon: () => {
+      const state = get()
+      if (state.night) return
+      if (state.area !== 'island') state.leaveBuilding()
+      sfx.confirm()
+      // Puts the balloon back over the plaza with every gathering still
+      // waiting, so the briefing shows the island the flight will start on.
+      openFlight()
+      set((s) => ({
+        mode: 'balloon',
+        dialogue: null,
+        panel: null,
+        nearby: null,
+        balloon: {
+          status: 'briefing',
+          served: 0,
+          wrong: 0,
+          dropped: 0,
+          seconds: 0,
+          round: (s.balloon?.round ?? 0) + 1,
+        },
+      }))
+    },
+
+    beginBalloon: () => {
+      const flight = get().balloon
+      if (!flight) return
+      openFlight()
+      sfx.jingle()
+      set((s) => ({
+        mode: 'explore',
+        area: 'island',
+        nearby: null,
+        balloon: {
+          ...flight,
+          status: 'flying',
+          served: 0,
+          wrong: 0,
+          dropped: 0,
+        },
+        // He is in the basket, not on the grass, but the token still draws the
+        // curtain over the moment the camera jumps into the sky.
+        spawn: {
+          area: 'island',
+          position: [BALLOON_START.x, BALLOON_START.z] as Vec2,
+          token: s.spawn.token + 1,
+        },
+      }))
+    },
+
+    /** The last gathering has had its parcel: bring the card up. */
+    finishBalloon: () => {
+      const flight = get().balloon
+      if (!flight || flight.status !== 'flying') return
+      sfx.jingle()
+      set({
+        mode: 'balloon',
+        balloon: {
+          ...flight,
+          status: 'done',
+          served: Math.min(CALL_TOTAL, BALLOON.count),
+          wrong: BALLOON.wrong,
+          dropped: BALLOON.dropped,
+          seconds: BALLOON.elapsed,
+        },
+      })
+    },
+
+    /** Sets him down on the grass under wherever the basket ended up. */
+    exitBalloon: () => {
+      const parked = landingSpot()
+      closeFlight()
+      sfx.cancel()
+      set((s) => ({
+        mode: 'explore',
+        balloon: null,
+        nearby: null,
+        spawn: { area: 'island', position: parked, token: s.spawn.token + 1 },
+      }))
+    },
+
+    /* --------------------------- the sea rescue ------------------------ */
+
+    /**
+     * The lifeboat. She is tied up off the end of the dock, so opening the
+     * briefing puts the boat and the sea back the way the run will start them.
+     */
+    openRescue: () => {
+      const state = get()
+      if (state.night) return
+      if (state.area !== 'island') state.leaveBuilding()
+      sfx.confirm()
+      openWater()
+      set((s) => ({
+        mode: 'rescue',
+        dialogue: null,
+        panel: null,
+        nearby: null,
+        rescue: {
+          status: 'briefing',
+          saved: 0,
+          seconds: 0,
+          won: false,
+          round: (s.rescue?.round ?? 0) + 1,
+        },
+      }))
+    },
+
+    beginRescue: () => {
+      const run = get().rescue
+      if (!run) return
+      openWater()
+      sfx.jingle()
+      set((s) => ({
+        mode: 'explore',
+        area: 'island',
+        nearby: null,
+        rescue: { ...run, status: 'sailing', saved: 0, seconds: 0, won: false },
+        // He is aboard rather than on the sand, but the token still draws the
+        // curtain over the moment the camera goes out to sea.
+        spawn: {
+          area: 'island',
+          position: [BOAT_START.x, BOAT_START.z] as Vec2,
+          token: s.spawn.token + 1,
+        },
+      }))
+    },
+
+    /** Everyone out of the water, or a flare that went out. */
+    finishRescue: () => {
+      const run = get().rescue
+      if (!run || run.status !== 'sailing') return
+      if (RESCUE.won) sfx.jingle()
+      else sfx.hurt()
+      set({
+        mode: 'rescue',
+        rescue: {
+          ...run,
+          status: 'done',
+          saved: Math.min(SOULS, RESCUE.saved),
+          seconds: RESCUE.elapsed,
+          won: RESCUE.won,
+        },
+      })
+    },
+
+    /** Ties her up again and puts him back on the dock. */
+    exitRescue: () => {
+      closeWater()
+      sfx.cancel()
+      set((s) => ({
+        mode: 'explore',
+        rescue: null,
+        nearby: null,
+        spawn: {
+          area: 'island',
+          position: [-100, 22] as Vec2,
+          token: s.spawn.token + 1,
+        },
+      }))
+    },
+
+    /* ------------------------- hide and seek -------------------------- */
+
+    /**
+     * The night game. Either they hide and you go looking, or you hide and
+     * every one of them does — and either way the island's lights go out for
+     * the duration, so a torch is the only thing burning on it.
+     */
+    openHide: () => {
+      const state = get()
+      if (!state.night) return
+      if (state.area !== 'island') state.leaveBuilding()
+      // Nobody can hide while they are all dancing in the middle of the plaza.
+      if (state.party) state.toggleParty()
+      sfx.confirm()
+      const role = state.hide?.role ?? 'seeker'
+      openHide(role)
+      set((s) => ({
+        mode: 'hide',
+        dialogue: null,
+        panel: null,
+        nearby: null,
+        hide: {
+          status: 'briefing',
+          role,
+          found: 0,
+          seconds: 0,
+          won: false,
+          round: (s.hide?.round ?? 0) + 1,
+        },
+      }))
+    },
+
+    /** Swapping ends, on the briefing card. */
+    setRole: (role) => {
+      const game = get().hide
+      if (!game || game.status !== 'briefing' || game.role === role) return
+      sfx.blip()
+      openHide(role)
+      set({ hide: { ...game, role } })
+    },
+
+    beginHide: () => {
+      const game = get().hide
+      if (!game) return
+      openHide(game.role)
+      sfx.jingle()
+      set((s) => ({
+        mode: 'explore',
+        area: 'island',
+        nearby: null,
+        hide: { ...game, status: 'playing', found: 0, won: false },
+        spawn: {
+          area: 'island',
+          position: [0, 22] as Vec2,
+          token: s.spawn.token + 1,
+        },
+      }))
+    },
+
+    finishHide: (won) => {
+      const game = get().hide
+      if (!game || game.status !== 'playing') return
+      if (won) sfx.jingle()
+      else sfx.hurt()
+      set({
+        mode: 'hide',
+        hide: {
+          ...game,
+          status: 'done',
+          won,
+          found: Math.min(COUNT, HIDE.found),
+          seconds:
+            game.role === 'hider'
+              ? Math.max(0, HIDE.elapsed - HEAD_START)
+              : HIDE.elapsed,
+        },
+      })
+    },
+
+    exitHide: () => {
+      closeHide()
+      sfx.cancel()
+      set((s) => ({
+        mode: 'explore',
+        hide: null,
+        nearby: null,
+        spawn: {
+          area: 'island',
+          position: [0, 22] as Vec2,
+          token: s.spawn.token + 1,
+        },
+      }))
+    },
+
+    /* ---------------------------- paintball --------------------------- */
+
+    /** Draws the teams and shows the briefing. Always fought on the island. */
+    openPaintball: () => {
+      const state = get()
+      if (state.night) return
+      if (state.area !== 'island') state.leaveBuilding()
+      sfx.confirm()
+      set((s) => ({
+        mode: 'paintball',
+        dialogue: null,
+        panel: null,
+        nearby: null,
+        paintball: {
+          ...pickTeams(),
+          out: {},
+          lives: START_LIVES,
+          ammo: MAG_SIZE,
+          reloadAt: null,
+          status: 'briefing',
+          hits: 0,
+          friendlyFire: 0,
+          feed: null,
+          round: (s.paintball?.round ?? 0) + 1,
+        },
+      }))
+    },
+
+    /**
+     * The three ways the briefing lets you change the sides before the whistle:
+     * put somebody on your side or take them off it, set how many are against
+     * you, or throw the whole thing back in the hat.
+     */
+    toggleAlly: (id) => {
+      const game = get().paintball
+      if (!game || game.status !== 'briefing') return
+      const on = game.friends.includes(id)
+      const wanted = on
+        ? game.friends.filter((f) => f !== id)
+        : [...game.friends, id]
+      // Silently refuses a sixth: the card greys the rest out to say so.
+      if (!on && wanted.length > MAX_FRIENDS) {
+        sfx.cancel()
+        return
+      }
+      sfx.blip()
+      set({
+        paintball: { ...game, ...buildTeams(wanted, game.enemies.length) },
+      })
+    },
+
+    setEnemyCount: (count) => {
+      const game = get().paintball
+      if (!game || game.status !== 'briefing') return
+      if (count === game.enemies.length) return
+      set({ paintball: { ...game, ...buildTeams(game.friends, count) } })
+    },
+
+    redrawTeams: () => {
+      const game = get().paintball
+      if (!game || game.status !== 'briefing') return
+      sfx.confirm()
+      set({ paintball: { ...game, ...pickTeams() } })
+    },
+
+    beginPaintball: () => {
+      const game = get().paintball
+      if (!game) return
+      openArena(game.friends, game.enemies)
+      sfx.jingle()
+      set((s) => ({
+        mode: 'explore',
+        area: 'island',
+        nearby: null,
+        paintball: {
+          ...game,
+          out: {},
+          lives: START_LIVES,
+          ammo: MAG_SIZE,
+          reloadAt: null,
+          status: 'playing',
+          hits: 0,
+          friendlyFire: 0,
+          feed: null,
+        },
+        spawn: {
+          area: 'island',
+          position: [ARENA_CENTER.x, ARENA_CENTER.z] as Vec2,
+          token: s.spawn.token + 1,
+        },
+      }))
+    },
+
+    exitPaintball: () => {
+      closeArena()
+      sfx.cancel()
+      set({ mode: 'explore', paintball: null, nearby: null })
+    },
+
+    /** Spends one round; emptying the hopper starts the six-second refill. */
+    fireRound: () => {
+      const game = get().paintball
+      if (!game || game.ammo <= 0 || game.reloadAt) return
+      const ammo = game.ammo - 1
+      set({
+        paintball: {
+          ...game,
+          ammo,
+          reloadAt: ammo === 0 ? Date.now() + RELOAD_MS : game.reloadAt,
+        },
+      })
+    },
+
+    finishReload: () => {
+      const game = get().paintball
+      if (!game || !game.reloadAt) return
+      set({ paintball: { ...game, ammo: MAG_SIZE, reloadAt: null } })
+    },
+
+    splatCombatant: (id, team, by) => {
+      const game = get().paintball
+      if (!game || game.status !== 'playing' || game.out[id]) return
+      const name = combatantName(id)
+      const out = { ...game.out, [id]: true as const }
+      const mine = by === 'player'
+      const friendly = team === 'friend'
+      const won = game.enemies.every((e) => out[e])
+
+      set({
+        mode: won ? 'paintball' : 'explore',
+        paintball: {
+          ...game,
+          out,
+          status: won ? 'won' : 'playing',
+          hits: game.hits + (mine && !friendly ? 1 : 0),
+          friendlyFire: game.friendlyFire + (mine && friendly ? 1 : 0),
+          feed: {
+            text: friendly
+              ? `${name} was on your side!`
+              : mine
+                ? `You painted ${name}`
+                : `${name} is out`,
+            kind: friendly ? 'bad' : 'good',
+            at: Date.now(),
+          },
+        },
+      })
+    },
+
+    hitPlayer: () => {
+      const game = get().paintball
+      if (!game || game.status !== 'playing') return
+      const lives = Math.max(0, game.lives - 1)
+      const lost = lives === 0
+
+      set({
+        mode: lost ? 'paintball' : 'explore',
+        paintball: {
+          ...game,
+          lives,
+          status: lost ? 'lost' : 'playing',
+          feed: {
+            text: lost
+              ? 'Painted out.'
+              : `Hit! ${lives} ${lives === 1 ? 'life' : 'lives'} left`,
+            kind: 'bad',
+            at: Date.now(),
+          },
+        },
+      })
+    },
+
+    /* ------------------------------ areas ----------------------------- */
+
+    enterBuilding: (id) => {
+      // Every door on the island is locked while hide and seek is on. The game
+      // is played out in the dark between the buildings, and a room nobody can
+      // follow you into is not a hiding place.
+      if (get().hide) return
+      const interior = INTERIOR_BY_ID.get(id)
+      if (!interior) return
+      get().discover(id)
+      set((s) => ({
         area: id,
-        position: [...interior.spawn] as Vec2,
-        token: s.spawn.token + 1,
-      },
-    }))
-  },
+        mode: 'explore',
+        nearby: null,
+        panel: null,
+        dialogue: null,
+        spawn: {
+          area: id,
+          position: [...interior.spawn] as Vec2,
+          token: s.spawn.token + 1,
+        },
+      }))
+    },
 
-  leaveBuilding: () => {
-    const { area } = get()
-    // A room two floors down still belongs to a door on the island, and this
-    // is what puts the player back on the right doorstep rather than nowhere.
-    const interior = INTERIOR_BY_ID.get(area)
-    const building = BUILDING_BY_ID.get(interior?.building ?? area)
-    if (!building) return
-    set((s) => ({
-      area: 'island',
-      mode: 'explore',
-      nearby: null,
-      panel: null,
-      dialogue: null,
-      spawn: {
+    leaveBuilding: () => {
+      const { area } = get()
+      // A room two floors down still belongs to a door on the island, and this
+      // is what puts the player back on the right doorstep rather than nowhere.
+      const interior = INTERIOR_BY_ID.get(area)
+      const building = BUILDING_BY_ID.get(interior?.building ?? area)
+      if (!building) return
+      set((s) => ({
         area: 'island',
-        position: [...building.door] as Vec2,
-        token: s.spawn.token + 1,
-      },
-    }))
-  },
+        mode: 'explore',
+        nearby: null,
+        panel: null,
+        dialogue: null,
+        spawn: {
+          area: 'island',
+          position: [...building.door] as Vec2,
+          token: s.spawn.token + 1,
+        },
+      }))
+    },
 
-  /** The step he was taking by himself is done; nothing is walking him now. */
-  endStride: () => {
-    if (get().stride) set({ stride: null })
-  },
+    /** The step he was taking by himself is done; nothing is walking him now. */
+    endStride: () => {
+      if (get().stride) set({ stride: null })
+    },
 
-  /**
-   * Into the car. Nothing moves yet: he walks in, the doors stay open, the
-   * panel comes up, and he is free to walk straight back out again.
-   */
-  callLift: (call) => {
-    if (get().lift || get().liftCall) return
-    /*
-     * Step him into the car. Until this existed a ride was watched from the
-     * corridor — the doors shut on an empty shaft in front of him and opened
-     * again on a room he had been teleported to, which read as a door with a
-     * delay rather than as a lift.
+    /**
+     * Into the car. Nothing moves yet: he walks in, the doors stay open, the
+     * panel comes up, and he is free to walk straight back out again.
      */
-    const room = INTERIOR_BY_ID.get(call.room)
-    const car = (room?.links ?? []).find((l) => l.id === call.linkId)
-    const stance = car ? liftStance(car, room) : null
-    set({
-      liftCall: call,
-      mode: 'lift',
-      nearby: null,
-      panel: null,
-      dialogue: null,
-      /* Walked, not teleported: a spawn here would drop a curtain over the
+    callLift: (call) => {
+      if (get().lift || get().liftCall) return
+      /*
+       * Step him into the car. Until this existed a ride was watched from the
+       * corridor — the doors shut on an empty shaft in front of him and opened
+       * again on a room he had been teleported to, which read as a door with a
+       * delay rather than as a lift.
+       */
+      const room = INTERIOR_BY_ID.get(call.room)
+      const car = (room?.links ?? []).find((l) => l.id === call.linkId)
+      const stance = car ? liftStance(car, room) : null
+      set({
+        liftCall: call,
+        mode: 'lift',
+        nearby: null,
+        panel: null,
+        dialogue: null,
+        /* Walked, not teleported: a spawn here would drop a curtain over the
          one step that makes the ride make sense. */
-      stride: stance && { to: stance.inside, facing: stance.facing },
-    })
-  },
-
-  /**
-   * Out of the car without going anywhere — he backs out the way he came in,
-   * onto the floor he was already standing on.
-   */
-  leaveLift: () => {
-    const call = get().liftCall
-    if (!call) return
-    const room = INTERIOR_BY_ID.get(call.room)
-    const car = (room?.links ?? []).find((l) => l.id === call.linkId)
-    const stance = car ? liftStance(car, room) : null
-    set({
-      liftCall: null,
-      mode: 'explore',
-      stride: stance && { to: stance.outside, facing: stance.facing },
-    })
-  },
-
-  /**
-   * A button. A floor with a room behind it shuts the doors and rides; the
-   * one with nothing behind it says so and leaves the doors open.
-   */
-  pressFloor: (stop) => {
-    const call = get().liftCall
-    if (!call) return
-    if (!stop.to || !INTERIOR_BY_ID.has(stop.to)) {
-      sfx.dry()
-      set({
-        liftCall: { ...call, refused: stop.lines ?? ['Nothing happens.'] },
+        stride: stance && { to: stance.inside, facing: stance.facing },
       })
-      return
-    }
-    /*
-     * Already on that floor. The panel does not offer the button at all any
-     * more, so this is a backstop rather than a path anybody walks — kept
-     * because a ride to the floor you are standing on would teleport you
-     * across your own room.
+    },
+
+    /**
+     * Out of the car without going anywhere — he backs out the way he came in,
+     * onto the floor he was already standing on.
      */
-    if (stop.to === call.room) {
-      sfx.dry()
+    leaveLift: () => {
+      const call = get().liftCall
+      if (!call) return
+      const room = INTERIOR_BY_ID.get(call.room)
+      const car = (room?.links ?? []).find((l) => l.id === call.linkId)
+      const stance = car ? liftStance(car, room) : null
       set({
-        liftCall: { ...call, refused: ['You are on this floor already.'] },
+        liftCall: null,
+        mode: 'explore',
+        stride: stance && { to: stance.outside, facing: stance.facing },
       })
-      return
-    }
-    get().rideLift({
-      linkId: call.linkId,
-      fromRoom: call.room,
-      toRoom: stop.to,
-      from: call.floor,
-      to: stop.floor,
-      started: performance.now() / 1000,
-      duration:
-        LIFT_DOORS * 2 +
-        Math.max(1, Math.abs(stop.floor - call.floor)) * LIFT_PER_FLOOR,
-    })
-  },
+    },
 
-  /**
-   * The doors shut and the car moves. The room does not change yet: he stands
-   * where he is until `endLift`, once the ride has run its course.
-   */
-  rideLift: (ride) => {
-    if (get().lift) return
-    if (!INTERIOR_BY_ID.has(ride.toRoom)) return
-    set({
-      lift: ride,
-      liftCall: null,
-      mode: 'lift',
-      nearby: null,
-      panel: null,
-      dialogue: null,
-      /* He is already standing in the car; nothing is left to walk. */
-      stride: null,
-    })
-  },
+    /**
+     * A button. A floor with a room behind it shuts the doors and rides; the
+     * one with nothing behind it says so and leaves the doors open.
+     */
+    pressFloor: (stop) => {
+      const call = get().liftCall
+      if (!call) return
+      if (!stop.to || !INTERIOR_BY_ID.has(stop.to)) {
+        sfx.dry()
+        set({
+          liftCall: { ...call, refused: stop.lines ?? ['Nothing happens.'] },
+        })
+        return
+      }
+      /*
+       * Already on that floor. The panel does not offer the button at all any
+       * more, so this is a backstop rather than a path anybody walks — kept
+       * because a ride to the floor you are standing on would teleport you
+       * across your own room.
+       */
+      if (stop.to === call.room) {
+        sfx.dry()
+        set({
+          liftCall: { ...call, refused: ['You are on this floor already.'] },
+        })
+        return
+      }
+      get().rideLift({
+        linkId: call.linkId,
+        fromRoom: call.room,
+        toRoom: stop.to,
+        from: call.floor,
+        to: stop.floor,
+        started: performance.now() / 1000,
+        duration:
+          LIFT_DOORS * 2 +
+          Math.max(1, Math.abs(stop.floor - call.floor)) * LIFT_PER_FLOOR,
+      })
+    },
 
-  /**
-   * The car has stopped on the far floor. The room changes here, with the
-   * doors still shut, so the opening half of the ride plays on the floor he
-   * has arrived at rather than being lost with the room he left.
-   *
-   * The ride itself stays on the store — `endLift` clears it once the doors
-   * are wide — which is what keeps the far floor's leaves animating instead
-   * of mounting already open.
-   */
-  arriveLift: (arrive, facing) => {
-    const ride = get().lift
-    if (!ride || get().area === ride.toRoom) return
-    if (!INTERIOR_BY_ID.has(ride.toRoom)) return
-    set((s) => ({
-      area: ride.toRoom,
-      nearby: null,
-      panel: null,
-      dialogue: null,
-      spawn: {
+    /**
+     * The doors shut and the car moves. The room does not change yet: he stands
+     * where he is until `endLift`, once the ride has run its course.
+     */
+    rideLift: (ride) => {
+      if (get().lift) return
+      if (!INTERIOR_BY_ID.has(ride.toRoom)) return
+      set({
+        lift: ride,
+        liftCall: null,
+        mode: 'lift',
+        nearby: null,
+        panel: null,
+        dialogue: null,
+        /* He is already standing in the car; nothing is left to walk. */
+        stride: null,
+      })
+    },
+
+    /**
+     * The car has stopped on the far floor. The room changes here, with the
+     * doors still shut, so the opening half of the ride plays on the floor he
+     * has arrived at rather than being lost with the room he left.
+     *
+     * The ride itself stays on the store — `endLift` clears it once the doors
+     * are wide — which is what keeps the far floor's leaves animating instead
+     * of mounting already open.
+     */
+    arriveLift: (arrive, facing) => {
+      const ride = get().lift
+      if (!ride || get().area === ride.toRoom) return
+      if (!INTERIOR_BY_ID.has(ride.toRoom)) return
+      set((s) => ({
         area: ride.toRoom,
-        position: [...arrive] as Vec2,
-        facing,
-        token: s.spawn.token + 1,
-      },
-      stride: null,
-    }))
-  },
+        nearby: null,
+        panel: null,
+        dialogue: null,
+        spawn: {
+          area: ride.toRoom,
+          position: [...arrive] as Vec2,
+          facing,
+          token: s.spawn.token + 1,
+        },
+        stride: null,
+      }))
+    },
 
-  /**
-   * The doors are wide and he is out of the car: back in control.
-   *
-   * `mode` is held at 'lift' for the whole ride and only released here, so
-   * the walk is his again exactly when the opening he walks through is.
-   */
-  endLift: () => {
-    if (!get().lift) return
-    set({ lift: null, mode: 'explore' })
-  },
+    /**
+     * The doors are wide and he is out of the car: back in control.
+     *
+     * `mode` is held at 'lift' for the whole ride and only released here, so
+     * the walk is his again exactly when the opening he walks through is.
+     */
+    endLift: () => {
+      if (!get().lift) return
+      set({ lift: null, mode: 'explore' })
+    },
 
-  /**
-   * Through a door or down the stairs inside one building. Not the same as
-   * entering from outside: nothing is discovered, and the way out still knows
-   * which doorstep it belongs to.
-   */
-  goRoom: (to, arrive, facing) => {
-    if (get().hide) return
-    if (!INTERIOR_BY_ID.has(to)) return
-    set((s) => ({
-      area: to,
-      mode: 'explore',
-      nearby: null,
-      panel: null,
-      dialogue: null,
-      spawn: {
+    /**
+     * The button under the glass goes down and the count starts.
+     *
+     * Everything that could interrupt a launch is cleared here rather than
+     * guarded against for the next twenty seconds: no prompt, no panel, nobody
+     * talking, and nothing left to walk. From this moment the only thing the
+     * store will accept is the climb finishing.
+     */
+    beginLaunch: () => {
+      if (get().launch) return
+      if (get().area !== 'lighthouse') return
+      sfx.jingle()
+      /* Through the seal, which is not yet closed — this is what closes it. */
+      set({
+        launch: { started: performance.now() / 1000, arrived: false },
+        launched: true,
+        mode: 'launch',
+        nearby: null,
+        panel: null,
+        dialogue: null,
+        stride: null,
+        liftCall: null,
+      })
+    },
+
+    /**
+     * The engines are out and the island is a shape below him.
+     *
+     * The area is left as the lighthouse deliberately: he is still strapped
+     * into the room he launched in, and the window is the part that changed.
+     * What ends here is the flight, not the place.
+     */
+    reachOrbit: () => {
+      const launch = get().launch
+      if (!launch || launch.arrived) return
+      /* Through the seal: launch → orbit is the one move it has to permit. */
+      raw({ mode: 'orbit' })
+      set({ launch: { ...launch, arrived: true } })
+    },
+
+    /**
+     * Through a door or down the stairs inside one building. Not the same as
+     * entering from outside: nothing is discovered, and the way out still knows
+     * which doorstep it belongs to.
+     */
+    goRoom: (to, arrive, facing) => {
+      if (get().hide) return
+      if (!INTERIOR_BY_ID.has(to)) return
+      set((s) => ({
         area: to,
-        position: [...arrive] as Vec2,
-        facing,
-        token: s.spawn.token + 1,
-      },
-      /* A teleport outranks a walk: whatever step was under way belonged to
+        mode: 'explore',
+        nearby: null,
+        panel: null,
+        dialogue: null,
+        spawn: {
+          area: to,
+          position: [...arrive] as Vec2,
+          facing,
+          token: s.spawn.token + 1,
+        },
+        /* A teleport outranks a walk: whatever step was under way belonged to
          the room he has just left. */
-      stride: null,
-    }))
-  },
+        stride: null,
+      }))
+    },
 
-  revealSecret: (id, found) => {
-    const first = !get().secrets[id]
-    if (first) sfx.jingle()
-    set((s) => ({
-      secrets: first ? { ...s.secrets, [id]: true } : s.secrets,
-      /* Swung open on this visit, and only this one: leaving shuts it again,
+    revealSecret: (id, found) => {
+      const first = !get().secrets[id]
+      if (first) sfx.jingle()
+      set((s) => ({
+        secrets: first ? { ...s.secrets, [id]: true } : s.secrets,
+        /* Swung open on this visit, and only this one: leaving shuts it again,
          and finding the switch a second time on a later visit opens it again
          without filing anything twice. */
-      swung: { ...s.swung, [id]: s.spawn.token },
-      toast: first && found ? { ...found, kind: 'key' as const } : s.toast,
-    }))
-  },
+        swung: { ...s.swung, [id]: s.spawn.token },
+        toast: first && found ? { ...found, kind: 'key' as const } : s.toast,
+      }))
+    },
 
-  travelTo: (buildingId) => {
-    const building = BUILDING_BY_ID.get(buildingId)
-    if (!building) return
-    sfx.confirm()
-    set((s) => ({
-      area: 'island',
-      mode: 'explore',
-      nearby: null,
-      spawn: {
+    travelTo: (buildingId) => {
+      const building = BUILDING_BY_ID.get(buildingId)
+      if (!building) return
+      sfx.confirm()
+      set((s) => ({
         area: 'island',
-        position: [...building.door] as Vec2,
-        token: s.spawn.token + 1,
-      },
-    }))
-  },
+        mode: 'explore',
+        nearby: null,
+        spawn: {
+          area: 'island',
+          position: [...building.door] as Vec2,
+          token: s.spawn.token + 1,
+        },
+      }))
+    },
 
-  discover: (buildingId) => {
-    if (get().discovered[buildingId]) return
-    set((s) => ({ discovered: { ...s.discovered, [buildingId]: true } }))
-  },
+    discover: (buildingId) => {
+      if (get().discovered[buildingId]) return
+      set((s) => ({ discovered: { ...s.discovered, [buildingId]: true } }))
+    },
 
-  /* ---------------------------- missions ---------------------------- */
+    /* ---------------------------- missions ---------------------------- */
 
-  activateMission: (id) => {
-    const mission = MISSION_BY_ID.get(id)
-    if (!mission || get().missions[id] !== 'idle') return
-    set((s) => ({
-      missions: { ...s.missions, [id]: 'active' },
-      toast: { title: mission.title, body: mission.hint, kind: 'mission' },
-    }))
-  },
+    activateMission: (id) => {
+      const mission = MISSION_BY_ID.get(id)
+      if (!mission || get().missions[id] !== 'idle') return
+      set((s) => ({
+        missions: { ...s.missions, [id]: 'active' },
+        toast: { title: mission.title, body: mission.hint, kind: 'mission' },
+      }))
+    },
 
-  takeKey: (keyId) => {
-    const key = KEY_BY_ID.get(keyId)
-    if (!key || get().keys[keyId]) return
-    const mission = MISSIONS.find((m) => m.keyId === keyId)
-    set((s) => ({
-      keys: { ...s.keys, [keyId]: true },
-      missions: mission ? { ...s.missions, [mission.id]: 'done' } : s.missions,
-      toast: {
-        title: key.name,
-        body: mission
-          ? `${mission.done} ${Object.keys(s.keys).length + 1} of ${TOTAL_KEYS} keys.`
-          : 'Key taken.',
-        kind: 'key',
-      },
-    }))
-  },
+    takeKey: (keyId) => {
+      const key = KEY_BY_ID.get(keyId)
+      if (!key || get().keys[keyId]) return
+      const mission = MISSIONS.find((m) => m.keyId === keyId)
+      set((s) => ({
+        keys: { ...s.keys, [keyId]: true },
+        missions: mission
+          ? { ...s.missions, [mission.id]: 'done' }
+          : s.missions,
+        toast: {
+          title: key.name,
+          body: mission
+            ? `${mission.done} ${Object.keys(s.keys).length + 1} of ${TOTAL_KEYS} keys.`
+            : 'Key taken.',
+          kind: 'key',
+        },
+      }))
+    },
 
-  unlockLighthouse: () => {
-    if (get().lighthouseOpen) return
-    set({ lighthouseOpen: true })
-  },
+    unlockLighthouse: () => {
+      if (get().lighthouseOpen) return
+      set({ lighthouseOpen: true })
+    },
 
-  /**
-   * Everything found, put back. The saved blob goes with it — the watcher
-   * below sees an empty island and takes the row out of site data rather than
-   * leaving an encoded nothing behind.
-   *
-   * The settings are deliberately untouched: someone clearing the island they
-   * walked is not asking to have the volume turned back up.
-   */
-  clearProgress: () => {
-    forgetProgress()
-    set({
-      visited: {},
-      entries: [],
-      keys: {},
-      missions: { ...IDLE_MISSIONS },
-      discovered: {},
-      secrets: {},
-      swung: {},
-      lighthouseOpen: false,
-      cvUnlocked: false,
-      toast: {
-        title: 'Starting over',
-        body: 'The journal, the keyring and everything found have been forgotten.',
-        kind: 'progress',
-      },
-    })
-  },
-}))
+    /**
+     * Everything found, put back. The saved blob goes with it — the watcher
+     * below sees an empty island and takes the row out of site data rather than
+     * leaving an encoded nothing behind.
+     *
+     * The settings are deliberately untouched: someone clearing the island they
+     * walked is not asking to have the volume turned back up.
+     */
+    clearProgress: () => {
+      forgetProgress()
+      /* Through the seal: starting over is the one thing orbit does allow, and
+       it puts the island back at the title screen rather than in the room. */
+      raw({ mode: 'title', area: 'island' })
+      set({
+        visited: {},
+        entries: [],
+        keys: {},
+        missions: { ...IDLE_MISSIONS },
+        discovered: {},
+        secrets: {},
+        swung: {},
+        lighthouseOpen: false,
+        cvUnlocked: false,
+        launch: null,
+        launched: false,
+        toast: {
+          title: 'Starting over',
+          body: 'The journal, the keyring and everything found have been forgotten.',
+          kind: 'progress',
+        },
+      })
+    },
+  }
+})
 
 /** Everything a save holds, and nothing else the store happens to keep. */
 type Progressed = Pick<
@@ -2078,6 +2228,7 @@ type Progressed = Pick<
   | 'secrets'
   | 'lighthouseOpen'
   | 'cvUnlocked'
+  | 'launched'
 >
 
 /** The store's progress in the shape the save file keeps it in. */
@@ -2094,6 +2245,7 @@ function snapshot(s: Progressed): SavedProgress {
     secrets: Object.keys(s.secrets),
     lighthouseOpen: s.lighthouseOpen,
     cvUnlocked: s.cvUnlocked,
+    launched: s.launched,
   }
 }
 
@@ -2111,7 +2263,8 @@ useGame.subscribe((state, previous) => {
     state.discovered === previous.discovered &&
     state.secrets === previous.secrets &&
     state.lighthouseOpen === previous.lighthouseOpen &&
-    state.cvUnlocked === previous.cvUnlocked
+    state.cvUnlocked === previous.cvUnlocked &&
+    state.launched === previous.launched
   ) {
     return
   }

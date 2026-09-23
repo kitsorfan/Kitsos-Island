@@ -164,6 +164,22 @@ export function useKeyboard() {
           }
           return
 
+        /*
+         * A launch, and the orbit it ends in. Both swallow the keyboard
+         * whole, except for the two that only touch the speakers.
+         *
+         * This has to be stated rather than left to `default`, which would
+         * otherwise hand a man strapped into a rocket the map — and the map
+         * offers fast travel, which is the one thing a one-way trip cannot
+         * be allowed. There is deliberately no Escape here either: the
+         * launch is not a card you can back out of.
+         */
+        case 'launch':
+        case 'orbit':
+          if (event.code === 'KeyN') state.toggleMute()
+          else if (event.code === 'KeyB') state.toggleMusic()
+          return
+
         default:
           // Mid-match the trigger takes over the keys that normally hop
           // and interact, so nothing fires a dialogue during a firefight.

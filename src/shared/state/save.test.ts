@@ -27,6 +27,7 @@ const blank: SavedProgress = {
   secrets: [],
   lighthouseOpen: false,
   cvUnlocked: false,
+  launched: false,
 }
 
 /** A visit with something in every field. */
@@ -38,6 +39,7 @@ const visit: SavedProgress = {
   secrets: ['the-switch'],
   lighthouseOpen: true,
   cvUnlocked: true,
+  launched: true,
 }
 
 beforeEach(() => {
@@ -57,6 +59,7 @@ describe('isEmpty', () => {
     expect(isEmpty({ ...blank, missions: { m: 'active' } })).toBe(false)
     expect(isEmpty({ ...blank, lighthouseOpen: true })).toBe(false)
     expect(isEmpty({ ...blank, cvUnlocked: true })).toBe(false)
+    expect(isEmpty({ ...blank, launched: true })).toBe(false)
   })
 })
 
@@ -175,10 +178,27 @@ describe('what a save is allowed to contain', () => {
       entries: ['x'],
       lighthouseOpen: 'yes' as unknown as boolean,
       cvUnlocked: 1 as unknown as boolean,
+      launched: 'true' as unknown as boolean,
     })
     const back = loadProgress()
     expect(back?.lighthouseOpen).toBe(false)
     expect(back?.cvUnlocked).toBe(false)
+    expect(back?.launched).toBe(false)
+  })
+
+  it('reads a save written before the ship was found', () => {
+    /*
+     * The field was added without bumping VERSION, which is only safe while
+     * a save that predates it still reads — as a visit that never launched,
+     * with everything else it remembers intact.
+     */
+    const { launched: _launched, ...old } = visit
+    saveProgress(old as unknown as SavedProgress)
+
+    const back = loadProgress()
+    expect(back?.launched).toBe(false)
+    expect(back?.entries).toEqual(visit.entries)
+    expect(back?.lighthouseOpen).toBe(true)
   })
 
   it('carries a journal long enough to be a real visit', () => {

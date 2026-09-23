@@ -86,56 +86,64 @@ heading on it.
 
 ## Layout of the code
 
+The island is laid out by **feature**: everything one part of it needs — its
+rules, its 3D pieces, its panels and its tests — sits in one directory, so a
+change to the lift is a change to one folder rather than a tour of four.
+
 ```text
 src/
-  data/
-    profile.ts    all CV copy, as structured panel blocks
-    world.ts      island layout: buildings, NPCs, signposts, roads, keys, missions
-    interiors.ts  one room per building: furniture, exhibits, key stands
-    cv.ts         renders the panel data into a downloadable Markdown CV
-  game/
-    terrain.ts    height field, colliders, prop scattering, camera occlusion
-    interior.ts   furniture footprints and room collision
-    collision.ts  circle/AABB push-out, circular and rectangular bounds
-    input.ts      keyboard + virtual stick, read by the frame loop
-    actors.ts     live NPC positions, shared with the player and the map
-    audio.ts      WebAudio blips and jingles (no audio files)
-    music.ts      the soundtrack, sequenced note by note in WebAudio
-  state/store.ts  zustand: area, dialogue, panels, journal, keys, missions
-  world/          the 3D scene
-    Island.tsx      terrain, water, foliage, props, buildings
-    Interior.tsx    the room shell, exhibits and key stands
-    InteriorProps.tsx  the furniture kit, and the Greek flag
-    buildings/      one low-poly model per building kind
-  ui/             title, dialogue, panels, journal, HUD, minimap, map, touch pad
+  features/
+    island/       terrain, water, foliage, paths, props, buildings, daylight
+    interior/     the room shell, its furniture kit, doors and what you examine
+    player/       the controller, the character, input and the touch pad
+    npc/          the townspeople, the guards, and who is standing where
+    cv/           the CV itself: the journal, the panels, the downloads
+    lift/         the car, its panel, and the one journey that takes time
+    map/          the minimap and the full map overlay
+    arcade/       the games board and the list it offers
+    paintball/  moto/  balloon/  hide/  rescue/     one minigame each
+    lecture/  party/  proposal/  calendar/  radio/  toys/
+  shared/
+    engine/       the r3f scene, collision, audio, signage, quality
+    ui/           the HUD, panels, dialogue, toasts, title and settings
+    state/        zustand: area, dialogue, journal, keys, missions, saves
+    i18n/         the translator, and the Greek dictionary it fetches
   test/           shared fixtures, and the setup every test file runs first
+config/           vite, vitest, oxlint, prettier and the project tsconfigs
 ```
+
+Within a feature, the plain `.ts` modules hold the rules and the `.tsx` ones
+draw them. Where a feature has both under one name, the logic carries a
+`Logic` suffix — `balloonLogic.ts` beside `Balloon.tsx` — because a file
+system that ignores case cannot tell `balloon.ts` from `Balloon.tsx`, and a
+pair that differs only in case is a trap on Windows and a merge conflict
+waiting to happen.
 
 Some notes on how it hangs together:
 
 - **Nothing is fetched.** Terrain, water, characters, buildings, furniture and
   props are all procedural geometry; signage text is drawn to a canvas at runtime
-  (`world/TextSign.tsx`). The only external request is the font stylesheet.
+  (`shared/engine/TextSign.tsx`). The only external request is the font stylesheet.
 - **The music is composed in code**, not shipped as a file — a I–V–vi–IV loop in
   D major with a pad, bass, arpeggio, melody and light percussion, scheduled a
   bar and a half ahead of the audio clock. Original by construction, so there is
   no licence to honour, and it adds nothing to the bundle. It thins out indoors
   and opens up again in the lighthouse. `B` turns it off, `N` mutes everything.
-- **One area is mounted at a time.** `Scene.tsx` swaps the island for a room, so
+- **One area is mounted at a time.** `shared/engine/Scene.tsx` swaps the island for a room, so
   indoor scenes light themselves and the draw call count stays low. The player
   controller is shared and picks its colliders, bounds, ground height and camera
   from whichever area is active.
 - **The lift is the one way through that takes time.** Every other door and
   flight swaps the room the moment you walk into it. Walking into the car
-  instead raises its panel (`ui/LiftPanel.tsx`) with a button per floor; press
+  instead raises its panel (`features/lift/LiftPanel.tsx`) with a button per floor; press
   one and the doors shut, the indicator counts, and only when the car stops are
-  you put out — on the far floor's lift, not on its stairs. `game/lift.ts` owns
+  you put out — on the far floor's lift, not on its stairs. `features/lift/lift.ts` owns
   the timing, so the doors in the scene and the number over them read the same
   clock. The button for the third floor is on the panel and does nothing, which
   is the point of it.
-- **The frame loop never re-renders React.** `Player.tsx` reads input, resolves
+- **The frame loop never re-renders React.** `features/player/Player.tsx` reads input, resolves
   collisions and drives the camera inside `useFrame`, writing to refs. Walking
-  NPCs publish their positions to `game/actors.ts` rather than to state, so a
+  NPCs publish their positions to `features/npc/actors.ts` rather than to state, so a
   strolling townsperson costs nothing.
 - **`terrainHeight()` is the single source of truth** for the ground, shared by
   the mesh generator and the player controller, so nothing floats or sinks.
@@ -181,10 +189,10 @@ board by hand, or assert only what is true of every draw.
 
 ## Editing the content
 
-All the wording lives in three files. `src/data/profile.ts` holds the copy as
+All the wording lives in three files. `src/features/cv/profile.ts` holds the copy as
 typed blocks (`text`, `list`, `stats`, `tags`, `timeline`, `quote`);
-`src/data/world.ts` holds the map — where each building and person stands, what
-they say, and which mission they hand out; `src/data/interiors.ts` furnishes each
+`src/features/island/world.ts` holds the map — where each building and person stands, what
+they say, and which mission they hand out; `src/features/interior/interiors.ts` furnishes each
 room and places its exhibits.
 
 Referees live in `profile.ts` as `Letter` objects, grouped into
@@ -199,7 +207,7 @@ stand on their own.
 
 Institution marks work the same way. `public/marks/ntua.png`, `ibm.png` and
 `veltiston.png` are used on the Academy's foundation stone and the Work
-District's tenant board when present; without them, `src/world/Emblems.tsx`
+District's tenant board when present; without them, `src/shared/engine/Emblems.tsx`
 draws stylised stand-ins so the island always renders.
 
 Adding a townsperson is one entry in `NPCS` — the model, marker, dialogue,

@@ -1952,9 +1952,12 @@ export const INTERIORS: Interior[] = [
       { kind: 'stairs', position: [8, 8], rotation: -Math.PI / 2 },
       /* The flight chair, facing the console and the window beyond it. */
       { kind: 'chair', position: [0, -3.6], rotation: Math.PI },
-      { kind: 'bookshelf', position: [8.8, 2], rotation: -Math.PI / 2 },
-      /* The globe stays. It is the one instrument on the deck that was
-         already here, and it is still the right one. */
+      /* No shelf of books. The keeper's library was the last thing in here
+         still furnishing a parlour, and a wall of paperbacks behind a flight
+         console reads as a study somebody parked a rocket in. The logbook on
+         the east wall is what is left of him, and it is enough. */
+      /* The globe stays, though. It is the one instrument on the deck that
+         was already here, and it is still the right one. */
       { kind: 'globe', position: [6.6, 6.4] },
       /*
        * The west wall is the airlock and nothing else. The rack stands at

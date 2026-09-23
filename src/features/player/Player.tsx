@@ -7,6 +7,7 @@ import { INTERIOR_BY_ID } from '../interior/interiors'
 import { BOARD } from '../arcade/minigames'
 import { AMALIA, PARTY_BUTTON, TUXEDO } from '../party/partyData'
 import { LAUNCH_AREA, SPACESUIT, STAR_SHIRT } from '../launch/launch'
+import { StarTrail } from '../launch/StarTrail'
 import { CONSOLE, SUIT_RACK } from '../launch/deck'
 import {
   BUILDINGS,
@@ -1557,6 +1558,12 @@ export function Player() {
 
   return (
     <>
+      {/* The wake the star shirt leaves. Outside the player's own group on
+          purpose: a spark that has been shed belongs to the island, so it
+          stays where it fell rather than being carried along and swung round
+          as he turns. It reads `group` for where to shed the next one. */}
+      <StarTrail motion={motion} at={group} on={outfit === 'star'} />
+
       <group ref={group}>
         <Character
           {...wearing}

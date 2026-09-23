@@ -75,7 +75,9 @@ map lists every mission's state. With all five keys the lighthouse door opens.
 Nothing a recruiter needs is ever locked away. The **Say hi** button — on the HUD
 and on the title screen, always — opens a card where Kitsos himself waves, warns
 you that you will miss all the fun, and then hands over the entire CV plus the
-message desk. The lighthouse is a reward, not a gate.
+message desk. The lighthouse is a reward, not a gate — and taking the shortcut
+hands over the CV without opening its door, because the tower is what the keys
+are _for_. Skipping the hunt should not also finish it.
 
 ### Getting around
 

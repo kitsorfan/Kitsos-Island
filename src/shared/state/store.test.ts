@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { useGame } from './store'
+import { nextObjective, useGame } from './store'
 import { KEYS, MISSIONS, PLAYER_START } from '../../features/island/world'
 import { BIRTHDAY, FEAST } from '../../features/calendar/calendar'
 import { INTERIORS } from '../../features/interior/interiors'
@@ -719,5 +719,40 @@ describe('coming home', () => {
     /* The seal is off: the ordinary screens answer once more. */
     useGame.getState().openMap()
     expect(useGame.getState().mode).toBe('map')
+  })
+})
+
+/**
+ * The skip-ahead card, and the line it must not cross.
+ *
+ * Nothing a recruiter needs is locked away, so the greeting hands over the
+ * whole CV on request. What it must not do is hand over the island with it:
+ * the lighthouse is the reward for walking the place, and opening its door
+ * for somebody who has just said they would rather not is the one way to
+ * make that reward mean nothing.
+ */
+describe('unlocking the CV', () => {
+  it('hands over the CV', () => {
+    useGame.getState().unlockCv()
+
+    expect(useGame.getState().cvUnlocked).toBe(true)
+    expect(useGame.getState().mode).toBe('panel')
+    expect(useGame.getState().panel?.kind).toBe('cv')
+  })
+
+  it('does not open the lighthouse with it', () => {
+    useGame.getState().unlockCv()
+
+    /* The door stays shut, the keyring quest stays unfinished, and the
+       arcade's locked game stays locked. */
+    expect(useGame.getState().lighthouseOpen).toBe(false)
+  })
+
+  it('leaves the keys still worth finding', () => {
+    useGame.getState().unlockCv()
+
+    const objective = nextObjective(useGame.getState())
+    /* Still pointing at the hunt rather than at nothing. */
+    expect(objective).not.toBeNull()
   })
 })

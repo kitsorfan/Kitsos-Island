@@ -996,9 +996,20 @@ export const useGame = create<GameState>((raw, get) => {
 
     closeGreeting: () => set((s) => ({ mode: s.greetingReturn })),
 
-    /** Hands over the whole CV without the key hunt. */
+    /**
+     * Hands over the whole CV without the key hunt.
+     *
+     * It does not open the lighthouse, and used to. Skipping ahead to the CV
+     * is a recruiter saying they have not got time for the island; it is not
+     * five keys turning. Opening the door on their behalf unlocked the
+     * arcade's last game, ticked the keyring quest off on the map and left
+     * the tower standing open with nothing earned — a reward handed out for
+     * declining the thing it was the reward for.
+     *
+     * So the two are separate now, which is what `cvUnlocked` was always for.
+     */
     unlockCv: () => {
-      set({ lighthouseOpen: true, cvUnlocked: true })
+      set({ cvUnlocked: true })
       get().openPanel({
         kicker: 'The full CV',
         title: `${PROFILE.firstName} "${PROFILE.nickname}" ${PROFILE.lastName}`,

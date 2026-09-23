@@ -7,7 +7,7 @@ import { INTERIOR_BY_ID } from '../interior/interiors'
 import { BOARD } from '../arcade/minigames'
 import { AMALIA, PARTY_BUTTON, TUXEDO } from '../party/partyData'
 import { LAUNCH_AREA, SPACESUIT, STAR_SHIRT } from '../launch/launch'
-import { SUIT_RACK } from '../launch/deck'
+import { CONSOLE, SUIT_RACK } from '../launch/deck'
 import {
   BUILDINGS,
   BUILDING_BY_ID,
@@ -790,6 +790,30 @@ export function Player() {
              floor he can actually reach it from starts a stride out. */
           range: 3.6,
           trigger: () => useGame.getState().toggleSuit(),
+        })
+
+        /*
+         * And the button under the glass, for the same reason: it is the
+         * whole point of the room, and a thing you can only click is a thing
+         * half the visitors cannot press.
+         *
+         * It is offered whether or not he is suited. `beginLaunch` is what
+         * refuses a man in shirtsleeves, and it refuses him out loud - so
+         * the prompt appears, he presses it, and the deck tells him why not.
+         * Hiding the prompt instead would leave him standing at a console
+         * that does not admit the button is there.
+         */
+        list.push({
+          id: 'launch-button',
+          kind: 'exhibit',
+          label: 'the launch button',
+          verb: 'Press',
+          x: CONSOLE[0],
+          /* The button sits half a metre proud of the console's centre, on
+             the side he stands at. */
+          z: CONSOLE[1] + 0.5,
+          range: 2.8,
+          trigger: () => useGame.getState().beginLaunch(),
         })
       }
 

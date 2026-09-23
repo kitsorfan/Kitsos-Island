@@ -20,6 +20,9 @@ import { LAUNCH_AREA } from './launch'
 /** How near the rack the walker has to get. Mirrors Player.tsx's target. */
 const RACK_RANGE = 3.6
 
+/** How near the console he has to get. Mirrors Player.tsx's target. */
+const BUTTON_RANGE = 2.8
+
 const room = INTERIOR_BY_ID.get(LAUNCH_AREA)!
 
 describe('the flight deck fits in the room it is in', () => {
@@ -46,6 +49,39 @@ describe('the flight deck fits in the room it is in', () => {
     expect(apart(SUIT_RACK, CONSOLE)).toBeGreaterThan(6)
     expect(apart(SUIT_RACK, HOLOGRAM)).toBeGreaterThan(6)
     expect(apart(CONSOLE, HOLOGRAM)).toBeGreaterThan(5)
+  })
+
+  it('leaves the launch button inside reach of somewhere he can stand', () => {
+    /*
+     * The same rule as the rack, for the same reason. The button sits half a
+     * metre proud of the console's centre and the console is drawn rather
+     * than declared, so nothing collides here - but the south wall's margin
+     * still decides how near the glass he can get.
+     */
+    const standable = -(room.half[1] - INTERIOR_MARGIN)
+    const button = CONSOLE[1] + 0.5
+    expect(Math.abs(button - standable)).toBeLessThan(BUTTON_RANGE)
+  })
+
+  it('keeps the two prompts from competing for the same keypress', () => {
+    /* Whichever is nearer wins, so the reaches must not overlap: standing at
+       one must never be standing at the other. */
+    const gap = Math.hypot(
+      SUIT_RACK[0] - CONSOLE[0],
+      SUIT_RACK[1] - (CONSOLE[1] + 0.5),
+    )
+    expect(gap).toBeGreaterThan(RACK_RANGE + BUTTON_RANGE)
+  })
+
+  it('has no cupboards left on the airlock wall', () => {
+    /*
+     * A row of lockers beside the suit read as a changing room and pulled
+     * the eye off the one thing this wall is for.
+     */
+    const cupboards = (room.props ?? []).filter(
+      (prop) => prop.kind === 'locker' && prop.position[0] < -5.5,
+    )
+    expect(cupboards).toEqual([])
   })
 
   it('keeps the furniture off the walk from the door to the rack', () => {

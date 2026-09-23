@@ -1,7 +1,14 @@
 import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { DoubleSide } from 'three'
-import type { Group, Object3D, PointLight, SpotLight } from 'three'
+import type {
+  Group,
+  Mesh,
+  MeshStandardMaterial,
+  Object3D,
+  PointLight,
+  SpotLight,
+} from 'three'
 import { partyBeat } from '../party/partyLogic'
 import { RING } from '../party/partyData'
 import { starShape } from '../launch/starShape'
@@ -1172,66 +1179,145 @@ export function Character({
 
 /** The gold on the blue: star, collar, cuffs and the patch on the arm. */
 function StarKit() {
-  const star = useMemo(() => starShape(0.2, 0.085), [])
+  /* Big. This is the only thing on the island that has to be earned, and it
+     is read from across a green at the camera's usual distance, so the star
+     is most of the width of the chest rather than a badge on it. */
+  const star = useMemo(() => starShape(0.26, 0.112), [])
+  const patch = useMemo(() => starShape(0.07, 0.03), [])
+  const glow = useRef<Mesh>(null)
+
+  /* It catches the light as he turns, the way a metal thread does. The pulse
+     is slow and shallow - a shirt that blinks is a hazard light. */
+  useFrame((state) => {
+    if (!glow.current) return
+    const m = glow.current.material as MeshStandardMaterial
+    m.emissiveIntensity = 0.5 + Math.sin(state.clock.elapsedTime * 1.3) * 0.22
+  })
 
   return (
     <group position={[0, 1.05, 0]}>
-      {/* The star across the chest, standing a hair off the shirt so it
-          catches the light rather than reading as a printed decal. */}
-      <mesh position={[0, 0.06, 0.196]}>
-        <extrudeGeometry args={[star, { depth: 0.022, bevelEnabled: false }]} />
+      {/* A darker field behind the star, so the gold has something to sit on
+          rather than floating on the blue. */}
+      <mesh position={[0, 0.05, 0.192]}>
+        <circleGeometry args={[0.29, 24]} />
+        <meshStandardMaterial color="#12306b" roughness={0.85} />
+      </mesh>
+      <mesh position={[0, 0.05, 0.194]}>
+        <ringGeometry args={[0.285, 0.305, 24]} />
         <meshStandardMaterial
-          color="#f5c518"
-          emissive="#f0a33c"
-          emissiveIntensity={0.45}
+          color="#f2c230"
           metalness={0.5}
-          roughness={0.3}
+          roughness={0.35}
         />
       </mesh>
 
-      {/* Gold at the collar. */}
+      {/* The star itself, bevelled so its arms catch the light separately
+          rather than reading as one flat shape. */}
+      <mesh ref={glow} position={[0, 0.05, 0.196]} castShadow>
+        <extrudeGeometry
+          args={[
+            star,
+            {
+              depth: 0.03,
+              bevelEnabled: true,
+              bevelThickness: 0.012,
+              bevelSize: 0.012,
+              bevelSegments: 2,
+            },
+          ]}
+        />
+        <meshStandardMaterial
+          color="#ffd23f"
+          emissive="#f0a33c"
+          emissiveIntensity={0.5}
+          metalness={0.65}
+          roughness={0.22}
+        />
+      </mesh>
+
+      {/* A chevron under the star, which is what turns a decorated shirt into
+          a uniform somebody was given. */}
+      {[0, 1].map((i) => (
+        <mesh
+          key={i}
+          position={[0, -0.26 + i * 0.06, 0.193]}
+          rotation={[0, 0, 0]}
+        >
+          {/* A partial ring, centred on straight down so the chevron is
+              symmetric about the middle of the chest. 270 degrees is down in
+              ring space, and the span is taken off either side of it -
+              picking a start angle by eye lands it lopsided. */}
+          <ringGeometry
+            args={[0.16 - i * 0.03, 0.185 - i * 0.03, 20, 1, 4.012, 1.4]}
+          />
+          <meshStandardMaterial
+            color="#f2c230"
+            metalness={0.45}
+            roughness={0.35}
+          />
+        </mesh>
+      ))}
+
+      {/* Gold at the collar, standing slightly proud of the neck. */}
       <mesh position={[0, 0.355, 0]}>
-        <boxGeometry args={[0.64, 0.07, 0.4]} />
+        <boxGeometry args={[0.645, 0.08, 0.405]} />
         <meshStandardMaterial
           color="#f2c230"
           flatShading
-          metalness={0.4}
-          roughness={0.4}
+          metalness={0.45}
+          roughness={0.35}
         />
       </mesh>
+      {/* And a second, thinner line under it: a placket, so the collar reads
+          as tailoring rather than as a stripe. */}
+      <mesh position={[0, 0.29, 0.192]}>
+        <boxGeometry args={[0.2, 0.04, 0.01]} />
+        <meshStandardMaterial color="#f2c230" metalness={0.4} />
+      </mesh>
 
-      {/* A gold band round the hem, which is what ties it to the trousers. */}
+      {/* A gold band round the hem, which ties the shirt to the trousers. */}
       <mesh position={[0, -0.33, 0]}>
-        <boxGeometry args={[0.635, 0.06, 0.395]} />
-        <meshStandardMaterial color="#f2c230" flatShading metalness={0.35} />
+        <boxGeometry args={[0.638, 0.07, 0.398]} />
+        <meshStandardMaterial color="#f2c230" flatShading metalness={0.4} />
       </mesh>
 
       {/* Cuffs, at the end of each sleeve. */}
       {[-0.33, 0.33].map((x) => (
         <mesh key={x} position={[x, 0.24, 0]}>
-          <boxGeometry args={[0.06, 0.12, 0.4]} />
-          <meshStandardMaterial color="#f2c230" flatShading metalness={0.35} />
+          <boxGeometry args={[0.07, 0.13, 0.405]} />
+          <meshStandardMaterial color="#f2c230" flatShading metalness={0.4} />
         </mesh>
       ))}
 
-      {/* The mission patch on the left arm: a small disc with its own star. */}
-      <group position={[-0.325, 0.08, 0.02]} rotation={[0, -Math.PI / 2, 0]}>
-        <mesh>
-          <circleGeometry args={[0.1, 16]} />
-          <meshStandardMaterial color="#0f2c5c" />
+      {/* Shoulder flashes: a gold bar down the top of each arm. From behind -
+          which is how this game is played - these are the whole of what says
+          the shirt is a kit. */}
+      {[-0.31, 0.31].map((x) => (
+        <mesh key={x} position={[x, 0.3, 0]}>
+          <boxGeometry args={[0.045, 0.05, 0.3]} />
+          <meshStandardMaterial color="#f2c230" flatShading metalness={0.45} />
         </mesh>
-        <mesh position={[0, 0, 0.004]}>
+      ))}
+
+      {/* The mission patch on the left arm: a disc with its own star. */}
+      <group position={[-0.325, 0.06, 0.02]} rotation={[0, -Math.PI / 2, 0]}>
+        <mesh>
+          <circleGeometry args={[0.105, 16]} />
+          <meshStandardMaterial color="#0f2c5c" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 0, 0.003]}>
+          <ringGeometry args={[0.095, 0.105, 16]} />
+          <meshStandardMaterial color="#f2c230" metalness={0.45} />
+        </mesh>
+        <mesh position={[0, 0, 0.006]}>
           <extrudeGeometry
-            args={[
-              starShape(0.068, 0.029),
-              { depth: 0.008, bevelEnabled: false },
-            ]}
+            args={[patch, { depth: 0.008, bevelEnabled: false }]}
           />
           <meshStandardMaterial
-            color="#f5c518"
+            color="#ffd23f"
             emissive="#f0a33c"
             emissiveIntensity={0.4}
-            metalness={0.4}
+            metalness={0.45}
           />
         </mesh>
       </group>

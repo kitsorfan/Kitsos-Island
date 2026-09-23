@@ -1957,17 +1957,13 @@ export const INTERIORS: Interior[] = [
          already here, and it is still the right one. */
       { kind: 'globe', position: [6.6, 6.4] },
       /*
-       * The airlock. The rack stands at z = -2 in an alcove of its own and
-       * the floor in front of it is left empty, because the one thing this
-       * wall has to do is show a suit hanging on it - furniture parked in the
-       * mouth of the recess hides the suit and the walk to it both.
-       *
-       * So the spare lockers are pushed north, past the alcove and out of the
-       * approach, and there is nothing at all between the door and the rack.
+       * The west wall is the airlock and nothing else. The rack stands at
+       * z = -2 in its own lit alcove and the whole side is left to it -
+       * there were lockers along here and they are gone, because a row of
+       * green cupboards beside a spacesuit reads as a changing room and
+       * pulls the eye off the one thing on this wall worth looking at.
        */
-      { kind: 'locker', position: [-9, 3.6], rotation: Math.PI / 2 },
-      { kind: 'locker', position: [-9, 5.4], rotation: Math.PI / 2 },
-      /* Avionics down both sides: the racks that fly the thing. */
+      /* Avionics down the other side: the racks that fly the thing. */
       { kind: 'serverRack', position: [9, -4], rotation: -Math.PI / 2 },
       { kind: 'serverRack', position: [9, -6], rotation: -Math.PI / 2 },
       { kind: 'serverRack', position: [-9, -6], rotation: Math.PI / 2 },

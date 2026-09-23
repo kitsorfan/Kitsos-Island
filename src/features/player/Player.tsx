@@ -1280,13 +1280,38 @@ export function Player() {
     }
 
     if (group.current) {
-      group.current.position.set(px, py, pz)
-      group.current.rotation.y = facing.current
+      /*
+       * In orbit there is no floor and no down, so he comes off the deck and
+       * turns slowly with nothing holding him - which is the whole of what
+       * says the engines are out. Everything below still runs on the walking
+       * position, so this is applied over the top of it rather than instead:
+       * the drift is added to where the deck put him.
+       */
+      if (store.mode === 'orbit') {
+        const drift = clock - (store.launch?.started ?? clock)
+        group.current.position.set(
+          px + Math.sin(drift * 0.31) * 0.5,
+          py + 0.9 + Math.sin(drift * 0.43) * 0.35,
+          pz + Math.cos(drift * 0.26) * 0.4,
+        )
+        /* A slow tumble on all three axes. A man with nothing under his feet
+           does not stay upright, and holding him level is the one thing that
+           would make the float read as standing on glass. */
+        group.current.rotation.set(
+          Math.sin(drift * 0.23) * 0.22,
+          facing.current + drift * 0.16,
+          Math.sin(drift * 0.19) * 0.3,
+        )
+      } else {
+        group.current.position.set(px, py, pz)
+        group.current.rotation.set(0, facing.current, 0)
+      }
     }
     // The blob shadow stays on the ground and shrinks as he rises. In the
-    // water there is nothing under him for it to fall on.
+    // water there is nothing under him for it to fall on. Weightless there
+    // is nothing under him at all.
     if (shadow.current) {
-      shadow.current.visible = !SWIM.afloat
+      shadow.current.visible = !SWIM.afloat && store.mode !== 'orbit'
       shadow.current.position.y = 0.03 - hop.current.y
       const shrink = Math.max(0.45, 1 - hop.current.y * 0.28)
       shadow.current.scale.setScalar(shrink)

@@ -62,15 +62,76 @@ export function FlightDeck() {
  */
 function Hologram() {
   const t = useT()
+  const launch = useGame((s) => s.launch)
   const spin = useRef<Group>(null)
   const glow = useRef<Group>(null)
+  /* The painted shell, which lifts away and fades as the count runs out. */
+  const shell = useRef<Group>(null)
+  /* The ship inside it, which is what climbs. */
+  const ship = useRef<Group>(null)
+  /* The exhaust under it, lit only while the engines are. */
+  const burn = useRef<Group>(null)
 
   useFrame((state) => {
     const time = state.clock.elapsedTime
-    if (spin.current) spin.current.rotation.y = time * 0.32
     /* It breathes, the way a projection that is costing power does. */
     if (glow.current)
       glow.current.scale.setScalar(1 + Math.sin(time * 1.6) * 0.012)
+
+    const phase = launch ? launchPhase(launch, performance.now() / 1000) : null
+
+    /*
+     * Idling, it turns slowly and shows the cutaway. That is the diagram,
+     * and it is what the room says before anything happens.
+     */
+    if (!phase) {
+      if (spin.current) spin.current.rotation.y = time * 0.32
+      if (shell.current) {
+        shell.current.position.y = 0
+        shell.current.visible = true
+        shell.current.scale.setScalar(1)
+      }
+      if (ship.current) ship.current.position.y = 0
+      if (burn.current) burn.current.visible = false
+      return
+    }
+
+    /*
+     * And once the button is pressed it stops being a diagram and flies the
+     * flight, in miniature, a couple of metres from the man doing it. The
+     * hologram is the only place the launch can actually be watched from the
+     * outside - he is strapped in behind the window for the whole of it - so
+     * this is where the ship is seen to leave the tower.
+     */
+    /* The turn slows to a stop as the count runs out: a model still
+       revolving through its own launch reads as a display, not an event. */
+    const settle = Math.max(0, 1 - phase.t * 3)
+    if (spin.current) spin.current.rotation.y += settle * 0.32 * 0.016
+
+    /* The shell lifts off and thins away through the hold, so by ignition
+       the ship is standing clear of it. */
+    const shed = Math.min(1, phase.stage === 'hold' ? phase.stageT : 1)
+    if (shell.current) {
+      shell.current.position.y = shed * 1.4
+      shell.current.scale.setScalar(1 + shed * 0.5)
+      shell.current.visible = shed < 0.98
+    }
+
+    /* The ship climbs on the same altitude the window is reading, so the
+       model and the view out of the glass agree. */
+    if (ship.current) ship.current.position.y = phase.altitude * 3.4
+
+    /* The engines, lit from ignition and out again at the top. */
+    if (burn.current) {
+      const lit = phase.stage === 'ignition' || phase.stage === 'climb'
+      burn.current.visible = lit
+      if (lit) {
+        /* Flickering, and longest at ignition where the thrust is. */
+        const flare = 0.6 + phase.shake * 0.8 + Math.sin(time * 40) * 0.12
+        burn.current.scale.set(1, flare, 1)
+        burn.current.position.y = phase.altitude * 3.4
+      }
+    }
   })
 
   return (
@@ -103,96 +164,131 @@ function Hologram() {
       <group ref={glow} position={[0, 0.34, 0]}>
         <group ref={spin}>
           {/* The tower as it looks from outside: the painted bands, in light
-              rather than paint. */}
-          {[0, 1, 2, 3, 4].map((i) => (
-            <mesh key={i} position={[0, 0.5 + i * 0.42, 0]}>
-              <cylinderGeometry
-                args={[0.52 - i * 0.05, 0.57 - i * 0.05, 0.42, 14, 1, true]}
-              />
-              <meshBasicMaterial
-                color={i % 2 === 0 ? '#bfe4ff' : '#ff9b8a'}
-                transparent
-                opacity={0.22}
-                depthWrite={false}
-                side={DoubleSide}
-              />
-            </mesh>
-          ))}
-          {/* The lantern room at the top of it. */}
-          <mesh position={[0, 2.78, 0]}>
-            <cylinderGeometry args={[0.3, 0.3, 0.34, 12, 1, true]} />
-            <meshBasicMaterial
-              color="#ffe9a8"
-              transparent
-              opacity={0.45}
-              depthWrite={false}
-              side={DoubleSide}
-            />
-          </mesh>
-
-          {/* And the ship inside the shell: a hull up the middle, a nose on
-              it, fins at the base and the bells of the engines under it. */}
-          <mesh position={[0, 1.5, 0]}>
-            <cylinderGeometry args={[0.3, 0.38, 2.5, 12]} />
-            <meshBasicMaterial
-              color="#8fd4ff"
-              wireframe
-              transparent
-              opacity={0.75}
-            />
-          </mesh>
-          <mesh position={[0, 3.05, 0]}>
-            <coneGeometry args={[0.3, 0.6, 12]} />
-            <meshBasicMaterial
-              color="#8fd4ff"
-              wireframe
-              transparent
-              opacity={0.75}
-            />
-          </mesh>
-          {[0, 1, 2].map((i) => {
-            const a = (i / 3) * Math.PI * 2
-            return (
-              <mesh
-                key={i}
-                position={[Math.cos(a) * 0.42, 0.42, Math.sin(a) * 0.42]}
-                rotation={[0, -a, 0]}
-              >
-                <boxGeometry args={[0.04, 0.72, 0.36]} />
-                <meshBasicMaterial
-                  color="#8fd4ff"
-                  wireframe
-                  transparent
-                  opacity={0.75}
+              rather than paint. This is the part that lifts away. */}
+          <group ref={shell}>
+            {[0, 1, 2, 3, 4].map((i) => (
+              <mesh key={i} position={[0, 0.5 + i * 0.42, 0]}>
+                <cylinderGeometry
+                  args={[0.52 - i * 0.05, 0.57 - i * 0.05, 0.42, 14, 1, true]}
                 />
-              </mesh>
-            )
-          })}
-          {[0, 1, 2].map((i) => {
-            const a = (i / 3) * Math.PI * 2 + Math.PI / 3
-            return (
-              <mesh
-                key={i}
-                position={[Math.cos(a) * 0.19, 0.14, Math.sin(a) * 0.19]}
-              >
-                <coneGeometry args={[0.15, 0.3, 10, 1, true]} />
                 <meshBasicMaterial
-                  color="#ffb36a"
+                  color={i % 2 === 0 ? '#bfe4ff' : '#ff9b8a'}
                   transparent
-                  opacity={0.5}
+                  opacity={0.22}
                   depthWrite={false}
                   side={DoubleSide}
                 />
               </mesh>
-            )
-          })}
+            ))}
+            {/* The lantern room at the top of it. */}
+            <mesh position={[0, 2.78, 0]}>
+              <cylinderGeometry args={[0.3, 0.3, 0.34, 12, 1, true]} />
+              <meshBasicMaterial
+                color="#ffe9a8"
+                transparent
+                opacity={0.45}
+                depthWrite={false}
+                side={DoubleSide}
+              />
+            </mesh>
+          </group>
+
+          {/* And the ship inside the shell: a hull up the middle, a nose on
+              it, fins at the base and the bells of the engines under it.
+              This is the part that climbs. */}
+          <group ref={ship}>
+            <mesh position={[0, 1.5, 0]}>
+              <cylinderGeometry args={[0.3, 0.38, 2.5, 12]} />
+              <meshBasicMaterial
+                color="#8fd4ff"
+                wireframe
+                transparent
+                opacity={0.75}
+              />
+            </mesh>
+            <mesh position={[0, 3.05, 0]}>
+              <coneGeometry args={[0.3, 0.6, 12]} />
+              <meshBasicMaterial
+                color="#8fd4ff"
+                wireframe
+                transparent
+                opacity={0.75}
+              />
+            </mesh>
+            {[0, 1, 2].map((i) => {
+              const a = (i / 3) * Math.PI * 2
+              return (
+                <mesh
+                  key={i}
+                  position={[Math.cos(a) * 0.42, 0.42, Math.sin(a) * 0.42]}
+                  rotation={[0, -a, 0]}
+                >
+                  <boxGeometry args={[0.04, 0.72, 0.36]} />
+                  <meshBasicMaterial
+                    color="#8fd4ff"
+                    wireframe
+                    transparent
+                    opacity={0.75}
+                  />
+                </mesh>
+              )
+            })}
+            {[0, 1, 2].map((i) => {
+              const a = (i / 3) * Math.PI * 2 + Math.PI / 3
+              return (
+                <mesh
+                  key={i}
+                  position={[Math.cos(a) * 0.19, 0.14, Math.sin(a) * 0.19]}
+                >
+                  <coneGeometry args={[0.15, 0.3, 10, 1, true]} />
+                  <meshBasicMaterial
+                    color="#ffb36a"
+                    transparent
+                    opacity={0.5}
+                    depthWrite={false}
+                    side={DoubleSide}
+                  />
+                </mesh>
+              )
+            })}
+          </group>
+
+          {/*
+            The exhaust, which only exists while the engines are lit. It
+            hangs off the bottom of the ship and stretches with the thrust,
+            so the plume is longest at ignition and thins as the air does.
+          */}
+          <group ref={burn} visible={false}>
+            <mesh position={[0, -0.36, 0]}>
+              <coneGeometry args={[0.26, 0.9, 12, 1, true]} />
+              <meshBasicMaterial
+                color="#ffd08a"
+                transparent
+                opacity={0.55}
+                depthWrite={false}
+                side={DoubleSide}
+              />
+            </mesh>
+            <mesh position={[0, -0.62, 0]}>
+              <coneGeometry args={[0.15, 1.5, 12, 1, true]} />
+              <meshBasicMaterial
+                color="#ff8a4a"
+                transparent
+                opacity={0.3}
+                depthWrite={false}
+                side={DoubleSide}
+              />
+            </mesh>
+          </group>
         </group>
       </group>
 
       {/* The label on the deck under it, which is where the reveal is put
           into words for anybody who wants it spelled out. */}
       <TextPlane
-        text={t('THE OLD LIGHTHOUSE - CUTAWAY')}
+        text={t(
+          launch ? 'DEPARTURE IN PROGRESS' : 'THE OLD LIGHTHOUSE - CUTAWAY',
+        )}
         position={[0, 0.42, 1.55]}
         rotation={[-Math.PI / 2, 0, 0]}
         width={2.4}

@@ -155,6 +155,19 @@ Some notes on how it hangs together:
   arithmetic on elapsed time rather than a frame-stepped machine, so a dropped
   frame or a backgrounded tab costs nothing.
 
+- **The hologram flies the flight.** Idling it turns slowly and shows the
+  cutaway; once the button is pressed the painted shell lifts away and thins
+  out, the ship climbs on the same altitude the window is reading, and the
+  engines light under it. It is the only place the launch can be watched from
+  outside — he is strapped in behind the glass for the whole of it.
+
+- **In orbit he floats, and the credits roll.** The engines cut and he comes
+  off the deck, tumbling slowly on all three axes with the blob shadow gone,
+  because holding a weightless man upright is the one thing that would make
+  the float read as standing on glass. Beside him a credits panel plays
+  (`features/launch/credits.ts`) — every job on a game's crew list, all of
+  them him, ending on the one card that is not a joke.
+
 - **The prize is a certificate and a shirt.** In orbit he types his name onto
   a certificate drawn to a canvas and handed over as a PNG
   (`features/launch/certificate.ts`), signed by Kitsos Orfanopoulos; the full

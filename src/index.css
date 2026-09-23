@@ -5613,3 +5613,117 @@ canvas {
   transform: translateY(-1px);
   filter: brightness(1.08);
 }
+
+/* --------------------------- the credits -------------------------- */
+
+/*
+ * Playing in the cabin while he floats. Fixed to the left so it runs beside
+ * the orbit card rather than over it: the certificate is what that card is
+ * for, and this is something on in the background.
+ *
+ * It takes no pointer events at all — there is nothing to click here, and a
+ * panel that swallows clicks beside a card with buttons on it is a panel
+ * that eats the button.
+ */
+.credits {
+  position: fixed;
+  left: clamp(0.8rem, 3vw, 2.4rem);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 72;
+  display: grid;
+  gap: 0.6rem;
+  width: min(230px, 26vw);
+  padding: 1rem 1.1rem;
+  border-left: 2px solid rgba(240, 163, 60, 0.5);
+  color: #dce6f4;
+  pointer-events: none;
+}
+
+.credits__kicker {
+  font-size: 0.62rem;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: #f0a33c;
+}
+
+/* Held at a fixed height so the roll does not jog the panel about as the
+   cards change length. */
+.credits__stage {
+  display: grid;
+  align-content: center;
+  min-height: 7.5rem;
+  transition: opacity 0.12s linear;
+}
+
+.credits__job {
+  margin: 0 0 0.15rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #8fa4c0;
+}
+
+.credits__who {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.credits__thanks h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #f0a33c;
+}
+
+.credits__thanks p {
+  margin: 0 0 0.3rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.credits__sign {
+  margin-top: 0.5rem !important;
+  color: #8fa4c0;
+  font-size: 0.75rem !important;
+  font-style: italic;
+}
+
+/*
+ * The roll only sits beside the card where there is genuinely room for it.
+ *
+ * The card is up to 760px centred, so on anything under about 1400px the two
+ * meet in the middle and the credits run across the certificate. Below that
+ * width the roll comes off the side and lies along the bottom instead.
+ *
+ * It stays fixed rather than going static: it is a sibling of the card, not
+ * a child of it, so unpinning it would drop it at the foot of the whole app
+ * rather than under the certificate.
+ */
+@media (max-width: 1400px) {
+  .credits {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    transform: none;
+    width: 100%;
+    padding: 0.6rem 1rem calc(0.6rem + env(safe-area-inset-bottom, 0px));
+    border-left: 0;
+    border-top: 2px solid rgba(240, 163, 60, 0.5);
+    background: linear-gradient(
+      180deg,
+      rgba(6, 7, 14, 0),
+      rgba(6, 7, 14, 0.92) 35%
+    );
+    text-align: center;
+    justify-items: center;
+  }
+
+  .credits__stage {
+    min-height: 3.4rem;
+  }
+}

@@ -15,6 +15,7 @@ import { LiftPanel } from './features/lift/LiftPanel'
 import { LiftRide } from './features/lift/LiftRide'
 import { LaunchSequence } from './features/launch/LaunchSequence'
 import { OrbitCard } from './features/launch/OrbitCard'
+import { CreditsRoll } from './features/launch/CreditsRoll'
 import { BalloonCard } from './features/balloon/BalloonCard'
 import { HideCard } from './features/hide/HideCard'
 import { MotoCard } from './features/moto/MotoCard'
@@ -178,6 +179,7 @@ export default function App() {
           <LiftRide />
           <LaunchSequence />
           <OrbitCard />
+          <CreditsRoll />
           <Toast />
         </>
       )}

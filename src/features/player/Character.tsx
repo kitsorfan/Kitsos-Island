@@ -1289,15 +1289,11 @@ function StarKit() {
         </mesh>
       ))}
 
-      {/* Shoulder flashes: a gold bar down the top of each arm. From behind -
-          which is how this game is played - these are the whole of what says
-          the shirt is a kit. */}
-      {[-0.31, 0.31].map((x) => (
-        <mesh key={x} position={[x, 0.3, 0]}>
-          <boxGeometry args={[0.045, 0.05, 0.3]} />
-          <meshStandardMaterial color="#f2c230" flatShading metalness={0.45} />
-        </mesh>
-      ))}
+      {/* Nothing on the shoulders. There were gold bars down the top of each
+          arm and they made the shirt busy: with the collar, the cuffs and the
+          hem already gold, a fourth line across the top turned the whole
+          silhouette into stripes and the star stopped being the thing you
+          look at. The shoulders stay blue. */}
 
       {/* The mission patch on the left arm: a disc with its own star. */}
       <group position={[-0.325, 0.06, 0.02]} rotation={[0, -Math.PI / 2, 0]}>

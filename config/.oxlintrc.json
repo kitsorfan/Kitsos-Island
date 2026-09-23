@@ -1,0 +1,14 @@
+{
+  "$schema": "../node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }],
+    // react-three-fiber is imperative by design: a useFrame callback earns its
+    // frame budget by writing straight to the camera, to shader uniforms and to
+    // the renderer, none of which are React state and none of which may go
+    // through a render to change. This rule is written for the compiler's view
+    // of a component tree and reads every one of those writes as a mutation.
+    "react/immutability": "off"
+  }
+}

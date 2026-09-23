@@ -1,6 +1,6 @@
 import './index.css'
-import { hasWebGL2 } from './game/webgl'
-import { showUnsupported } from './ui/Unsupported'
+import { hasWebGL2 } from './shared/engine/webgl'
+import { showUnsupported } from './shared/ui/Unsupported'
 
 const root = document.getElementById('root')!
 
@@ -23,7 +23,7 @@ if (hasWebGL2()) {
     let greek: Promise<unknown> = Promise.resolve()
     try {
       if (localStorage.getItem('island.settings')?.includes('"locale":"el"')) {
-        greek = import('./i18n/el/index')
+        greek = import('./shared/i18n/el/index')
       }
     } catch {
       /* No storage to read; English it is. */

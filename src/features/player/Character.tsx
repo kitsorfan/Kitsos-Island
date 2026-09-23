@@ -36,6 +36,17 @@ export interface CharacterMotion {
   cheer?: number
   /** 0 to 1: chest-deep in the sea and pulling, rather than standing. */
   swimming?: number
+  /**
+   * 0 to 1: weightless, and pulling at nothing.
+   *
+   * Apart from `swimming` because the arms are the only half the two share.
+   * A swimmer lies flat along the surface and goes somewhere; a man in orbit
+   * hangs upright-ish in the middle of the air with his knees drawn up and
+   * sculls to stay put. Feeding this through `swimming` would lay him out
+   * face-down in a cabin, which is the one pose that reads as drowning
+   * rather than floating.
+   */
+  floating?: number
 }
 
 interface CharacterProps {
@@ -194,6 +205,8 @@ export function Character({
   const ovation = useRef(0)
   /** Eased swim, so going in and wading out are both a settle, not a snap. */
   const paddle = useRef(0)
+  /** Eased, like the paddle: how weightless he is. */
+  const adrift = useRef(0)
   /** The wrist that whatever he is carrying hangs in, and a torch's flame. */
   const gripRef = useRef<Group>(null)
   /** The other wrist, for the flowers. */
@@ -230,6 +243,8 @@ export function Character({
       ((m.cheer ?? 0) - ovation.current) * Math.min(1, delta * 5)
     paddle.current +=
       ((m.swimming ?? 0) - paddle.current) * Math.min(1, delta * 5)
+    adrift.current +=
+      ((m.floating ?? 0) - adrift.current) * Math.min(1, delta * 2.5)
 
     if (m.recoil !== undefined && m.recoil > 0) m.recoil -= delta
     const kick = Math.max(0, m.recoil ?? 0) * 3
@@ -658,6 +673,85 @@ export function Character({
     // him round his own ankles and stand his head a body's length in front
     // of where he is. The lift and the shift back are what put the middle of
     // him back over the middle of him, lying along the surface.
+    /*
+     * Weightless.
+     *
+     * Slower than a stroke and going nowhere: he sculls with his forearms to
+     * hold himself where he is, one arm lazily out of time with the other so
+     * it never reads as a jumping jack. The legs hang with the knees drawn
+     * up, which is what a body does with nothing under it - a man in orbit
+     * standing to attention is a man standing on something.
+     */
+    if (adrift.current > 0.01) {
+      const mix = adrift.current
+      /* `t` is the character's own clock, already in scope: elapsed time
+         plus the per-character seed, so two people floating side by side
+         are not sculling in lockstep. */
+      const blend = (current: number, wanted: number) =>
+        current * (1 - mix) + wanted * mix
+
+      /* Two rates that do not divide into one another, so the arms never
+         come back into step. */
+      const sculLeft = Math.sin(t * 0.9)
+      const sculRight = Math.sin(t * 0.73 + 1.1)
+
+      if (armL.current) {
+        armL.current.rotation.x = blend(
+          armL.current.rotation.x,
+          -0.75 + sculLeft * 0.5,
+        )
+        armL.current.rotation.z = blend(
+          armL.current.rotation.z,
+          -0.55 - sculLeft * 0.22,
+        )
+      }
+      if (armR.current) {
+        armR.current.rotation.x = blend(
+          armR.current.rotation.x,
+          -0.75 + sculRight * 0.5,
+        )
+        armR.current.rotation.z = blend(
+          armR.current.rotation.z,
+          0.55 + sculRight * 0.22,
+        )
+      }
+      /* Knees drawn up and drifting, the way they hang with no floor. */
+      const tuck = Math.sin(t * 0.55)
+      if (legL.current) {
+        legL.current.rotation.x = blend(
+          legL.current.rotation.x,
+          -0.5 + tuck * 0.16,
+        )
+        legL.current.rotation.z = blend(legL.current.rotation.z, -0.12)
+      }
+      if (legR.current) {
+        legR.current.rotation.x = blend(
+          legR.current.rotation.x,
+          -0.38 - tuck * 0.14,
+        )
+        legR.current.rotation.z = blend(legR.current.rotation.z, 0.14)
+      }
+      if (kneeL.current) {
+        kneeL.current.rotation.x = blend(
+          kneeL.current.rotation.x,
+          0.85 + tuck * 0.2,
+        )
+      }
+      if (kneeR.current) {
+        kneeR.current.rotation.x = blend(
+          kneeR.current.rotation.x,
+          0.7 - tuck * 0.18,
+        )
+      }
+      /* A lean back off the vertical, so he is not stood to attention. */
+      if (body.current) {
+        body.current.rotation.x = blend(
+          body.current.rotation.x,
+          -0.22 + Math.sin(t * 0.47) * 0.1,
+        )
+      }
+    }
+
     if (paddle.current > 0.01) {
       const mix = paddle.current
       // Half the stride rate: an arm that swings like a walk is not a stroke.

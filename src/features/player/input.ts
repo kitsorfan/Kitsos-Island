@@ -206,6 +206,23 @@ export function consumeTripleJump() {
   return true
 }
 
+/**
+ * True once, on the second of two quick taps — the cape's way down.
+ *
+ * Deliberately does NOT reset the tap count. A double tap is the front half
+ * of a triple one, and zeroing here would eat the third tap before the dive
+ * off the jetty ever saw it. The flyer reads this, the jetty reads the
+ * triple, and the count is left alone for whichever comes second.
+ */
+export function doubleTapped() {
+  return taps === 2
+}
+
+/** Forget the run of taps, once a gesture has claimed it. */
+export function forgetTaps() {
+  taps = 0
+}
+
 /* ------------------------------- paintball ------------------------------- */
 
 /** Keys that throw a paintball. */

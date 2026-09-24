@@ -9,12 +9,14 @@
     "start": "vite preview --config config/vite.config.ts",
     "preview": "vite preview --config config/vite.config.ts",
     "lint": "oxlint --config config/.oxlintrc.json",
+    "typecheck": "tsc -b",
     "cv:pdf": "node config/cv-pdf.ts",
     "format": "prettier --write . --config config/.prettierrc.json --ignore-path config/.prettierignore",
     "format:check": "prettier --check . --config config/.prettierrc.json --ignore-path config/.prettierignore",
     "test": "vitest run --config config/vitest.config.ts",
     "test:watch": "vitest --config config/vitest.config.ts",
-    "test:coverage": "vitest run --coverage --config config/vitest.config.ts"
+    "test:coverage": "vitest run --coverage --config config/vitest.config.ts",
+    "prepare": "husky"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",
@@ -25,6 +27,8 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
@@ -35,7 +39,9 @@
     "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^6.1.0",
     "@vitest/coverage-v8": "^5.0.1",
+    "husky": "^9.1.7",
     "jsdom": "^29.1.1",
+    "lint-staged": "^17.5.1",
     "oxlint": "^1.79.0",
     "prettier": "^3.9.6",
     "typescript": "^7.0.2",

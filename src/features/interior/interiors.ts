@@ -2006,14 +2006,14 @@ export const INTERIORS: Interior[] = [
           title: 'Release notes',
           sections: [
             {
-              heading: 'Version 1.0',
+              heading: 'Version 1.0 · 2026-09-25',
               blocks: [{ type: 'text', text: 'First working version.' }],
             },
           ],
         },
         journal: {
           title: 'Release notes',
-          body: 'Version 1.0: the first working version of the island.',
+          body: 'Version 1.0, 2026-09-25: the first working version of the island.',
         },
       },
     ],

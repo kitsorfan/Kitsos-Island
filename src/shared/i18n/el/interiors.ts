@@ -227,6 +227,57 @@ export const INTERIORS: Record<string, string> = {
   'the footlocker at the end of the bunks':
     'το ερμάριο στο τέλος των κρεβατιών',
 
+  /* ---------------------------- Radio Center -------------------------- */
+  'the release notes': 'οι σημειώσεις έκδοσης',
+  'Release notes': 'Σημειώσεις έκδοσης',
+  'Version 1.1 · 2026-09-25': 'Έκδοση 1.1 · 2026-09-25',
+  'A two-page PDF CV, printed from the island, to download from the full CV.':
+    'Ένα βιογραφικό PDF δύο σελίδων, τυπωμένο από το νησί, για λήψη από το πλήρες βιογραφικό.',
+  'Version 1.0 · 2026-09-25': 'Έκδοση 1.0 · 2026-09-25',
+  'First working version.': 'Η πρώτη λειτουργική έκδοση.',
+  'Version 1.1, 2026-09-25: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.':
+    'Έκδοση 1.1, 2026-09-25: ένα βιογραφικό PDF δύο σελίδων, για λήψη από το πλήρες βιογραφικό. Έκδοση 1.0: η πρώτη λειτουργική έκδοση του νησιού.',
+
+  /* The officers' door, and the room behind it. */
+  'Operations room': 'Αίθουσα επιχειρήσεων',
+  'Officers only': 'Μόνο αξιωματικοί',
+  'the door to the operations room': 'η πόρτα για την αίθουσα επιχειρήσεων',
+  'the door to the barracks': 'η πόρτα για τον θάλαμο',
+  'OFFICERS ONLY, stencilled across it at eye height. The handle turns, and the duty clerk on the far side turns you straight back round.':
+    'ΜΟΝΟ ΑΞΙΩΜΑΤΙΚΟΙ, με στένσιλ στο ύψος των ματιών. Το πόμολο γυρίζει, και ο γραφέας υπηρεσίας από την άλλη μεριά σε γυρίζει αμέσως πίσω.',
+  'Not in those clothes. There is a uniform hanging on the locker by the service record.':
+    'Όχι με αυτά τα ρούχα. Υπάρχει μια στολή κρεμασμένη στο ντουλάπι δίπλα στο φύλλο μητρώου.',
+  'The operations room': 'Η αίθουσα επιχειρήσεων',
+  'Through the officers’ door at the Army Camp, which opens for the uniform and not for the man: Lt Col Mitsidis at his desk, and the landing plan on the table.':
+    'Πίσω από την πόρτα των αξιωματικών στο Στρατόπεδο, που ανοίγει για τη στολή κι όχι για τον άνθρωπο: ο Αντισυνταγματάρχης Μητσίδης στο γραφείο του, και το σχέδιο της απόβασης στο τραπέζι.',
+
+  /* His kit, and the duty bell. */
+  'the officer’s uniform': 'η στολή του αξιωματικού',
+  'OFFICER KIT': 'ΣΤΟΛΗ ΑΞΙΩΜΑΤΙΚΟΥ',
+  'ON PARADE': 'ΣΕ ΥΠΗΡΕΣΙΑ',
+  'In uniform': 'Με στολή',
+  'Pattern combat dress and the green beret. The door to the operations room will open for you now.':
+    'Στολή παραλλαγής και ο πράσινος μπερές. Η πόρτα της αίθουσας επιχειρήσεων θα σου ανοίξει τώρα.',
+  'the duty bell': 'το καμπανάκι υπηρεσίας',
+  'The duty bell': 'Το καμπανάκι υπηρεσίας',
+  'Not for civilians': 'Όχι για πολίτες',
+  'A brass bell on a bracket, its rope tied up out of reach of anybody passing through.':
+    'Ένα μπρούντζινο καμπανάκι σε βραχίονα, με το σχοινί του δεμένο ψηλά, μακριά από όποιον περνάει.',
+  'It calls the barracks to stand by their beds for evening inspection. Only the duty officer rings it, and the duty officer is in uniform.':
+    'Καλεί τον θάλαμο να σταθεί δίπλα στα κρεβάτια για τη βραδινή επιθεώρηση. Μόνο ο αξιωματικός υπηρεσίας το χτυπά, και ο αξιωματικός υπηρεσίας φορά στολή.',
+
+  /* The inspection it calls. */
+  'Barracks orderly': 'Θαλαμοφύλακας',
+  'Evening inspection': 'Βραδινή επιθεώρηση',
+  'Barracks — attention! Five men, one to a bunk, heels on the line.':
+    'Θάλαμος — προσοχή! Πέντε άντρες, ένας σε κάθε κρεβάτι, οι φτέρνες στη γραμμή.',
+  'Lieutenant, barracks ready for inspection! Beds made, lockers squared, nobody missing.':
+    'Κύριε Διμοιρίτα, θάλαμος έτοιμος για επιθεώρηση! Κρεβάτια στρωμένα, ντουλάπια τακτοποιημένα, κανείς δεν λείπει.',
+  'Permission to turn in once the Lieutenant has walked the line, sir.':
+    'Ζητώ την άδεια να κατακλιθούμε, μόλις ο κύριος Διμοιρίτης περάσει τη γραμμή.',
+  'Already at attention, sir. Nobody moves until the Lieutenant says so.':
+    'Ήδη σε στάση προσοχής, κύριε. Κανείς δεν κουνιέται μέχρι να το πει ο Διμοιρίτης.',
+
   /* ------------------------------- School ----------------------------- */
   'The hall': 'Το χολ',
   'Early education': 'Πρώτα χρόνια εκπαίδευσης',
@@ -285,4 +336,10 @@ export const INTERIORS: Record<string, string> = {
   'Six countries': 'Έξι χώρες',
   'The globe in the astronomy corner at Evangeliki: Greece, Cyprus, Germany, France, Italy and Switzerland, stood in rather than pointed at.':
     'Η υδρόγειος στη γωνιά της αστρονομίας στην Ευαγγελική: Ελλάδα, Κύπρος, Γερμανία, Γαλλία, Ιταλία και Ελβετία — χώρες όχι δειγμένες μα πατημένες.',
+  'Flight deck': 'Θάλαμος πτήσης',
+  'the crew screen': 'η οθόνη του πληρώματος',
+  'Meet the characters': 'Γνωρίστε τους χαρακτήρες',
+  'The crew screen': 'Η οθόνη του πληρώματος',
+  'A screen on the flight deck with everybody on the island on it, and a tick against each one he stopped to hear.':
+    'Μια οθόνη στον θάλαμο πτήσης με όλους όσοι ζουν στο νησί, και ένα τικ δίπλα σε όποιον στάθηκε να ακούσει.',
 }

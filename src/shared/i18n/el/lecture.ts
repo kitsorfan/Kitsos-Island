@@ -12,7 +12,7 @@ export const LECTURE: Record<string, string> = {
     'Ανάλυση συμμόρφωσης ασκήσεων κίνησης',
   'Diploma thesis · NTUA, School of ECE, 2022':
     'Διπλωματική εργασία · ΕΜΠ, Σχολή ΗΜΜΥ, 2022',
-  'Christos Orfanopoulos': 'Χρήστος Ορφανόπουλος',
+  'Kitsos Orfanopoulos': 'Κίτσος Ορφανόπουλος',
   'Supervisor: Prof. Panagiotis Tsanakas, Dean of the School':
     'Επιβλέπων: Καθ. Παναγιώτης Τσανάκας, Κοσμήτορας της Σχολής',
 

@@ -74,6 +74,8 @@ export function Hud() {
   const missions = useGame((s) => s.missions)
   const lighthouseOpen = useGame((s) => s.lighthouseOpen)
   const hasMoved = useGame((s) => s.hasMoved)
+  const hasDived = useGame((s) => s.hasDived)
+  const outfit = useGame((s) => s.outfit)
   const openJournal = useGame((s) => s.openJournal)
   const openMap = useGame((s) => s.openMap)
   const openGreeting = useGame((s) => s.openGreeting)
@@ -117,6 +119,15 @@ export function Hud() {
   // its own, so a building lookup comes back empty two floors down and the
   // banner reads "Kitsos Island" while you are standing under the house.
   const room = t(indoors ? INTERIOR_BY_ID.get(area) : undefined)
+
+  /*
+   * The whole HUD steps off the screen for the launch and stays off in
+   * orbit. Every one of its buttons is a way back to a game that is over —
+   * the map fast-travels, the arcade opens a board, the day/night switch
+   * relights an island he can no longer see — and the certificate wants the
+   * screen to itself besides.
+   */
+  if (mode === 'reveal' || mode === 'launch' || mode === 'orbit') return null
 
   return (
     <div
@@ -325,6 +336,27 @@ export function Hud() {
             : t('WASD to walk · Shift to sprint · M for the map')}
         </p>
       )}
+
+      {/* The cape.
+
+          Flying is the one thing on the island no sign explains, and the way
+          back down is the half nobody guesses - you can take off by accident
+          and then be stuck up there. Shown from the moment he earns the
+          shirt until the first time he dives, and never again that session.
+
+          It waits for `hasMoved` so a new player is not handed two hints at
+          once, and sits out the on-screen-stick layout, where there is no
+          space bar to press. */}
+      {mode === 'explore' &&
+        outfit === 'star' &&
+        hasMoved &&
+        !hasDived &&
+        !playing &&
+        !coarse && (
+          <p className="nudge">
+            {t('Space to fly · double-tap Space to drop · hold to pull up')}
+          </p>
+        )}
 
       {party && (
         <p className="party-banner">

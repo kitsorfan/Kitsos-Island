@@ -366,6 +366,11 @@ export type ExhibitKind =
    * every other exhibit does.
    */
   | 'prop'
+  /**
+   * The screen on the flight deck with everybody on the island on it. Its
+   * panel draws the roster itself, from the world's own list of people.
+   */
+  | 'crew'
 
 export interface Exhibit {
   id: string
@@ -432,6 +437,12 @@ export interface InteriorLink {
    * `revealSecret`. Until then it is furniture.
    */
   needs?: string
+  /**
+   * Stays shut to anybody not dressed for it: the officers' door at the
+   * camp, which opens for the uniform and not for the man. Drawn shut, and
+   * offers `lines` to whoever tries it, until he is wearing it.
+   */
+  dress?: 'officer'
   /** Journal entry filed the first time it opens. */
   journal?: { title: string; body: string }
   /**

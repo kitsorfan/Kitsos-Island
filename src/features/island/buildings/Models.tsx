@@ -9,6 +9,7 @@ import {
   type MeshStandardMaterial,
 } from 'three'
 import { useGame } from '../../../shared/state/store'
+import { bandShed, revealPhase } from '../../launch/revealLogic'
 import {
   DOOR_AJAR,
   DOOR_OPEN,
@@ -52,6 +53,11 @@ interface WindowProps {
   rotation?: [number, number, number]
   frame?: string
   glass?: string
+  /**
+   * Whether anybody is home behind this pane. It is not a colour — it is a
+   * switch that only does anything once the lamps come on: a window marked
+   * `lit` is ordinary glass all day and burns after dark.
+   */
   lit?: boolean
 }
 
@@ -63,6 +69,11 @@ function Win({
   glass = '#bfe4f5',
   lit = false,
 }: WindowProps) {
+  // A window is only ever lit after dark, and never during hide and seek,
+  // when every lamp on the island is put out.
+  const night = useGame((s) => s.night && s.hide === null)
+  const burning = lit && night
+
   return (
     <group position={position} rotation={rotation}>
       <mesh position={[0, 0, 0.02]}>
@@ -70,14 +81,14 @@ function Win({
         <meshStandardMaterial color={frame} flatShading roughness={0.8} />
       </mesh>
       <mesh position={[0, 0, 0.1]}>
-        <planeGeometry args={size} />
         <meshStandardMaterial
-          color={lit ? '#ffe9a8' : glass}
-          emissive={lit ? '#ffbe4d' : '#000000'}
-          emissiveIntensity={lit ? 0.7 : 0}
+          color={burning ? '#ffe4a2' : glass}
+          emissive={burning ? '#ffc65a' : '#000000'}
+          emissiveIntensity={burning ? 1.5 : 0}
           roughness={0.25}
           metalness={0.1}
         />
+        <planeGeometry args={size} />
       </mesh>
     </group>
   )
@@ -1465,31 +1476,48 @@ export function RadioModel() {
     }
   })
 
+  /* A twelve-sided cylinder puts a corner, not a face, at +z. Turned by half
+     a facet, the drum has a flat face at the front for the door and one
+     every 30° after it for the windows; unturned, the door straddled the
+     corner and the wall folded through the middle of it. */
+  const facet = Math.PI / 12
+
   return (
     <group>
-      <mesh position={[0, 2.1, 0]} castShadow receiveShadow>
+      <mesh
+        position={[0, 2.1, 0]}
+        rotation={[0, facet, 0]}
+        castShadow
+        receiveShadow
+      >
         <cylinderGeometry args={[3.9, 4.1, 4.2, 12]} />
         <meshStandardMaterial color="#efe6f2" flatShading roughness={0.9} />
       </mesh>
-      <mesh position={[0, 4.4, 0]} castShadow>
+      <mesh position={[0, 4.4, 0]} rotation={[0, facet, 0]} castShadow>
         <cylinderGeometry args={[4.4, 4.4, 0.4, 12]} />
         <meshStandardMaterial color="#8e4fa8" flatShading roughness={0.8} />
       </mesh>
-      <mesh position={[0, 5, 0]} castShadow>
+      <mesh position={[0, 5, 0]} rotation={[0, facet, 0]} castShadow>
         <cylinderGeometry args={[2.6, 3.4, 1.2, 12]} />
         <meshStandardMaterial color="#b95fd0" flatShading roughness={0.85} />
       </mesh>
 
+      {/* The front face leans in with the taper, from 3.96 out at the
+          ground to 3.85 at the head of the door; the slab straddles both. */}
       <Door
-        position={[0, 1.2, D / 2 - 0.05]}
+        position={[0, 1.2, D / 2]}
         width={1.5}
         height={2.4}
         color="#7a3f92"
       />
-      {[-2.2, 2.2].map((x) => (
+      {/* The drum is round, so the windows go round it too: each one sits
+          on the face either side of the door's, turned to face straight
+          out, with its frame half in the wall so none of it floats. */}
+      {[-2 * facet, 2 * facet].map((turn) => (
         <Win
-          key={x}
-          position={[x, 2.6, D / 2 - 1.1]}
+          key={turn}
+          position={[Math.sin(turn) * 3.86, 2.6, Math.cos(turn) * 3.86]}
+          rotation={[0, turn, 0]}
           size={[1, 1]}
           frame="#c9a6d6"
           lit
@@ -1584,93 +1612,495 @@ function SignalRings() {
 /* The Old Lighthouse — the locked reward on the north-west cape       */
 /* ------------------------------------------------------------------ */
 
+/**
+ * What is inside the lighthouse: the ship, at the scale of the tower it has
+ * been standing in.
+ *
+ * The same hull the hologram draws on its plinth and the same one he floats
+ * beside in orbit, so all three are recognisably one object. It is drawn
+ * hidden and only shown while the paint is coming off.
+ */
+function RocketHull() {
+  return (
+    <group>
+      {/* Hull, filling the space the bands were wrapped round. */}
+      <mesh position={[0, 9, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[2.5, 3.2, 17, 20]} />
+        <meshStandardMaterial
+          color="#e8eef4"
+          roughness={0.55}
+          metalness={0.35}
+          flatShading
+        />
+      </mesh>
+      {/* A red band round it, off the tower it used to be. */}
+      <mesh position={[0, 12.6, 0]} castShadow>
+        <cylinderGeometry args={[2.62, 2.62, 2.8, 20]} />
+        <meshStandardMaterial color="#c0392b" roughness={0.7} flatShading />
+      </mesh>
+      {/* Nose. */}
+      <mesh position={[0, 19.8, 0]} castShadow>
+        <coneGeometry args={[2.5, 4.6, 20]} />
+        <meshStandardMaterial
+          color="#d8e2ea"
+          roughness={0.55}
+          metalness={0.35}
+          flatShading
+        />
+      </mesh>
+      {/* A lit window where the flight deck is. */}
+      <mesh position={[0, 14.6, 2.55]}>
+        <circleGeometry args={[0.8, 16]} />
+        <meshStandardMaterial
+          color="#ffe9a8"
+          emissive="#ffbe4d"
+          emissiveIntensity={0.9}
+        />
+      </mesh>
+      {/* Three fins at the base. */}
+      {[0, 1, 2].map((i) => {
+        const a = (i / 3) * Math.PI * 2
+        return (
+          <mesh
+            key={i}
+            position={[Math.cos(a) * 3.3, 2.4, Math.sin(a) * 3.3]}
+            rotation={[0, -a, 0]}
+            castShadow
+          >
+            <boxGeometry args={[0.45, 5.4, 3]} />
+            <meshStandardMaterial color="#c0392b" roughness={0.8} flatShading />
+          </mesh>
+        )
+      })}
+      {/* And the bells under it, cold: nothing is lit yet. */}
+      {[0, 1, 2].map((i) => {
+        const a = (i / 3) * Math.PI * 2 + Math.PI / 3
+        return (
+          <mesh key={i} position={[Math.cos(a) * 1.5, 0.4, Math.sin(a) * 1.5]}>
+            <coneGeometry args={[1.1, 2.6, 12]} />
+            <meshStandardMaterial
+              color="#4a545f"
+              roughness={0.7}
+              metalness={0.4}
+              flatShading
+            />
+          </mesh>
+        )
+      })}
+    </group>
+  )
+}
+
 export function LighthouseModel() {
   const beam = useRef<Group>(null)
   const bands = [0, 1, 2, 3, 4, 5]
+  /*
+   * The tower is the thing that comes apart, so the reveal is animated here
+   * rather than drawn over the top of it.
+   *
+   * Overlaying a second, see-through tower was the obvious approach and it
+   * does not work: this model is solid and stands in front of the copy, so
+   * the whole cutscene played inside a building nobody could see into. The
+   * paint has to leave the actual tower.
+   */
+  const reveal = useGame((s) => s.reveal)
+  /*
+   * The tower owns the end of the cutscene, because the tower is what plays
+   * it. Nothing else runs for the whole of one — the component that used to
+   * hold this was an overlay, and when the overlay went so did the only call
+   * to `endReveal`, which left the reveal running forever with him stood on
+   * the doorstep watching a rocket he was never let into.
+   */
+  const endReveal = useGame((s) => s.endReveal)
+  /** Fires the arrival once, however many frames are in flight. */
+  const landed = useRef(false)
+  /** The doorway, the wooden door on it, and the hatch behind that. */
+  const door = useRef<Group>(null)
+  const woodDoor = useRef<Group>(null)
+  const hatch = useRef<Group>(null)
+  /** Every painted band, so each can be flown off on its own beat. */
+  const shell = useRef<(Group | null)[]>([])
+  /** The lamp, the gallery and the cottage: everything that is not the hull. */
+  const trim = useRef<Group>(null)
+  /** What is underneath, which only exists while the paint is coming off. */
+  const ship = useRef<Group>(null)
+  /** The whole tower, shaken while it lets go. */
+  const shake = useRef<Group>(null)
+  /** Light at the seams, on while the shell is splitting along them. */
+  const seams = useRef<(Mesh | null)[]>([])
 
   useFrame((state) => {
     if (beam.current) beam.current.rotation.y = state.clock.elapsedTime * 0.55
+
+    const phase = reveal ? revealPhase(reveal, performance.now() / 1000) : null
+
+    /* Put back together whenever nothing is playing, so leaving the room
+       does not leave a half-dismantled lighthouse on the cape. */
+    if (!phase) {
+      landed.current = false
+      for (const band of shell.current) {
+        if (!band) continue
+        band.visible = true
+        band.position.set(0, 0, 0)
+        band.rotation.set(0, 0, 0)
+        band.scale.setScalar(1)
+      }
+      if (trim.current) {
+        trim.current.visible = true
+        trim.current.position.y = 0
+      }
+      if (ship.current) ship.current.visible = false
+      if (woodDoor.current) {
+        woodDoor.current.visible = true
+        woodDoor.current.position.z = 0
+        woodDoor.current.rotation.x = 0
+      }
+      if (hatch.current) hatch.current.visible = false
+      if (door.current) door.current.position.z = 3.75
+      if (shake.current) shake.current.position.set(0, 0, 0)
+      for (const seam of seams.current) {
+        if (seam) seam.visible = false
+      }
+      return
+    }
+
+    /* The bands go one at a time from the bottom up, each turning and
+       tipping as it climbs, the odd ones spinning the other way. */
+    for (let i = 0; i < shell.current.length; i++) {
+      const band = shell.current[i]
+      if (!band) continue
+      const gone = bandShed(i, phase.shed)
+      band.visible = gone < 0.995
+      const way = i % 2 === 0 ? 1 : -1
+      band.position.y = gone * (7 + i * 1.4)
+      band.position.x = Math.sin(i * 2.1) * gone * 5
+      band.position.z = Math.cos(i * 2.1) * gone * 5
+      band.rotation.y = gone * 2.6 * way
+      band.rotation.x = gone * 1.1 * way
+      band.scale.setScalar(1 + gone * 0.2)
+    }
+
+    /*
+     * The door goes over early - with the first band rather than the last -
+     * because it is the thing he is standing in front of. Leaving it wooden
+     * until the end would have him watching a rocket assemble itself around
+     * a cottage door.
+     */
+    const swap = bandShed(0, phase.shed)
+    if (woodDoor.current) {
+      woodDoor.current.visible = swap < 0.5
+      woodDoor.current.position.z = swap * 2.4
+      woodDoor.current.rotation.x = swap * 1.2
+    }
+    if (hatch.current) hatch.current.visible = swap >= 0.5
+    if (door.current) {
+      /* It settles back a little as the hull takes its place, since the
+         hatch is set into steel rather than hung on plaster. */
+      door.current.position.z = 3.75 - swap * 0.35
+    }
+
+    /* The lamp room and the cottage lift away with the last of the paint. */
+    if (trim.current) {
+      const off = bandShed(shell.current.length - 1, phase.shed)
+      trim.current.visible = off < 0.995
+      trim.current.position.y = off * 14
+    }
+
+    /* And the hull underneath, which is there from the first band going. */
+    if (ship.current) ship.current.visible = phase.ship > 0.01
+
+    /* The tower shudders as it comes apart, hardest in the middle of it. */
+    if (shake.current) {
+      const r = phase.rumble
+      const time = state.clock.elapsedTime
+      shake.current.position.x = Math.sin(time * 43) * r * 0.3
+      shake.current.position.z = Math.sin(time * 37) * r * 0.3
+    }
+
+    /* Light at the seams: what says it opened rather than fell to bits. */
+    for (const seam of seams.current) {
+      if (!seam) continue
+      seam.visible = phase.seam > 0.02
+      const mat = seam.material as MeshStandardMaterial
+      mat.opacity = phase.seam * 0.9
+    }
+
+    /* And when it is over, he goes in. */
+    if (phase.done && !landed.current) {
+      landed.current = true
+      endReveal()
+    }
   })
 
   return (
-    <group>
+    <group ref={shake}>
+      {/* The seams the shell splits along, lit while it is splitting. */}
+      {bands.map((i) => (
+        <mesh
+          key={`seam-${i}`}
+          ref={(m) => {
+            seams.current[i] = m
+          }}
+          position={[0, 2.7 + i * 2.6, 0]}
+          rotation={[Math.PI / 2, 0, 0]}
+          visible={false}
+        >
+          <torusGeometry args={[3.55 - i * 0.34, 0.12, 6, 24]} />
+          <meshStandardMaterial
+            color="#ffd9a0"
+            emissive="#f0a33c"
+            emissiveIntensity={2.4}
+            transparent
+            opacity={0}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+
       {/* Rocky outcrop it stands on */}
       <mesh position={[0, -0.6, 0]} receiveShadow>
         <cylinderGeometry args={[6.4, 7.6, 1.6, 12]} />
         <meshStandardMaterial color="#8d949a" flatShading roughness={1} />
       </mesh>
 
-      {/* Tapered tower in painted bands */}
+      {/* What is under the paint, seen only while it is coming off. */}
+      <group ref={ship} visible={false}>
+        <RocketHull />
+      </group>
+
+      {/* Tapered tower in painted bands. Each in its own group so the
+          reveal can fly it off without moving the rest. */}
       {bands.map((i) => (
-        <mesh key={i} position={[0, 1.4 + i * 2.6, 0]} castShadow receiveShadow>
-          <cylinderGeometry args={[3.5 - i * 0.34, 3.85 - i * 0.34, 2.6, 16]} />
-          <meshStandardMaterial
-            color={i % 2 === 0 ? '#f6f1e4' : '#c0392b'}
-            flatShading
-            roughness={0.9}
-          />
-        </mesh>
+        <group
+          key={i}
+          ref={(g) => {
+            shell.current[i] = g
+          }}
+        >
+          <mesh position={[0, 1.4 + i * 2.6, 0]} castShadow receiveShadow>
+            <cylinderGeometry
+              args={[3.5 - i * 0.34, 3.85 - i * 0.34, 2.6, 16]}
+            />
+            <meshStandardMaterial
+              color={i % 2 === 0 ? '#f6f1e4' : '#c0392b'}
+              flatShading
+              roughness={0.9}
+            />
+          </mesh>
+          {/* A slot for the stairwell on every other band, set on the taper
+              at that height and turned a little further round as it climbs,
+              the way the stair inside it winds. It belongs to the band, so
+              the reveal carries it off with the paint. */}
+          {i % 2 === 1 && (
+            <Win
+              position={[
+                Math.sin(0.5 + i * 0.5) * (3.6 - i * 0.34),
+                1.4 + i * 2.6,
+                Math.cos(0.5 + i * 0.5) * (3.6 - i * 0.34),
+              ]}
+              rotation={[0, 0.5 + i * 0.5, 0]}
+              size={[0.8, 1.2]}
+              frame="#8d6b45"
+              lit
+            />
+          )}
+        </group>
       ))}
 
-      {/* Gallery deck and railing */}
-      <mesh position={[0, 17.1, 0]} castShadow>
-        <cylinderGeometry args={[2.9, 2.4, 0.4, 16]} />
-        <meshStandardMaterial color="#4a5057" flatShading roughness={0.8} />
-      </mesh>
-      {Array.from({ length: 12 }, (_, i) => {
-        const a = (i / 12) * Math.PI * 2
-        return (
-          <mesh key={i} position={[Math.cos(a) * 2.6, 17.8, Math.sin(a) * 2.6]}>
-            <boxGeometry args={[0.1, 1, 0.1]} />
-            <meshStandardMaterial color="#4a5057" flatShading />
-          </mesh>
-        )
-      })}
-      <mesh position={[0, 18.35, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[2.6, 0.07, 6, 20]} />
-        <meshStandardMaterial color="#4a5057" flatShading />
-      </mesh>
+      {/* Everything above the hull, which leaves with the last band. */}
+      <group ref={trim}>
+        {/* Gallery deck and railing */}
+        <mesh position={[0, 17.1, 0]} castShadow>
+          <cylinderGeometry args={[2.9, 2.4, 0.4, 16]} />
+          <meshStandardMaterial color="#4a5057" flatShading roughness={0.8} />
+        </mesh>
+        {Array.from({ length: 12 }, (_, i) => {
+          const a = (i / 12) * Math.PI * 2
+          return (
+            <mesh
+              key={i}
+              position={[Math.cos(a) * 2.6, 17.8, Math.sin(a) * 2.6]}
+            >
+              <boxGeometry args={[0.1, 1, 0.1]} />
+              <meshStandardMaterial color="#4a5057" flatShading />
+            </mesh>
+          )
+        })}
+        <mesh position={[0, 18.35, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[2.6, 0.07, 6, 20]} />
+          <meshStandardMaterial color="#4a5057" flatShading />
+        </mesh>
 
-      {/* Lantern room */}
-      <mesh position={[0, 19.4, 0]} castShadow>
-        <cylinderGeometry args={[1.7, 1.7, 2.4, 12]} />
-        <meshStandardMaterial
-          color="#ffe9a8"
-          emissive="#ffbe4d"
-          emissiveIntensity={0.9}
-          transparent
-          opacity={0.75}
-          roughness={0.2}
-        />
-      </mesh>
-      <group ref={beam} position={[0, 19.4, 0]}>
-        <mesh position={[0, 0, 5]} rotation={[Math.PI / 2, 0, 0]}>
-          <coneGeometry args={[1.7, 11, 4, 1, true]} />
-          <meshBasicMaterial
+        {/* Lantern room */}
+        <mesh position={[0, 19.4, 0]} castShadow>
+          <cylinderGeometry args={[1.7, 1.7, 2.4, 12]} />
+          <meshStandardMaterial
             color="#ffe9a8"
+            emissive="#ffbe4d"
+            emissiveIntensity={0.9}
             transparent
-            opacity={0.16}
-            depthWrite={false}
-            side={2}
+            opacity={0.75}
+            roughness={0.2}
           />
         </mesh>
+        <group ref={beam} position={[0, 19.4, 0]}>
+          <mesh position={[0, 0, 5]} rotation={[Math.PI / 2, 0, 0]}>
+            <coneGeometry args={[1.7, 11, 4, 1, true]} />
+            <meshBasicMaterial
+              color="#ffe9a8"
+              transparent
+              opacity={0.16}
+              depthWrite={false}
+              side={2}
+            />
+          </mesh>
+        </group>
+        <mesh position={[0, 21, 0]} castShadow>
+          <coneGeometry args={[2.2, 1.6, 12]} />
+          <meshStandardMaterial color="#2f3a44" flatShading roughness={0.8} />
+        </mesh>
+        <mesh position={[0, 22.2, 0]}>
+          <cylinderGeometry args={[0.06, 0.06, 1, 6]} />
+          <meshStandardMaterial color="#9aa5ad" metalness={0.6} />
+        </mesh>
       </group>
-      <mesh position={[0, 21, 0]} castShadow>
-        <coneGeometry args={[2.2, 1.6, 12]} />
-        <meshStandardMaterial color="#2f3a44" flatShading roughness={0.8} />
-      </mesh>
-      <mesh position={[0, 22.2, 0]}>
-        <cylinderGeometry args={[0.06, 0.06, 1, 6]} />
-        <meshStandardMaterial color="#9aa5ad" metalness={0.6} />
-      </mesh>
 
-      {/* Keeper's door, facing the road */}
-      <Door
-        position={[0, 1.4, 3.75]}
-        width={1.6}
-        height={2.8}
-        color="#7a4a2c"
-      />
+      {/*
+        The door. A keeper's door until the paint comes off it, and an
+        airlock hatch underneath - so the one thing he has been walking up to
+        all game turns out to have been a piece of the ship as well.
+      */}
+      <group ref={door} position={[0, 1.4, 3.75]}>
+        {/* The wooden one, which goes with the rest of the paint. */}
+        <group ref={woodDoor}>
+          <Door position={[0, 0, 0]} width={1.6} height={2.8} color="#7a4a2c" />
+        </group>
+
+        {/*
+          And the hatch behind it: a way into a spacecraft, at the size of a
+          way into a spacecraft.
+
+          The first version was a ring of bolts round a wheel, which at this
+          scale read as a ship's helm bolted to the wall rather than a door -
+          it was narrower than the wooden door it replaced, so the thing that
+          had plainly been a doorway a second earlier stopped looking like
+          one. It is squarer and taller than a man now, set into a frame of
+          its own, and the wheel is a detail on it instead of the whole of it.
+        */}
+        <group ref={hatch} visible={false}>
+          {/* The frame, sunk into the hull: a rounded arch of plate. */}
+          <mesh position={[0, 0, -0.34]} castShadow receiveShadow>
+            <boxGeometry args={[2.5, 3.4, 0.5]} />
+            <meshStandardMaterial
+              color="#8d949a"
+              metalness={0.55}
+              roughness={0.45}
+              flatShading
+            />
+          </mesh>
+          {/* A chamfer round the opening, so the frame is not a slab. */}
+          <mesh position={[0, 0, -0.06]}>
+            <boxGeometry args={[2.16, 3.06, 0.14]} />
+            <meshStandardMaterial
+              color="#5c6670"
+              metalness={0.5}
+              roughness={0.5}
+              flatShading
+            />
+          </mesh>
+
+          {/* The door itself: a slab of plate with a long window in it. */}
+          <mesh position={[0, 0, 0.04]} castShadow>
+            <boxGeometry args={[1.94, 2.84, 0.16]} />
+            <meshStandardMaterial
+              color="#c3ccd6"
+              metalness={0.5}
+              roughness={0.42}
+              flatShading
+            />
+          </mesh>
+          {/* Two ribs across it, which is what says plate rather than panel. */}
+          {[-0.72, 0.72].map((y) => (
+            <mesh key={y} position={[0, y, 0.13]}>
+              <boxGeometry args={[1.84, 0.16, 0.06]} />
+              <meshStandardMaterial
+                color="#9aa5ad"
+                metalness={0.55}
+                roughness={0.4}
+                flatShading
+              />
+            </mesh>
+          ))}
+          {/* The port: a tall slot of lit glass, at head height. */}
+          <mesh position={[0, 0.62, 0.14]}>
+            <boxGeometry args={[0.78, 0.62, 0.05]} />
+            <meshStandardMaterial
+              color="#bfe4ff"
+              emissive="#6fc3ff"
+              emissiveIntensity={1.2}
+              metalness={0.3}
+              roughness={0.12}
+            />
+          </mesh>
+
+          {/* Bolts down both jambs rather than round a circle. */}
+          {[-1.04, 1.04].map((x) =>
+            [-1.15, -0.4, 0.4, 1.15].map((y) => (
+              <mesh key={`${x}-${y}`} position={[x, y, 0.06]}>
+                <cylinderGeometry args={[0.09, 0.09, 0.14, 8]} />
+                <meshStandardMaterial
+                  color="#6b7480"
+                  metalness={0.7}
+                  roughness={0.3}
+                />
+              </mesh>
+            )),
+          )}
+
+          {/* The wheel, low and off to one side the way a handle is. */}
+          <group position={[0.52, -0.62, 0.2]}>
+            <mesh castShadow>
+              <torusGeometry args={[0.34, 0.07, 8, 20]} />
+              <meshStandardMaterial
+                color="#f0a33c"
+                metalness={0.5}
+                roughness={0.4}
+              />
+            </mesh>
+            {[0, 1, 2].map((i) => (
+              <mesh key={i} rotation={[0, 0, (i / 3) * Math.PI * 2]}>
+                <boxGeometry args={[0.66, 0.06, 0.06]} />
+                <meshStandardMaterial
+                  color="#f0a33c"
+                  metalness={0.5}
+                  roughness={0.4}
+                />
+              </mesh>
+            ))}
+          </group>
+
+          {/* And the lamp over the frame, green because the locks are open. */}
+          <mesh position={[0, 1.86, 0.06]}>
+            <boxGeometry args={[0.5, 0.16, 0.12]} />
+            <meshStandardMaterial
+              color="#6fd08a"
+              emissive="#6fd08a"
+              emissiveIntensity={1.5}
+            />
+          </mesh>
+          {/* Hazard stripes along the sill: the one thing that says this is
+              equipment and not architecture. */}
+          {[-0.7, -0.24, 0.24, 0.7].map((x, i) => (
+            <mesh key={`sill-${x}`} position={[x, -1.62, 0.12]}>
+              <boxGeometry args={[0.22, 0.14, 0.05]} />
+              <meshStandardMaterial
+                color={i % 2 === 0 ? '#f0a33c' : '#2b333c'}
+                flatShading
+              />
+            </mesh>
+          ))}
+        </group>
+      </group>
 
       {/* Keeper's cottage tucked against the base */}
       <group position={[5.4, 0, 2.6]} rotation={[0, -0.5, 0]}>

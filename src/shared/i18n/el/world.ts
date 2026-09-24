@@ -12,8 +12,7 @@ export const WORLD: Record<string, string> = {
   /* ------------------------------ Buildings --------------------------- */
   'Kitsos House': 'Το Σπίτι του Κίτσου',
   House: 'Σπίτι',
-  'Home of Christos "Kitsos" Orfanopoulos':
-    'Το σπίτι του Χρήστου «Κίτσου» Ορφανόπουλου',
+  'Home of Kitsos Orfanopoulos': 'Το σπίτι του Κίτσου Ορφανόπουλου',
   'National Technical University of Athens': 'Εθνικό Μετσόβιο Πολυτεχνείο',
   NTUA: 'ΕΜΠ',
   'School of Electrical & Computer Engineering':
@@ -123,6 +122,12 @@ export const WORLD: Record<string, string> = {
   Alex: 'Άλεξ',
   'Robotics club': 'Όμιλος ρομποτικής',
   'Sergeant Petros': 'Λοχίας Πέτρος',
+  'Private Giotampas': 'Στρατιώτης Γιωταμπάς',
+  '575 Marine Battalion': '575 Τάγμα Πεζοναυτών',
+  'Lt Col Mitsidis': 'Αντισυνταγματάρχης Μητσίδης',
+  'Commander, 575 Marine Battalion': 'Διοικητής, 575 Τάγμα Πεζοναυτών',
+  '2nd Lt Stavros': 'Ανθυπολοχαγός Σταύρος',
+  'Same intake, reserve officer': 'Ίδια σειρά, έφεδρος αξιωματικός',
   'Dean Tsanakas': 'Κοσμήτορας Τσανάκας',
   'Dean, School of ECE': 'Κοσμήτορας, Σχολή ΗΜΜΥ',
   'Prof. Nikos': 'Καθηγητής Νίκος',
@@ -177,8 +182,8 @@ export const WORLD: Record<string, string> = {
 
   /* --------------------------- Journal entries ------------------------ */
   'Welcome to Kitsos Town': 'Καλώς ήρθες στην Πόλη του Κίτσου',
-  'Christos "Kitsos" Orfanopoulos, Senior Full Stack Software Engineer & Technical Lead, based in Athens, Greece. Five keys, one per district, open the Old Lighthouse on the north-west cape.':
-    'Χρήστος «Κίτσος» Ορφανόπουλος, Senior Full Stack Software Engineer & Technical Lead, με έδρα την Αθήνα. Πέντε κλειδιά, ένα ανά συνοικία, ανοίγουν τον Παλιό Φάρο στο βορειοδυτικό ακρωτήρι.',
+  'Kitsos Orfanopoulos, Senior Full Stack Software Engineer & Technical Lead, based in Athens, Greece. Five keys, one per district, open the Old Lighthouse on the north-west cape.':
+    'Κίτσος Ορφανόπουλος, Senior Full Stack Software Engineer & Technical Lead, με έδρα την Αθήνα. Πέντε κλειδιά, ένα ανά συνοικία, ανοίγουν τον Παλιό Φάρο στο βορειοδυτικό ακρωτήρι.',
   Volunteering: 'Εθελοντισμός',
   'Leading volunteer (2017–2021, 2023–today) and Director (2021–2022) at the Christian Youth Foundation "Pantokrator", Paleo Faliro. Blood donor since 2017.':
     'Επικεφαλής εθελοντής (2017–2021, 2023–σήμερα) και Διευθυντής (2021–2022) στο Χριστιανικό Ίδρυμα Νεότητας «Παντοκράτωρ», Παλαιό Φάληρο. Αιμοδότης από το 2017.',
@@ -201,8 +206,17 @@ export const WORLD: Record<string, string> = {
   'Children’s tutor in Robotics at Citylab, Alimos, 2020–2021.':
     'Εκπαιδευτής παιδιών στη Ρομποτική στο Citylab, Άλιμος, 2020–2021.',
   'Military service': 'Στρατιωτική θητεία',
-  'Reservist Second Lieutenant, Marine Battalion, September 2022 – November 2023. Special Forces basic training at Nea Peramos; graduated 3rd in class from the Infantry Reserve Officers School, Heraklion; completed the Rangers’ Guerilla Warfare School at Rentina; served as Deputy Company Commander and Weapons Officer.':
-    'Έφεδρος Ανθυπολοχαγός, Τάγμα Πεζοναυτών, Σεπτέμβριος 2022 – Νοέμβριος 2023. Βασική εκπαίδευση Ειδικών Δυνάμεων στη Νέα Πέραμο· αποφοίτησε 3ος της σειράς του από τη ΣΕΑΠ Ηρακλείου· ολοκλήρωσε το Σχολείο Ανταρτοπολέμου (Rangers) στη Ρεντίνα· υπηρέτησε ως Υποδιοικητής Λόχου και Αξιωματικός Οπλισμού.',
+  'Reservist Second Lieutenant, Marine Battalion, September 2022 – November 2023. Service is compulsory; the reserve officer’s path is by exam and selection. Special Forces basic training at Nea Peramos; cadet company leader at the Infantry Reserve Officers School, Heraklion, graduating 3rd; selected for the Special Forces and completed the Rangers’ Guerilla Warfare School at Rentina; served as Deputy Company Commander and Weapons Officer.':
+    'Έφεδρος Ανθυπολοχαγός, Τάγμα Πεζοναυτών, Σεπτέμβριος 2022 – Νοέμβριος 2023. Η θητεία είναι υποχρεωτική· ο δρόμος του έφεδρου αξιωματικού περνά από εξετάσεις και επιλογή. Βασική εκπαίδευση Ειδικών Δυνάμεων στη Νέα Πέραμο· αρχηγός λόχου στη ΣΕΑΠ Ηρακλείου, απ’ όπου αποφοίτησε 3ος· επελέγη για τις Ειδικές Δυνάμεις και ολοκλήρωσε το Σχολείο Ανταρτοπολέμου (Rangers) στη Ρεντίνα· υπηρέτησε ως Υποδιοικητής Λόχου και Αξιωματικός Οπλισμού.',
+  'A private in his company': 'Ένας στρατιώτης του λόχου του',
+  'Private Giotampas, 575 Marine Battalion: first in every exercise, while carrying the weapons, a platoon and the company’s readiness at the same time.':
+    'Ο στρατιώτης Γιωταμπάς, 575 Τάγμα Πεζοναυτών: πρώτος σε κάθε άσκηση, την ώρα που σήκωνε ταυτόχρονα τον οπλισμό, μια διμοιρία και την ετοιμότητα του λόχου.',
+  'His commanding officer': 'Ο διοικητής του',
+  'Lt Col Georgios Mitsidis, Commander of the 575 Marine Battalion, in person: worked without supervision, brought ideas for how the Unit ran and put them in place, and "honoured the green beret".':
+    'Ο Αντισυνταγματάρχης Γεώργιος Μητσίδης, Διοικητής του 575 Τάγματος Πεζοναυτών, αυτοπροσώπως: δούλευε χωρίς επίβλεψη, έφερνε ιδέες για τη λειτουργία της Μονάδας και τις υλοποιούσε, και «τίμησε τον πράσινο μπερέ».',
+  'Rentina, and the landing': 'Η Ρεντίνα, και η απόβαση',
+  'A reserve officer from the same intake: Hell Week at the Rangers’ school in Rentina, with no rest, no food and days on foot in the mountains with no camp, and a full landing exercise from ship to beach to island.':
+    'Ένας έφεδρος αξιωματικός της ίδιας σειράς: η Εβδομάδα της Κόλασης στο σχολείο Rangers στη Ρεντίνα, χωρίς ξεκούραση, χωρίς φαγητό και μέρες με τα πόδια στα βουνά χωρίς κατασκήνωση, και μια πλήρης άσκηση απόβασης, από το πλοίο στην παραλία και στο νησί.',
   'NTUA, MEng ECE': 'ΕΜΠ, Δίπλωμα ΗΜΜΥ',
   'Seminars & contests': 'Σεμινάρια & διαγωνισμοί',
   'IBM graduate program (2024), Agile bootcamp in Hamburg (2024), Arduino IEEE Workshop at NTUA (2018). 2nd in the National Biology Competition (2016) and awards in Physics, Mathematics, Informatics and Literature. Volunteer at European Researchers’ Night (2019) and 100 years of ECE (2017).':
@@ -289,6 +303,8 @@ export const WORLD: Record<string, string> = {
     'Επτά δρόμοι φεύγουν από αυτή την πλατεία, και ο καθένας τους πήρε το όνομά του από αυτό που κέρδισε εκεί. Κίνητρο, Πειθαρχία, Περιέργεια, Φροντίδα, Ηγεσία, Συνεργασία.',
   'And north-west, Freedom Road, out to the Old Lighthouse on the cape. Sealed for years. Five district keys open it, one hidden in each building.':
     'Και βορειοδυτικά, η Οδός Ελευθερίας, μέχρι τον Παλιό Φάρο στο ακρωτήρι. Σφραγισμένος χρόνια. Τον ανοίγουν πέντε κλειδιά των συνοικιών, ένα κρυμμένο σε κάθε κτίριο.',
+  'Sealed, I said. Though the night watch tells me there has been hammering out there lately. Probably the wind.':
+    'Σφραγισμένος, είπα. Αν και η νυχτερινή βάρδια μού λέει πως τελευταία ακούγονται σφυριές από εκεί. Ο αέρας, μάλλον.',
   'Press M for the map if the walk gets long. Once you have found a place, you can travel straight back to it.':
     'Πάτα M για τον χάρτη αν σου φανεί μακρύς ο δρόμος. Μόλις βρεις ένα μέρος, μπορείς να πας κατευθείαν ξανά εκεί.',
 
@@ -367,6 +383,8 @@ export const WORLD: Record<string, string> = {
     'Ψάχνεις τον Φάρο; Οδός Ελευθερίας, βορειοδυτικά, μέχρι το ακρωτήρι.',
   'Locked since before I moved here. Five keys, they say. One per district.':
     'Κλειδωμένος από πριν έρθω εδώ. Πέντε κλειδιά, λένε. Ένα ανά συνοικία.',
+  'Funny, though. I walk past it in the evenings, and these last few days there is banging inside. Metal on metal.':
+    'Περίεργο πάντως. Περνάω από εκεί τα βράδια, και τις τελευταίες μέρες κάτι χτυπάει μέσα. Μέταλλο πάνω σε μέταλλο.',
 
   /* -------------------------------- Nikos ----------------------------- */
   'Cannot stop, halfway through the loop!':
@@ -381,6 +399,8 @@ export const WORLD: Record<string, string> = {
     'Η θάλασσα είναι λάδι. Καλή μέρα για μεγάλη κουβέντα.',
   'Athens is over that horizon. That is where he lives and works.':
     'Η Αθήνα είναι πίσω από εκείνο τον ορίζοντα. Εκεί ζει και δουλεύει.',
+  'Light in the old lighthouse the last few nights. Not the lamp, lower down. Somebody is working in there.':
+    'Φως στον παλιό φάρο τις τελευταίες νύχτες. Όχι ο φανός, πιο χαμηλά. Κάποιος δουλεύει εκεί μέσα.',
   'Hiking, camping, a boat when he can get one. Then back to the screens.':
     'Πεζοπορία, κάμπινγκ, και μια βάρκα όποτε προλάβει. Και μετά πάλι στις οθόνες.',
   'If you have a job for him, do not shout it at the sea. Use the Radio Center.':
@@ -391,6 +411,8 @@ export const WORLD: Record<string, string> = {
     'Ράφι δίπλα στη σκακιέρα. Δεν γίνεται να μην το δεις, ποτέ δεν συμμαζεύει.',
   'That is his house, right there. Lights on late, always.':
     'Να το σπίτι του, εκεί. Πάντα με τα φώτα αναμμένα ως αργά.',
+  'Not this week, mind. This week he is out before dark with a toolbox, up Freedom Road, and back when the birds start.':
+    'Όχι αυτή τη βδομάδα, βέβαια. Αυτή τη βδομάδα φεύγει πριν σκοτεινιάσει με μια εργαλειοθήκη, προς την Οδό Ελευθερίας, και γυρίζει με τα πρώτα πουλιά.',
   'I have watched that boy grow up from this spot. Seventy years I have been across the road from them.':
     'Από εδώ τον είδα να μεγαλώνει αυτό το παιδί. Εβδομήντα χρόνια απέναντί τους.',
   'I knew his grandfather. Same walk, same way of standing in a doorway to finish a sentence.':
@@ -429,20 +451,60 @@ export const WORLD: Record<string, string> = {
     'Ερμάριο. Στο τέλος των κρεβατιών. Και μη μου αναστατώσεις τον θάλαμο.',
   'Halt. …Relax, civilian, the camp is open today.':
     'Αλτ. …Ησύχασε, πολίτη, σήμερα το στρατόπεδο είναι ανοιχτό.',
+  'Military service is compulsory in Greece. Becoming a reserve officer is not: you sit the exams, and then they decide whether to take you.':
+    'Η θητεία στην Ελλάδα είναι υποχρεωτική. Το να γίνεις έφεδρος αξιωματικός δεν είναι: δίνεις εξετάσεις, και μετά αποφασίζουν αν θα σε πάρουν.',
   'Second Lieutenant Orfanopoulos, reservist. September 2022 to November 2023, straight out of NTUA.':
     'Ανθυπολοχαγός Ορφανόπουλος, έφεδρος. Από τον Σεπτέμβριο του 2022 ως τον Νοέμβριο του 2023, κατευθείαν από το ΕΜΠ.',
-  'Basic training at the Center of Special Forces in Nea Peramos. Third in his class out of the Infantry Reserve Officers School in Heraklion.':
-    'Βασική εκπαίδευση στο Κέντρο Εκπαίδευσης Ειδικών Δυνάμεων στη Νέα Πέραμο. Τρίτος της σειράς του από τη Σχολή Εφέδρων Αξιωματικών Πεζικού στο Ηράκλειο.',
-  'Then the Rangers’ school at Rentina, guerilla warfare. After that, Deputy Company Commander and Weapons Officer at a Marine Battalion.':
-    'Μετά το σχολείο Rangers στη Ρεντίνα, ανταρτοπόλεμος. Και έπειτα Υποδιοικητής Λόχου και Αξιωματικός Οπλισμού σε Τάγμα Πεζοναυτών.',
+  'Basic training at the Center of Special Forces in Nea Peramos. Then the Infantry Reserve Officers School in Heraklion, where his captain made him cadet company leader, and he finished third in the School.':
+    'Βασική εκπαίδευση στο Κέντρο Εκπαίδευσης Ειδικών Δυνάμεων στη Νέα Πέραμο. Μετά η Σχολή Εφέδρων Αξιωματικών Πεζικού στο Ηράκλειο, όπου ο λοχαγός του τον όρισε αρχηγό λόχου, και βγήκε τρίτος στη Σχολή.',
+  'Then the extra selection for the Special Forces, and the Rangers’ school at Rentina, guerilla warfare. After that, Deputy Company Commander and Weapons Officer at a Marine Battalion.':
+    'Μετά οι επιπλέον εξετάσεις για τις Ειδικές Δυνάμεις, και το σχολείο Rangers στη Ρεντίνα, ανταρτοπόλεμος. Και έπειτα Υποδιοικητής Λόχου και Αξιωματικός Οπλισμού σε Τάγμα Πεζοναυτών.',
   'Platoon Leader and Weapons Officer for a Marine Company. Personnel, logistics, weaponry, readiness.':
     'Διμοιρίτης και Αξιωματικός Οπλισμού σε Λόχο Πεζοναυτών. Προσωπικό, εφοδιασμός, οπλισμός, ετοιμότητα.',
-  'The Battalion Commander wrote him a letter. It is framed inside, on the east wall. Read it.':
-    'Ο Διοικητής του Τάγματος του έγραψε επιστολή. Είναι κορνιζαρισμένη μέσα, στον ανατολικό τοίχο. Διάβασέ την.',
+  'His Battalion Commander is inside today, in the operations room. Officers only through that door, so you will have to look the part.':
+    'Ο Διοικητής του Τάγματός του είναι μέσα σήμερα, στην αίθουσα επιχειρήσεων. Από εκείνη την πόρτα περνούν μόνο αξιωματικοί, οπότε θα πρέπει να ντυθείς ανάλογα.',
   'That is where the calm comes from. Bad news does not make him louder.':
     'Από εκεί βγαίνει η ψυχραιμία. Τα άσχημα νέα δεν τον κάνουν να υψώσει τη φωνή.',
   'The key you are after is in the footlocker at the end of the bunks. Go on in.':
     'Το κλειδί που ψάχνεις είναι στο ερμάριο στο τέλος των κρεβατιών. Πέρνα μέσα.',
+
+  /* -------------------------- Private Giotampas ----------------------- */
+  'Private Giotampas, 575 Marine Battalion. I served in the Lieutenant’s company.':
+    'Στρατιώτης Γιωταμπάς, 575 Τάγμα Πεζοναυτών. Υπηρέτησα στον λόχο του Ανθυπολοχαγού.',
+  'Every exercise, he was first. First up the hill, first off the boat, first into the water. And he did not have to be — he was the one holding the clipboard.':
+    'Σε κάθε άσκηση ήταν πρώτος. Πρώτος στον λόφο, πρώτος έξω από το σκάφος, πρώτος στο νερό. Και δεν ήταν υποχρεωμένος — αυτός κρατούσε το πρόχειρο.',
+  'Weapons officer, platoon leader, deputy company commander, and still the one checking we had eaten. Three jobs, and none of them ever dropped.':
+    'Αξιωματικός οπλισμού, διμοιρίτης, υποδιοικητής λόχου, και πάλι αυτός που έλεγχε αν είχαμε φάει. Τρεις δουλειές, και καμία δεν έπεσε ποτέ κάτω.',
+  'You want to see where the officers work? Not in those clothes. His kit is on the locker by the service record. Put it on, and the door in the east wall will open for you.':
+    'Θες να δεις πού δουλεύουν οι αξιωματικοί; Όχι με αυτά τα ρούχα. Η στολή του κρέμεται στο ντουλάπι δίπλα στο φύλλο μητρώου. Φόρεσέ τη, και η πόρτα στον ανατολικό τοίχο θα σου ανοίξει.',
+  'And once you are in uniform, leave the bell alone. Unless you want five of us standing by our beds.':
+    'Κι όταν φορέσεις τη στολή, άσε το καμπανάκι ήσυχο. Εκτός αν θες πέντε από εμάς προσοχή δίπλα στα κρεβάτια μας.',
+
+  /* --------------------------- Lt Col Mitsidis ------------------------- */
+  'Lieutenant Colonel Georgios Mitsidis, Commander of the 575 Marine Battalion. Stand easy.':
+    'Αντισυνταγματάρχης Γεώργιος Μητσίδης, Διοικητής του 575 Τάγματος Πεζοναυτών. Ανάπαυση.',
+  'He reported to my unit as an Officer Designate in February 2023, and left us a Special Forces Second Lieutenant that November. Platoon Leader and Weapons Officer for a Marine Company.':
+    'Παρουσιάστηκε στη μονάδα μου ως Δόκιμος Έφεδρος Αξιωματικός τον Φεβρουάριο του 2023, και μας άφησε Ανθυπολοχαγός Ειδικών Δυνάμεων εκείνον τον Νοέμβριο. Διμοιρίτης και Αξιωματικός Οπλισμού σε Λόχο Πεζοναυτών.',
+  'I will tell you what I told everyone who asked. He did his job without anybody standing over him, and he threw himself into every activity the Unit had.':
+    'Θα σου πω ό,τι είπα σε όποιον ρώτησε. Έκανε τη δουλειά του χωρίς να χρειάζεται κανείς από πάνω του, και έπεφτε με όρεξη σε κάθε δραστηριότητα της Μονάδας.',
+  'Team spirit, critical thinking, and an eye for formality and detail. And he came to me with ideas for running things better, and then did the work of putting them in, inside the Command’s guidelines.':
+    'Ομαδικό πνεύμα, κριτική σκέψη, και μάτι για την τυπικότητα και τη λεπτομέρεια. Κι ερχόταν σε μένα με ιδέες για να λειτουργούν τα πράγματα καλύτερα, και μετά έκανε ο ίδιος τη δουλειά να εφαρμοστούν, μέσα στις κατευθύνσεις της Διοίκησης.',
+  'I was proud to have him as an officer in my Unit. He honoured the green beret. Whatever field he chooses, I recommend him with the utmost confidence.':
+    'Ήμουν περήφανος που τον είχα αξιωματικό στη Μονάδα μου. Τίμησε τον πράσινο μπερέ. Όποιον χώρο κι αν διαλέξει, τον συστήνω με απόλυτη εμπιστοσύνη.',
+  'The letter is on the east wall, if you would like it in writing.':
+    'Η επιστολή είναι στον ανατολικό τοίχο, αν τη θέλεις γραπτώς.',
+
+  /* ------------------------------ 2nd Lt Stavros ----------------------- */
+  'Same intake as him: Heraklion, then the Special Forces selection, then Rentina. We still talk about Rentina.':
+    'Ίδια σειρά με αυτόν: Ηράκλειο, μετά η επιλογή για τις Ειδικές Δυνάμεις, μετά Ρεντίνα. Για τη Ρεντίνα ακόμη μιλάμε.',
+  'Hell Week. No rest and no food, up in the mountains with no camp to go back to. Just out in the wild, walking, and then walking again.':
+    'Η Εβδομάδα της Κόλασης. Χωρίς ξεκούραση και χωρίς φαγητό, πάνω στα βουνά χωρίς κατασκήνωση να γυρίσεις. Μόνο έξω στην άγρια φύση, περπάτημα, και ξανά περπάτημα.',
+  'You stop feeling your feet on the second day and stop thinking about them on the third. He kept the rest of us talking the whole way, which was harder than the walking.':
+    'Τη δεύτερη μέρα σταματάς να νιώθεις τα πόδια σου και την τρίτη σταματάς να τα σκέφτεσαι. Αυτός κρατούσε όλους τους υπόλοιπους να μιλάνε σε όλη τη διαδρομή, κι αυτό ήταν πιο δύσκολο από το περπάτημα.',
+  'And this, on the table, was our D-Day. A full landing exercise: off the ship, onto the beach, and take the island from the sea.':
+    'Κι αυτό, πάνω στο τραπέζι, ήταν η δική μας D-Day. Πλήρης άσκηση απόβασης: από το πλοίο, στην παραλία, και κατάληψη του νησιού από τη θάλασσα.',
+  'Ramps down, into the water up to the chest, and up the sand under smoke. His platoon came off the ramp in the order it had been briefed in, which on a landing is the whole trick.':
+    'Κάτω οι καταπέλτες, στο νερό ως το στήθος, και πάνω στην άμμο μέσα στον καπνό. Η διμοιρία του βγήκε από τον καταπέλτη με τη σειρά που είχε ενημερωθεί, κι αυτό σε μια απόβαση είναι όλο το μυστικό.',
 
   /* ---------------------------- Dean Tsanakas ------------------------- */
   'Panagiotis Tsanakas, Dean of the School. Sit anywhere; the lecture is over.':
@@ -682,6 +744,8 @@ export const WORLD: Record<string, string> = {
     'Εκπροσώπησε και το σχολείο. Όταν με ρώτησαν ποιος θα έπρεπε να μιλήσει για εμάς, δεν χρειάστηκε να το σκεφτώ.',
   'Robotics. That year the whole class built a submarine drone. It floated, it dived, it came back, mostly.':
     'Ρομποτική. Εκείνη τη χρονιά όλη η τάξη έφτιαξε ένα υποβρύχιο drone. Επέπλεε, βουτούσε, επέστρεφε, τις περισσότερες φορές.',
+  'He was the one who asked, once it worked, what it would take to build one that went up instead of down.':
+    'Εκείνος ήταν που ρώτησε, μόλις δούλεψε, τι θα χρειαζόταν για να φτιάξουμε ένα που να πηγαίνει προς τα πάνω αντί για κάτω.',
   'Kitsos built a proof-of-concept electric bicycle on his own. Twelve volts, a motor, a frame off the rack, and it moved. Truly remarkable, at that age.':
     'Ο Κίτσος έφτιαξε μόνος του ένα πρωτότυπο ηλεκτρικού ποδηλάτου. Δώδεκα βολτ, ένα μοτέρ, ένας σκελετός από το ράφι, και κινήθηκε. Πραγματικά αξιοσημείωτο, σε αυτή την ηλικία.',
   'That bicycle by the bench? That is the one.':
@@ -735,6 +799,8 @@ export const WORLD: Record<string, string> = {
     'Φυσική γενικής παιδείας και κατεύθυνσης, και τις δύο χρονιές. Άριστος σε όλη τη διάρκεια, το έγραψα σε έντυπο υποτροφίας, και τη λέξη αυτή δεν τη μοιράζω.',
   'He captained our EUSO team: the science olympiad where three of you share one bench of experiments and a problem that changes the moment you touch it. He kept the bench calm.':
     'Ήταν αρχηγός της ομάδας μας στη EUSO: την ολυμπιάδα φυσικών επιστημών όπου τρεις μοιράζεστε έναν πάγκο πειραμάτων και ένα πρόβλημα που αλλάζει μόλις το ακουμπήσεις. Κρατούσε τον πάγκο ήρεμο.',
+  'He asked me once how fast you would have to go to leave the Earth for good. Eleven kilometres a second, I told him. He wrote it on the back of his hand.':
+    'Με ρώτησε κάποτε πόσο γρήγορα πρέπει να πας για να φύγεις από τη Γη για πάντα. Έντεκα χιλιόμετρα το δευτερόλεπτο, του είπα. Το έγραψε στην παλάμη του.',
   'Every event, competition and presentation this school put on, he was in it. And he argued well: a very good conversationalist, with clear arguments and a sense of humour. You need one, in physics.':
     'Σε κάθε εκδήλωση, διαγωνισμό και παρουσίαση που έκανε αυτό το σχολείο, ήταν μέσα. Και επιχειρηματολογούσε καλά: πολύ καλός συνομιλητής, με ξεκάθαρα επιχειρήματα και χιούμορ. Το χρειάζεσαι, στη φυσική.',
   'The EUSO bench': 'Ο πάγκος της EUSO',

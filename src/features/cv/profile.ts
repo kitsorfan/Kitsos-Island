@@ -10,7 +10,15 @@ export const PROFILE = {
   email: 'kitsorfan@protonmail.com',
   linkedin: 'https://linkedin.com/in/kitsorfan/',
   linkedinLabel: 'linkedin.com/in/kitsorfan',
+  website: 'https://www.kitsorfan.com',
+  websiteLabel: 'www.kitsorfan.com',
 } as const
+
+/** The full name, given name and nickname both. Only the CV carries it. */
+export const CV_NAME = `${PROFILE.firstName} (${PROFILE.nickname}) ${PROFILE.lastName}`
+
+/** The name everywhere else on the island. */
+export const NAME = `${PROFILE.nickname} ${PROFILE.lastName}`
 
 export const HOUSE_SECTIONS: PanelSection[] = [
   {

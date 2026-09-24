@@ -42,6 +42,9 @@ export function SettingsCard() {
   const found = useGame((s) => s.entries.length)
   const keys = useGame((s) => s.keys)
   const clearProgress = useGame((s) => s.clearProgress)
+  const starShirt = useGame((s) => s.starShirt)
+  const outfit = useGame((s) => s.outfit)
+  const wearStarShirt = useGame((s) => s.wearStarShirt)
   const walked = useGame(hasProgress)
   const t = useTranslate(locale)
 
@@ -54,6 +57,34 @@ export function SettingsCard() {
   return (
     <div className="settings-card">
       <h3>{t('Settings')}</h3>
+
+      {/* Only once there is a choice to make: before the flight there is
+          one shirt, and a picker with a single option is furniture. */}
+      {starShirt && (
+        <div className="setting setting--stacked">
+          <span className="setting__name">{t('Shirt')}</span>
+          <div
+            className="setting__choices"
+            role="group"
+            aria-label={t('Shirt')}
+          >
+            <button
+              className={`chip${outfit === 'star' ? ' chip--on' : ''}`}
+              aria-pressed={outfit === 'star'}
+              onClick={() => wearStarShirt(true)}
+            >
+              {t('Star')}
+            </button>
+            <button
+              className={`chip${outfit !== 'star' ? ' chip--on' : ''}`}
+              aria-pressed={outfit !== 'star'}
+              onClick={() => wearStarShirt(false)}
+            >
+              {t('Original')}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="setting setting--stacked">
         <span className="setting__name">{t('Language')}</span>

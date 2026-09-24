@@ -1,10 +1,10 @@
 # Kitsos Island — a playable CV
 
-A frontend-only 3D personal site for **Christos "Kitsos" Orfanopoulos**, built as a
+A frontend-only 3D personal site for **Kitsos Orfanopoulos**, built as a
 Pokémon-style island you walk around. Townspeople tell you about him, seven
 buildings open up and let you walk **inside**, five hidden keys unlock the Old
-Lighthouse, and the Radio Center hands your message straight to your own mail
-client.
+Lighthouse — which turns out to be a spaceship — and the Radio Center hands
+your message straight to your own mail client.
 
 No backend, no API keys, no runtime network calls beyond the Google Fonts
 stylesheet — it deploys as static files anywhere.
@@ -32,6 +32,20 @@ npm test         # the whole suite, once
 npm run test:watch     # re-runs what a change touches
 npm run test:coverage  # text summary, plus coverage/ for the full report
 ```
+
+### The PDF CV
+
+The island hands out a two-page A4 PDF, `public/Orfanopoulos-Christos-CV.pdf`,
+laid out like a conventional CV with nothing of the island in it. It is printed
+from `/resume.html`, which is generated from the same data as everything else,
+so re-print it whenever the CV changes and commit the result:
+
+```bash
+npm run cv:pdf   # needs Edge or Chrome installed; CV_BROWSER=<path> for others
+```
+
+A square portrait at `public/cv/photo.jpg` goes into the header; without one,
+the header simply goes without a photo.
 
 ## Controls
 
@@ -63,7 +77,7 @@ people and — in five of them — a key.
 | **Army Camp** (SE)               | Service record and the Battalion Commander's letter, under the Greek flag · 🔑 Footlocker Key                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | **Town School** (W)              | The hall: his first teacher, two cups, volunteering and the foundation's letter · 🔑 Cabinet Key. West door: the Evangeliki classroom, the principal, the Pascal tutor, the robotics bench and the after-school clubs. East door: the Ionidios classroom, three teachers and their scholarship letters, the EUSO bench and the machine he learned C++ on                                                                                                                                                                |
 | **Radio Center** (S)             | The transmitter — email, LinkedIn and a message desk                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| **The Old Lighthouse** (NW cape) | Sealed with five locks. Inside: the career summary, what he is good at, what he is looking for, and a CV download                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **The Old Lighthouse** (NW cape) | Sealed with five locks, and not a lighthouse. Inside is a flight deck: a hologram of the tower cut away to show the ship inside it, an airlock with a pressure suit on the rack, and the button under the glass. Suit up, launch, sign the certificate in orbit, fly home in the star shirt                                                                                                                                                                                                                             |
 
 ### Missions and keys
 
@@ -75,7 +89,9 @@ map lists every mission's state. With all five keys the lighthouse door opens.
 Nothing a recruiter needs is ever locked away. The **Say hi** button — on the HUD
 and on the title screen, always — opens a card where Kitsos himself waves, warns
 you that you will miss all the fun, and then hands over the entire CV plus the
-message desk. The lighthouse is a reward, not a gate.
+message desk. The lighthouse is a reward, not a gate — and taking the shortcut
+hands over the CV without opening its door, because the tower is what the keys
+are _for_. Skipping the hunt should not also finish it.
 
 ### Getting around
 
@@ -99,6 +115,7 @@ src/
     npc/          the townspeople, the guards, and who is standing where
     cv/           the CV itself: the journal, the panels, the downloads
     lift/         the car, its panel, and the one journey that takes time
+    launch/       the ship in the lighthouse, the flight, and the certificate
     map/          the minimap and the full map overlay
     arcade/       the games board and the list it offers
     paintball/  moto/  balloon/  hide/  rescue/     one minigame each
@@ -133,6 +150,80 @@ Some notes on how it hangs together:
   indoor scenes light themselves and the draw call count stays low. The player
   controller is shared and picks its colliders, bounds, ground height and camera
   from whichever area is active.
+- **The tower tells you what it is before it lets you in.** The first time
+  the door opens, he stops on the doorstep, a `!` springs up over his head,
+  and the painted bands lift off the tower while the rocket underneath fades
+  up through them — both on screen at once, so it reads as one thing becoming
+  another rather than a swap. "This is not a lighthouse. This is a space
+  rocket." Then the screen goes and the deck takes over.
+  `features/launch/revealLogic.ts` times it. The bands come away one at a
+  time from the bottom up, turning as they go, with the seams lit and the
+  ground shaking hardest in the middle of it — all at once would be a texture
+  fading out rather than a tower coming apart. It plays every time he walks
+  in, not just the first, so it is kept to seven seconds.
+
+- **Suited, the front door refuses.** A man in a pressure suit walking the
+  island in it would make the suit a costume rather than equipment, so the
+  door says no while it is on. It is a refusal and not a trap: the rack is
+  three strides away, hanging the suit up always works, and the keeper's
+  logbook is in that room.
+
+- **The lighthouse is a spaceship.** The summit room is a flight deck
+  (`features/launch/FlightDeck.tsx`), and it says so before a word is read: a
+  hologram turns on a plinth in the middle of the floor with the painted tower
+  in translucent bands and the ship inside it in wireframe, engines and all.
+  Ribbed bulkheads, a lit floor strip and cold lighting do the rest.
+
+- **The airlock is the gate, and the walk across the room is the point.** The
+  suit hangs on a rack in a lit alcove on the west wall, as far from the
+  console as the room allows. The button is dull and reads `SUIT UP FIRST`
+  until he has been over and put it on; press it in shirtsleeves and the deck
+  says so. Suited, he gets a bubble helmet, a life-support pack and an amber
+  collar (`Character.tsx`), the rack stands empty, and its lamp goes green.
+
+- **The flight is one clock.** `features/launch/launch.ts` times hold,
+  ignition, climb and orbit, so the count on the screen, the shake on the
+  camera and the island shrinking in the window all agree. A phase is
+  arithmetic on elapsed time rather than a frame-stepped machine, so a dropped
+  frame or a backgrounded tab costs nothing.
+
+- **The hologram flies the flight.** Idling it turns slowly and shows the
+  cutaway; once the button is pressed the painted shell lifts away and thins
+  out, the ship climbs on the same altitude the window is reading, and the
+  engines light under it. It is the only place the launch can be watched from
+  outside — he is strapped in behind the glass for the whole of it.
+
+- **In orbit he is outside the ship.** The engines cut and the room is
+  replaced by open space (`features/launch/Space.tsx`): a starfield, the sun,
+  the island turning under him as a blue-green globe with a band of air round
+  its rim, and the ship he came up in holding station a little way off. That
+  is why he can move freely out there — a cabin is a room with walls, and
+  nothing about weightlessness survives being boxed in. He sculls along with
+  his forearms, drawn half again as big, with nothing to bump into.
+
+- **And the credits roll.** `features/launch/credits.ts` — a crew list as
+  long as a real one with almost nobody on it, which is the joke; his own
+  name appears twice. The last credit before the thanks is Movement, You,
+  which is the only line on the roll that is literally true of whoever is
+  reading it.
+
+- **The prize is a certificate and a shirt.** In orbit he types his name onto
+  a certificate drawn to a canvas and handed over as a PNG
+  (`features/launch/certificate.ts`), signed by Kitsos Orfanopoulos; the full
+  CV is on the same card. Then he flies home, landing at the crossroads in the
+  blue-and-yellow star shirt: deep flight blue, a gold star extruded off the
+  chest, gold collar, cuffs and hem, and a mission patch on the sleeve. It is
+  the only thing on the island that has to be earned, and the settings card
+  will swap it back for anybody who would rather have the red one.
+
+- **While he is up there the game is sealed.** Every other screen can be
+  backed out of sideways; this one has exactly one door, which is the ride
+  home. That is enforced in one place rather than a dozen: `isSealed` wraps
+  the store’s own `set`, so every existing way back to `explore` — a panel
+  closing, the map, walking out of a building — silently drops the mode change
+  and keeps the rest of its patch, the functional-updater form included. A
+  path added later is covered without anybody having to remember it.
+
 - **The lift is the one way through that takes time.** Every other door and
   flight swaps the room the moment you walk into it. Walking into the car
   instead raises its panel (`features/lift/LiftPanel.tsx`) with a button per floor; press

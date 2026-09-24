@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Panel } from './Panel'
 import { useGame } from '../state/store'
 import type { PanelSection } from '../../types'
+import { downloadCv } from '../../features/cv/downloadCv'
 
 /**
  * The card that opens when something on the island is looked at properly.
@@ -27,6 +28,8 @@ vi.mock('../game/audio', async () => {
     },
   })
 })
+
+vi.mock('../../features/cv/downloadCv', () => ({ downloadCv: vi.fn() }))
 
 const PRISTINE = useGame.getState()
 
@@ -110,5 +113,44 @@ describe('Panel', () => {
         .dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
     })
     expect(useGame.getState().mode).toBe('panel')
+  })
+})
+
+describe('the full CV panel', () => {
+  const openCv = () => {
+    act(() => {
+      useGame.getState().openPanel({
+        kicker: 'Skip ahead',
+        title: 'The full CV',
+        sections,
+        accent: '#1f6f8b',
+        kind: 'cv',
+      })
+    })
+  }
+
+  it('offers the PDF in the header, without scrolling for it', () => {
+    render(<Panel />)
+    openCv()
+    const head = document.querySelector('.panel__head')
+    const button = screen.getByRole('button', { name: /Download CV/ })
+    expect(head?.contains(button)).toBe(true)
+  })
+
+  it('hands the PDF over and says so', () => {
+    vi.mocked(downloadCv).mockClear()
+    render(<Panel />)
+    openCv()
+    act(() => {
+      screen.getByRole('button', { name: /Download CV/ }).click()
+    })
+    expect(downloadCv).toHaveBeenCalledOnce()
+    expect(screen.getByRole('button', { name: /Saved/ })).toBeInTheDocument()
+  })
+
+  it('keeps it out of every other panel', () => {
+    render(<Panel />)
+    open()
+    expect(screen.queryByRole('button', { name: /Download CV/ })).toBeNull()
   })
 })

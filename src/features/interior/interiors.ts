@@ -1,4 +1,5 @@
 import type { Interior, LiftStop } from '../../types'
+import { LATEST_RELEASE } from '../radio/release'
 import {
   ARMY_SECTIONS,
   CERTIFICATIONS_SECTIONS,
@@ -1453,6 +1454,18 @@ export const INTERIORS: Interior[] = [
     ],
   },
 
+  /* ------------------------------ the camp --------------------------- */
+
+  /**
+   * The Army Camp is two rooms. The barracks behind the gate, where anybody
+   * off the road may walk in and talk to the private on duty, and the
+   * operations room through the east wall, where the commander is — and
+   * which only opens to somebody in uniform. His kit hangs on the locker by
+   * the service record; see game/army.ts, which owns the door, the kit and
+   * the duty bell by the lockers.
+   *
+   *     [ barracks ]──east──[ operations room ]
+   */
   {
     id: 'army',
     name: 'Army Camp',
@@ -1471,6 +1484,7 @@ export const INTERIORS: Interior[] = [
       { kind: 'bunk', position: [11, -1], rotation: -Math.PI / 2 },
       { kind: 'locker', position: [-5.5, -9.8] },
       { kind: 'locker', position: [-3, -9.8] },
+      /* His, with the kit hanging on it. */
       { kind: 'locker', position: [3, -9.8] },
       { kind: 'crate', position: [7.5, -8.5] },
       { kind: 'crate', position: [9.5, -8.5] },
@@ -1481,6 +1495,30 @@ export const INTERIORS: Interior[] = [
       { kind: 'chair', position: [0, 6.4], rotation: Math.PI },
       { kind: 'greekFlag', position: [12.5, -9] },
       { kind: 'painting', position: [-11, -10.2] },
+    ],
+    links: [
+      /*
+       * The officers' door, in the east wall past the last of the bunks. Not
+       * locked: shut to civilian clothes, and open to the uniform on the
+       * locker a few strides away.
+       */
+      {
+        id: 'army-officers-door',
+        kind: 'door',
+        label: 'the door to the operations room',
+        position: [14.3, -6],
+        rotation: -Math.PI / 2,
+        to: 'army-ops',
+        dress: 'officer',
+        lines: [
+          'OFFICERS ONLY, stencilled across it at eye height. The handle turns, and the duty clerk on the far side turns you straight back round.',
+          'Not in those clothes. There is a uniform hanging on the locker by the service record.',
+        ],
+        journal: {
+          title: 'The operations room',
+          body: 'Through the officers’ door at the Army Camp, which opens for the uniform and not for the man: Lt Col Mitsidis at his desk, and the landing plan on the table.',
+        },
+      },
     ],
     exhibits: [
       {
@@ -1499,10 +1537,60 @@ export const INTERIORS: Interior[] = [
         },
       },
       {
+        id: 'army-key',
+        kind: 'key',
+        label: 'the footlocker at the end of the bunks',
+        position: [-11, -9],
+        keyId: 'key-camp',
+      },
+    ],
+  },
+
+  /**
+   * The operations room, through the officers' door. The commander's desk
+   * against the north wall with him behind it, his letter on the east wall,
+   * and in the middle the table with the landing laid out on it — which is
+   * what the officer standing over it has come to talk about.
+   */
+  {
+    id: 'army-ops',
+    building: 'army',
+    name: 'Army Camp',
+    kicker: 'Operations room',
+    half: [10, 7.5],
+    floor: '#7d735a',
+    rug: '#55603c',
+    wall: '#b3b692',
+    accent: '#6f7f4a',
+    spawn: [-7, 0],
+    windows: [{ side: 'north', at: -0.55 }],
+    props: [
+      { kind: 'rug', position: [0, -3.4], scale: 1.1, solid: false },
+      { kind: 'desk', position: [0, -4.4] },
+      { kind: 'greekFlag', position: [-3.2, -6.7] },
+      { kind: 'bookshelf', position: [5.6, -7] },
+      /* The landing, laid out for the briefing. */
+      { kind: 'table', position: [3.4, 2.4], scale: 1.3 },
+      { kind: 'crate', position: [8.6, 5.8] },
+      { kind: 'locker', position: [-6.4, -6.8] },
+      { kind: 'plant', position: [-9, 6.4] },
+    ],
+    links: [
+      {
+        id: 'ops-barracks',
+        kind: 'door',
+        label: 'the door to the barracks',
+        position: [-9.8, 0],
+        rotation: Math.PI / 2,
+        to: 'army',
+      },
+    ],
+    exhibits: [
+      {
         id: 'army-reference',
         kind: 'board',
         label: 'the commander’s letter',
-        position: [13.9, -3],
+        position: [9.4, -2.6],
         rotation: -Math.PI / 2,
         panel: {
           kicker: 'Army Camp',
@@ -1513,13 +1601,6 @@ export const INTERIORS: Interior[] = [
           title: 'Commander’s reference',
           body: 'Lt Col Georgios Mitsidis, Commander of the 575 Marine Battalion: Platoon Leader and Weapons Officer for a Marine Company, "accomplished his tasks successfully without the need of supervision"; recommended with the utmost confidence as "a valuable and trusted partner".',
         },
-      },
-      {
-        id: 'army-key',
-        kind: 'key',
-        label: 'the footlocker at the end of the bunks',
-        position: [-11, -9],
-        keyId: 'key-camp',
       },
     ],
   },
@@ -1913,35 +1994,118 @@ export const INTERIORS: Interior[] = [
           body: 'The message desk composes an email straight to Kitsos, with no operator in between.',
         },
       },
+      /* What is on the air: the island's own release notes, on the wall
+         the station would pin its broadcast log to. */
+      {
+        id: 'radio-release',
+        kind: 'board',
+        label: 'the release notes',
+        position: [10.4, -3],
+        rotation: -Math.PI / 2,
+        panel: {
+          kicker: 'Radio Center',
+          title: 'Release notes',
+          sections: [
+            {
+              heading: `Version ${LATEST_RELEASE.version} · ${LATEST_RELEASE.date}`,
+              blocks: [
+                {
+                  type: 'text',
+                  text: 'A two-page PDF CV, printed from the island, to download from the full CV.',
+                },
+              ],
+            },
+            {
+              heading: 'Version 1.0 · 2026-09-25',
+              blocks: [{ type: 'text', text: 'First working version.' }],
+            },
+          ],
+        },
+        journal: {
+          title: 'Release notes',
+          body: `Version ${LATEST_RELEASE.version}, ${LATEST_RELEASE.date}: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.`,
+        },
+      },
     ],
   },
 
   {
     id: 'lighthouse',
     name: 'The Old Lighthouse',
-    kicker: 'Summit room',
+    /*
+     * Not a summit room any more. The kicker is the first thing the HUD says
+     * when he walks in, so it is the first place the reveal lands.
+     */
+    kicker: 'Flight deck',
     half: [10, 10],
-    floor: '#d8cfc0',
-    rug: '#f0a33c',
-    wall: '#efe2cc',
-    accent: '#f0a33c',
-    spawn: [0, 4.5],
+    /*
+     * Painted like a hull rather than a keeper's parlour: plate grey
+     * underfoot, cold panelling on the walls, and the amber kept for the
+     * things that are still the lighthouse - the logbook, the collar of the
+     * suit, the lamp at the top of the hologram.
+     */
+    floor: '#39414b',
+    rug: '#1f5f9e',
+    wall: '#5a6672',
+    accent: '#6fc3ff',
+    spawn: [0, 8.2],
+    /*
+     * A keeper's room that stopped being one. The north half is the flight
+     * deck — console, window and the button, all drawn by
+     * `features/launch/FlightDeck.tsx` rather than declared here, because
+     * they read the launch clock — and what is left of the lighthouse is
+     * pushed to the edges: the logbook on the east wall, the globe and the
+     * shelf behind him, the stairs he came up by.
+     *
+     * The west wall is the airlock. That is the one part of the room the
+     * visitor has to walk to before anything happens, so it is kept well
+     * clear of the console and given the whole side to itself.
+     */
     props: [
-      { kind: 'stairs', position: [8, 7], rotation: -Math.PI / 2 },
-      { kind: 'rug', position: [0, 0], scale: 1.5, solid: false },
-      { kind: 'table', position: [0, 1] },
-      { kind: 'chair', position: [0, 3.4], rotation: Math.PI },
-      { kind: 'bookshelf', position: [-8.8, -2], rotation: Math.PI / 2 },
-      { kind: 'lamp', position: [-8, 6] },
-      { kind: 'plant', position: [8.6, -6] },
-      { kind: 'globe', position: [-6.5, -7.5] },
+      /*
+       * No stairs, and no globe.
+       *
+       * Both were the keeper's room still showing through. The flight to
+       * the deck is a hatch and a ladder now, not a wooden staircase with a
+       * handrail, and a flight of steps standing in the corner of a launch
+       * cabin reads as a cottage somebody parked a rocket in - which is the
+       * one thing the rest of this room works to undo. The globe went with
+       * them: a blue ball on a turned wooden stand is a parlour ornament,
+       * and it sat in the eyeline between the door and the console.
+       */
+      /* The flight chair, facing the console and the window beyond it. */
+      { kind: 'chair', position: [0, -3.6], rotation: Math.PI },
+      /* No shelf of books. The keeper's library was the last thing in here
+         still furnishing a parlour, and a wall of paperbacks behind a flight
+         console reads as a study somebody parked a rocket in. The logbook on
+         the east wall is what is left of him, and it is enough. */
+
+      /*
+       * The west wall is the airlock and nothing else. The rack stands at
+       * z = -2 in its own lit alcove and the whole side is left to it -
+       * there were lockers along here and they are gone, because a row of
+       * green cupboards beside a spacesuit reads as a changing room and
+       * pulls the eye off the one thing on this wall worth looking at.
+       */
+      /* Avionics down the other side: the racks that fly the thing. */
+      { kind: 'serverRack', position: [9, -4], rotation: -Math.PI / 2 },
+      { kind: 'serverRack', position: [9, -6], rotation: -Math.PI / 2 },
+      { kind: 'serverRack', position: [-9, -6], rotation: Math.PI / 2 },
+      { kind: 'monitor', position: [6.6, -7.6], rotation: Math.PI },
+      { kind: 'monitor', position: [-6.6, -7.6], rotation: Math.PI },
+      /* One green thing, in a tank by the door. Every crew keeps one. */
+      { kind: 'plant', position: [-8.6, 8.4] },
     ],
     exhibits: [
       {
         id: 'lh-summary',
         kind: 'cv',
         label: 'the keeper’s logbook',
-        position: [0, -9.3],
+        /* Off the east wall now: the south wall in front of the window is
+           the flight deck's, and a logbook there would be read through the
+           console. */
+        position: [9.3, 0],
+        rotation: -Math.PI / 2,
         panel: {
           kicker: 'The Old Lighthouse',
           title: 'The short version',
@@ -1950,6 +2114,42 @@ export const INTERIORS: Interior[] = [
         journal: {
           title: 'The Old Lighthouse',
           body: 'Opened with all five district keys. The keeper’s logbook holds the career summary, what he is good at, and what he is looking for.',
+        },
+      },
+      {
+        id: 'lh-crew',
+        kind: 'crew',
+        label: 'the crew screen',
+        /* On the east wall by the door, across the room from the notice:
+           the last thing on the way out, and everybody he is leaving. */
+        position: [9.3, 5.4],
+        rotation: -Math.PI / 2,
+        panel: {
+          kicker: 'Flight deck',
+          title: 'Meet the characters',
+          sections: [],
+        },
+        journal: {
+          title: 'The crew screen',
+          body: 'A screen on the flight deck with everybody on the island on it, and a tick against each one he stopped to hear.',
+        },
+      },
+      {
+        id: 'lh-notice',
+        kind: 'board',
+        label: 'the departure notice',
+        position: [-9.3, 5],
+        rotation: Math.PI / 2,
+        lines: [
+          'PRE-FLIGHT — read it in order, there is no second try.',
+          'One. The suit is on the rack behind you. Put it on; the console will not answer a man in shirtsleeves.',
+          'Two. The button is under the glass on the console. Press it and the count starts.',
+          'Three. There is no abort. Once the gantry lets go you are going up.',
+          'Signed, the keeper. He has done it once and says the view is worth it.',
+        ],
+        journal: {
+          title: 'The departure notice',
+          body: 'The lighthouse is a gantry and the summit room is a flight deck. The suit goes on first, then the button under the glass. There is no abort.',
         },
       },
     ],

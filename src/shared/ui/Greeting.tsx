@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { PLAYER_COLORS } from '../../features/island/world'
-import { PROFILE } from '../../features/cv/profile'
+import { NAME, PROFILE } from '../../features/cv/profile'
 import { useGame } from '../state/store'
 import { Character } from '../../features/player/Character'
 import * as sfx from '../engine/audio'
@@ -74,9 +74,7 @@ export function Greeting() {
               <Character colors={PLAYER_COLORS} wave look={look} />
             </group>
           </Canvas>
-          <span className="greeting__name">
-            {PROFILE.firstName} “{PROFILE.nickname}”
-          </span>
+          <span className="greeting__name">{NAME}</span>
         </div>
 
         <div className="greeting__body">

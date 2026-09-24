@@ -2,31 +2,35 @@ import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 import { buildCvHtml } from '../src/features/cv/cvHtml.ts'
+import { buildResumeHtml } from '../src/features/cv/resumeHtml.ts'
 
 /**
- * Writes the plain HTML CV out beside the island.
+ * Writes the plain HTML CVs out beside the island: the long one at /cv.html,
+ * and the two-page printed one at /resume.html that the PDF is made from.
  *
- * It is generated rather than kept by hand so that it cannot fall behind the
- * data the island reads from, and it is served in dev too so the fallback can
- * be checked without a build.
+ * They are generated rather than kept by hand so that they cannot fall behind
+ * the data the island reads from, and they are served in dev too so the
+ * fallbacks can be checked without a build.
  */
 function cvPage(): Plugin {
-  const PATH = '/cv.html'
+  const PAGES: Record<string, () => string> = {
+    'cv.html': buildCvHtml,
+    'resume.html': () => buildResumeHtml(),
+  }
   return {
     name: 'cv-page',
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        if (!req.url || req.url.split('?')[0] !== PATH) return next()
+        const page = PAGES[req.url?.split('?')[0].slice(1) ?? '']
+        if (!page) return next()
         res.setHeader('Content-Type', 'text/html; charset=utf-8')
-        res.end(buildCvHtml())
+        res.end(page())
       })
     },
     generateBundle() {
-      this.emitFile({
-        type: 'asset',
-        fileName: 'cv.html',
-        source: buildCvHtml(),
-      })
+      for (const [fileName, page] of Object.entries(PAGES)) {
+        this.emitFile({ type: 'asset', fileName, source: page() })
+      }
     },
   }
 }

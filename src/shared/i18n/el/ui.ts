@@ -76,6 +76,8 @@ export const UI: Record<string, string> = {
     'Σύρε τον μοχλό για να περπατήσεις, πάτα A για αλληλεπίδραση',
   'WASD to walk · Shift to sprint · M for the map':
     'WASD για περπάτημα · Shift για τρέξιμο · M για τον χάρτη',
+  'Space to fly · double-tap Space to drop · hold to pull up':
+    'Space για πτήση · διπλό Space για βουτιά · κράτα το για ανάκαμψη',
   'Party in the plaza': 'Γλέντι στην πλατεία',
   'Press the button again to call it a night':
     'Πάτα ξανά το κουμπί για να σχολάσει το γλέντι',
@@ -184,10 +186,12 @@ export const UI: Record<string, string> = {
 
   /* ------------------------------- Panel ------------------------------ */
   'Take a copy of the CV': 'Πάρε αντίγραφο του βιογραφικού',
-  'Saved as Markdown, the same content you have been walking through.':
-    'Αποθηκεύτηκε ως Markdown, το ίδιο περιεχόμενο που περπάτησες.',
-  'Written out as Markdown, generated from everything on this island.':
-    'Γραμμένο σε Markdown, από όλα όσα υπάρχουν σε αυτό το νησί.',
+  'Download CV': 'Λήψη βιογραφικού',
+  Saved: 'Αποθηκεύτηκε',
+  'Saved as a two-page PDF, the same facts you have been walking through.':
+    'Αποθηκεύτηκε ως PDF δύο σελίδων, με όσα περπάτησες.',
+  'A two-page PDF, printed from everything on this island.':
+    'Ένα PDF δύο σελίδων, τυπωμένο από όλα όσα υπάρχουν σε αυτό το νησί.',
   Read: 'Διάβασε',
   'The original': 'Το πρωτότυπο',
   'The original, page by page': 'Το πρωτότυπο, σελίδα σελίδα',
@@ -416,4 +420,68 @@ export const UI: Record<string, string> = {
   throttle: 'γκάζι',
   chart: 'χάρτης',
   'put in': 'επιστροφή',
+
+  /* The lighthouse, once it turns out to be a ship. */
+  Orbit: 'Τροχιά',
+  'In orbit': 'Σε τροχιά',
+  'You made it off the island': 'Έφυγες από το νησί',
+  'The lighthouse was a gantry all along, and the summit room was the flight deck. Kitsos Island is the blue-green shape under the window now, with every road you walked on it.':
+    'Ο φάρος ήταν ικρίωμα από την αρχή, και η αίθουσα της κορυφής ήταν το πιλοτήριο. Το Νησί του Κίτσου είναι τώρα το γαλαζοπράσινο σχήμα κάτω από το παράθυρο, με κάθε δρόμο που περπάτησες πάνω του.',
+  'Put your name on it': 'Βάλε το όνομά σου',
+  'your name here': 'το όνομά σου εδώ',
+  'Take your certificate': 'Πάρε το πιστοποιητικό σου',
+  'Saved — take another': 'Αποθηκεύτηκε — πάρε κι άλλο',
+  'And the full CV': 'Και το πλήρες βιογραφικό',
+  'Preview of your certificate': 'Προεπισκόπηση του πιστοποιητικού σου',
+  'Signed by': 'Υπογραφή',
+  'Thanks for walking the whole of it.':
+    'Ευχαριστώ που το περπάτησες ολόκληρο.',
+  'Fly back down to the island': 'Πέτα πίσω στο νησί',
+  'Certificate saved. The shirt comes with the landing.':
+    'Το πιστοποιητικό αποθηκεύτηκε. Η μπλούζα έρχεται με την προσγείωση.',
+  'You can take the certificate down with you either way.':
+    'Μπορείς να πάρεις το πιστοποιητικό μαζί σου ούτως ή άλλως.',
+  'to launch': 'για εκτόξευση',
+  'Hold. Strapped in and counting.': 'Αναμονή. Δεμένος και μετράει αντίστροφα.',
+  'Ignition. The gantry has let go.': 'Ανάφλεξη. Το ικρίωμα άφησε.',
+  'Climbing. The island is getting smaller.': 'Ανέρχεται. Το νησί μικραίνει.',
+  'Orbit. Nothing out here but the hum.':
+    'Τροχιά. Τίποτα εδώ έξω πέρα από το βουητό.',
+  LAUNCH: 'ΕΚΤΟΞΕΥΣΗ',
+  'SUIT UP FIRST': 'ΦΟΡΕΣΕ ΣΤΟΛΗ ΠΡΩΤΑ',
+  'ASTRO SUIT': 'ΑΣΤΡΟΣΤΟΛΗ',
+  'SUIT ON': 'ΣΤΟΛΗ ΦΟΡΕΜΕΝΗ',
+  'KITSOS ISLAND · DEPARTURE': 'ΝΗΣΙ ΚΙΤΣΟΥ · ΑΝΑΧΩΡΗΣΗ',
+  Credits: 'Συντελεστές',
+  'Special thanks': 'Ιδιαίτερες ευχαριστίες',
+  'To the love of my life, Amalia.': 'Στον έρωτα της ζωής μου, την Αμαλία.',
+  'And to you, for walking the whole of it.':
+    'Και σε σένα, που το περπάτησες ολόκληρο.',
+  'Played By': 'Παίχτηκε από',
+  'Hang on...': 'Μια στιγμή...',
+  'THIS IS NOT A LIGHTHOUSE': 'ΑΥΤΟ ΔΕΝ ΕΙΝΑΙ ΦΑΡΟΣ',
+  'IT IS A SPACE ROCKET': 'ΕΙΝΑΙ ΔΙΑΣΤΗΜΙΚΟΣ ΠΥΡΑΥΛΟΣ',
+  Cast: 'Διανομή',
+  Engineering: 'Μηχανική',
+  'Art department': 'Καλλιτεχνικό τμήμα',
+  Production: 'Παραγωγή',
+  'Special effects': 'Ειδικά εφέ',
+  Catering: 'Τροφοδοσία',
+  'Written and built by': 'Γράφτηκε και χτίστηκε από',
+  'To my family, for all of it.': 'Στην οικογένειά μου, για όλα.',
+  'Thanks for walking the island.': 'Ευχαριστώ που περπάτησες το νησί.',
+  'DEPARTURE IN PROGRESS': 'ΑΝΑΧΩΡΗΣΗ ΣΕ ΕΞΕΛΙΞΗ',
+  'THE OLD LIGHTHOUSE - CUTAWAY': 'Ο ΠΑΛΙΟΣ ΦΑΡΟΣ - ΤΟΜΗ',
+  Shirt: 'Μπλούζα',
+  Star: 'Αστέρι',
+  Original: 'Αρχική',
+  'MEET THE CHARACTERS': 'ΓΝΩΡΙΣΤΕ ΤΟΥΣ ΧΑΡΑΚΤΗΡΕΣ',
+  Met: 'Γνώρισες',
+  'of the': 'από τους',
+  'with a story to tell.': 'που έχουν μια ιστορία να πουν.',
+  'Out on the island': 'Έξω στο νησί',
+  'At the thesis defence': 'Στην παρουσίαση της διπλωματικής',
+  'Around the island': 'Σε όλο το νησί',
+  'After dark': 'Μετά το σούρουπο',
+  'Christmas Day only': 'Μόνο ανήμερα τα Χριστούγεννα',
 }

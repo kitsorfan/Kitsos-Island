@@ -473,4 +473,13 @@ export const UI: Record<string, string> = {
   Shirt: 'Μπλούζα',
   Star: 'Αστέρι',
   Original: 'Αρχική',
+  'MEET THE CHARACTERS': 'ΓΝΩΡΙΣΤΕ ΤΟΥΣ ΧΑΡΑΚΤΗΡΕΣ',
+  Met: 'Γνώρισες',
+  'of the': 'από τους',
+  'with a story to tell.': 'που έχουν μια ιστορία να πουν.',
+  'Out on the island': 'Έξω στο νησί',
+  'At the thesis defence': 'Στην παρουσίαση της διπλωματικής',
+  'Around the island': 'Σε όλο το νησί',
+  'After dark': 'Μετά το σούρουπο',
+  'Christmas Day only': 'Μόνο ανήμερα τα Χριστούγεννα',
 }

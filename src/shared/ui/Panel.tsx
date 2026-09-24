@@ -4,6 +4,7 @@ import { useGame } from '../state/store'
 import * as sfx from '../engine/audio'
 import { RadioConsole } from '../../features/radio/RadioConsole'
 import { ToyShelfCase } from '../../features/toys/ToyShelfCase'
+import { CrewRoster } from '../../features/launch/CrewRoster'
 import { Flag } from './Flag'
 import { TechIcon } from '../../features/cv/TechIcon'
 import { hasTechIcon } from '../../features/cv/techMarkIcons'
@@ -72,6 +73,8 @@ export function Panel() {
           {panel.kind === 'radio' && <RadioConsole />}
 
           {panel.kind === 'toy' && <ToyShelfCase />}
+
+          {panel.kind === 'crew' && <CrewRoster />}
 
           {panel.kind === 'cv' && (
             <div className="panel__cta">

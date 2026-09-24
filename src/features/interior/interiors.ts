@@ -2004,6 +2004,24 @@ export const INTERIORS: Interior[] = [
         },
       },
       {
+        id: 'lh-crew',
+        kind: 'crew',
+        label: 'the crew screen',
+        /* On the east wall by the door, across the room from the notice:
+           the last thing on the way out, and everybody he is leaving. */
+        position: [9.3, 5.4],
+        rotation: -Math.PI / 2,
+        panel: {
+          kicker: 'Flight deck',
+          title: 'Meet the characters',
+          sections: [],
+        },
+        journal: {
+          title: 'The crew screen',
+          body: 'A screen on the flight deck with everybody on the island on it, and a tick against each one he stopped to hear.',
+        },
+      },
+      {
         id: 'lh-notice',
         kind: 'board',
         label: 'the departure notice',

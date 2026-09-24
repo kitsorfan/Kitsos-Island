@@ -1865,6 +1865,74 @@ canvas {
   color: var(--ink-soft);
 }
 
+/* The crew screen's roster: a card per islander, grouped by where they are. */
+.crew__count {
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.crew__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.crew__card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 14px;
+  border: 3px solid var(--line);
+  background: var(--paper-2);
+  box-shadow: 0 3px 0 rgba(42, 32, 51, 0.18);
+}
+
+.crew__card--met {
+  background: var(--paper);
+  border-left-width: 7px;
+  border-left-color: var(--accent, #3f7bd6);
+}
+
+.crew__portrait {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+}
+
+.crew__who {
+  display: grid;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.crew__name {
+  font-weight: 800;
+}
+
+.crew__role {
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+}
+
+.crew__place {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  opacity: 0.8;
+}
+
+.crew__met {
+  font-weight: 800;
+  color: var(--accent, #3f7bd6);
+}
+
 .toast p {
   margin: 0.2rem 0 0;
   font-size: 0.84rem;

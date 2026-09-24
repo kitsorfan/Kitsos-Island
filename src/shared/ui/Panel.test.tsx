@@ -133,7 +133,7 @@ describe('the full CV panel', () => {
     render(<Panel />)
     openCv()
     const head = document.querySelector('.panel__head')
-    const button = screen.getByRole('button', { name: /Download PDF/ })
+    const button = screen.getByRole('button', { name: /Download CV/ })
     expect(head?.contains(button)).toBe(true)
   })
 
@@ -142,7 +142,7 @@ describe('the full CV panel', () => {
     render(<Panel />)
     openCv()
     act(() => {
-      screen.getByRole('button', { name: /Download PDF/ }).click()
+      screen.getByRole('button', { name: /Download CV/ }).click()
     })
     expect(downloadCv).toHaveBeenCalledOnce()
     expect(screen.getByRole('button', { name: /Saved/ })).toBeInTheDocument()
@@ -151,6 +151,6 @@ describe('the full CV panel', () => {
   it('keeps it out of every other panel', () => {
     render(<Panel />)
     open()
-    expect(screen.queryByRole('button', { name: /Download PDF/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /Download CV/ })).toBeNull()
   })
 })

@@ -55,8 +55,16 @@ export function Panel() {
             {/* In the header, which never scrolls, so the PDF is the first
                 thing on offer rather than a reward for reading to the end. */}
             {panel.kind === 'cv' && (
-              <button className="panel__download" onClick={save}>
-                {saved ? '✓' : '⬇'} {t(saved ? 'Saved' : 'Download PDF')}
+              <button
+                className={`panel__download${saved ? ' panel__download--saved' : ''}`}
+                onClick={save}
+              >
+                <span className="panel__download-icon" aria-hidden>
+                  {saved ? '✓' : '⬇'}
+                </span>
+                <span>
+                  {t(saved ? 'Saved' : 'Download CV')} <small>PDF</small>
+                </span>
               </button>
             )}
             <button

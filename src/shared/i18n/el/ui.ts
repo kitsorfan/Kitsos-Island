@@ -186,7 +186,7 @@ export const UI: Record<string, string> = {
 
   /* ------------------------------- Panel ------------------------------ */
   'Take a copy of the CV': 'Πάρε αντίγραφο του βιογραφικού',
-  'Download PDF': 'Λήψη PDF',
+  'Download CV': 'Λήψη βιογραφικού',
   Saved: 'Αποθηκεύτηκε',
   'Saved as a two-page PDF, the same facts you have been walking through.':
     'Αποθηκεύτηκε ως PDF δύο σελίδων, με όσα περπάτησες.',

@@ -80,10 +80,13 @@ describe('the resume', () => {
 describe('the experience timeline', () => {
   const doc = parse(buildResumeHtml())
 
-  it('shows a promotion as two steps at one company', () => {
+  it('shows a promotion as one job with two titles', () => {
     const veltiston = [...doc.querySelectorAll('.company')].find((c) =>
       c.querySelector('.org')?.textContent?.startsWith('Veltiston AI'),
     )
-    expect(veltiston?.querySelectorAll('.entry')).toHaveLength(2)
+    // Both titles, each with its dates, over one account of the work.
+    expect(veltiston?.querySelectorAll('.entry')).toHaveLength(1)
+    expect(veltiston?.querySelectorAll('header .when')).toHaveLength(2)
+    expect(veltiston?.querySelectorAll('.stack')).toHaveLength(1)
   })
 })

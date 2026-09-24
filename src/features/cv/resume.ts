@@ -30,6 +30,8 @@ type Entry = {
   meta: string
   bullets?: string[]
   tags?: string[]
+  /** Titles held in turn at one employer, newest first, with their dates. */
+  steps?: { title: string; meta: string }[]
 }
 
 /** A timeline entry from the island's data, looked up by its title. */
@@ -80,6 +82,26 @@ function role(
   }
 }
 
+/**
+ * Several titles at one employer, told as one job: the titles and their
+ * dates stacked at the top, then a single account of the work across all of
+ * them. A promotion reads better that way than as two jobs that repeat each
+ * other.
+ */
+function promoted(
+  sections: PanelSection[],
+  titles: string[],
+  bullets: string[],
+  tags?: string[],
+): Entry {
+  const steps = titles.map((title) => ({
+    title,
+    meta: entry(sections, title).meta,
+  }))
+  const { org } = entry(sections, titles[0])
+  return { ...steps[0], org, bullets, tags, steps }
+}
+
 export const RESUME = {
   name: `${PROFILE.firstName} (${PROFILE.nickname}) ${PROFILE.lastName}`,
   firstName: PROFILE.firstName,
@@ -116,19 +138,16 @@ export const RESUME = {
     'Senior full-stack engineer and technical lead with a track record of taking healthcare products from concept to production. Java and Spring Boot on the backend, React on the front, AWS underneath, and teams of 5–10 engineers across three countries shipping weekly into U.S. hospitals under HIPAA.',
 
   experience: [
-    role(VELTISTON_SECTIONS, 'Senior Software Engineer', [
-      'Technical Lead of the flagship Nurse Scheduling platform at an AI healthcare startup founded by MIT Professor Dimitris Bertsimas; project lead on three projects.',
-      'Leads cross-functional teams of 5–10 developers across Greece, Boston (USA) and Morocco: architecture, technical decisions, code reviews and sprint planning.',
-      'Works with customers, Product, QA and DevOps to deliver weekly production releases, reliable, secure and HIPAA-compliant.',
-      'Runs technical interviews, mentors engineers and onboards new team members.',
-    ]),
-    role(
+    promoted(
       VELTISTON_SECTIONS,
-      'Full-stack Software Engineer',
+      ['Senior Software Engineer', 'Full-stack Software Engineer'],
       [
-        'One of the company’s first engineers; architected and built the cloud-native Nurse Scheduling platform (Java, Spring Boot, React, MySQL, AWS), now live in four major U.S. hospitals.',
+        'One of the first engineers at an AI healthcare startup founded by MIT Professor Dimitris Bertsimas; grew into Technical Lead of the flagship Nurse Scheduling platform and project lead on three projects.',
+        'Architected and built the cloud-native Nurse Scheduling platform (Java, Spring Boot, React, MySQL, AWS), now live in four major U.S. hospitals.',
+        'Leads cross-functional teams of 5–10 developers across Greece, Boston (USA) and Morocco: architecture, technical decisions, code reviews and sprint planning.',
         'Delivered an AI documentation assistant (Spring AI, RAG), SMART on FHIR apps inside Epic EHR, SAML 2.0 SSO, UKG integration, notifications and audit logging.',
         'Modernised a legacy Java/Angular application through Agile practices, engineering standards, CI/CD, documentation and incremental refactoring.',
+        'Ships weekly, secure, HIPAA-compliant releases with customers, Product, QA and DevOps; runs technical interviews, mentors and onboards engineers.',
       ],
       [
         'Java',

@@ -69,12 +69,18 @@ function timeline(entries: Entry[]): string {
     .map((group) => {
       const [name, where] = splitOrg(group[0].org)
       const roles = group
-        .map(
-          (e) =>
-            `<article class="entry"><header><h3>${esc(e.title)}</h3><span class="when">${esc(
-              e.meta,
-            )}</span></header>${bullets(e.bullets)}${tech(e.tags)}</article>`,
-        )
+        .map((e) => {
+          const head = (e.steps ?? [e])
+            .map(
+              (step) =>
+                `<header><h3>${esc(step.title)}</h3><span class="when">${esc(
+                  step.meta,
+                )}</span></header>`,
+            )
+            .join('')
+          const cls = e.steps ? 'entry entry--steps' : 'entry'
+          return `<article class="${cls}">${head}${bullets(e.bullets)}${tech(e.tags)}</article>`
+        })
         .join('')
       return `<li class="company${group.length > 1 ? ' company--steps' : ''}"><p class="org"><b>${esc(
         name,
@@ -271,6 +277,8 @@ body {
 .entry { margin: 0 0 2mm; }
 .entry:last-child { margin-bottom: 0; }
 .company--steps .entry + .entry { padding-top: 1.6mm; border-top: .3mm dashed var(--line); }
+.entry--steps header + header { margin-top: .6mm; }
+.entry--steps header + header h3 { color: var(--soft); font-weight: 500; }
 .entry header { display: flex; justify-content: space-between; gap: 3mm; align-items: baseline; }
 .entry h3 { margin: 0; color: var(--accent); font-size: 8.9pt; font-weight: 600; }
 .entry .when { flex: none; color: var(--soft); font-size: 7.6pt; font-variant-numeric: tabular-nums; white-space: nowrap; }

@@ -195,7 +195,7 @@ export const BUILDINGS: Building[] = [
     kind: 'house',
     name: 'Kitsos House',
     short: 'House',
-    subtitle: 'Home of Christos "Kitsos" Orfanopoulos',
+    subtitle: 'Home of Kitsos Orfanopoulos',
     position: [-62, 56],
     door: [-62, 47],
     half: [7.2, 6.5],
@@ -433,7 +433,7 @@ export const NPCS: Npc[] = [
     ],
     journal: {
       title: 'Welcome to Kitsos Town',
-      body: 'Christos "Kitsos" Orfanopoulos, Senior Full Stack Software Engineer & Technical Lead, based in Athens, Greece. Five keys, one per district, open the Old Lighthouse on the north-west cape.',
+      body: 'Kitsos Orfanopoulos, Senior Full Stack Software Engineer & Technical Lead, based in Athens, Greece. Five keys, one per district, open the Old Lighthouse on the north-west cape.',
     },
   },
   {

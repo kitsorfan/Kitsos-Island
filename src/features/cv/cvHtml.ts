@@ -1,6 +1,6 @@
 import type { PanelBlock, PanelSection } from '../../types.ts'
 import { CV_PARTS } from './cv.ts'
-import { PROFILE } from './profile.ts'
+import { CV_NAME, PROFILE } from './profile.ts'
 
 /**
  * The CV as a single self-contained HTML page.
@@ -194,7 +194,7 @@ a { color: var(--accent); }
 
 /** The whole CV as one standalone HTML document. */
 export function buildCvHtml(): string {
-  const name = `${PROFILE.firstName} "${PROFILE.nickname}" ${PROFILE.lastName}`
+  const name = CV_NAME
   const body = CV_PARTS.map(
     ([title, sections]) =>
       `<h2 class="part">${esc(title)}</h2>${renderSections(sections)}`,

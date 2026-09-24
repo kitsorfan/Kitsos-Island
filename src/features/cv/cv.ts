@@ -6,6 +6,7 @@ import {
   IBM_SECTIONS,
   LIGHTHOUSE_SECTIONS,
   PLATFORM_SECTIONS,
+  CV_NAME,
   PROFILE,
   PUBLICATION_SECTIONS,
   REFERENCES_SECTIONS,
@@ -100,7 +101,7 @@ export const CV_PARTS: [string, PanelSection[]][] = [
 /** The whole CV as Markdown, built from the same data the island shows. */
 export function buildCvText(): string {
   const lines: string[] = [
-    `# ${PROFILE.firstName} "${PROFILE.nickname}" ${PROFILE.lastName}`,
+    `# ${CV_NAME}`,
     '',
     PROFILE.title,
     '',

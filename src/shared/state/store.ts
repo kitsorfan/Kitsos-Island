@@ -11,7 +11,7 @@ import {
 } from '../../features/island/world'
 import {
   FULL_CV_SECTIONS,
-  PROFILE,
+  CV_NAME,
   RADIO_SECTIONS,
 } from '../../features/cv/profile'
 import type {
@@ -1098,7 +1098,7 @@ export const useGame = create<GameState>((raw, get) => {
       set({ cvUnlocked: true })
       get().openPanel({
         kicker: 'The full CV',
-        title: `${PROFILE.firstName} "${PROFILE.nickname}" ${PROFILE.lastName}`,
+        title: CV_NAME,
         sections: FULL_CV_SECTIONS,
         accent: '#f0a33c',
         kind: 'cv',

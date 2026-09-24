@@ -12,6 +12,12 @@ export const PROFILE = {
   linkedinLabel: 'linkedin.com/in/kitsorfan',
 } as const
 
+/** The full name, given name and nickname both. Only the CV carries it. */
+export const CV_NAME = `${PROFILE.firstName} (${PROFILE.nickname}) ${PROFILE.lastName}`
+
+/** The name everywhere else on the island. */
+export const NAME = `${PROFILE.nickname} ${PROFILE.lastName}`
+
 export const HOUSE_SECTIONS: PanelSection[] = [
   {
     heading: 'Trainer card',

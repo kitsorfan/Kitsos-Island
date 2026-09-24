@@ -12,8 +12,7 @@ export const WORLD: Record<string, string> = {
   /* ------------------------------ Buildings --------------------------- */
   'Kitsos House': 'Το Σπίτι του Κίτσου',
   House: 'Σπίτι',
-  'Home of Christos "Kitsos" Orfanopoulos':
-    'Το σπίτι του Χρήστου «Κίτσου» Ορφανόπουλου',
+  'Home of Kitsos Orfanopoulos': 'Το σπίτι του Κίτσου Ορφανόπουλου',
   'National Technical University of Athens': 'Εθνικό Μετσόβιο Πολυτεχνείο',
   NTUA: 'ΕΜΠ',
   'School of Electrical & Computer Engineering':
@@ -177,8 +176,8 @@ export const WORLD: Record<string, string> = {
 
   /* --------------------------- Journal entries ------------------------ */
   'Welcome to Kitsos Town': 'Καλώς ήρθες στην Πόλη του Κίτσου',
-  'Christos "Kitsos" Orfanopoulos, Senior Full Stack Software Engineer & Technical Lead, based in Athens, Greece. Five keys, one per district, open the Old Lighthouse on the north-west cape.':
-    'Χρήστος «Κίτσος» Ορφανόπουλος, Senior Full Stack Software Engineer & Technical Lead, με έδρα την Αθήνα. Πέντε κλειδιά, ένα ανά συνοικία, ανοίγουν τον Παλιό Φάρο στο βορειοδυτικό ακρωτήρι.',
+  'Kitsos Orfanopoulos, Senior Full Stack Software Engineer & Technical Lead, based in Athens, Greece. Five keys, one per district, open the Old Lighthouse on the north-west cape.':
+    'Κίτσος Ορφανόπουλος, Senior Full Stack Software Engineer & Technical Lead, με έδρα την Αθήνα. Πέντε κλειδιά, ένα ανά συνοικία, ανοίγουν τον Παλιό Φάρο στο βορειοδυτικό ακρωτήρι.',
   Volunteering: 'Εθελοντισμός',
   'Leading volunteer (2017–2021, 2023–today) and Director (2021–2022) at the Christian Youth Foundation "Pantokrator", Paleo Faliro. Blood donor since 2017.':
     'Επικεφαλής εθελοντής (2017–2021, 2023–σήμερα) και Διευθυντής (2021–2022) στο Χριστιανικό Ίδρυμα Νεότητας «Παντοκράτωρ», Παλαιό Φάληρο. Αιμοδότης από το 2017.',

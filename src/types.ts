@@ -366,6 +366,11 @@ export type ExhibitKind =
    * every other exhibit does.
    */
   | 'prop'
+  /**
+   * The screen on the flight deck with everybody on the island on it. Its
+   * panel draws the roster itself, from the world's own list of people.
+   */
+  | 'crew'
 
 export interface Exhibit {
   id: string

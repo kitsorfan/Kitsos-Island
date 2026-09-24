@@ -17,6 +17,7 @@ import { MONTH_NAMES, nameOfDay } from '../calendar/calendar'
 import { examine } from './examine'
 import { LECTURE_AREA } from '../lecture/lecture'
 import { FlightDeck } from '../launch/FlightDeck'
+import { CrewScreen } from '../launch/CrewScreen'
 import { LAUNCH_AREA } from '../launch/launch'
 import { liftPhase } from '../lift/lift'
 import { useGame } from '../../shared/state/store'
@@ -417,6 +418,8 @@ function ExhibitPiece({
           <WallCalendar />
         ) : exhibit.kind === 'techWall' ? (
           <TechWall accent={accent} />
+        ) : exhibit.kind === 'crew' ? (
+          <CrewScreen />
         ) : exhibit.kind === 'toy' || exhibit.kind === 'prop' ? null : (
           <NoticeBoard accent={accent} />
         )}

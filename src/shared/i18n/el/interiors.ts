@@ -285,4 +285,10 @@ export const INTERIORS: Record<string, string> = {
   'Six countries': 'Έξι χώρες',
   'The globe in the astronomy corner at Evangeliki: Greece, Cyprus, Germany, France, Italy and Switzerland, stood in rather than pointed at.':
     'Η υδρόγειος στη γωνιά της αστρονομίας στην Ευαγγελική: Ελλάδα, Κύπρος, Γερμανία, Γαλλία, Ιταλία και Ελβετία — χώρες όχι δειγμένες μα πατημένες.',
+  'Flight deck': 'Θάλαμος πτήσης',
+  'the crew screen': 'η οθόνη του πληρώματος',
+  'Meet the characters': 'Γνωρίστε τους χαρακτήρες',
+  'The crew screen': 'Η οθόνη του πληρώματος',
+  'A screen on the flight deck with everybody on the island on it, and a tick against each one he stopped to hear.':
+    'Μια οθόνη στον θάλαμο πτήσης με όλους όσοι ζουν στο νησί, και ένα τικ δίπλα σε όποιον στάθηκε να ακούσει.',
 }

@@ -11,6 +11,7 @@ import {
   UNIVERSITY_SECTIONS,
   VELTISTON_SECTIONS,
 } from './profile.ts'
+import { LATEST_RELEASE } from '../radio/release.ts'
 
 /**
  * The CV as a recruiter expects to receive it: two A4 pages, nothing about
@@ -300,6 +301,19 @@ export const RESUME = {
     'Hiking & camping',
   ],
 }
+
+/**
+ * When the CV was last brought up to date: the island's latest release,
+ * since the CV is printed from the island's data and ships with it.
+ */
+export const RESUME_UPDATED = new Date(
+  `${LATEST_RELEASE.date}T12:00:00Z`,
+).toLocaleDateString('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
 
 /** What the PDF is saved as, so it is findable in a downloads folder. */
 export const RESUME_PDF = `${PROFILE.lastName}-${PROFILE.firstName}-CV.pdf`

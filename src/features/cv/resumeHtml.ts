@@ -1,4 +1,4 @@
-import { RESUME, RESUME_PDF } from './resume.ts'
+import { RESUME, RESUME_PDF, RESUME_UPDATED } from './resume.ts'
 
 /**
  * The CV as a printed document: two A4 sheets in a clean two-column layout,
@@ -191,7 +191,7 @@ body {
   line-height: 1.05;
   letter-spacing: -.02em;
 }
-.masthead h1 .nick { color: #737f91; font-weight: 400; }
+.masthead h1 .nick { color: #5f6b7d; font-weight: 400; }
 .masthead .role {
   margin: 1.8mm 0 3.2mm;
   color: var(--accent);
@@ -427,7 +427,9 @@ export function buildResumeHtml({ photo, bare }: ResumeOptions = {}): string {
   )
 
   const foot = (n: number) =>
-    `<footer class="foot"><span>${esc(r.name)}</span><span>${n} / 2</span></footer>`
+    `<footer class="foot"><span>${esc(r.name)}</span><span>Last updated ${esc(
+      RESUME_UPDATED,
+    )} · ${n} / 2</span></footer>`
 
   const page1 = `<div class="sheet">
 ${masthead}

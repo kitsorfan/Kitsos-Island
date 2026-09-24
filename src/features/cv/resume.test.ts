@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it } from 'vitest'
-import { RESUME } from './resume'
+import { RESUME, RESUME_UPDATED } from './resume'
 import { buildResumeHtml } from './resumeHtml'
 import { PROFILE } from './profile'
 
@@ -88,5 +88,14 @@ describe('the experience timeline', () => {
     expect(veltiston?.querySelectorAll('.entry')).toHaveLength(1)
     expect(veltiston?.querySelectorAll('header .when')).toHaveLength(2)
     expect(veltiston?.querySelectorAll('.stack')).toHaveLength(1)
+  })
+})
+
+describe('the footer', () => {
+  it('dates the CV by the latest release note', () => {
+    const doc = parse(buildResumeHtml())
+    const foot = doc.querySelector('.foot')?.textContent ?? ''
+    expect(foot).toContain(`Last updated ${RESUME_UPDATED}`)
+    expect(RESUME_UPDATED).toMatch(/^\d{1,2} [A-Z][a-z]+ \d{4}$/)
   })
 })

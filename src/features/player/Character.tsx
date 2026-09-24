@@ -128,6 +128,12 @@ interface CharacterProps {
    * and it has to look like it from across a field.
    */
   starShirt?: boolean
+  /**
+   * The officer's kit at the camp: a disruptive pattern over the olive, and
+   * a second lieutenant's single star on each shoulder. The colours come in
+   * through `colors` like anybody's; this is only the pattern and the rank.
+   */
+  camo?: boolean
 }
 
 const IDLE: CharacterMotion = { moving: false, speed: 0, airborne: false }
@@ -199,6 +205,7 @@ export function Character({
   helmet,
   spacesuit,
   starShirt,
+  camo = false,
   kit,
   ring = false,
 }: CharacterProps) {
@@ -987,7 +994,9 @@ export function Character({
                   roughness={0.9}
                 />
               </mesh>
+              {spacesuit && <MoonBoot />}
             </group>
+            {spacesuit && <KneePad />}
           </group>
         ))}
 
@@ -1042,6 +1051,7 @@ export function Character({
                 a gold star on the chest, gold at the collar and cuffs, and
                 the mission patch on the sleeve. */}
             {starShirt && !spacesuit && <StarKit motion={motion} />}
+            {camo && !spacesuit && <CamoKit />}
 
             {/* The pack on his back, and the chest rig that answers it. */}
             {spacesuit && (
@@ -1082,6 +1092,64 @@ export function Character({
                     <meshStandardMaterial color="#f0a33c" flatShading />
                   </mesh>
                 ))}
+                {/* A dial under the lights, and a stripe of blue down the
+                    front of the box so it reads as kit, not a pocket. */}
+                <mesh
+                  position={[0, -0.03, 0.245]}
+                  rotation={[Math.PI / 2, 0, 0]}
+                >
+                  <cylinderGeometry args={[0.035, 0.035, 0.02, 10]} />
+                  <meshStandardMaterial
+                    color="#4a5260"
+                    metalness={0.5}
+                    roughness={0.35}
+                  />
+                </mesh>
+                <mesh position={[0.11, 0.04, 0.242]}>
+                  <boxGeometry args={[0.04, 0.16, 0.01]} />
+                  <meshStandardMaterial color="#3d7fd6" />
+                </mesh>
+                {/* The utility belt, a dark band round the waist with a
+                    steel buckle at the front. */}
+                <mesh position={[0, -0.32, 0]}>
+                  <boxGeometry args={[0.65, 0.09, 0.41]} />
+                  <meshStandardMaterial
+                    color="#3a4150"
+                    flatShading
+                    roughness={0.6}
+                  />
+                </mesh>
+                <mesh position={[0, -0.32, 0.21]}>
+                  <boxGeometry args={[0.12, 0.08, 0.02]} />
+                  <meshStandardMaterial
+                    color="#c9d2dc"
+                    metalness={0.7}
+                    roughness={0.25}
+                  />
+                </mesh>
+                {/* The mission patch on the left shoulder: a blue disc with
+                    an amber ring and a star in it. */}
+                <group
+                  position={[-0.316, 0.08, 0.02]}
+                  rotation={[0, -Math.PI / 2, 0]}
+                >
+                  <mesh rotation={[Math.PI / 2, 0, 0]}>
+                    <cylinderGeometry args={[0.085, 0.085, 0.01, 16]} />
+                    <meshStandardMaterial color="#f0a33c" />
+                  </mesh>
+                  <mesh position={[0, 0, 0.004]} rotation={[Math.PI / 2, 0, 0]}>
+                    <cylinderGeometry args={[0.068, 0.068, 0.01, 16]} />
+                    <meshStandardMaterial color="#1f3f78" />
+                  </mesh>
+                  <mesh position={[0, 0, 0.01]}>
+                    <circleGeometry args={[0.03, 5]} />
+                    <meshStandardMaterial
+                      color="#ffe28a"
+                      emissive="#ffd34d"
+                      emissiveIntensity={0.4}
+                    />
+                  </mesh>
+                </group>
               </group>
             )}
 
@@ -1290,6 +1358,7 @@ export function Character({
                     />
                   </mesh>
                 )}
+                {spacesuit && <SpaceGlove />}
                 {gun && arm.ref === armR && <Marker accent={gunColor} />}
                 {bouquet && !gun && arm.ref === armR && (
                   <group ref={bouquetRef} position={[0, -0.6, 0]}>
@@ -1409,6 +1478,65 @@ export function Character({
  * how fast he is going - a cape that hangs dead still while he runs is a
  * towel pinned to his back.
  */
+/**
+ * The blotches, as [x, y, width, height, colour] on the chest's own face.
+ * Laid out by hand rather than at random, so every officer on the island
+ * wears the same pattern and it never shimmers from one render to the next.
+ */
+const CAMO_PATCHES: [number, number, number, number, string][] = [
+  [-0.17, 0.2, 0.2, 0.13, '#3f4a2a'],
+  [0.12, 0.12, 0.24, 0.1, '#8a7a4f'],
+  [-0.05, -0.06, 0.18, 0.12, '#4a3c2a'],
+  [0.18, -0.2, 0.16, 0.12, '#3f4a2a'],
+  [-0.2, -0.22, 0.14, 0.1, '#8a7a4f'],
+  [0.02, 0.28, 0.12, 0.06, '#4a3c2a'],
+]
+
+/**
+ * Pattern on the front and back of the jacket, a name tape over the right
+ * breast, and the rank on the shoulders. Nothing here casts, for the reason
+ * the star shirt's trim does not: flat patches on the chest throw their own
+ * hard shapes onto the ground beside the body that is already casting.
+ */
+function CamoKit() {
+  return (
+    <group position={[0, 1.05, 0]}>
+      {[1, -1].map((face) => (
+        <group key={face} rotation={[0, face > 0 ? 0 : Math.PI, 0]}>
+          {CAMO_PATCHES.map(([x, y, w, h, color], i) => (
+            <mesh key={i} position={[x, y, 0.192 + i * 0.0004]}>
+              <planeGeometry args={[w, h]} />
+              <meshStandardMaterial color={color} roughness={0.95} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+      {/* The name tape, pale on the olive. */}
+      <mesh position={[-0.15, 0.2, 0.196]}>
+        <planeGeometry args={[0.2, 0.05]} />
+        <meshStandardMaterial color="#d9d2b0" roughness={0.9} />
+      </mesh>
+      {/* One gold star on each shoulder strap: a second lieutenant. */}
+      {[-0.2, 0.2].map((x) => (
+        <group key={x} position={[x, 0.365, 0]}>
+          <mesh>
+            <boxGeometry args={[0.1, 0.012, 0.2]} />
+            <meshStandardMaterial color="#4c5238" roughness={0.9} />
+          </mesh>
+          <mesh position={[0, 0.012, 0.03]}>
+            <boxGeometry args={[0.05, 0.012, 0.05]} />
+            <meshStandardMaterial
+              color="#e2b53c"
+              metalness={0.6}
+              roughness={0.3}
+            />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  )
+}
+
 function StarKit({ motion }: { motion?: RefObject<CharacterMotion> }) {
   /* Big. This is the only thing on the island that has to be earned, and it
      is read from across a green at the camera's usual distance, so the star
@@ -1816,10 +1944,30 @@ function SpaceHelmet() {
           side={DoubleSide}
         />
       </mesh>
+      {/* A gold-tinted sun visor, a band across the front just under the
+          shade, so the eyes below it stay clear. */}
+      <mesh>
+        <sphereGeometry
+          args={[0.47, 18, 6, Math.PI * 0.2, Math.PI * 0.6, 0.9, 0.36]}
+        />
+        <meshStandardMaterial
+          color="#e8b04a"
+          transparent
+          opacity={0.55}
+          metalness={0.9}
+          roughness={0.15}
+          side={DoubleSide}
+        />
+      </mesh>
       {/* The sunshade over the brow, and the lamp clipped to it. */}
       <mesh position={[0, 0.3, 0.08]} castShadow>
         <cylinderGeometry args={[0.34, 0.34, 0.14, 14]} />
         <meshStandardMaterial color="#eef2f6" flatShading roughness={0.7} />
+      </mesh>
+      {/* An amber stripe round the shade, answering the collar. */}
+      <mesh position={[0, 0.3, 0.08]}>
+        <cylinderGeometry args={[0.345, 0.345, 0.04, 14]} />
+        <meshStandardMaterial color="#f0a33c" flatShading roughness={0.5} />
       </mesh>
       <mesh position={[0, 0.3, 0.36]}>
         <cylinderGeometry args={[0.07, 0.07, 0.06, 10]} />
@@ -1828,6 +1976,75 @@ function SpaceHelmet() {
           emissive="#ffd98a"
           emissiveIntensity={0.9}
         />
+      </mesh>
+      {/* A pair of side lamps at the temples. */}
+      {[-0.44, 0.44].map((x) => (
+        <mesh key={x} position={[x, 0.02, 0.06]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.05, 0.05, 0.07, 10]} />
+          <meshStandardMaterial
+            color="#ffffff"
+            emissive="#bfe4ff"
+            emissiveIntensity={0.8}
+          />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+/**
+ * A chunky boot for the suit: an oversized shell over the foot with an amber
+ * welt and a dark tread, so the silhouette ends in moon boots rather than
+ * in trouser legs.
+ */
+function MoonBoot() {
+  return (
+    <group position={[0, -SHIN, 0]}>
+      {/* No two faces share a plane: the shell starts inside the sole, the
+          sole dips just under the ground, and the shin's own end sits
+          buried between them — coplanar faces flicker as they trade places. */}
+      <mesh position={[0, 0.16, 0.03]} castShadow>
+        <boxGeometry args={[0.29, 0.24, 0.34]} />
+        <meshStandardMaterial color="#d3dbe3" flatShading roughness={0.75} />
+      </mesh>
+      <mesh position={[0, 0.28, 0]}>
+        <boxGeometry args={[0.3, 0.05, 0.31]} />
+        <meshStandardMaterial color="#f0a33c" flatShading />
+      </mesh>
+      <mesh position={[0, 0.025, 0.04]}>
+        <boxGeometry args={[0.31, 0.07, 0.37]} />
+        <meshStandardMaterial color="#2f343d" flatShading roughness={0.9} />
+      </mesh>
+    </group>
+  )
+}
+
+/** A padded plate over the knee, riding on the thigh so it bends with it. */
+function KneePad() {
+  return (
+    <mesh position={[0, -THIGH + 0.02, 0.125]}>
+      <boxGeometry args={[0.18, 0.14, 0.04]} />
+      <meshStandardMaterial
+        color="#b9c4cf"
+        flatShading
+        metalness={0.3}
+        roughness={0.5}
+      />
+    </mesh>
+  )
+}
+
+/** A gauntlet: an amber wrist ring and a dark glove at the end of the arm. */
+function SpaceGlove() {
+  return (
+    <group position={[0, -0.56, 0]}>
+      <mesh>
+        <boxGeometry args={[0.2, 0.06, 0.23]} />
+        <meshStandardMaterial color="#f0a33c" flatShading />
+      </mesh>
+      <mesh position={[0, -0.08, 0]} castShadow>
+        <boxGeometry args={[0.19, 0.13, 0.21]} />
+        <meshStandardMaterial color="#3a4150" flatShading roughness={0.7} />
       </mesh>
     </group>
   )
@@ -1864,6 +2081,19 @@ function LifeSupport() {
           color="#6fd08a"
           emissive="#6fd08a"
           emissiveIntensity={0.8}
+        />
+      </mesh>
+      {/* A whip antenna off the top corner, tipped with a red beacon. */}
+      <mesh position={[-0.22, 0.58, -0.12]}>
+        <cylinderGeometry args={[0.012, 0.012, 0.44, 6]} />
+        <meshStandardMaterial color="#8d949a" metalness={0.6} roughness={0.4} />
+      </mesh>
+      <mesh position={[-0.22, 0.81, -0.12]}>
+        <sphereGeometry args={[0.035, 8, 6]} />
+        <meshStandardMaterial
+          color="#ff5a4a"
+          emissive="#ff3b2e"
+          emissiveIntensity={1.2}
         />
       </mesh>
       {/* The hoses up to the collar. */}
@@ -2325,22 +2555,39 @@ function Accessory({ prop }: { prop?: Npc['prop'] }) {
       )
     case 'headset':
       return (
+        /*
+         * Every piece stands clear of the head rather than on it. The band
+         * used to lie flat at the hair's own half-width and the boom's front
+         * face sat exactly on the face (both at z=0.26); coplanar faces have
+         * no depth between them to sort by, so they flickered as the camera
+         * moved. Now: the band arches over the hair (top 0.32) from ear to
+         * ear, the cups sit outside the long-hair strands (x 0.36), and the
+         * boom runs forward outside the cheek and across in front of the
+         * mouth at z=0.31, a clear 5cm off the face.
+         */
         <group>
-          <mesh position={[0, 0.26, 0]} rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.3, 0.035, 6, 14, Math.PI]} />
+          <mesh position={[0, 0.02, 0]}>
+            <torusGeometry args={[0.39, 0.03, 6, 16, Math.PI]} />
             <meshStandardMaterial color="#2f3542" roughness={0.7} />
           </mesh>
-          <mesh position={[-0.3, 0.04, 0]}>
-            <boxGeometry args={[0.09, 0.16, 0.16]} />
+          {[-0.38, 0.38].map((x) => (
+            <mesh key={x} position={[x, 0.02, 0]}>
+              <boxGeometry args={[0.08, 0.17, 0.17]} />
+              <meshStandardMaterial color="#2f3542" roughness={0.7} />
+            </mesh>
+          ))}
+          {/* The boom: forward off the right cup, then in to the mouth. */}
+          <mesh position={[0.39, -0.05, 0.17]}>
+            <boxGeometry args={[0.03, 0.03, 0.28]} />
             <meshStandardMaterial color="#2f3542" roughness={0.7} />
           </mesh>
-          <mesh position={[0.3, 0.04, 0]}>
-            <boxGeometry args={[0.09, 0.16, 0.16]} />
+          <mesh position={[0.245, -0.1, 0.31]} rotation={[0, 0, 0.33]}>
+            <boxGeometry args={[0.31, 0.03, 0.03]} />
             <meshStandardMaterial color="#2f3542" roughness={0.7} />
           </mesh>
-          <mesh position={[0.2, -0.09, 0.24]} rotation={[0, 0, 0.5]}>
-            <boxGeometry args={[0.22, 0.04, 0.04]} />
-            <meshStandardMaterial color="#2f3542" roughness={0.7} />
+          <mesh position={[0.1, -0.15, 0.31]}>
+            <sphereGeometry args={[0.035, 8, 6]} />
+            <meshStandardMaterial color="#20242e" roughness={0.8} />
           </mesh>
         </group>
       )

@@ -19,6 +19,8 @@ import { LECTURE_AREA } from '../lecture/lecture'
 import { FlightDeck } from '../launch/FlightDeck'
 import { CrewScreen } from '../launch/CrewScreen'
 import { LAUNCH_AREA } from '../launch/launch'
+import { ARMY_AREA, admits } from '../army/army'
+import { Barracks } from '../army/Barracks'
 import { liftPhase } from '../lift/lift'
 import { useGame } from '../../shared/state/store'
 import { useT } from '../../shared/i18n/useT'
@@ -44,6 +46,8 @@ export function Interior({ id }: { id: string }) {
   const swung = useGame((s) => s.swung)
   const visit = useGame((s) => s.spawn.token)
   const christmas = useGame((s) => s.christmas)
+  /* The officers' door at the camp reads it: shut to civvies, open to kit. */
+  const outfit = useGame((s) => s.outfit)
   if (!interior) return null
 
   // Underground there is no sun and no sky: the light comes off whatever is
@@ -123,12 +127,15 @@ export function Interior({ id }: { id: string }) {
       {id === LECTURE_AREA && <Slides />}
       {/* The summit room is a flight deck, and has a window in it. */}
       {id === LAUNCH_AREA && <FlightDeck />}
+      {/* The kit on its locker, the duty bell, and whoever it calls in. */}
+      {id === ARMY_AREA && <Barracks />}
       {(interior.links ?? []).map((link) => (
         <LinkPiece
           key={link.id}
           link={link}
           accent={interior.accent}
           shown={!link.needs || swung[link.needs] === visit}
+          admitted={admits(link, outfit)}
         />
       ))}
       {interior.exhibits.map((exhibit) => (
@@ -905,11 +912,14 @@ function Logbook({ accent }: { accent: string }) {
         <boxGeometry args={[1.6, 1.2, 1]} />
         <meshStandardMaterial color="#8a6642" flatShading roughness={0.95} />
       </mesh>
-      <mesh position={[0, 1.24, -0.1]} rotation={[-0.4, 0, 0]} castShadow>
+      {/* Canted toward +z, the reader's side, where the lamp is: tipped the
+          other way it faced the wall, and from the room all that showed was
+          the raised back edge of the book, standing up like a dark slab. */}
+      <mesh position={[0, 1.24, -0.1]} rotation={[0.4, 0, 0]} castShadow>
         <boxGeometry args={[1.7, 0.1, 1]} />
         <meshStandardMaterial color="#a97c4e" flatShading />
       </mesh>
-      <group ref={book} position={[0, 1.28, 0]} rotation={[-0.4, 0, 0]}>
+      <group ref={book} position={[0, 1.28, 0]} rotation={[0.4, 0, 0]}>
         <mesh castShadow>
           <boxGeometry args={[1.2, 0.16, 0.8]} />
           <meshStandardMaterial color={accent} flatShading roughness={0.8} />
@@ -1128,10 +1138,13 @@ function LinkPiece({
   link,
   accent,
   shown,
+  admitted,
 }: {
   link: InteriorLink
   accent: string
   shown: boolean
+  /** Dressed for it, for a door that cares; true for every door that does not. */
+  admitted: boolean
 }) {
   const t = useT()
   const dest = link.to ? INTERIOR_BY_ID.get(link.to) : undefined
@@ -1176,7 +1189,7 @@ function LinkPiece({
           <Stairwell />
         ) : link.kind === 'stairsUp' ? (
           <UpFlight />
-        ) : link.kind === 'locked' ? (
+        ) : link.kind === 'locked' || !admitted ? (
           <ShutDoor accent={accent} />
         ) : link.kind === 'lift' ? (
           <LiftDoors link={link} accent={accent} />
@@ -1198,7 +1211,19 @@ function LinkPiece({
       {link.kind === 'hatch' && <Threshold accent={accent} />}
       {/* Where it goes, over the top of it. The secret room's shelf keeps
           its own counsel: the sign just says you can get through. */}
-      {link.kind !== 'locked' && link.kind !== 'lift' && (
+      {/* A door that wants a uniform says so over the top of it, and says
+          where it goes once it will take him there. */}
+      {!admitted && (
+        <TextPlane
+          text={t('Officers only')}
+          width={4.6}
+          aspect={7}
+          color="#ffe9c4"
+          outline="rgba(0,0,0,0.6)"
+          position={[0, 4.35, 0.3]}
+        />
+      )}
+      {admitted && link.kind !== 'locked' && link.kind !== 'lift' && (
         <TextPlane
           text={t(link.kind === 'hatch' || !dest ? 'Through' : dest.kicker)}
           width={link.kind === 'hatch' || !dest ? 2.2 : 4.6}

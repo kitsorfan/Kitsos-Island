@@ -1476,35 +1476,47 @@ export function RadioModel() {
     }
   })
 
+  /* A twelve-sided cylinder puts a corner, not a face, at +z. Turned by half
+     a facet, the drum has a flat face at the front for the door and one
+     every 30° after it for the windows; unturned, the door straddled the
+     corner and the wall folded through the middle of it. */
+  const facet = Math.PI / 12
+
   return (
     <group>
-      <mesh position={[0, 2.1, 0]} castShadow receiveShadow>
+      <mesh
+        position={[0, 2.1, 0]}
+        rotation={[0, facet, 0]}
+        castShadow
+        receiveShadow
+      >
         <cylinderGeometry args={[3.9, 4.1, 4.2, 12]} />
         <meshStandardMaterial color="#efe6f2" flatShading roughness={0.9} />
       </mesh>
-      <mesh position={[0, 4.4, 0]} castShadow>
+      <mesh position={[0, 4.4, 0]} rotation={[0, facet, 0]} castShadow>
         <cylinderGeometry args={[4.4, 4.4, 0.4, 12]} />
         <meshStandardMaterial color="#8e4fa8" flatShading roughness={0.8} />
       </mesh>
-      <mesh position={[0, 5, 0]} castShadow>
+      <mesh position={[0, 5, 0]} rotation={[0, facet, 0]} castShadow>
         <cylinderGeometry args={[2.6, 3.4, 1.2, 12]} />
         <meshStandardMaterial color="#b95fd0" flatShading roughness={0.85} />
       </mesh>
 
+      {/* The front face leans in with the taper, from 3.96 out at the
+          ground to 3.85 at the head of the door; the slab straddles both. */}
       <Door
-        position={[0, 1.2, D / 2 - 0.05]}
+        position={[0, 1.2, D / 2]}
         width={1.5}
         height={2.4}
         color="#7a3f92"
       />
-      {/* The drum is round, so the windows go round it too: each one is set
-          at its own angle on the curve and turned to face straight out. Laid
-          out on a flat line instead, as they used to be, they sank back
-          inside the wall and their light never got out. */}
-      {[-0.62, 0.62].map((turn) => (
+      {/* The drum is round, so the windows go round it too: each one sits
+          on the face either side of the door's, turned to face straight
+          out, with its frame half in the wall so none of it floats. */}
+      {[-2 * facet, 2 * facet].map((turn) => (
         <Win
           key={turn}
-          position={[Math.sin(turn) * 3.95, 2.6, Math.cos(turn) * 3.95]}
+          position={[Math.sin(turn) * 3.86, 2.6, Math.cos(turn) * 3.86]}
           rotation={[0, turn, 0]}
           size={[1, 1]}
           frame="#c9a6d6"

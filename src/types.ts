@@ -437,6 +437,12 @@ export interface InteriorLink {
    * `revealSecret`. Until then it is furniture.
    */
   needs?: string
+  /**
+   * Stays shut to anybody not dressed for it: the officers' door at the
+   * camp, which opens for the uniform and not for the man. Drawn shut, and
+   * offers `lines` to whoever tries it, until he is wearing it.
+   */
+  dress?: 'officer'
   /** Journal entry filed the first time it opens. */
   journal?: { title: string; body: string }
   /**

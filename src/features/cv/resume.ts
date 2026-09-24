@@ -93,10 +93,7 @@ export const RESUME = {
    * into a public site from a public repo, and a number that goes out that
    * way gets scraped; the email and LinkedIn are the channels meant for it.
    */
-  profile: [
-    { label: 'Location', value: PROFILE.location },
-    { label: 'Nationality', value: PROFILE.nationality },
-  ],
+  profile: [{ label: 'Location', value: PROFILE.location }],
   contact: [
     {
       label: 'Email',

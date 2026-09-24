@@ -27,7 +27,6 @@ const ICON = {
   pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 7 8.5-7"/>',
   link: '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10v7M8 7v.01M12 17v-4a2.5 2.5 0 0 1 5 0v4M12 10v7"/>',
-  flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
   globe:
     '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/>',
 }
@@ -186,7 +185,7 @@ body {
   line-height: 1.05;
   letter-spacing: -.02em;
 }
-.masthead h1 .nick { color: #9aa5b5; font-weight: 300; }
+.masthead h1 .nick { color: #737f91; font-weight: 400; }
 .masthead .role {
   margin: 1.8mm 0 3.2mm;
   color: var(--accent);
@@ -195,7 +194,7 @@ body {
   letter-spacing: -.005em;
 }
 .masthead .role span { color: var(--soft); font-weight: 400; }
-.contact { display: flex; flex-wrap: wrap; gap: 1.2mm 5mm; margin: 0; padding: 0; list-style: none; }
+.contact { display: grid; grid-template-columns: repeat(2, max-content); gap: 1.4mm 8mm; margin: 0; padding: 0; list-style: none; }
 .contact li { display: flex; align-items: center; gap: 1.4mm; color: var(--body); }
 .contact a { color: inherit; text-decoration: none; }
 .ico { width: 3.4mm; height: 3.4mm; flex: none; fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -367,7 +366,6 @@ export function buildResumeHtml({ photo, bare }: ResumeOptions = {}): string {
 <li>${icon('mail')}<a href="${esc(email.href)}">${esc(email.value)}</a></li>
 <li>${icon('link')}<a href="${esc(linkedin.href)}">${esc(linkedin.value)}</a></li>
 <li>${icon('globe')}<a href="${esc(website.href)}">${esc(website.value)}</a></li>
-<li>${icon('flag')}${esc(r.profile[1].value)}</li>
 </ul>`
 
   const masthead = `<header class="masthead"><div class="who"><h1>${esc(
@@ -465,7 +463,7 @@ ${section('Interests', `<p class="tags">${r.hobbies.map(esc).join(' · ')}</p>`)
 <meta name="description" content="${esc(`${r.name} · ${r.title}, ${r.profile[0].value}.`)}">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=block">
 <style>${STYLE}</style>
 </head>
 <body>

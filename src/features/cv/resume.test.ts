@@ -1,0 +1,89 @@
+/**
+ * @vitest-environment jsdom
+ */
+import { describe, expect, it } from 'vitest'
+import { RESUME } from './resume'
+import { buildResumeHtml } from './resumeHtml'
+import { PROFILE } from './profile'
+
+/**
+ * The two-page CV, the one that gets forwarded around.
+ *
+ * Its facts are read out of the island's data, so the things worth holding
+ * it to are the ones a recruiter would notice: it is two pages, it says how
+ * to reach him, it carries no phone number, and nothing of the island has
+ * leaked into it.
+ */
+
+function parse(html: string): Document {
+  return new DOMParser().parseFromString(html, 'text/html')
+}
+
+describe('the resume', () => {
+  const doc = parse(buildResumeHtml())
+
+  it('is exactly two sheets', () => {
+    expect(doc.querySelectorAll('.sheet')).toHaveLength(2)
+  })
+
+  it('leads with the name and the job', () => {
+    const head = doc.querySelector('.masthead')?.textContent ?? ''
+    expect(head).toContain(PROFILE.lastName)
+    expect(head).toContain(RESUME.title)
+  })
+
+  it('says how to reach him', () => {
+    expect(
+      doc.querySelector(`a[href="mailto:${PROFILE.email}"]`),
+    ).not.toBeNull()
+    expect(doc.querySelector(`a[href="${PROFILE.linkedin}"]`)).not.toBeNull()
+  })
+
+  it('publishes no phone number', () => {
+    expect(doc.body.textContent).not.toMatch(/\+30|69\d{8}/)
+  })
+
+  it('keeps the island out of it', () => {
+    const text = doc.querySelector('.desk')?.textContent ?? ''
+    expect(text).not.toMatch(/island|lighthouse|trainer card/i)
+  })
+
+  it('lists every role with its dates', () => {
+    const entries = doc.querySelectorAll('.entry')
+    expect(entries.length).toBe(
+      RESUME.experience.length +
+        RESUME.earlier.length +
+        RESUME.education.length +
+        RESUME.publications.length,
+    )
+    for (const e of entries) {
+      expect(e.querySelector('.when')?.textContent).toBeTruthy()
+    }
+  })
+
+  it('puts the portrait in when there is one', () => {
+    const withPhoto = parse(buildResumeHtml({ photo: '/cv/photo.jpg' }))
+    expect(withPhoto.querySelector('.portrait img')?.getAttribute('src')).toBe(
+      '/cv/photo.jpg',
+    )
+    expect(doc.querySelector('.portrait')).toBeNull()
+  })
+
+  it('drops the toolbar for the print', () => {
+    expect(doc.querySelector('.toolbar')).not.toBeNull()
+    expect(
+      parse(buildResumeHtml({ bare: true })).querySelector('.toolbar'),
+    ).toBeNull()
+  })
+})
+
+describe('the experience timeline', () => {
+  const doc = parse(buildResumeHtml())
+
+  it('shows a promotion as two steps at one company', () => {
+    const veltiston = [...doc.querySelectorAll('.company')].find((c) =>
+      c.querySelector('.org')?.textContent?.startsWith('Veltiston AI'),
+    )
+    expect(veltiston?.querySelectorAll('.entry')).toHaveLength(2)
+  })
+})

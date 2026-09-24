@@ -1,23 +1,18 @@
-import { buildCvText } from './cv'
-import { PROFILE } from './profile'
+import { RESUME_PDF } from './resume'
 
 /**
- * Hands the visitor a Markdown copy of the CV.
+ * Hands the visitor the two-page PDF CV.
  *
- * This lives up here rather than beside the CV data because it is the only
- * part that touches the document; the build generates the plain HTML page
- * from that data and cannot afford to pull the DOM in with it.
+ * The PDF is a static file in public/, printed from the same data by
+ * `npm run cv:pdf`, so this is only a link with a download on it. It lives up
+ * here rather than beside the CV data because it is the only part that
+ * touches the document.
  */
 export function downloadCv() {
-  const blob = new Blob([buildCvText()], {
-    type: 'text/markdown;charset=utf-8',
-  })
-  const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
-  link.href = url
-  link.download = `${PROFILE.lastName}-${PROFILE.firstName}-CV.md`
+  link.href = `/${RESUME_PDF}`
+  link.download = RESUME_PDF
   document.body.appendChild(link)
   link.click()
   link.remove()
-  URL.revokeObjectURL(url)
 }

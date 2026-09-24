@@ -10,6 +10,8 @@ export const PROFILE = {
   email: 'kitsorfan@protonmail.com',
   linkedin: 'https://linkedin.com/in/kitsorfan/',
   linkedinLabel: 'linkedin.com/in/kitsorfan',
+  website: 'https://www.kitsorfan.com',
+  websiteLabel: 'www.kitsorfan.com',
 } as const
 
 /** The full name, given name and nickname both. Only the CV carries it. */

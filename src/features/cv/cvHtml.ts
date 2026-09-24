@@ -1,6 +1,7 @@
 import type { PanelBlock, PanelSection } from '../../types.ts'
 import { CV_PARTS } from './cv.ts'
 import { CV_NAME, PROFILE } from './profile.ts'
+import { RESUME_PDF } from './resume.ts'
 
 /**
  * The CV as a single self-contained HTML page.
@@ -174,6 +175,7 @@ header.card {
 }
 .contact { list-style: none; padding: 0; margin: .5rem 0 0; display: flex; flex-wrap: wrap; gap: .3rem 1.25rem; }
 .contact li { margin: 0; color: var(--soft); }
+.short { margin: .75rem 0 0; font-size: .9rem; }
 a { color: var(--accent); }
 .back {
   display: inline-block;
@@ -221,6 +223,7 @@ export function buildCvHtml(): string {
 <li><a href="mailto:${esc(PROFILE.email)}">${esc(PROFILE.email)}</a></li>
 <li><a href="${esc(PROFILE.linkedin)}" rel="noopener">${esc(PROFILE.linkedinLabel)}</a></li>
 </ul>
+<p class="short">Short on time? <a href="/${esc(RESUME_PDF)}" download>Take the two-page PDF</a> or <a href="/resume.html">read it here</a>.</p>
 </header>
 ${body}
 <a class="back" href="/">← Back to the island</a>

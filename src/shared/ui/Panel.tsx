@@ -84,8 +84,8 @@ export function Panel() {
               <p className="panel__note">
                 {t(
                   saved
-                    ? 'Saved as Markdown, the same content you have been walking through.'
-                    : 'Written out as Markdown, generated from everything on this island.',
+                    ? 'Saved as a two-page PDF, the same facts you have been walking through.'
+                    : 'A two-page PDF, printed from everything on this island.',
                 )}
               </p>
             </div>

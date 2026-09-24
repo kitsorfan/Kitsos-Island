@@ -2555,22 +2555,39 @@ function Accessory({ prop }: { prop?: Npc['prop'] }) {
       )
     case 'headset':
       return (
+        /*
+         * Every piece stands clear of the head rather than on it. The band
+         * used to lie flat at the hair's own half-width and the boom's front
+         * face sat exactly on the face (both at z=0.26); coplanar faces have
+         * no depth between them to sort by, so they flickered as the camera
+         * moved. Now: the band arches over the hair (top 0.32) from ear to
+         * ear, the cups sit outside the long-hair strands (x 0.36), and the
+         * boom runs forward outside the cheek and across in front of the
+         * mouth at z=0.31, a clear 5cm off the face.
+         */
         <group>
-          <mesh position={[0, 0.26, 0]} rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.3, 0.035, 6, 14, Math.PI]} />
+          <mesh position={[0, 0.02, 0]}>
+            <torusGeometry args={[0.39, 0.03, 6, 16, Math.PI]} />
             <meshStandardMaterial color="#2f3542" roughness={0.7} />
           </mesh>
-          <mesh position={[-0.3, 0.04, 0]}>
-            <boxGeometry args={[0.09, 0.16, 0.16]} />
+          {[-0.38, 0.38].map((x) => (
+            <mesh key={x} position={[x, 0.02, 0]}>
+              <boxGeometry args={[0.08, 0.17, 0.17]} />
+              <meshStandardMaterial color="#2f3542" roughness={0.7} />
+            </mesh>
+          ))}
+          {/* The boom: forward off the right cup, then in to the mouth. */}
+          <mesh position={[0.39, -0.05, 0.17]}>
+            <boxGeometry args={[0.03, 0.03, 0.28]} />
             <meshStandardMaterial color="#2f3542" roughness={0.7} />
           </mesh>
-          <mesh position={[0.3, 0.04, 0]}>
-            <boxGeometry args={[0.09, 0.16, 0.16]} />
+          <mesh position={[0.245, -0.1, 0.31]} rotation={[0, 0, 0.33]}>
+            <boxGeometry args={[0.31, 0.03, 0.03]} />
             <meshStandardMaterial color="#2f3542" roughness={0.7} />
           </mesh>
-          <mesh position={[0.2, -0.09, 0.24]} rotation={[0, 0, 0.5]}>
-            <boxGeometry args={[0.22, 0.04, 0.04]} />
-            <meshStandardMaterial color="#2f3542" roughness={0.7} />
+          <mesh position={[0.1, -0.15, 0.31]}>
+            <sphereGeometry args={[0.035, 8, 6]} />
+            <meshStandardMaterial color="#20242e" roughness={0.8} />
           </mesh>
         </group>
       )

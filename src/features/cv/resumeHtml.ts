@@ -354,7 +354,7 @@ body {
 `
 
 export interface ResumeOptions {
-  /** A portrait for the header; the header simply goes without one. */
+  /** A portrait for the left of the header; it simply goes without one. */
   photo?: string
   /** Leave out the on-screen toolbar, as the PDF render does. */
   bare?: boolean
@@ -376,13 +376,13 @@ export function buildResumeHtml({ photo, bare }: ResumeOptions = {}): string {
 <li>${icon('globe')}<a href="${esc(website.href)}">${esc(website.value)}</a></li>
 </ul>`
 
-  const masthead = `<header class="masthead"><div class="who"><h1>${esc(
+  const masthead = `<header class="masthead">${portrait}<div class="who"><h1>${esc(
     r.firstName,
   )} <span class="nick">(${esc(r.nickname)})</span> ${esc(
     r.lastName,
   )}</h1><p class="role">${esc(r.title)} <span>· ${esc(
     r.subtitle,
-  )}</span></p>${contact}</div>${portrait}</header>`
+  )}</span></p>${contact}</div></header>`
 
   const runner = `<header class="runner"><b>${esc(
     `${r.firstName} ${r.lastName}`,

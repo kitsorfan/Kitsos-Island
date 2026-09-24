@@ -2,7 +2,9 @@ import { describe, expect, it, vi } from 'vitest'
 import { formatSerial, mintSerial, sign } from './certId'
 import { TROPHIES } from './trophies'
 import {
+  CERT_HEIGHT,
   CERT_TEXT,
+  CERT_WIDTH,
   NAME_LIMIT,
   certDate,
   certFilename,
@@ -180,6 +182,57 @@ describe('the stickers and the serial on it', () => {
     const stamp = { serial, signature: sign(serial) }
     drawCertificate(ctx, 'Ada', '1 Jan 2026', { serial: stamp })
     expect(ctx.filled).toContain(formatSerial(stamp.serial, stamp.signature))
+  })
+
+  it('keeps the reference inside the printed border', () => {
+    /*
+     * The bug this pins: the serial was drawn at H - 52 and the inner border
+     * runs to H - 62, so the reference was printed ten pixels out in the
+     * margin. It rendered perfectly and was simply not on the document.
+     *
+     * Every baseline on the certificate has to clear that border, so the
+     * y of anything drawn is checked against it rather than eyeballed.
+     */
+    const ctx = detailContext()
+    const drawn: number[] = []
+    ctx.fillText = vi.fn((text: string, _x: number, y: number) => {
+      ;(ctx as unknown as { filled: string[] }).filled.push(text)
+      drawn.push(y)
+    }) as unknown as CanvasRenderingContext2D['fillText']
+
+    const serial = mintSerial(() => 0.5)
+    drawCertificate(ctx, 'Ada', '1 Jan 2026', {
+      serial: { serial, signature: sign(serial) },
+    })
+
+    /* The inner border, as `drawCertificate` strokes it. */
+    const borderBottom = 62 + (CERT_HEIGHT - 124)
+    for (const y of drawn) expect(y).toBeLessThan(borderBottom)
+  })
+
+  it('spaces the stickers so their labels do not collide', () => {
+    /*
+     * The rings had room and the writing under them did not - "Sea Rescue"
+     * is wider than the pitch the discs were laid out on. The whole row also
+     * has to sit inside the border.
+     */
+    const ctx = detailContext()
+    const xs: number[] = []
+    ctx.fillText = vi.fn((text: string, x: number) => {
+      ;(ctx as unknown as { filled: string[] }).filled.push(text)
+      if (TROPHIES.some((tr) => tr.label === text)) xs.push(x)
+    }) as unknown as CanvasRenderingContext2D['fillText']
+
+    drawCertificate(ctx, 'Ada', '1 Jan 2026', { trophies: {} })
+
+    expect(xs).toHaveLength(TROPHIES.length)
+    xs.sort((a, b) => a - b)
+    for (let i = 1; i < xs.length; i++) {
+      /* Wider than the widest label, so no two can run together. */
+      expect(xs[i] - xs[i - 1]).toBeGreaterThan(110)
+    }
+    expect(xs[0]).toBeGreaterThan(62)
+    expect(xs[xs.length - 1]).toBeLessThan(CERT_WIDTH - 62)
   })
 
   it('works with nothing won and no serial', () => {

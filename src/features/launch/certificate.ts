@@ -189,14 +189,24 @@ export function drawCertificate(
    * it on the way to the signature.
    */
   if (detail.serial) {
+    /*
+     * Inside the frame, which is where this went wrong the first time: at
+     * H - 52 the baseline sat ten pixels below the inner border and the
+     * reference was printed out in the margin, off the document. The border
+     * runs to H - 62, so anything meant to be on the certificate has to
+     * clear that by a line of its own.
+     */
     ctx.textAlign = 'center'
-    ctx.fillStyle = '#a89a80'
-    ctx.font = '20px "Courier New", Courier, monospace'
+    ctx.fillStyle = '#9a8c74'
+    ctx.font = '19px "Courier New", Courier, monospace'
     ctx.fillText(
       formatSerial(detail.serial.serial, detail.serial.signature),
       mid,
-      H - 52,
+      H - 96,
     )
+    ctx.fillStyle = '#b8ae9c'
+    ctx.font = '15px Georgia, "Times New Roman", serif'
+    ctx.fillText('Certificate reference · verifiable', mid, H - 74)
   }
 }
 
@@ -214,7 +224,15 @@ function drawTrophies(
   y: number,
   won: Record<string, true>,
 ): void {
-  const gap = 132
+  /*
+   * Wide enough that the labels clear each other, not just the rings.
+   *
+   * At 132 the discs had 52px between them and looked fine, but "Sea
+   * Rescue" is about 90px of Georgia at the old size - so the writing
+   * underneath ran into its neighbours even though the circles did not.
+   * The labels are what set the pitch here, and they are smaller now too.
+   */
+  const gap = 176
   const left = mid - ((TROPHIES.length - 1) * gap) / 2
 
   ctx.textAlign = 'center'
@@ -255,8 +273,8 @@ function drawTrophy(
 
   /* The name under it. */
   ctx.fillStyle = won ? '#5c6670' : '#b8ae9c'
-  ctx.font = `${won ? '600' : '400'} 17px Georgia, "Times New Roman", serif`
-  ctx.fillText(trophy.label, x, y + TROPHY_RADIUS + 26)
+  ctx.font = `${won ? '600' : '400'} 15px Georgia, "Times New Roman", serif`
+  ctx.fillText(trophy.label, x, y + TROPHY_RADIUS + 24)
 }
 
 /**

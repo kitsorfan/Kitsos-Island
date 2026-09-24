@@ -33,6 +33,20 @@ npm run test:watch     # re-runs what a change touches
 npm run test:coverage  # text summary, plus coverage/ for the full report
 ```
 
+### The PDF CV
+
+The island hands out a two-page A4 PDF, `public/Orfanopoulos-Christos-CV.pdf`,
+laid out like a conventional CV with nothing of the island in it. It is printed
+from `/resume.html`, which is generated from the same data as everything else,
+so re-print it whenever the CV changes and commit the result:
+
+```bash
+npm run cv:pdf   # needs Edge or Chrome installed; CV_BROWSER=<path> for others
+```
+
+A square portrait at `public/cv/photo.jpg` goes into the header; without one,
+the header simply goes without a photo.
+
 ## Controls
 
 | Action                  | Keyboard           | Touch                |

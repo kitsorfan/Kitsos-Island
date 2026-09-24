@@ -186,10 +186,12 @@ export const UI: Record<string, string> = {
 
   /* ------------------------------- Panel ------------------------------ */
   'Take a copy of the CV': 'Πάρε αντίγραφο του βιογραφικού',
-  'Saved as Markdown, the same content you have been walking through.':
-    'Αποθηκεύτηκε ως Markdown, το ίδιο περιεχόμενο που περπάτησες.',
-  'Written out as Markdown, generated from everything on this island.':
-    'Γραμμένο σε Markdown, από όλα όσα υπάρχουν σε αυτό το νησί.',
+  'Download CV': 'Λήψη βιογραφικού',
+  Saved: 'Αποθηκεύτηκε',
+  'Saved as a two-page PDF, the same facts you have been walking through.':
+    'Αποθηκεύτηκε ως PDF δύο σελίδων, με όσα περπάτησες.',
+  'A two-page PDF, printed from everything on this island.':
+    'Ένα PDF δύο σελίδων, τυπωμένο από όλα όσα υπάρχουν σε αυτό το νησί.',
   Read: 'Διάβασε',
   'The original': 'Το πρωτότυπο',
   'The original, page by page': 'Το πρωτότυπο, σελίδα σελίδα',

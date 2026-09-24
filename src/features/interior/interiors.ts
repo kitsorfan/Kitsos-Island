@@ -1,4 +1,5 @@
 import type { Interior, LiftStop } from '../../types'
+import { LATEST_RELEASE } from '../radio/release'
 import {
   ARMY_SECTIONS,
   CERTIFICATIONS_SECTIONS,
@@ -2006,14 +2007,14 @@ export const INTERIORS: Interior[] = [
           title: 'Release notes',
           sections: [
             {
-              heading: 'Version 1.0 · 2026-09-25',
+              heading: `Version ${LATEST_RELEASE.version} · ${LATEST_RELEASE.date}`,
               blocks: [{ type: 'text', text: 'First working version.' }],
             },
           ],
         },
         journal: {
           title: 'Release notes',
-          body: 'Version 1.0, 2026-09-25: the first working version of the island.',
+          body: `Version ${LATEST_RELEASE.version}, ${LATEST_RELEASE.date}: the first working version of the island.`,
         },
       },
     ],

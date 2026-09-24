@@ -9,6 +9,7 @@
     "start": "vite preview --config config/vite.config.ts",
     "preview": "vite preview --config config/vite.config.ts",
     "lint": "oxlint --config config/.oxlintrc.json",
+    "cv:pdf": "node config/cv-pdf.ts",
     "format": "prettier --write . --config config/.prettierrc.json --ignore-path config/.prettierignore",
     "format:check": "prettier --check . --config config/.prettierrc.json --ignore-path config/.prettierignore",
     "test": "vitest run --config config/vitest.config.ts",

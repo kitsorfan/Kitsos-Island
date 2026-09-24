@@ -143,13 +143,34 @@ export function drawCertificate(
   ctx.lineTo(W - 240, 648)
   ctx.stroke()
 
-  /* The citation, wrapped by hand: canvas will not do it. */
+  /*
+   * The citation, wrapped by hand: canvas will not do it.
+   *
+   * Set small enough to keep to two lines, the way the name is set to its
+   * line: at 30px it ran to a third, and the third sat right where the
+   * "ISLAND GAMES" heading over the stickers is lettered.
+   */
   ctx.fillStyle = '#3c4650'
-  ctx.font = '30px Georgia, "Times New Roman", serif'
-  wrapText(ctx, CERT_TEXT.body, mid, 706, W - 380, 42)
+  const citeWidth = W - 380
+  let citeSize = 30
+  ctx.font = `${citeSize}px Georgia, "Times New Roman", serif`
+  while (
+    citeSize > 22 &&
+    splitLines(ctx, CERT_TEXT.body, citeWidth).length > 2
+  ) {
+    citeSize -= 2
+    ctx.font = `${citeSize}px Georgia, "Times New Roman", serif`
+  }
+  const citeLead = Math.round(citeSize * 1.4)
+  const citeLines = wrapText(ctx, CERT_TEXT.body, mid, 706, citeWidth, citeLead)
+  const citeEnd = 706 + (citeLines - 1) * citeLead
 
-  /* The stickers, in a row under the citation. */
-  drawTrophies(ctx, mid, 820, detail.trophies ?? {})
+  /* The stickers, in a row under the citation, whatever it came to. Their
+     heading is lettered 50 above the row, so the row keeps a clear line
+     under the last baseline — but never lower than 844, past which the
+     labels run into the signature band. */
+  const rowY = Math.min(844, Math.max(820, citeEnd + 88))
+  drawTrophies(ctx, mid, rowY, detail.trophies ?? {})
 
   /* Signed, bottom right; dated, bottom left. */
   ctx.textAlign = 'left'
@@ -240,7 +261,7 @@ function drawTrophies(
   ctx.textAlign = 'center'
   ctx.fillStyle = '#a89a80'
   ctx.font = '600 20px Georgia, "Times New Roman", serif'
-  ctx.fillText('ISLAND GAMES', mid, y - 58)
+  ctx.fillText('ISLAND GAMES', mid, y - 50)
 
   for (let i = 0; i < TROPHIES.length; i++) {
     const trophy = TROPHIES[i]
@@ -447,24 +468,30 @@ export function wrapText(
   maxWidth: number,
   lineHeight: number,
 ): number {
-  const words = text.split(' ')
+  const lines = splitLines(ctx, text, maxWidth)
+  lines.forEach((line, i) => ctx.fillText(line, x, y + i * lineHeight))
+  return lines.length
+}
+
+/** The lines `wrapText` would draw, in the current font, without drawing them. */
+export function splitLines(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+): string[] {
+  const lines: string[] = []
   let line = ''
-  let drawn = 0
-  for (const word of words) {
+  for (const word of text.split(' ')) {
     const next = line ? `${line} ${word}` : word
     if (line && ctx.measureText(next).width > maxWidth) {
-      ctx.fillText(line, x, y + drawn * lineHeight)
-      drawn++
+      lines.push(line)
       line = word
     } else {
       line = next
     }
   }
-  if (line) {
-    ctx.fillText(line, x, y + drawn * lineHeight)
-    drawn++
-  }
-  return drawn
+  if (line) lines.push(line)
+  return lines
 }
 
 /**

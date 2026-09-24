@@ -191,7 +191,7 @@ body {
   line-height: 1.05;
   letter-spacing: -.02em;
 }
-.masthead h1 .nick { color: #5f6b7d; font-weight: 400; }
+.masthead h1 .nick { color: var(--ink); font-weight: 400; }
 .masthead .role {
   margin: 1.8mm 0 3.2mm;
   color: var(--accent);

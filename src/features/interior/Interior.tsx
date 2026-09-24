@@ -912,11 +912,14 @@ function Logbook({ accent }: { accent: string }) {
         <boxGeometry args={[1.6, 1.2, 1]} />
         <meshStandardMaterial color="#8a6642" flatShading roughness={0.95} />
       </mesh>
-      <mesh position={[0, 1.24, -0.1]} rotation={[-0.4, 0, 0]} castShadow>
+      {/* Canted toward +z, the reader's side, where the lamp is: tipped the
+          other way it faced the wall, and from the room all that showed was
+          the raised back edge of the book, standing up like a dark slab. */}
+      <mesh position={[0, 1.24, -0.1]} rotation={[0.4, 0, 0]} castShadow>
         <boxGeometry args={[1.7, 0.1, 1]} />
         <meshStandardMaterial color="#a97c4e" flatShading />
       </mesh>
-      <group ref={book} position={[0, 1.28, 0]} rotation={[-0.4, 0, 0]}>
+      <group ref={book} position={[0, 1.28, 0]} rotation={[0.4, 0, 0]}>
         <mesh castShadow>
           <boxGeometry args={[1.2, 0.16, 0.8]} />
           <meshStandardMaterial color={accent} flatShading roughness={0.8} />

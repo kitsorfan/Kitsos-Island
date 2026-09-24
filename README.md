@@ -33,6 +33,22 @@ npm run test:watch     # re-runs what a change touches
 npm run test:coverage  # text summary, plus coverage/ for the full report
 ```
 
+### Quality gates
+
+`npm install` wires up the git hooks (via husky), so every clone checks the
+same things before anything leaves it:
+
+| Hook         | Runs                                                                                                                           |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `pre-commit` | Prettier and oxlint on the staged files only (lint-staged), and a warning if the CV data changed but the PDF was not reprinted |
+| `commit-msg` | commitlint: [Conventional Commits](https://www.conventionalcommits.org), `type(scope): subject`                                |
+| `pre-push`   | `npm run typecheck` and the whole test suite                                                                                   |
+
+GitHub Actions runs the same gates again on every push to `main` and
+`develop` and on every pull request — lint with warnings denied, formatting,
+types, tests with coverage, the build — and checks every commit message in a
+pull request. Dependabot opens weekly dependency updates against `develop`.
+
 ### The PDF CV
 
 The island hands out a two-page A4 PDF, `public/Orfanopoulos-Christos-CV.pdf`,

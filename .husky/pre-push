@@ -1,0 +1,3 @@
+# The whole suite and the type-check, once, before anything leaves the machine.
+npm run typecheck
+npm test

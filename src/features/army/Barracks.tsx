@@ -240,7 +240,7 @@ function Private({
     <group ref={group} visible={false}>
       <Character
         colors={{ skin: look.skin, hair: look.hair, ...FATIGUES }}
-        prop="cap"
+        prop="beret"
         seed={index * 1.3}
         motion={motion}
       />

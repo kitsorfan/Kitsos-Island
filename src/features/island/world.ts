@@ -819,7 +819,7 @@ export const NPCS: Npc[] = [
       shirt: '#6f7f4a',
       pants: '#4c5238',
     },
-    prop: 'cap',
+    prop: 'beret',
     lines: [
       'Private Giotampas, 575 Marine Battalion. I served in the Lieutenant’s company.',
       'Every exercise, he was first. First up the hill, first off the boat, first into the water. And he did not have to be — he was the one holding the clipboard.',

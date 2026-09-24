@@ -1993,6 +1993,29 @@ export const INTERIORS: Interior[] = [
           body: 'The message desk composes an email straight to Kitsos, with no operator in between.',
         },
       },
+      /* What is on the air: the island's own release notes, on the wall
+         the station would pin its broadcast log to. */
+      {
+        id: 'radio-release',
+        kind: 'board',
+        label: 'the release notes',
+        position: [10.4, -3],
+        rotation: -Math.PI / 2,
+        panel: {
+          kicker: 'Radio Center',
+          title: 'Release notes',
+          sections: [
+            {
+              heading: 'Version 1.0',
+              blocks: [{ type: 'text', text: 'First working version.' }],
+            },
+          ],
+        },
+        journal: {
+          title: 'Release notes',
+          body: 'Version 1.0: the first working version of the island.',
+        },
+      },
     ],
   },
 

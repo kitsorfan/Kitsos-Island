@@ -227,6 +227,14 @@ export const INTERIORS: Record<string, string> = {
   'the footlocker at the end of the bunks':
     'το ερμάριο στο τέλος των κρεβατιών',
 
+  /* ---------------------------- Radio Center -------------------------- */
+  'the release notes': 'οι σημειώσεις έκδοσης',
+  'Release notes': 'Σημειώσεις έκδοσης',
+  'Version 1.0': 'Έκδοση 1.0',
+  'First working version.': 'Η πρώτη λειτουργική έκδοση.',
+  'Version 1.0: the first working version of the island.':
+    'Έκδοση 1.0: η πρώτη λειτουργική έκδοση του νησιού.',
+
   /* The officers' door, and the room behind it. */
   'Operations room': 'Αίθουσα επιχειρήσεων',
   'Officers only': 'Μόνο αξιωματικοί',

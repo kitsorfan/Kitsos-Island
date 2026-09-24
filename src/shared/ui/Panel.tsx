@@ -51,13 +51,22 @@ export function Panel() {
             <p className="panel__kicker">{panel.kicker}</p>
             <h2 className="panel__title">{panel.title}</h2>
           </div>
-          <button
-            className="panel__close"
-            onClick={close}
-            aria-label={t('Close')}
-          >
-            ✕<kbd>Esc</kbd>
-          </button>
+          <div className="panel__actions">
+            {/* In the header, which never scrolls, so the PDF is the first
+                thing on offer rather than a reward for reading to the end. */}
+            {panel.kind === 'cv' && (
+              <button className="panel__download" onClick={save}>
+                {saved ? '✓' : '⬇'} {t(saved ? 'Saved' : 'Download PDF')}
+              </button>
+            )}
+            <button
+              className="panel__close"
+              onClick={close}
+              aria-label={t('Close')}
+            >
+              ✕<kbd>Esc</kbd>
+            </button>
+          </div>
         </header>
 
         <div className="panel__body" ref={body}>

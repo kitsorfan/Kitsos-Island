@@ -782,6 +782,62 @@ canvas {
   line-height: 1.15;
 }
 
+.panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* The full CV's PDF, offered up top: the one button in the header that is
+   meant to be pressed, so it is the one that looks it. */
+.panel__download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--accent, #3f7bd6);
+  background: #fff;
+  border: 3px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  animation: download-nudge 2.4s ease-in-out 0.6s 2;
+}
+
+.panel__download:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+
+.panel__download:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+@keyframes download-nudge {
+  0%,
+  100% {
+    transform: none;
+  }
+  12% {
+    transform: translateY(-3px);
+  }
+  24% {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel__download {
+    animation: none;
+  }
+}
+
 .panel__close {
   display: inline-flex;
   align-items: center;

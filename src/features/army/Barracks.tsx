@@ -121,7 +121,13 @@ function DutyBell() {
   const rung = useGame((s) => s.inspection)
   useFrame(() => {
     if (!swing.current) return
-    const since = rung === null ? Infinity : performance.now() / 1000 - rung
+    /* Never rung: hang still. Infinity here would make sin() NaN, and a NaN
+       rotation takes the whole bell out of the picture. */
+    if (rung === null) {
+      swing.current.rotation.x = 0
+      return
+    }
+    const since = performance.now() / 1000 - rung
     const left = Math.max(0, 1 - since / SWING_FOR)
     swing.current.rotation.x = Math.sin(since * 14) * 0.45 * left
   })

@@ -447,7 +447,7 @@ export const UI: Record<string, string> = {
     'Τροχιά. Τίποτα εδώ έξω πέρα από το βουητό.',
   LAUNCH: 'ΕΚΤΟΞΕΥΣΗ',
   'SUIT UP FIRST': 'ΦΟΡΕΣΕ ΣΤΟΛΗ ΠΡΩΤΑ',
-  'PRESSURE SUIT': 'ΣΤΟΛΗ ΠΙΕΣΗΣ',
+  'ASTRO SUIT': 'ΑΣΤΡΟΣΤΟΛΗ',
   'SUIT ON': 'ΣΤΟΛΗ ΦΟΡΕΜΕΝΗ',
   'KITSOS ISLAND · DEPARTURE': 'ΝΗΣΙ ΚΙΤΣΟΥ · ΑΝΑΧΩΡΗΣΗ',
   Credits: 'Συντελεστές',
@@ -455,7 +455,7 @@ export const UI: Record<string, string> = {
   'To the love of my life, Amalia.': 'Στον έρωτα της ζωής μου, την Αμαλία.',
   'And to you, for walking the whole of it.':
     'Και σε σένα, που το περπάτησες ολόκληρο.',
-  Movement: 'Κίνηση',
+  'Played By': 'Παίχτηκε από',
   'Hang on...': 'Μια στιγμή...',
   'THIS IS NOT A LIGHTHOUSE': 'ΑΥΤΟ ΔΕΝ ΕΙΝΑΙ ΦΑΡΟΣ',
   'IT IS A SPACE ROCKET': 'ΕΙΝΑΙ ΔΙΑΣΤΗΜΙΚΟΣ ΠΥΡΑΥΛΟΣ',

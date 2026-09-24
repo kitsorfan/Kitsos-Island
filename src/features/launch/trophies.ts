@@ -24,7 +24,7 @@ export interface Trophy {
    * Which icon `drawTrophy` puts inside the ring. Kept as a name rather than
    * a path because every one of them is drawn, not fetched.
    */
-  icon: 'target' | 'bike' | 'balloon' | 'boat' | 'torch' | 'moon'
+  icon: 'target' | 'bike' | 'balloon' | 'boat' | 'torch' | 'hiding'
 }
 
 export const TROPHIES: Trophy[] = [
@@ -33,7 +33,7 @@ export const TROPHIES: Trophy[] = [
   { id: 'balloon', label: 'Balloon', color: '#3fa9e8', icon: 'balloon' },
   { id: 'rescue', label: 'Sea Rescue', color: '#2f6fa8', icon: 'boat' },
   { id: 'hide-seeking', label: 'Seeking', color: '#8a9ad6', icon: 'torch' },
-  { id: 'hide-hiding', label: 'Hiding', color: '#6b5ca5', icon: 'moon' },
+  { id: 'hide-hiding', label: 'Hiding', color: '#6b5ca5', icon: 'hiding' },
 ]
 
 export const TROPHY_BY_ID = new Map(TROPHIES.map((t) => [t.id, t]))

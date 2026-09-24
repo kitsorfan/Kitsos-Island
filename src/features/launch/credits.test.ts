@@ -94,13 +94,13 @@ describe('what the roll says', () => {
      * here, so the movement is honestly theirs - and it is the only credit
      * on the roll that is literally true of the person reading it.
      */
-    const movement = ROLL.find((c) => c.heading === 'Movement')
-    expect(movement?.roles?.[0].who).toBe('You')
+    const played = ROLL.find((c) => c.heading === 'Played By')
+    expect(played?.roles?.[0].who).toBe('You')
   })
 
   it('puts the player last of the credits, before the thanks', () => {
     const order = ROLL.map((c) => c.heading)
-    expect(order[order.length - 2]).toBe('Movement')
+    expect(order[order.length - 2]).toBe('Played By')
     expect(ROLL[ROLL.length - 1].kind).toBe('thanks')
   })
 

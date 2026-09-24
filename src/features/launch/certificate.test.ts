@@ -97,6 +97,8 @@ function stubContext() {
     stroke: vi.fn(),
     fill: vi.fn(),
     arc: vi.fn(),
+    ellipse: vi.fn(),
+    quadraticCurveTo: vi.fn(),
   }
   return ctx as unknown as CanvasRenderingContext2D & { filled: string[] }
 }
@@ -163,6 +165,8 @@ function detailContext() {
     stroke: vi.fn(),
     fill: vi.fn(),
     arc: vi.fn(),
+    ellipse: vi.fn(),
+    quadraticCurveTo: vi.fn(),
   }
   return ctx as unknown as CanvasRenderingContext2D & { filled: string[] }
 }
@@ -233,6 +237,37 @@ describe('the stickers and the serial on it', () => {
     }
     expect(xs[0]).toBeGreaterThan(62)
     expect(xs[xs.length - 1]).toBeLessThan(CERT_WIDTH - 62)
+  })
+
+  it('keeps the sticker row out of the signature band', () => {
+    /*
+     * The collision that the pitch alone did not fix. The row is centred and
+     * the signature is set right, so widening the stickers pushed the last
+     * of them under "Kitsos Orfanopoulos" - same x, near enough the same y,
+     * and the two printed over each other.
+     *
+     * Checked as bands rather than as boxes: anything sharing a horizontal
+     * strip with the signature has to be left of where the signature starts.
+     */
+    const ctx = detailContext()
+    const drawn: { text: string; x: number; y: number }[] = []
+    ctx.fillText = vi.fn((text: string, x: number, y: number) => {
+      drawn.push({ text, x, y })
+    }) as unknown as CanvasRenderingContext2D['fillText']
+
+    drawCertificate(ctx, 'Ada', '1 Jan 2026', { trophies: {} })
+
+    const signature = drawn.find((d) => d.text === CERT_TEXT.signatory)
+    expect(signature).toBeDefined()
+
+    const labels = drawn.filter((d) =>
+      TROPHIES.some((tr) => tr.label === d.text),
+    )
+    for (const label of labels) {
+      /* Either well above the signature, or nowhere near it across. */
+      const clearsAbove = label.y < signature!.y - 40
+      expect(clearsAbove, `${label.text} sits in the signature band`).toBe(true)
+    }
   })
 
   it('works with nothing won and no serial', () => {

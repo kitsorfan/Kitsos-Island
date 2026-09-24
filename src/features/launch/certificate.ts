@@ -149,7 +149,7 @@ export function drawCertificate(
   wrapText(ctx, CERT_TEXT.body, mid, 706, W - 380, 42)
 
   /* The stickers, in a row under the citation. */
-  drawTrophies(ctx, mid, 872, detail.trophies ?? {})
+  drawTrophies(ctx, mid, 820, detail.trophies ?? {})
 
   /* Signed, bottom right; dated, bottom left. */
   ctx.textAlign = 'left'
@@ -225,20 +225,22 @@ function drawTrophies(
   won: Record<string, true>,
 ): void {
   /*
-   * Wide enough that the labels clear each other, not just the rings.
+   * The pitch is set by the labels, not the rings — and the row as a whole
+   * has to clear the signature.
    *
-   * At 132 the discs had 52px between them and looked fine, but "Sea
-   * Rescue" is about 90px of Georgia at the old size - so the writing
-   * underneath ran into its neighbours even though the circles did not.
-   * The labels are what set the pitch here, and they are smaller now too.
+   * Widening it alone was not enough: at 176 the row ran out to x = 1280
+   * while "Kitsos Orfanopoulos" starts around 1070, and the labels sat at
+   * y = 936 against a signature baseline of 940. The last two stickers and
+   * the signature were in the same band of the page. Tighter and higher
+   * fixes both.
    */
-  const gap = 176
+  const gap = 150
   const left = mid - ((TROPHIES.length - 1) * gap) / 2
 
   ctx.textAlign = 'center'
   ctx.fillStyle = '#a89a80'
   ctx.font = '600 20px Georgia, "Times New Roman", serif'
-  ctx.fillText('ISLAND GAMES', mid, y - 66)
+  ctx.fillText('ISLAND GAMES', mid, y - 58)
 
   for (let i = 0; i < TROPHIES.length; i++) {
     const trophy = TROPHIES[i]
@@ -247,7 +249,7 @@ function drawTrophies(
 }
 
 /** How wide the ring round one sticker is. */
-const TROPHY_RADIUS = 40
+const TROPHY_RADIUS = 32
 
 /** One sticker: a ring, a mark inside it, and the name under it. */
 function drawTrophy(
@@ -273,8 +275,8 @@ function drawTrophy(
 
   /* The name under it. */
   ctx.fillStyle = won ? '#5c6670' : '#b8ae9c'
-  ctx.font = `${won ? '600' : '400'} 15px Georgia, "Times New Roman", serif`
-  ctx.fillText(trophy.label, x, y + TROPHY_RADIUS + 24)
+  ctx.font = `${won ? '600' : '400'} 14px Georgia, "Times New Roman", serif`
+  ctx.fillText(trophy.label, x, y + TROPHY_RADIUS + 22)
 }
 
 /**
@@ -369,13 +371,33 @@ function drawTrophyIcon(
       ctx.fill()
       break
     }
-    /* Hiding: a moon, cut out of itself. */
-    case 'moon': {
+    /*
+     * Hiding: two eyes looking out over something you are behind.
+     *
+     * It was a crescent moon, which was wrong twice over - it reads as a
+     * religious symbol before it reads as night, and "it was dark" is the
+     * setting rather than the achievement. Not being found is: so the mark
+     * is somebody watching from cover, which is the thing the sticker is
+     * actually for.
+     */
+    case 'hiding': {
+      /* The cover: a low bank across the bottom of the disc. */
       ctx.beginPath()
-      ctx.arc(x + 2, y, 15, Math.PI * 0.35, Math.PI * 1.65)
-      ctx.arc(x + 9, y, 16, Math.PI * 1.3, Math.PI * 0.7, true)
+      ctx.moveTo(x - 17, y + 13)
+      ctx.lineTo(x + 17, y + 13)
+      ctx.lineTo(x + 17, y + 4)
+      ctx.quadraticCurveTo(x, y - 3, x - 17, y + 4)
       ctx.closePath()
       ctx.fill()
+      /* And the pair of eyes over the top of it. */
+      for (const dx of [-7, 7]) {
+        ctx.beginPath()
+        ctx.ellipse(x + dx, y - 6, 5.5, 4, 0, 0, Math.PI * 2)
+        ctx.stroke()
+        ctx.beginPath()
+        ctx.arc(x + dx, y - 6, 2.1, 0, Math.PI * 2)
+        ctx.fill()
+      }
       break
     }
   }

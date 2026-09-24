@@ -134,7 +134,7 @@ export const ROLL: CreditCard[] = [
    */
   {
     kind: 'roles',
-    heading: 'Movement',
+    heading: 'Played By',
     roles: [{ role: '', who: 'You' }],
     hold: 4,
   },

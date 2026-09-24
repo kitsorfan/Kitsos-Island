@@ -608,7 +608,7 @@ function SuitRack() {
       </mesh>
 
       <TextPlane
-        text={t(suited ? 'SUIT ON - GO' : 'PRESSURE SUIT')}
+        text={t(suited ? 'SUIT ON - GO' : 'ASTRO SUIT')}
         position={[0, 3.22, 0.46]}
         width={2.4}
         aspect={9}

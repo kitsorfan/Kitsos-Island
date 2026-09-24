@@ -1453,6 +1453,18 @@ export const INTERIORS: Interior[] = [
     ],
   },
 
+  /* ------------------------------ the camp --------------------------- */
+
+  /**
+   * The Army Camp is two rooms. The barracks behind the gate, where anybody
+   * off the road may walk in and talk to the private on duty, and the
+   * operations room through the east wall, where the commander is — and
+   * which only opens to somebody in uniform. His kit hangs on the locker by
+   * the service record; see game/army.ts, which owns the door, the kit and
+   * the duty bell by the lockers.
+   *
+   *     [ barracks ]──east──[ operations room ]
+   */
   {
     id: 'army',
     name: 'Army Camp',
@@ -1471,6 +1483,7 @@ export const INTERIORS: Interior[] = [
       { kind: 'bunk', position: [11, -1], rotation: -Math.PI / 2 },
       { kind: 'locker', position: [-5.5, -9.8] },
       { kind: 'locker', position: [-3, -9.8] },
+      /* His, with the kit hanging on it. */
       { kind: 'locker', position: [3, -9.8] },
       { kind: 'crate', position: [7.5, -8.5] },
       { kind: 'crate', position: [9.5, -8.5] },
@@ -1481,6 +1494,30 @@ export const INTERIORS: Interior[] = [
       { kind: 'chair', position: [0, 6.4], rotation: Math.PI },
       { kind: 'greekFlag', position: [12.5, -9] },
       { kind: 'painting', position: [-11, -10.2] },
+    ],
+    links: [
+      /*
+       * The officers' door, in the east wall past the last of the bunks. Not
+       * locked: shut to civilian clothes, and open to the uniform on the
+       * locker a few strides away.
+       */
+      {
+        id: 'army-officers-door',
+        kind: 'door',
+        label: 'the door to the operations room',
+        position: [14.3, -6],
+        rotation: -Math.PI / 2,
+        to: 'army-ops',
+        dress: 'officer',
+        lines: [
+          'OFFICERS ONLY, stencilled across it at eye height. The handle turns, and the duty clerk on the far side turns you straight back round.',
+          'Not in those clothes. There is a uniform hanging on the locker by the service record.',
+        ],
+        journal: {
+          title: 'The operations room',
+          body: 'Through the officers’ door at the Army Camp, which opens for the uniform and not for the man: Lt Col Mitsidis at his desk, and the landing plan on the table.',
+        },
+      },
     ],
     exhibits: [
       {
@@ -1499,10 +1536,60 @@ export const INTERIORS: Interior[] = [
         },
       },
       {
+        id: 'army-key',
+        kind: 'key',
+        label: 'the footlocker at the end of the bunks',
+        position: [-11, -9],
+        keyId: 'key-camp',
+      },
+    ],
+  },
+
+  /**
+   * The operations room, through the officers' door. The commander's desk
+   * against the north wall with him behind it, his letter on the east wall,
+   * and in the middle the table with the landing laid out on it — which is
+   * what the officer standing over it has come to talk about.
+   */
+  {
+    id: 'army-ops',
+    building: 'army',
+    name: 'Army Camp',
+    kicker: 'Operations room',
+    half: [10, 7.5],
+    floor: '#7d735a',
+    rug: '#55603c',
+    wall: '#b3b692',
+    accent: '#6f7f4a',
+    spawn: [-7, 0],
+    windows: [{ side: 'north', at: -0.55 }],
+    props: [
+      { kind: 'rug', position: [0, -3.4], scale: 1.1, solid: false },
+      { kind: 'desk', position: [0, -4.4] },
+      { kind: 'greekFlag', position: [-3.2, -6.7] },
+      { kind: 'bookshelf', position: [5.6, -7] },
+      /* The landing, laid out for the briefing. */
+      { kind: 'table', position: [3.4, 2.4], scale: 1.3 },
+      { kind: 'crate', position: [8.6, 5.8] },
+      { kind: 'locker', position: [-6.4, -6.8] },
+      { kind: 'plant', position: [-9, 6.4] },
+    ],
+    links: [
+      {
+        id: 'ops-barracks',
+        kind: 'door',
+        label: 'the door to the barracks',
+        position: [-9.8, 0],
+        rotation: Math.PI / 2,
+        to: 'army',
+      },
+    ],
+    exhibits: [
+      {
         id: 'army-reference',
         kind: 'board',
         label: 'the commander’s letter',
-        position: [13.9, -3],
+        position: [9.4, -2.6],
         rotation: -Math.PI / 2,
         panel: {
           kicker: 'Army Camp',
@@ -1513,13 +1600,6 @@ export const INTERIORS: Interior[] = [
           title: 'Commander’s reference',
           body: 'Lt Col Georgios Mitsidis, Commander of the 575 Marine Battalion: Platoon Leader and Weapons Officer for a Marine Company, "accomplished his tasks successfully without the need of supervision"; recommended with the utmost confidence as "a valuable and trusted partner".',
         },
-      },
-      {
-        id: 'army-key',
-        kind: 'key',
-        label: 'the footlocker at the end of the bunks',
-        position: [-11, -9],
-        keyId: 'key-camp',
       },
     ],
   },

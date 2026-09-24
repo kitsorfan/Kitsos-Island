@@ -154,6 +154,19 @@ export function whistle() {
 }
 
 /**
+ * The duty bell in the barracks: three strokes of brass, each one left to
+ * ring out under the next. Sine rather than square, because a bell that
+ * buzzes is a doorbell.
+ */
+export function bell() {
+  for (const at of [0, 0.42, 0.84]) {
+    tone(1318.5, 0.9, 'sine', 0.05, at)
+    tone(2637, 0.45, 'sine', 0.018, at)
+    tone(659.25, 1.1, 'triangle', 0.02, at)
+  }
+}
+
+/**
  * The hide-and-seek proximity thump. Low and soft, and it climbs a little as
  * you close on somebody — but it is the same in every direction, which is
  * the whole point of it.

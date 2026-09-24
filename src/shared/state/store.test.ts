@@ -988,3 +988,101 @@ describe('winning a sticker', () => {
     expect(useGame.getState().trophies).toEqual({})
   })
 })
+
+describe('the officer’s kit at the camp', () => {
+  /** In the barracks, with the walk his. */
+  const inBarracks = () => {
+    useGame.setState({ area: 'army', mode: 'explore' })
+  }
+
+  it('goes on at the locker, and comes back off', () => {
+    inBarracks()
+    state().toggleUniform()
+    expect(state().outfit).toBe('officer')
+    state().toggleUniform()
+    expect(state().outfit).toBe('islander')
+  })
+
+  it('is only handed out inside the camp', () => {
+    useGame.setState({ area: 'island', mode: 'explore' })
+    state().toggleUniform()
+    expect(state().outfit).toBe('islander')
+  })
+
+  it('is worn through to the operations room', () => {
+    inBarracks()
+    state().toggleUniform()
+    state().goRoom('army-ops', [-7, 0])
+    expect(state().outfit).toBe('officer')
+  })
+
+  it('stays behind at the gate', () => {
+    inBarracks()
+    state().toggleUniform()
+    state().leaveBuilding()
+    expect(state().area).toBe('island')
+    expect(state().outfit).toBe('islander')
+  })
+
+  it('gives back the star shirt to anybody who came in wearing it', () => {
+    useGame.setState({ area: 'army', mode: 'explore', starShirt: true })
+    useGame.setState({ outfit: 'star' })
+    state().toggleUniform()
+    state().leaveBuilding()
+    expect(state().outfit).toBe('star')
+  })
+
+  it('comes off on the way out through the map, too', () => {
+    inBarracks()
+    state().toggleUniform()
+    state().travelTo('house')
+    expect(state().outfit).toBe('islander')
+  })
+})
+
+describe('the duty bell', () => {
+  const inBarracks = () => {
+    useGame.setState({ area: 'army', mode: 'explore' })
+  }
+
+  it('does not answer to civilian clothes', () => {
+    inBarracks()
+    state().ringBell()
+    expect(state().inspection).toBeNull()
+    /* And says why, rather than simply not ringing. */
+    expect(state().dialogue).not.toBeNull()
+  })
+
+  it('calls the inspection for an officer', () => {
+    inBarracks()
+    state().toggleUniform()
+    state().ringBell()
+    expect(state().inspection).not.toBeNull()
+  })
+
+  it('does not call them in twice', () => {
+    inBarracks()
+    state().toggleUniform()
+    state().ringBell()
+    const first = state().inspection
+    useGame.setState({ mode: 'explore', dialogue: null })
+    state().ringBell()
+    expect(state().inspection).toBe(first)
+  })
+
+  it('dismisses them when he leaves the room', () => {
+    inBarracks()
+    state().toggleUniform()
+    state().ringBell()
+    state().goRoom('army-ops', [-7, 0])
+    expect(state().inspection).toBeNull()
+  })
+
+  it('dismisses them when he takes the kit off', () => {
+    inBarracks()
+    state().toggleUniform()
+    state().ringBell()
+    state().toggleUniform()
+    expect(state().inspection).toBeNull()
+  })
+})

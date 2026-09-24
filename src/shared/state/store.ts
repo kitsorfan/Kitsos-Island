@@ -32,6 +32,11 @@ import {
   liftStance,
 } from '../../features/lift/lift'
 import { LAUNCH_AREA } from '../../features/launch/launch'
+import {
+  ARMY_AREA,
+  ARMY_ROOMS,
+  INSPECTION_REPORT,
+} from '../../features/army/army'
 import { TROPHIES, trophyCount } from '../../features/launch/trophies'
 import type { TrophyId } from '../../features/launch/trophies'
 import type { CalendarDate } from '../../features/calendar/calendar'
@@ -549,8 +554,17 @@ interface GameState {
    * What he is wearing. The tuxedo is for her arrival and nothing else; the
    * pressure suit is the airlock's doing and comes off when he lands; the
    * star shirt is the one thing here that is earned, and is his to keep.
+   * The officer's kit is the camp's: it comes off the locker in the barracks
+   * and is left behind at the gate.
    */
-  outfit: 'islander' | 'tuxedo' | 'spacesuit' | 'star'
+  outfit: 'islander' | 'tuxedo' | 'spacesuit' | 'star' | 'officer'
+  /**
+   * Evening inspection in the barracks: when the duty bell was rung, on the
+   * wall clock in seconds, or null when nobody has rung it. The privates it
+   * calls in stand at their bunks until he leaves the room, and this is what
+   * leaving the room clears.
+   */
+  inspection: number | null
   /**
    * Whether the suit is on. The airlock is the gate on the whole flight: the
    * button under the glass does nothing until he has been to the rack at the
@@ -725,6 +739,10 @@ interface GameState {
   reachOrbit: () => void
   /** At the rack in the airlock: the suit goes on, or comes back off. */
   toggleSuit: () => void
+  /** At his locker in the barracks: the officer's kit goes on, or back. */
+  toggleUniform: () => void
+  /** The duty bell. Calls the evening inspection, for an officer. */
+  ringBell: () => void
   /** A minigame won: the sticker goes on the certificate. */
   winTrophy: (id: TrophyId) => void
   /** The roll has played out: the certificate may come up now. */
@@ -1011,6 +1029,7 @@ export const useGame = create<GameState>((raw, get) => {
     party: false,
     amaliaHere: false,
     outfit: 'islander',
+    inspection: null,
     proposal: null,
     proposalRound: 0,
     hasMoved: false,
@@ -2026,6 +2045,7 @@ export const useGame = create<GameState>((raw, get) => {
         nearby: null,
         panel: null,
         dialogue: null,
+        inspection: null,
         spawn: {
           area: id,
           position: [...interior.spawn] as Vec2,
@@ -2071,6 +2091,10 @@ export const useGame = create<GameState>((raw, get) => {
         nearby: null,
         panel: null,
         dialogue: null,
+        inspection: null,
+        /* The kit is the camp's, and it stays at the camp: he walks out of
+           the gate in whatever he walked in wearing. */
+        outfit: plainClothes(s),
         spawn: {
           area: 'island',
           position: [...building.door] as Vec2,
@@ -2379,6 +2403,77 @@ export const useGame = create<GameState>((raw, get) => {
     },
 
     /**
+     * The officer's kit, on or off, at his locker in the barracks.
+     *
+     * Like the suit, a change of clothes and nothing else. What it changes is
+     * who the building takes him for: the door to the operations room opens
+     * for it, and the duty bell answers to it.
+     */
+    toggleUniform: () => {
+      const { area, outfit } = get()
+      if (!ARMY_ROOMS.has(area)) return
+      /* Not over the tuxedo, which is for one night and one person. */
+      if (outfit === 'tuxedo') return
+      const on = outfit !== 'officer'
+      sfx.confirm()
+      set((s) => ({
+        outfit: on ? 'officer' : plainClothes(s),
+        /* Nobody stands to attention for a man in his civvies. */
+        inspection: on ? s.inspection : null,
+        toast: on
+          ? {
+              title: 'In uniform',
+              body: 'Pattern combat dress and the green beret. The door to the operations room will open for you now.',
+              kind: 'progress',
+            }
+          : null,
+      }))
+    },
+
+    /**
+     * The duty bell in the barracks.
+     *
+     * Rung by the duty officer to call the evening inspection, so it answers
+     * to the uniform: in civvies it is a brass bell on a bracket, and says so.
+     * Rung once, it calls the privates in; rung again while they are already
+     * standing to their bunks, it only tells him so.
+     */
+    ringBell: () => {
+      const { area, outfit, inspection } = get()
+      if (area !== ARMY_AREA) return
+      if (outfit !== 'officer') {
+        sfx.cancel()
+        get().talk({
+          speaker: 'The duty bell',
+          role: 'Not for civilians',
+          lines: [
+            'A brass bell on a bracket, its rope tied up out of reach of anybody passing through.',
+            'It calls the barracks to stand by their beds for evening inspection. Only the duty officer rings it, and the duty officer is in uniform.',
+          ],
+        })
+        return
+      }
+      if (inspection !== null) {
+        sfx.cancel()
+        get().talk({
+          speaker: INSPECTION_REPORT.speaker,
+          role: INSPECTION_REPORT.role,
+          lines: [
+            'Already at attention, sir. Nobody moves until the Lieutenant says so.',
+          ],
+        })
+        return
+      }
+      sfx.bell()
+      set({
+        inspection: performance.now() / 1000,
+        nearby: null,
+        panel: null,
+        dialogue: null,
+      })
+    },
+
+    /**
      * Home: down out of orbit and onto the island, in the middle of it.
      *
      * This is the one door out of the flight, which is why it reaches past
@@ -2423,7 +2518,9 @@ export const useGame = create<GameState>((raw, get) => {
     /** Which of the two shirts he wears. Only offered once both exist. */
     wearStarShirt: (on) => {
       if (!get().starShirt) return
-      if (get().outfit === 'tuxedo' || get().outfit === 'spacesuit') return
+      const outfit = get().outfit
+      if (outfit === 'tuxedo' || outfit === 'spacesuit' || outfit === 'officer')
+        return
       sfx.confirm()
       set({ outfit: on ? 'star' : 'islander' })
     },
@@ -2451,6 +2548,9 @@ export const useGame = create<GameState>((raw, get) => {
         /* A teleport outranks a walk: whatever step was under way belonged to
          the room he has just left. */
         stride: null,
+        /* The privates stand to their bunks for as long as he is in the
+           barracks with them, and not a moment after. */
+        inspection: null,
       }))
     },
 
@@ -2475,6 +2575,9 @@ export const useGame = create<GameState>((raw, get) => {
         area: 'island',
         mode: 'explore',
         nearby: null,
+        inspection: null,
+        /* Off the map from inside the camp is out of the gate all the same. */
+        outfit: plainClothes(s),
         spawn: {
           area: 'island',
           position: [...building.door] as Vec2,
@@ -2554,6 +2657,7 @@ export const useGame = create<GameState>((raw, get) => {
         trophies: {},
         suited: false,
         outfit: 'islander',
+        inspection: null,
         toast: {
           title: 'Starting over',
           body: 'The journal, the keyring and everything found have been forgotten.',
@@ -2563,6 +2667,16 @@ export const useGame = create<GameState>((raw, get) => {
     },
   }
 })
+
+/**
+ * What he wears once the officer's kit is off: the star shirt if he has
+ * earned it, his own red one if not. Anything else he has on is left alone,
+ * so walking out of a building never takes a tuxedo off him.
+ */
+function plainClothes(s: GameState): GameState['outfit'] {
+  if (s.outfit !== 'officer') return s.outfit
+  return s.starShirt ? 'star' : 'islander'
+}
 
 /** Everything a save holds, and nothing else the store happens to keep. */
 type Progressed = Pick<

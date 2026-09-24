@@ -128,6 +128,12 @@ interface CharacterProps {
    * and it has to look like it from across a field.
    */
   starShirt?: boolean
+  /**
+   * The officer's kit at the camp: a disruptive pattern over the olive, and
+   * a second lieutenant's single star on each shoulder. The colours come in
+   * through `colors` like anybody's; this is only the pattern and the rank.
+   */
+  camo?: boolean
 }
 
 const IDLE: CharacterMotion = { moving: false, speed: 0, airborne: false }
@@ -199,6 +205,7 @@ export function Character({
   helmet,
   spacesuit,
   starShirt,
+  camo = false,
   kit,
   ring = false,
 }: CharacterProps) {
@@ -1042,6 +1049,7 @@ export function Character({
                 a gold star on the chest, gold at the collar and cuffs, and
                 the mission patch on the sleeve. */}
             {starShirt && !spacesuit && <StarKit motion={motion} />}
+            {camo && !spacesuit && <CamoKit />}
 
             {/* The pack on his back, and the chest rig that answers it. */}
             {spacesuit && (
@@ -1409,6 +1417,65 @@ export function Character({
  * how fast he is going - a cape that hangs dead still while he runs is a
  * towel pinned to his back.
  */
+/**
+ * The blotches, as [x, y, width, height, colour] on the chest's own face.
+ * Laid out by hand rather than at random, so every officer on the island
+ * wears the same pattern and it never shimmers from one render to the next.
+ */
+const CAMO_PATCHES: [number, number, number, number, string][] = [
+  [-0.17, 0.2, 0.2, 0.13, '#3f4a2a'],
+  [0.12, 0.12, 0.24, 0.1, '#8a7a4f'],
+  [-0.05, -0.06, 0.18, 0.12, '#4a3c2a'],
+  [0.18, -0.2, 0.16, 0.12, '#3f4a2a'],
+  [-0.2, -0.22, 0.14, 0.1, '#8a7a4f'],
+  [0.02, 0.28, 0.12, 0.06, '#4a3c2a'],
+]
+
+/**
+ * Pattern on the front and back of the jacket, a name tape over the right
+ * breast, and the rank on the shoulders. Nothing here casts, for the reason
+ * the star shirt's trim does not: flat patches on the chest throw their own
+ * hard shapes onto the ground beside the body that is already casting.
+ */
+function CamoKit() {
+  return (
+    <group position={[0, 1.05, 0]}>
+      {[1, -1].map((face) => (
+        <group key={face} rotation={[0, face > 0 ? 0 : Math.PI, 0]}>
+          {CAMO_PATCHES.map(([x, y, w, h, color], i) => (
+            <mesh key={i} position={[x, y, 0.192 + i * 0.0004]}>
+              <planeGeometry args={[w, h]} />
+              <meshStandardMaterial color={color} roughness={0.95} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+      {/* The name tape, pale on the olive. */}
+      <mesh position={[-0.15, 0.2, 0.196]}>
+        <planeGeometry args={[0.2, 0.05]} />
+        <meshStandardMaterial color="#d9d2b0" roughness={0.9} />
+      </mesh>
+      {/* One gold star on each shoulder strap: a second lieutenant. */}
+      {[-0.2, 0.2].map((x) => (
+        <group key={x} position={[x, 0.365, 0]}>
+          <mesh>
+            <boxGeometry args={[0.1, 0.012, 0.2]} />
+            <meshStandardMaterial color="#4c5238" roughness={0.9} />
+          </mesh>
+          <mesh position={[0, 0.012, 0.03]}>
+            <boxGeometry args={[0.05, 0.012, 0.05]} />
+            <meshStandardMaterial
+              color="#e2b53c"
+              metalness={0.6}
+              roughness={0.3}
+            />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  )
+}
+
 function StarKit({ motion }: { motion?: RefObject<CharacterMotion> }) {
   /* Big. This is the only thing on the island that has to be earned, and it
      is read from across a green at the camera's usual distance, so the star

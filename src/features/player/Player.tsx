@@ -11,6 +11,13 @@ import { StarTrail } from '../launch/StarTrail'
 import { RevealMark } from '../launch/Reveal'
 import { CONSOLE, SUIT_RACK } from '../launch/deck'
 import {
+  ARMY_AREA,
+  DUTY_BELL,
+  OFFICER_UNIFORM,
+  UNIFORM_LOCKER,
+  admits,
+} from '../army/army'
+import {
   BUILDINGS,
   BUILDING_BY_ID,
   DOCK_WALK,
@@ -527,14 +534,21 @@ export function Player() {
         ? { colors: SPACESUIT, suit: false, spacesuit: true }
         : outfit === 'star'
           ? { colors: STAR_SHIRT, suit: false, starShirt: true }
-          : feasting
+          : outfit === 'officer'
             ? {
-                colors: HOST_SUIT,
-                suit: true,
-                bowTie: HOST_BOW_TIE,
-                buttonhole: HOST_BUTTONHOLE,
+                colors: OFFICER_UNIFORM,
+                suit: false,
+                camo: true,
+                prop: 'beret' as const,
               }
-            : { colors: PLAYER_COLORS, suit: false }
+            : feasting
+              ? {
+                  colors: HOST_SUIT,
+                  suit: true,
+                  bowTie: HOST_BOW_TIE,
+                  buttonhole: HOST_BUTTONHOLE,
+                }
+              : { colors: PLAYER_COLORS, suit: false }
 
   const indoors = area !== 'island'
   const interior = indoors ? INTERIOR_BY_ID.get(area) : undefined
@@ -948,6 +962,35 @@ export function Player() {
         })
       }
 
+      /*
+       * The camp's two: his kit on the locker, and the duty bell on the wall.
+       * Targets rather than exhibits for the suit rack's reason — neither
+       * opens a panel, and both have to be reachable from the keyboard.
+       */
+      if (interior.id === ARMY_AREA) {
+        list.push({
+          id: 'uniform-locker',
+          kind: 'exhibit',
+          label: 'the officer’s uniform',
+          /* Reactive, like the rack's, or it offers the kit he has on. */
+          verb: outfit === 'officer' ? 'Take off' : 'Put on',
+          x: UNIFORM_LOCKER[0],
+          z: UNIFORM_LOCKER[1],
+          range: 2.8,
+          trigger: () => useGame.getState().toggleUniform(),
+        })
+        list.push({
+          id: 'duty-bell',
+          kind: 'exhibit',
+          label: 'the duty bell',
+          verb: 'Ring',
+          x: DUTY_BELL[0],
+          z: DUTY_BELL[1],
+          range: 2.6,
+          trigger: () => useGame.getState().ringBell(),
+        })
+      }
+
       for (const exhibit of interior.exhibits) {
         if (exhibit.kind === 'key') {
           list.push({
@@ -1023,8 +1066,12 @@ export function Player() {
       // Doors and stairs are walked through rather than pressed — see the
       // thresholds in the frame loop. The one that does not open is the one
       // thing here worth a prompt: you try the handle.
+      //
+      // The officers' door is the same, until he is dressed for it: then it
+      // is a door like any other, and is walked through.
       for (const link of interior.links ?? []) {
-        if (link.kind !== 'locked') continue
+        const turnedAway = !admits(link, outfit)
+        if (link.kind !== 'locked' && !turnedAway) continue
         list.push({
           id: link.id,
           kind: 'door',
@@ -1036,7 +1083,7 @@ export function Player() {
           trigger: () => {
             sfx.cancel()
             useGame.getState().talk({
-              speaker: 'Locked',
+              speaker: turnedAway ? 'Officers only' : 'Locked',
               role: interior.name,
               lines: link.lines ?? ['It does not open.'],
             })
@@ -1058,6 +1105,8 @@ export function Player() {
     /* The rack's own verb reads off this, so the prompt has to be rebuilt
        when it changes: otherwise it offers to put on a suit he is wearing. */
     suited,
+    /* And the locker's, and the officers' door, off this. */
+    outfit,
   ])
 
   /* ------------------------------- frame ------------------------------ */
@@ -1945,6 +1994,8 @@ export function Player() {
            of you is already showing. */
         if (link.needs && store.swung[link.needs] !== store.spawn.token)
           continue
+        /* And a door that wants a uniform is a wall to a man without one. */
+        if (!admits(link, store.outfit)) continue
         if (linkReached(link, px, pz)) {
           through = link
           break

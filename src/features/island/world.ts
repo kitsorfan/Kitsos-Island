@@ -788,17 +788,105 @@ export const NPCS: Npc[] = [
     ],
     lines: [
       'Halt. …Relax, civilian, the camp is open today.',
+      'Military service is compulsory in Greece. Becoming a reserve officer is not: you sit the exams, and then they decide whether to take you.',
       'Second Lieutenant Orfanopoulos, reservist. September 2022 to November 2023, straight out of NTUA.',
-      'Basic training at the Center of Special Forces in Nea Peramos. Third in his class out of the Infantry Reserve Officers School in Heraklion.',
-      'Then the Rangers’ school at Rentina, guerilla warfare. After that, Deputy Company Commander and Weapons Officer at a Marine Battalion.',
+      'Basic training at the Center of Special Forces in Nea Peramos. Then the Infantry Reserve Officers School in Heraklion, where his captain made him cadet company leader, and he finished third in the School.',
+      'Then the extra selection for the Special Forces, and the Rangers’ school at Rentina, guerilla warfare. After that, Deputy Company Commander and Weapons Officer at a Marine Battalion.',
       'Platoon Leader and Weapons Officer for a Marine Company. Personnel, logistics, weaponry, readiness.',
-      'The Battalion Commander wrote him a letter. It is framed inside, on the east wall. Read it.',
+      'His Battalion Commander is inside today, in the operations room. Officers only through that door, so you will have to look the part.',
       'That is where the calm comes from. Bad news does not make him louder.',
       'The key you are after is in the footlocker at the end of the bunks. Go on in.',
     ],
     journal: {
       title: 'Military service',
-      body: 'Reservist Second Lieutenant, Marine Battalion, September 2022 – November 2023. Special Forces basic training at Nea Peramos; graduated 3rd in class from the Infantry Reserve Officers School, Heraklion; completed the Rangers’ Guerilla Warfare School at Rentina; served as Deputy Company Commander and Weapons Officer.',
+      body: 'Reservist Second Lieutenant, Marine Battalion, September 2022 – November 2023. Service is compulsory; the reserve officer’s path is by exam and selection. Special Forces basic training at Nea Peramos; cadet company leader at the Infantry Reserve Officers School, Heraklion, graduating 3rd; selected for the Special Forces and completed the Rangers’ Guerilla Warfare School at Rentina; served as Deputy Company Commander and Weapons Officer.',
+    },
+  },
+
+  /* ------------------------------ the camp -------------------------- */
+
+  /** On duty in the barracks, who served in his company. */
+  {
+    id: 'giotampas',
+    name: 'Private Giotampas',
+    role: '575 Marine Battalion',
+    area: 'army',
+    position: [-5, 1.5],
+    facing: Math.PI * 0.15,
+    colors: {
+      skin: SKIN.tan,
+      hair: '#241d18',
+      shirt: '#6f7f4a',
+      pants: '#4c5238',
+    },
+    prop: 'cap',
+    lines: [
+      'Private Giotampas, 575 Marine Battalion. I served in the Lieutenant’s company.',
+      'Every exercise, he was first. First up the hill, first off the boat, first into the water. And he did not have to be — he was the one holding the clipboard.',
+      'Weapons officer, platoon leader, deputy company commander, and still the one checking we had eaten. Three jobs, and none of them ever dropped.',
+      'You want to see where the officers work? Not in those clothes. His kit is on the locker by the service record. Put it on, and the door in the east wall will open for you.',
+      'And once you are in uniform, leave the bell alone. Unless you want five of us standing by our beds.',
+    ],
+    journal: {
+      title: 'A private in his company',
+      body: 'Private Giotampas, 575 Marine Battalion: first in every exercise, while carrying the weapons, a platoon and the company’s readiness at the same time.',
+    },
+  },
+
+  /** Behind his desk in the operations room: the commander who wrote the letter. */
+  {
+    id: 'mitsidis',
+    name: 'Lt Col Mitsidis',
+    role: 'Commander, 575 Marine Battalion',
+    area: 'army-ops',
+    position: [0, -6.2],
+    facing: 0,
+    colors: {
+      skin: SKIN.light,
+      hair: '#8c8a86',
+      shirt: '#5d6840',
+      pants: '#474d33',
+    },
+    prop: 'beret',
+    lines: [
+      'Lieutenant Colonel Georgios Mitsidis, Commander of the 575 Marine Battalion. Stand easy.',
+      'He reported to my unit as an Officer Designate in February 2023, and left us a Special Forces Second Lieutenant that November. Platoon Leader and Weapons Officer for a Marine Company.',
+      'I will tell you what I told everyone who asked. He did his job without anybody standing over him, and he threw himself into every activity the Unit had.',
+      'Team spirit, critical thinking, and an eye for formality and detail. And he came to me with ideas for running things better, and then did the work of putting them in, inside the Command’s guidelines.',
+      'I was proud to have him as an officer in my Unit. He honoured the green beret. Whatever field he chooses, I recommend him with the utmost confidence.',
+      'The letter is on the east wall, if you would like it in writing.',
+    ],
+    journal: {
+      title: 'His commanding officer',
+      body: 'Lt Col Georgios Mitsidis, Commander of the 575 Marine Battalion, in person: worked without supervision, brought ideas for how the Unit ran and put them in place, and "honoured the green beret".',
+    },
+  },
+
+  /** Over the landing plan: a reserve officer from the same intake. */
+  {
+    id: 'stavros',
+    name: '2nd Lt Stavros',
+    role: 'Same intake, reserve officer',
+    area: 'army-ops',
+    position: [6.3, 2.4],
+    facing: -Math.PI / 2,
+    colors: {
+      skin: SKIN.tan,
+      hair: '#3b2a1c',
+      shirt: '#6b7446',
+      pants: '#555c39',
+    },
+    prop: 'beret',
+    lines: [
+      'Same intake as him: Heraklion, then the Special Forces selection, then Rentina. We still talk about Rentina.',
+      'Hell Week. No rest and no food, up in the mountains with no camp to go back to. Just out in the wild, walking, and then walking again.',
+      'You stop feeling your feet on the second day and stop thinking about them on the third. He kept the rest of us talking the whole way, which was harder than the walking.',
+      'And this, on the table, was our D-Day. A full landing exercise: off the ship, onto the beach, and take the island from the sea.',
+      'Ramps down, into the water up to the chest, and up the sand under smoke. His platoon came off the ramp in the order it had been briefed in, which on a landing is the whole trick.',
+    ],
+    journal: {
+      title: 'Rentina, and the landing',
+      body: 'A reserve officer from the same intake: Hell Week at the Rangers’ school in Rentina, with no rest, no food and days on foot in the mountains with no camp, and a full landing exercise from ship to beach to island.',
     },
   },
   /* --------------------------- interiors --------------------------- */

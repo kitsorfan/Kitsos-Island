@@ -230,10 +230,13 @@ export const INTERIORS: Record<string, string> = {
   /* ---------------------------- Radio Center -------------------------- */
   'the release notes': 'οι σημειώσεις έκδοσης',
   'Release notes': 'Σημειώσεις έκδοσης',
+  'Version 1.1 · 2026-09-25': 'Έκδοση 1.1 · 2026-09-25',
+  'A two-page PDF CV, printed from the island, to download from the full CV.':
+    'Ένα βιογραφικό PDF δύο σελίδων, τυπωμένο από το νησί, για λήψη από το πλήρες βιογραφικό.',
   'Version 1.0 · 2026-09-25': 'Έκδοση 1.0 · 2026-09-25',
   'First working version.': 'Η πρώτη λειτουργική έκδοση.',
-  'Version 1.0, 2026-09-25: the first working version of the island.':
-    'Έκδοση 1.0, 2026-09-25: η πρώτη λειτουργική έκδοση του νησιού.',
+  'Version 1.1, 2026-09-25: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.':
+    'Έκδοση 1.1, 2026-09-25: ένα βιογραφικό PDF δύο σελίδων, για λήψη από το πλήρες βιογραφικό. Έκδοση 1.0: η πρώτη λειτουργική έκδοση του νησιού.',
 
   /* The officers' door, and the room behind it. */
   'Operations room': 'Αίθουσα επιχειρήσεων',

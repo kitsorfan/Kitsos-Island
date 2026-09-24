@@ -5295,3 +5295,487 @@ canvas {
   border-color: rgba(255, 255, 255, 0.3);
   color: #e6eeec;
 }
+
+/* --------------------------- the launch --------------------------- */
+
+/*
+ * The count over the button, and the stage the flight has got to.
+ *
+ * It does not take the pointer: the deck behind it is still being drawn and
+ * still being shaken, and this is a readout laid over that rather than a
+ * card in front of it. The one thing it does own is the vignette, which
+ * closes in as the engines light.
+ */
+.launch {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: clamp(1.4rem, 9vh, 5rem) 1rem 0;
+  pointer-events: none;
+}
+
+/*
+ * The shake, driven off the --shake the sequence writes each frame. The
+ * camera does the honest half of this in the scene; what the frame adds is
+ * the edge of the screen moving, which is what sells it on a small one.
+ */
+.launch__frame {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 calc(6rem + var(--shake, 0) * 9rem)
+    rgba(192, 57, 43, calc(0.1 + var(--shake, 0) * 0.42));
+  transition: box-shadow 0.12s linear;
+}
+
+.launch--ignition .launch__frame,
+.launch--climb .launch__frame {
+  animation: launch-rattle 0.09s steps(2, end) infinite;
+}
+
+.launch__count {
+  display: grid;
+  justify-items: center;
+  padding: 0.6rem 2.2rem;
+  border: 1px solid rgba(240, 163, 60, 0.55);
+  border-radius: 0.7rem;
+  background: rgba(14, 12, 18, 0.8);
+  backdrop-filter: blur(3px);
+  color: #f0a33c;
+  text-shadow: 0 0 0.9rem rgba(240, 163, 60, 0.6);
+}
+
+.launch__countNum {
+  font-size: clamp(2.6rem, 11vw, 4.6rem);
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  animation: launch-tick 1s ease-out infinite;
+}
+
+.launch__countLabel {
+  font-size: 0.72rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.launch__stage {
+  font-size: clamp(2rem, 9vw, 3.4rem);
+  color: #ffd9a0;
+  text-shadow: 0 0 1.2rem rgba(240, 163, 60, 0.7);
+  animation: launch-rise 0.9s ease-in-out infinite;
+}
+
+.launch__line {
+  margin: 0;
+  padding: 0.35rem 1rem;
+  border-radius: 0.5rem;
+  background: rgba(14, 12, 18, 0.7);
+  color: #f3e6d2;
+  font-size: clamp(0.82rem, 2.6vw, 1rem);
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+@keyframes launch-tick {
+  0% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+  40% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+}
+
+@keyframes launch-rise {
+  0%,
+  100% {
+    transform: translateY(0.18rem);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translateY(-0.18rem);
+    opacity: 1;
+  }
+}
+
+@keyframes launch-rattle {
+  0% {
+    transform: translate3d(calc(var(--shake, 0) * -2px), 0, 0);
+  }
+  100% {
+    transform: translate3d(calc(var(--shake, 0) * 2px), 0, 0);
+  }
+}
+
+/* ---------------------------- in orbit ---------------------------- */
+
+/*
+ * Darker than every other overlay on the island, and the only one with no
+ * way out of it. There is no close button here on purpose.
+ */
+.overlay--orbit {
+  background: radial-gradient(
+    ellipse at 50% 30%,
+    rgba(24, 28, 54, 0.88),
+    rgba(6, 7, 14, 0.96)
+  );
+  backdrop-filter: blur(6px);
+  z-index: 70;
+  overflow: auto;
+  place-items: start center;
+}
+
+.orbit {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  width: min(760px, 100%);
+  margin: auto;
+  padding: clamp(1.1rem, 3.5vw, 2rem);
+  border: 1px solid rgba(240, 163, 60, 0.35);
+  border-radius: 20px;
+  background: rgba(16, 18, 30, 0.82);
+  box-shadow:
+    0 0 4rem rgba(80, 120, 220, 0.18),
+    var(--shadow);
+  color: #eef2f8;
+  text-align: center;
+  animation: pop-in 0.3s ease both;
+}
+
+.orbit__kicker {
+  font-size: 0.7rem;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: #f0a33c;
+}
+
+.orbit__title {
+  margin: 0;
+  font-size: clamp(1.4rem, 5vw, 2.1rem);
+  line-height: 1.15;
+}
+
+.orbit__lead {
+  margin: 0;
+  max-width: 54ch;
+  color: #c3ccdc;
+  font-size: clamp(0.86rem, 2.4vw, 0.98rem);
+  line-height: 1.5;
+}
+
+/* The certificate itself, shown at whatever width the card has going. */
+.orbit__cert {
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0.6rem 2rem rgba(0, 0, 0, 0.5);
+}
+
+.orbit__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.orbit__field {
+  display: grid;
+  gap: 0.3rem;
+  width: min(420px, 100%);
+  text-align: left;
+}
+
+.orbit__label {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #9fb0c8;
+}
+
+.orbit__input {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid rgba(160, 180, 210, 0.35);
+  border-radius: 0.5rem;
+  background: rgba(8, 10, 18, 0.8);
+  color: #fff;
+  font: inherit;
+  font-size: 1rem;
+}
+
+.orbit__input:focus-visible {
+  outline: 2px solid #f0a33c;
+  outline-offset: 1px;
+}
+
+.orbit__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.orbit__take,
+.orbit__cv {
+  padding: 0.62rem 1.3rem;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease;
+}
+
+.orbit__take {
+  background: linear-gradient(180deg, #f6b85a, #e08c22);
+  color: #2b1d08;
+}
+
+.orbit__cv {
+  border: 1px solid rgba(180, 200, 230, 0.4);
+  background: transparent;
+  color: #dbe5f3;
+}
+
+.orbit__take:hover:not(:disabled),
+.orbit__cv:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.orbit__take:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.orbit__signoff {
+  margin: 0;
+  max-width: 52ch;
+  color: #94a2b8;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launch__countNum,
+  .launch__stage,
+  .launch--ignition .launch__frame,
+  .launch--climb .launch__frame {
+    animation: none;
+  }
+}
+
+/*
+ * The way home, at the foot of the orbit card.
+ *
+ * Deliberately the widest thing on the card and the last thing read: the
+ * certificate is what he came up for, and this is what he does next.
+ */
+.orbit__home {
+  display: grid;
+  gap: 0.15rem;
+  width: min(420px, 100%);
+  margin-top: 0.2rem;
+  padding: 0.7rem 1.2rem;
+  border: 1px solid rgba(140, 190, 255, 0.45);
+  border-radius: 0.8rem;
+  background: linear-gradient(
+    180deg,
+    rgba(58, 96, 170, 0.5),
+    rgba(30, 52, 104, 0.6)
+  );
+  color: #eaf2ff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease;
+}
+
+.orbit__home small {
+  font-weight: 400;
+  font-size: 0.75rem;
+  color: #a8bcd8;
+}
+
+.orbit__home:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+/* --------------------------- the credits -------------------------- */
+
+/*
+ * The roll, over the window while he floats.
+ *
+ * It takes no pointer events and swallows no keys: he can push himself about
+ * the cabin for the whole of it, which is the difference between an ending
+ * and a cutscene. The vignette is the only thing it puts over the scene, and
+ * it is there so white text stays readable against the island below.
+ */
+.credits {
+  position: fixed;
+  inset: 0;
+  z-index: 71;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 5vw, 3rem);
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(4, 6, 14, 0.15),
+    rgba(4, 6, 14, 0.72)
+  );
+  /* The whole plate fades with the card, so the darkening arrives with the
+     text rather than sitting there between cards. */
+  opacity: var(--fade, 0);
+}
+
+.credits__card {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  width: min(760px, 100%);
+  text-align: center;
+  color: #eef3fb;
+  /* Rising as it plays: what makes it a roll rather than a slideshow. */
+  transform: translateY(var(--rise, 0));
+}
+
+/* The opening card carries the island's name, so it is the biggest thing
+   here by a long way. */
+.credits__title {
+  margin: 0;
+  font-size: clamp(2.6rem, 10vw, 5rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  text-shadow: 0 0 2.4rem rgba(110, 180, 255, 0.45);
+}
+
+.credits__sub {
+  margin: 0;
+  font-size: clamp(0.95rem, 3vw, 1.3rem);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: #f0a33c;
+}
+
+.credits__heading {
+  margin: 0 0 1.2rem;
+  font-size: clamp(0.85rem, 2.6vw, 1.05rem);
+  font-weight: 700;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: #f0a33c;
+}
+
+/*
+ * Roles in two columns — the job on the right of the gutter, the name on the
+ * left of it — so the names line up down the middle the way a real crawl
+ * does. It collapses to one centred column on a narrow screen, where two
+ * columns of four words each are unreadable.
+ */
+.credits__roles {
+  display: grid;
+  gap: 0.7rem 1.6rem;
+  margin: 0;
+  width: 100%;
+}
+
+.credits__row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: baseline;
+  gap: 0 1.4rem;
+}
+
+.credits__row dt {
+  grid-column: 1;
+  justify-self: end;
+  font-size: clamp(0.82rem, 2.2vw, 1rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #93a6c2;
+  text-align: right;
+}
+
+.credits__row dd {
+  grid-column: 3;
+  justify-self: start;
+  margin: 0;
+  font-size: clamp(1.1rem, 3.2vw, 1.45rem);
+  font-weight: 700;
+  text-align: left;
+}
+
+/* A role with no job title — the "written and built by" card — centres its
+   one name across the whole width instead of hanging off the gutter.
+   Flagged with a class rather than matched with :has(), which is not
+   dependable enough to hang a layout on. */
+.credits__row--solo dd {
+  grid-column: 1 / -1;
+  justify-self: center;
+  font-size: clamp(1.8rem, 6vw, 2.8rem);
+  text-align: center;
+}
+
+.credits__thanks {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.credits__thanks p {
+  margin: 0;
+  font-size: clamp(1.15rem, 3.6vw, 1.6rem);
+  line-height: 1.55;
+}
+
+/* The last line of the last card, which is the one that is not a joke. */
+.credits__thanks p:last-child {
+  margin-top: 0.5rem;
+  color: #f0a33c;
+  font-style: italic;
+}
+
+@media (max-width: 560px) {
+  .credits__row {
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
+    justify-items: center;
+  }
+
+  .credits__row dt,
+  .credits__row dd {
+    grid-column: 1;
+    justify-self: center;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .credits__card {
+    transform: none;
+  }
+}
+
+/* One line under the certificate saying how many stickers are on it. */
+.orbit__stickers {
+  margin: 0;
+  color: #f0a33c;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+}

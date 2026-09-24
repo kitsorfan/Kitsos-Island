@@ -164,6 +164,32 @@ export function useKeyboard() {
           }
           return
 
+        /*
+         * A launch, and the orbit it ends in. Both swallow the keyboard
+         * whole, except for the two that only touch the speakers.
+         *
+         * This has to be stated rather than left to `default`, which would
+         * otherwise hand a man strapped into a rocket the map — and the map
+         * offers fast travel, which is the one thing a flight cannot be
+         * allowed. There is deliberately no Escape here either: the launch
+         * is not a card you can back out of, and orbit is left by the ride
+         * home rather than by a keypress.
+         *
+         * The movement keys are not swallowed, though, and do not pass
+         * through here at all: they are recorded above, before the switch,
+         * so `readMove` still sees them. That is what lets him push himself
+         * about the cabin while the credits play — being held still through
+         * a credits roll is the difference between an ending and a cutscene.
+         */
+        /* And the reveal, which is him standing still and looking at
+           something: there is nothing to press and nothing to skip. */
+        case 'reveal':
+        case 'launch':
+        case 'orbit':
+          if (event.code === 'KeyN') state.toggleMute()
+          else if (event.code === 'KeyB') state.toggleMusic()
+          return
+
         default:
           // Mid-match the trigger takes over the keys that normally hop
           // and interact, so nothing fires a dialogue during a firefight.

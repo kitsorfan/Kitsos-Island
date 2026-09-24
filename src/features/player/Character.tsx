@@ -1,9 +1,17 @@
-import { useEffect, useRef, type RefObject } from 'react'
+import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { DoubleSide } from 'three'
-import type { Group, Object3D, PointLight, SpotLight } from 'three'
+import type {
+  Group,
+  Mesh,
+  MeshStandardMaterial,
+  Object3D,
+  PointLight,
+  SpotLight,
+} from 'three'
 import { partyBeat } from '../party/partyLogic'
 import { RING } from '../party/partyData'
+import { starShape } from '../launch/starShape'
 import type { HandLight, Npc } from '../../types'
 
 export interface CharacterMotion {
@@ -28,6 +36,29 @@ export interface CharacterMotion {
   cheer?: number
   /** 0 to 1: chest-deep in the sea and pulling, rather than standing. */
   swimming?: number
+  /**
+   * 0 to 1: weightless, and pulling at nothing.
+   *
+   * Apart from `swimming` because the arms are the only half the two share.
+   * A swimmer lies flat along the surface and goes somewhere; a man in orbit
+   * hangs upright-ish in the middle of the air with his knees drawn up and
+   * sculls to stay put. Feeding this through `swimming` would lay him out
+   * face-down in a cabin, which is the one pose that reads as drowning
+   * rather than floating.
+   */
+  floating?: number
+  /**
+   * 0 to 1: under the cape, and going somewhere.
+   *
+   * Its own channel rather than `floating` or `swimming`, for the same
+   * reason those two are apart. A man in orbit hangs upright and sculls to
+   * stay put; a swimmer lies flat and pulls. This one lies flat like the
+   * swimmer but with everything trailing straight behind him and nothing
+   * stroking at all - the cape is doing the work, not his arms.
+   */
+  flying?: number
+  /** -1 diving to 1 climbing: which way the cape is taking him. */
+  climb?: number
 }
 
 interface CharacterProps {
@@ -79,6 +110,24 @@ interface CharacterProps {
   helmet?: string
   /** Match kit in a team colour: a bib over the shirt and a mask over the eyes. */
   kit?: string
+  /**
+   * Dressed for vacuum: a bubble helmet over the whole head, a life-support
+   * pack on the back, and the hard collar the two meet at.
+   *
+   * Its own flag rather than a colour, because unlike a crash helmet none of
+   * it is a matter of taste — a pressure suit is the same suit for everybody
+   * who goes up, and what varies is only whether you are wearing one.
+   */
+  spacesuit?: boolean
+  /**
+   * The shirt they give you for having gone up: deep blue, with a gold star
+   * across the chest, gold cuffs and collar, and a mission patch on the arm.
+   *
+   * Its own flag for the same reason the suit is. It is not a colour scheme
+   * somebody chose — it is the one thing on the island that has to be earned,
+   * and it has to look like it from across a field.
+   */
+  starShirt?: boolean
 }
 
 const IDLE: CharacterMotion = { moving: false, speed: 0, airborne: false }
@@ -94,6 +143,22 @@ const IDLE: CharacterMotion = { moving: false, speed: 0, airborne: false }
 const SWIM_PITCH = 1.36
 const SWIM_LIFT = 1.02
 const SWIM_SHIFT = -0.78
+
+/**
+ * The same three for the cape, and for the same reason: the rig turns about
+ * the soles of his boots, so laying him flat without putting his middle back
+ * over his feet would swing him round his own ankles.
+ *
+ * Pitched a shade past the swimmer's - he is driving through the air rather
+ * than lying on water - and lifted further, because nothing is holding him
+ * up at the waist.
+ */
+const FLY_PITCH = 1.46
+const FLY_LIFT = 1.12
+const FLY_SHIFT = -0.82
+/** The arch of the torso in flight. The cape hangs inside it, and subtracts
+    it back off to sit level with the world. */
+const FLY_ARCH = -0.16
 
 /** Leg measurements, shared by the rig and the crouch that folds it. */
 const HIP = 0.85
@@ -132,6 +197,8 @@ export function Character({
   buttonhole,
   bouquet = false,
   helmet,
+  spacesuit,
+  starShirt,
   kit,
   ring = false,
 }: CharacterProps) {
@@ -166,6 +233,12 @@ export function Character({
   const ovation = useRef(0)
   /** Eased swim, so going in and wading out are both a settle, not a snap. */
   const paddle = useRef(0)
+  /** Eased flight, likewise: the cape takes him and gives him back slowly. */
+  const soar = useRef(0)
+  /** Eased climb, -1 diving to 1 climbing. */
+  const tilt = useRef(0)
+  /** Eased, like the paddle: how weightless he is. */
+  const adrift = useRef(0)
   /** The wrist that whatever he is carrying hangs in, and a torch's flame. */
   const gripRef = useRef<Group>(null)
   /** The other wrist, for the flowers. */
@@ -202,6 +275,14 @@ export function Character({
       ((m.cheer ?? 0) - ovation.current) * Math.min(1, delta * 5)
     paddle.current +=
       ((m.swimming ?? 0) - paddle.current) * Math.min(1, delta * 5)
+    /* Slower than the swim: going into a dive and pulling out of one are
+       both a long change of shape, not a snap. */
+    soar.current += ((m.flying ?? 0) - soar.current) * Math.min(1, delta * 3)
+    /* And the climb angle eases on its own, so pointing up and levelling
+       off do not jerk the whole body round. */
+    tilt.current += ((m.climb ?? 0) - tilt.current) * Math.min(1, delta * 2.5)
+    adrift.current +=
+      ((m.floating ?? 0) - adrift.current) * Math.min(1, delta * 2.5)
 
     if (m.recoil !== undefined && m.recoil > 0) m.recoil -= delta
     const kick = Math.max(0, m.recoil ?? 0) * 3
@@ -630,6 +711,85 @@ export function Character({
     // him round his own ankles and stand his head a body's length in front
     // of where he is. The lift and the shift back are what put the middle of
     // him back over the middle of him, lying along the surface.
+    /*
+     * Weightless.
+     *
+     * Slower than a stroke and going nowhere: he sculls with his forearms to
+     * hold himself where he is, one arm lazily out of time with the other so
+     * it never reads as a jumping jack. The legs hang with the knees drawn
+     * up, which is what a body does with nothing under it - a man in orbit
+     * standing to attention is a man standing on something.
+     */
+    if (adrift.current > 0.01) {
+      const mix = adrift.current
+      /* `t` is the character's own clock, already in scope: elapsed time
+         plus the per-character seed, so two people floating side by side
+         are not sculling in lockstep. */
+      const blend = (current: number, wanted: number) =>
+        current * (1 - mix) + wanted * mix
+
+      /* Two rates that do not divide into one another, so the arms never
+         come back into step. */
+      const sculLeft = Math.sin(t * 0.9)
+      const sculRight = Math.sin(t * 0.73 + 1.1)
+
+      if (armL.current) {
+        armL.current.rotation.x = blend(
+          armL.current.rotation.x,
+          -0.75 + sculLeft * 0.5,
+        )
+        armL.current.rotation.z = blend(
+          armL.current.rotation.z,
+          -0.55 - sculLeft * 0.22,
+        )
+      }
+      if (armR.current) {
+        armR.current.rotation.x = blend(
+          armR.current.rotation.x,
+          -0.75 + sculRight * 0.5,
+        )
+        armR.current.rotation.z = blend(
+          armR.current.rotation.z,
+          0.55 + sculRight * 0.22,
+        )
+      }
+      /* Knees drawn up and drifting, the way they hang with no floor. */
+      const tuck = Math.sin(t * 0.55)
+      if (legL.current) {
+        legL.current.rotation.x = blend(
+          legL.current.rotation.x,
+          -0.5 + tuck * 0.16,
+        )
+        legL.current.rotation.z = blend(legL.current.rotation.z, -0.12)
+      }
+      if (legR.current) {
+        legR.current.rotation.x = blend(
+          legR.current.rotation.x,
+          -0.38 - tuck * 0.14,
+        )
+        legR.current.rotation.z = blend(legR.current.rotation.z, 0.14)
+      }
+      if (kneeL.current) {
+        kneeL.current.rotation.x = blend(
+          kneeL.current.rotation.x,
+          0.85 + tuck * 0.2,
+        )
+      }
+      if (kneeR.current) {
+        kneeR.current.rotation.x = blend(
+          kneeR.current.rotation.x,
+          0.7 - tuck * 0.18,
+        )
+      }
+      /* A lean back off the vertical, so he is not stood to attention. */
+      if (body.current) {
+        body.current.rotation.x = blend(
+          body.current.rotation.x,
+          -0.22 + Math.sin(t * 0.47) * 0.1,
+        )
+      }
+    }
+
     if (paddle.current > 0.01) {
       const mix = paddle.current
       // Half the stride rate: an arm that swings like a walk is not a stroke.
@@ -694,6 +854,96 @@ export function Character({
           SWIM_LIFT + Math.sin(t * 1.7) * 0.05,
         )
         body.current.position.z = blend(body.current.position.z, SWIM_SHIFT)
+      }
+    }
+
+    /*
+     * Under the cape.
+     *
+     * The whole pose is one idea: everything trails. One arm forward and one
+     * back is the picture everybody has of this, and it beats both arms out
+     * front because it tells you which way is forward even in silhouette.
+     * The legs go straight out behind with the knees all but locked - a
+     * flying man with his knees up is a man sitting in an invisible chair.
+     *
+     * Last of the body poses, so it wins over the swim and the stride: he
+     * can leave the water flying, and the two must not average out into a
+     * man doing the crawl through the air.
+     */
+    if (soar.current > 0.01) {
+      const mix = soar.current
+      const blend = (current: number, wanted: number) =>
+        current * (1 - mix) + wanted * mix
+      /* A slow wallow, so holding a hover is never perfectly still. */
+      const wallow = Math.sin(t * 1.4)
+      const climb = tilt.current
+
+      if (armL.current) {
+        /* The leading arm, straight out past his head. Pulled a little
+           wider as he climbs, which is what makes a climb read as effort. */
+        armL.current.rotation.x = blend(
+          armL.current.rotation.x,
+          -2.85 + climb * 0.12 + wallow * 0.05,
+        )
+        armL.current.rotation.z = blend(armL.current.rotation.z, -0.16)
+      }
+      if (armR.current) {
+        /* And the trailing arm, back along his side. */
+        armR.current.rotation.x = blend(
+          armR.current.rotation.x,
+          0.28 - climb * 0.1 - wallow * 0.05,
+        )
+        armR.current.rotation.z = blend(armR.current.rotation.z, 0.2)
+      }
+      /* Legs together and trailing, with the faintest scissor so he is not
+         a mannequin. */
+      if (legL.current) {
+        legL.current.rotation.x = blend(
+          legL.current.rotation.x,
+          -0.12 + wallow * 0.045,
+        )
+      }
+      if (legR.current) {
+        legR.current.rotation.x = blend(
+          legR.current.rotation.x,
+          -0.12 - wallow * 0.045,
+        )
+      }
+      if (kneeL.current) {
+        kneeL.current.rotation.x = blend(kneeL.current.rotation.x, 0.06)
+      }
+      if (kneeR.current) {
+        kneeR.current.rotation.x = blend(kneeR.current.rotation.x, 0.06)
+      }
+      if (torso.current) {
+        /* Arched, the way a body held up by its chest is. Named, because
+           the cape hangs inside this pivot and has to take it back off. */
+        torso.current.rotation.x = blend(torso.current.rotation.x, FLY_ARCH)
+      }
+      if (head.current) {
+        /* Chin up and looking where he is going. Flat out he is face-down,
+           so the neck has to lift most of the pitch back off. */
+        head.current.rotation.x = blend(
+          head.current.rotation.x,
+          -0.72 + climb * 0.18,
+        )
+        head.current.rotation.y = blend(head.current.rotation.y, 0)
+        head.current.rotation.z = blend(head.current.rotation.z, 0)
+      }
+      if (body.current) {
+        /* Flat out, less the climb: pointing up at the sky takes pitch off
+           the same angle that laid him down in the first place. */
+        body.current.rotation.x = blend(
+          body.current.rotation.x,
+          FLY_PITCH - climb * 0.42,
+        )
+        /* A slow bank, so a hover drifts rather than hangs. */
+        body.current.rotation.z = blend(body.current.rotation.z, wallow * 0.1)
+        body.current.position.y = blend(
+          body.current.position.y,
+          FLY_LIFT + Math.sin(t * 1.2) * 0.06,
+        )
+        body.current.position.z = blend(body.current.position.z, FLY_SHIFT)
       }
     }
 
@@ -788,6 +1038,52 @@ export function Character({
                 roughness={0.9}
               />
             </mesh>
+            {/* What makes the blue shirt the prize rather than a blue shirt:
+                a gold star on the chest, gold at the collar and cuffs, and
+                the mission patch on the sleeve. */}
+            {starShirt && !spacesuit && <StarKit motion={motion} />}
+
+            {/* The pack on his back, and the chest rig that answers it. */}
+            {spacesuit && (
+              <group position={[0, 1.05, 0]}>
+                <LifeSupport />
+                {/* A control box on the chest, where a pilot's is. It does
+                    not cast either, for the reason the star does not: flat
+                    trim worn on the front throws its own hard shape onto the
+                    ground, and the torso behind it is already casting. */}
+                <mesh position={[0, 0.04, 0.21]}>
+                  <boxGeometry args={[0.3, 0.2, 0.06]} />
+                  <meshStandardMaterial
+                    color="#c3ccd6"
+                    flatShading
+                    roughness={0.6}
+                  />
+                </mesh>
+                <mesh position={[-0.07, 0.04, 0.25]}>
+                  <boxGeometry args={[0.05, 0.05, 0.02]} />
+                  <meshStandardMaterial
+                    color="#6fd08a"
+                    emissive="#6fd08a"
+                    emissiveIntensity={0.9}
+                  />
+                </mesh>
+                <mesh position={[0.05, 0.04, 0.25]}>
+                  <boxGeometry args={[0.05, 0.05, 0.02]} />
+                  <meshStandardMaterial
+                    color="#f0a33c"
+                    emissive="#f0a33c"
+                    emissiveIntensity={0.7}
+                  />
+                </mesh>
+                {/* Amber bands at the shoulders, matching the collar. */}
+                {[-0.31, 0.31].map((x) => (
+                  <mesh key={x} position={[x, 0.22, 0]}>
+                    <boxGeometry args={[0.04, 0.16, 0.39]} />
+                    <meshStandardMaterial color="#f0a33c" flatShading />
+                  </mesh>
+                ))}
+              </group>
+            )}
 
             {/* Match kit: a team bib over whatever they turned up in */}
             {kit && (
@@ -1018,8 +1314,8 @@ export function Character({
                   roughness={0.85}
                 />
               </mesh>
-              {/* Hair, unless a helmet has swallowed it */}
-              {!helmet && (
+              {/* Hair, unless a helmet or a bubble has swallowed it */}
+              {!helmet && !spacesuit && (
                 <group>
                   <mesh position={[0, 0.2, -0.03]} castShadow>
                     <boxGeometry args={[0.6, 0.24, 0.56]} />
@@ -1039,7 +1335,7 @@ export function Character({
                   </mesh>
                 </group>
               )}
-              {hair === 'long' && !helmet && (
+              {hair === 'long' && !helmet && !spacesuit && (
                 <group>
                   {/* Down the back, past the shoulders */}
                   <mesh position={[0, -0.52, -0.28]} castShadow>
@@ -1094,13 +1390,489 @@ export function Character({
                   ))}
                 </group>
               )}
-              {helmet && <Helmet color={helmet} />}
-              {kit && !helmet && <Mask color={kit} />}
-              {!helmet && <Accessory prop={prop} />}
+              {spacesuit && <SpaceHelmet />}
+              {helmet && !spacesuit && <Helmet color={helmet} />}
+              {kit && !helmet && !spacesuit && <Mask color={kit} />}
+              {!helmet && !spacesuit && <Accessory prop={prop} />}
             </group>
           </group>
         </group>
       </group>
+    </group>
+  )
+}
+
+/**
+ * The gold on the blue: star, cape, collar, cuffs and the patch on the arm.
+ *
+ * Takes `motion` because the cape is the one part of the kit that has to know
+ * how fast he is going - a cape that hangs dead still while he runs is a
+ * towel pinned to his back.
+ */
+function StarKit({ motion }: { motion?: RefObject<CharacterMotion> }) {
+  /* Big. This is the only thing on the island that has to be earned, and it
+     is read from across a green at the camera's usual distance, so the star
+     is most of the width of the chest rather than a badge on it. */
+  const star = useMemo(() => starShape(0.3, 0.128), [])
+  const patch = useMemo(() => starShape(0.07, 0.03), [])
+  const glow = useRef<Mesh>(null)
+
+  /* It catches the light as he turns, the way a metal thread does. The pulse
+     is slow and shallow - a shirt that blinks is a hazard light. */
+  useFrame((state) => {
+    if (!glow.current) return
+    const m = glow.current.material as MeshStandardMaterial
+    m.emissiveIntensity = 0.5 + Math.sin(state.clock.elapsedTime * 1.3) * 0.22
+  })
+
+  return (
+    <group position={[0, 1.05, 0]}>
+      <Cape motion={motion} />
+
+      {/* A darker field behind the star, so the gold has something to sit on
+          rather than floating on the blue. */}
+      <mesh position={[0, 0.05, 0.192]}>
+        <circleGeometry args={[0.305, 24]} />
+        <meshStandardMaterial color="#12306b" roughness={0.85} />
+      </mesh>
+      <mesh position={[0, 0.05, 0.194]}>
+        <ringGeometry args={[0.3, 0.318, 24]} />
+        <meshStandardMaterial
+          color="#f2c230"
+          metalness={0.5}
+          roughness={0.35}
+        />
+      </mesh>
+
+      {/* The star itself, bevelled so its arms catch the light separately
+          rather than reading as one flat shape. */}
+      {/*
+        No castShadow on any of this.
+
+        The star is a raised badge a couple of centimetres off the chest, and
+        a shadow-casting one throws a sharp five-pointed star onto the ground
+        beside the player's own soft blob - so he walks the island trailing
+        stars across the grass. Trim on a shirt is not a thing that casts;
+        the body under it already does.
+      */}
+      <mesh ref={glow} position={[0, 0.05, 0.196]}>
+        <extrudeGeometry
+          args={[
+            star,
+            {
+              depth: 0.03,
+              bevelEnabled: true,
+              bevelThickness: 0.012,
+              bevelSize: 0.012,
+              bevelSegments: 2,
+            },
+          ]}
+        />
+        <meshStandardMaterial
+          color="#ffd23f"
+          emissive="#f0a33c"
+          emissiveIntensity={0.5}
+          metalness={0.65}
+          roughness={0.22}
+        />
+      </mesh>
+
+      {/* A chevron under the star, which is what turns a decorated shirt into
+          a uniform somebody was given. */}
+      {[0, 1].map((i) => (
+        <mesh
+          key={i}
+          position={[0, -0.26 + i * 0.06, 0.193]}
+          rotation={[0, 0, 0]}
+        >
+          {/* A partial ring, centred on straight down so the chevron is
+              symmetric about the middle of the chest. 270 degrees is down in
+              ring space, and the span is taken off either side of it -
+              picking a start angle by eye lands it lopsided. */}
+          <ringGeometry
+            args={[0.16 - i * 0.03, 0.185 - i * 0.03, 20, 1, 4.012, 1.4]}
+          />
+          <meshStandardMaterial
+            color="#f2c230"
+            metalness={0.45}
+            roughness={0.35}
+          />
+        </mesh>
+      ))}
+
+      {/* Gold at the collar, standing slightly proud of the neck. */}
+      <mesh position={[0, 0.355, 0]}>
+        <boxGeometry args={[0.645, 0.08, 0.405]} />
+        <meshStandardMaterial
+          color="#f2c230"
+          flatShading
+          metalness={0.45}
+          roughness={0.35}
+        />
+      </mesh>
+      {/* And a second, thinner line under it: a placket, so the collar reads
+          as tailoring rather than as a stripe. */}
+      <mesh position={[0, 0.29, 0.192]}>
+        <boxGeometry args={[0.2, 0.04, 0.01]} />
+        <meshStandardMaterial color="#f2c230" metalness={0.4} />
+      </mesh>
+
+      {/* No separate gold hem band any more: it sat at the same height as
+          the belt below and the two z-fought through each other. The belt
+          does that job now, and does it better - a buckle says waist where
+          a stripe only said edge-of-shirt. */}
+
+      {/* Cuffs, at the end of each sleeve. */}
+      {[-0.33, 0.33].map((x) => (
+        <mesh key={x} position={[x, 0.24, 0]}>
+          <boxGeometry args={[0.07, 0.13, 0.405]} />
+          <meshStandardMaterial color="#f2c230" flatShading metalness={0.4} />
+        </mesh>
+      ))}
+
+      {/* Shoulders.
+
+          Flat gold bars along the top of each arm were tried once and cut:
+          with the collar and cuffs already gold, a fourth horizontal line
+          turned the silhouette into stripes. These are not that. They are
+          pauldrons - caps that sit over the top of the shoulder joint and
+          square off the top of him, so the shape reads as armour at the
+          distance the camera actually sits at.
+
+          Placed at the arm's own pivot, x +-0.38 and y 0.33 in this group's
+          space (the arms hang at y 1.38 and this whole kit is a group at
+          1.05), and a shade wider than the 0.18 shoulder cap underneath so
+          they cover it rather than sink into it. They do not swing with the
+          arm - they are armour strapped to the shoulder, and the joint
+          rotates under them, which is what a real pauldron does. */}
+      {[-1, 1].map((side) => (
+        <group key={side} position={[side * 0.38, 0.33, 0]}>
+          <mesh castShadow rotation={[0, 0, side * -0.16]}>
+            <boxGeometry args={[0.22, 0.12, 0.24]} />
+            <meshStandardMaterial
+              color="#1b4694"
+              flatShading
+              metalness={0.35}
+              roughness={0.5}
+            />
+          </mesh>
+          {/* Gold only on the top bevel, so it catches the light from above
+              without drawing another line across the front of him. */}
+          <mesh position={[0, 0.07, 0]} rotation={[0, 0, side * -0.16]}>
+            <boxGeometry args={[0.23, 0.035, 0.25]} />
+            <meshStandardMaterial
+              color="#f2c230"
+              flatShading
+              metalness={0.5}
+              roughness={0.3}
+            />
+          </mesh>
+        </group>
+      ))}
+
+      {/* The belt: a gold buckle on a dark band at the waist, which is what
+          finally separates the shirt from the trousers instead of letting
+          the blue run all the way down. */}
+      <group position={[0, -0.3, 0]}>
+        <mesh>
+          <boxGeometry args={[0.648, 0.1, 0.408]} />
+          <meshStandardMaterial color="#14224a" flatShading roughness={0.7} />
+        </mesh>
+        <mesh position={[0, 0, 0.2]}>
+          <boxGeometry args={[0.16, 0.13, 0.03]} />
+          <meshStandardMaterial
+            color="#f2c230"
+            flatShading
+            metalness={0.55}
+            roughness={0.28}
+          />
+        </mesh>
+        <mesh position={[0, 0, 0.218]}>
+          <boxGeometry args={[0.07, 0.06, 0.01]} />
+          <meshStandardMaterial color="#12306b" roughness={0.6} />
+        </mesh>
+      </group>
+
+      {/* The mission patch on the left arm: a disc with its own star. */}
+      <group position={[-0.325, 0.06, 0.02]} rotation={[0, -Math.PI / 2, 0]}>
+        <mesh>
+          <circleGeometry args={[0.105, 16]} />
+          <meshStandardMaterial color="#0f2c5c" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 0, 0.003]}>
+          <ringGeometry args={[0.095, 0.105, 16]} />
+          <meshStandardMaterial color="#f2c230" metalness={0.45} />
+        </mesh>
+        <mesh position={[0, 0, 0.006]}>
+          <extrudeGeometry
+            args={[patch, { depth: 0.008, bevelEnabled: false }]}
+          />
+          <meshStandardMaterial
+            color="#ffd23f"
+            emissive="#f0a33c"
+            emissiveIntensity={0.4}
+            metalness={0.45}
+          />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
+/**
+ * The cape.
+ *
+ * Hung from a yoke across the shoulders and built as a lathe of stacked
+ * rings rather than a flat plane, so it wraps the back and falls away from
+ * him instead of reading as a rectangle stuck on with tape.
+ *
+ * Two conventions decide every number in here, and getting either backwards
+ * puts the cape on his chest:
+ *
+ * - Negative Z is behind him (the life-support pack is built the same way).
+ * - In cylinder space theta runs from +Z toward +X, so the arc that covers
+ *   his back is the half centred on PI - a window of PI/2 to 3*PI/2.
+ * - A positive `rotation.x` on something hanging swings its bottom edge
+ *   backward. So streaming the cape out behind him is a POSITIVE angle;
+ *   negative drapes it forward over his front.
+ *
+ * Every frame it does two things. It swings back by how fast he is going, so
+ * a sprint streams it out behind him and standing still lets it drop; and it
+ * breathes on a slow sine whatever he is doing, because a cape that is
+ * perfectly still whenever he stops moving is a plank.
+ */
+function Cape({ motion }: { motion?: RefObject<CharacterMotion> }) {
+  const swing = useRef<Group>(null)
+  /* Eased, so setting off and pulling up are a settle rather than a snap:
+     the cape has weight and arrives a moment after he does. */
+  const lift = useRef(0)
+  /* Eased flight, on the cape's own clock rather than read raw: the body
+     pitches over a good half second and a cape that snapped upright on the
+     first frame of a launch would arrive before he did. */
+  const aloft = useRef(0)
+
+  useFrame((state, delta) => {
+    const g = swing.current
+    if (!g) return
+    const m = motion?.current
+    const fly = m?.flying ?? 0
+    aloft.current += (fly - aloft.current) * Math.min(1, delta * 3)
+    const air = aloft.current
+
+    /* On the ground the wake is all about how fast he is walking. In the
+       air it is not: a hover is still flying, and a cape that drops the
+       moment he stops pushing a direction reads as the thing switching off.
+       So flight floors it - most of the way out at a standstill, the rest
+       of the way as he actually travels. */
+    const speed = m?.moving ? (m.speed ?? 0) : 0
+    const walked = Math.min(1, speed / 5)
+    const wanted = air > 0.01 ? Math.max(0.72 + air * 0.2, walked) : walked
+    lift.current += (wanted - lift.current) * Math.min(1, delta * 4)
+
+    const t = state.clock.elapsedTime
+
+    /*
+     * The counter-rotation, which is the whole of why this needs to know
+     * about flight at all.
+     *
+     * The cape hangs inside the body, and in the air the body is pitched
+     * face-down by FLY_PITCH. Everything this computes is relative to that,
+     * so the swing that streams the cape out behind him on the grass points
+     * it at the ground once he is flying. Taking the body's own pitch back
+     * off puts the cape level with the world again, which is where a cape
+     * held out by the air it is moving through actually sits.
+     *
+     * Two rotations to undo, not one: the body's pitch, and the torso arch
+     * of FLY_ARCH on the pivot this hangs inside. Both stack onto the cape
+     * before it gets a say.
+     *
+     * Not quite the whole of it either - 0.92 of the pitch rather than all
+     * of it, so the cape still rides a few degrees off level and reads as
+     * trailing from his shoulders rather than as a plank bolted on square.
+     */
+    const climb = m?.climb ?? 0
+    const upright = (-(FLY_PITCH - climb * 0.42) * 0.92 - FLY_ARCH) * air
+
+    /* Positive, so it lifts BEHIND him. At rest it hangs a few degrees off
+       his back rather than clipping into it; at a sprint it is most of the
+       way to horizontal. The billow is faster and deeper the harder he is
+       going, the way cloth loaded with air behaves. */
+    g.rotation.x =
+      0.06 +
+      lift.current * 1.15 +
+      upright +
+      Math.sin(t * (1.6 + lift.current * 4)) * (0.03 + lift.current * 0.09)
+    /* And a lazy side-to-side, so it is never a flat pendulum. In the air
+       it ripples harder and faster: there is a great deal more wind in it
+       up there than there is on a walk. */
+    g.rotation.z =
+      Math.sin(t * (0.9 + air * 1.6) + 1.1) *
+      (0.02 + lift.current * 0.06 + air * 0.1)
+    /* A slow roll along its own length while flying, which is the thing
+       that stops a big flat sheet reading as cardboard. */
+    g.rotation.y = Math.sin(t * 1.15 + 0.4) * air * 0.09
+  })
+
+  /* The back half, centred on PI. Shared by all three layers so the cape,
+     its lining and its hem are the same sheet of cloth and cannot part
+     company at the edges. */
+  const FROM = Math.PI * 0.5
+  const SPAN = Math.PI
+
+  return (
+    /* Pivoting at the top edge, high on his back, so it swings from the
+       shoulders the way it is fastened rather than from his middle. */
+    <group position={[0, 0.33, -0.17]} ref={swing}>
+      {/* The clasp: a gold bar across the shoulders holding the thing on.
+          Without it the cape floats a centimetre off his back and the eye
+          goes straight to the gap. */}
+      <mesh position={[0, 0.01, 0.05]}>
+        <boxGeometry args={[0.42, 0.055, 0.1]} />
+        <meshStandardMaterial
+          color="#f2c230"
+          flatShading
+          metalness={0.5}
+          roughness={0.3}
+        />
+      </mesh>
+
+      <group position={[0, -0.62, 0]}>
+        {/* The cape proper: a half-open cone, widening as it falls. Drawn
+            on both sides, because once it lifts you see the inside of it. */}
+        <mesh castShadow>
+          <cylinderGeometry args={[0.3, 0.66, 1.24, 18, 1, true, FROM, SPAN]} />
+          <meshStandardMaterial
+            color="#b3202e"
+            flatShading
+            roughness={0.82}
+            side={DoubleSide}
+          />
+        </mesh>
+        {/* The lining, a shade darker and a hair OUTSIDE the cape rather
+            than inside it: inside, it sits between the cloth and the camera
+            and you see the lining instead of the cape. */}
+        <mesh>
+          <cylinderGeometry
+            args={[0.312, 0.672, 1.235, 18, 1, true, FROM, SPAN]}
+          />
+          <meshStandardMaterial
+            color="#6d1420"
+            flatShading
+            roughness={0.9}
+            side={DoubleSide}
+          />
+        </mesh>
+        {/* A gold hem at the bottom, which is what ties the red back to the
+            rest of the kit rather than leaving it a separate garment. */}
+        <mesh position={[0, -0.605, 0]}>
+          <cylinderGeometry
+            args={[0.662, 0.674, 0.07, 18, 1, true, FROM, SPAN]}
+          />
+          <meshStandardMaterial
+            color="#f2c230"
+            flatShading
+            metalness={0.45}
+            roughness={0.35}
+            side={DoubleSide}
+          />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
+/**
+ * The bubble a man wears in vacuum.
+ *
+ * A sphere rather than a box, which is the whole of why it reads as a space
+ * helmet beside a crash helmet built out of the same kit: nothing else on
+ * this island is round. The glass is transparent enough to keep his face —
+ * losing the face to a mirrored visor loses the person inside the suit, and
+ * the point of the suit is that it is still him.
+ */
+function SpaceHelmet() {
+  return (
+    <group position={[0, 0.06, 0]}>
+      {/* The hard collar the bubble seats on. */}
+      <mesh position={[0, -0.36, 0]} castShadow>
+        <cylinderGeometry args={[0.36, 0.38, 0.12, 14]} />
+        <meshStandardMaterial
+          color="#f0a33c"
+          flatShading
+          roughness={0.5}
+          metalness={0.25}
+        />
+      </mesh>
+      {/* The glass. Drawn from the inside as well, so the back of it is
+          there behind his head rather than an open shell. */}
+      <mesh castShadow>
+        <sphereGeometry args={[0.46, 18, 16]} />
+        <meshStandardMaterial
+          color="#cfe6fa"
+          transparent
+          opacity={0.36}
+          roughness={0.08}
+          metalness={0.2}
+          side={DoubleSide}
+        />
+      </mesh>
+      {/* The sunshade over the brow, and the lamp clipped to it. */}
+      <mesh position={[0, 0.3, 0.08]} castShadow>
+        <cylinderGeometry args={[0.34, 0.34, 0.14, 14]} />
+        <meshStandardMaterial color="#eef2f6" flatShading roughness={0.7} />
+      </mesh>
+      <mesh position={[0, 0.3, 0.36]}>
+        <cylinderGeometry args={[0.07, 0.07, 0.06, 10]} />
+        <meshStandardMaterial
+          color="#fff4d0"
+          emissive="#ffd98a"
+          emissiveIntensity={0.9}
+        />
+      </mesh>
+    </group>
+  )
+}
+
+/**
+ * The life-support pack, and the two hoses that run from it to the collar.
+ * Worn on the back, where it is the silhouette that says "spacesuit" from
+ * behind — which is the angle this game is played from.
+ */
+function LifeSupport() {
+  return (
+    <group position={[0, 0, -0.3]}>
+      <mesh position={[0, 0, -0.12]} castShadow>
+        <boxGeometry args={[0.6, 0.72, 0.26]} />
+        <meshStandardMaterial color="#dbe3ea" flatShading roughness={0.8} />
+      </mesh>
+      {/* Two tanks down the back of it. */}
+      {[-0.16, 0.16].map((x) => (
+        <mesh key={x} position={[x, 0, -0.28]} castShadow>
+          <cylinderGeometry args={[0.1, 0.1, 0.62, 10]} />
+          <meshStandardMaterial
+            color="#b9c4cf"
+            flatShading
+            metalness={0.35}
+            roughness={0.5}
+          />
+        </mesh>
+      ))}
+      {/* A live readout, so the pack is running rather than luggage. */}
+      <mesh position={[0.18, 0.28, 0.02]}>
+        <boxGeometry args={[0.14, 0.08, 0.04]} />
+        <meshStandardMaterial
+          color="#6fd08a"
+          emissive="#6fd08a"
+          emissiveIntensity={0.8}
+        />
+      </mesh>
+      {/* The hoses up to the collar. */}
+      {[-0.2, 0.2].map((x) => (
+        <mesh key={x} position={[x, 0.42, -0.02]} rotation={[0.3, 0, 0]}>
+          <cylinderGeometry args={[0.05, 0.05, 0.36, 8]} />
+          <meshStandardMaterial color="#8d949a" roughness={0.6} />
+        </mesh>
+      ))}
     </group>
   )
 }

@@ -6,6 +6,8 @@ import type {
   Vec2,
 } from '../../types'
 import type { Collider } from '../island/terrainLogic'
+import { CONSOLE } from '../launch/deck'
+import { LAUNCH_AREA } from '../launch/launch'
 
 /** Half-extents each furniture kind occupies on the floor, before rotation. */
 export const PROP_FOOTPRINT: Record<PropKind, Vec2> = {
@@ -295,6 +297,25 @@ export function interiorColliders(
     if (!base || (base[0] === 0 && base[1] === 0)) continue
     const [hx, hz] = rotated(base, exhibit.rotation)
     out.push({ x: exhibit.position[0], z: exhibit.position[1], hx, hz })
+  }
+
+  /*
+   * The flight deck's console.
+   *
+   * It is drawn by `FlightDeck.tsx` rather than declared as a prop - it has
+   * to read the launch clock, which a line in a room's prop list cannot do -
+   * so the loop above never sees it and it had no footprint at all. You
+   * walked straight through five metres of instrument desk to reach a button
+   * that is supposed to be on the far side of it.
+   *
+   * Taken off the same CONSOLE the mesh is positioned from, so the thing you
+   * bump into and the thing you can see cannot drift apart. A shade narrower
+   * and shallower than the 5.2 by 1.5 desk, because the player is stopped at
+   * arm's length by the collider and standing to press the button should
+   * still feel like reaching over it.
+   */
+  if (interior.id === LAUNCH_AREA) {
+    out.push({ x: CONSOLE[0], z: CONSOLE[1], hx: 2.5, hz: 0.72 })
   }
 
   for (const link of interior.links ?? []) {

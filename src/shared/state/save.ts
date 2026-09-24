@@ -34,6 +34,12 @@ export interface SavedProgress {
   secrets: string[]
   lighthouseOpen: boolean
   cvUnlocked: boolean
+  /** Whether the ship inside the lighthouse has ever flown. */
+  launched: boolean
+  /** Whether the blue-and-yellow shirt has been earned. */
+  starShirt: boolean
+  /** Minigames won at least once, as trophy ids. */
+  trophies: string[]
 }
 
 /**
@@ -124,7 +130,10 @@ export function isEmpty(progress: SavedProgress): boolean {
     progress.secrets.length === 0 &&
     Object.keys(progress.missions).length === 0 &&
     !progress.lighthouseOpen &&
-    !progress.cvUnlocked
+    !progress.cvUnlocked &&
+    !progress.launched &&
+    !progress.starShirt &&
+    progress.trophies.length === 0
   )
 }
 
@@ -149,6 +158,13 @@ export function loadProgress(): SavedProgress | null {
       secrets: ids(saved.secrets),
       lighthouseOpen: saved.lighthouseOpen === true,
       cvUnlocked: saved.cvUnlocked === true,
+      /* Absent from every save written before the ship was found, which
+         reads as false: an old visit simply never launched. That is why
+         adding this did not need a VERSION bump — the field defaults, and
+         bumping would have thrown away every island already walked. */
+      launched: saved.launched === true,
+      starShirt: saved.starShirt === true,
+      trophies: ids(saved.trophies),
     }
   } catch {
     return null

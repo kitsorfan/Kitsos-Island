@@ -16,6 +16,8 @@ import {
 import { MONTH_NAMES, nameOfDay } from '../calendar/calendar'
 import { examine } from './examine'
 import { LECTURE_AREA } from '../lecture/lecture'
+import { FlightDeck } from '../launch/FlightDeck'
+import { LAUNCH_AREA } from '../launch/launch'
 import { liftPhase } from '../lift/lift'
 import { useGame } from '../../shared/state/store'
 import { useT } from '../../shared/i18n/useT'
@@ -118,6 +120,8 @@ export function Interior({ id }: { id: string }) {
       <InteriorFurniture props={roomProps(interior, festive)} />
       {/* Chalked on the board, and only while somebody is at the lectern. */}
       {id === LECTURE_AREA && <Slides />}
+      {/* The summit room is a flight deck, and has a window in it. */}
+      {id === LAUNCH_AREA && <FlightDeck />}
       {(interior.links ?? []).map((link) => (
         <LinkPiece
           key={link.id}

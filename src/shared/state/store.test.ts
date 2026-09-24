@@ -2,8 +2,8 @@
  * @vitest-environment jsdom
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { useGame } from './store'
-import { KEYS, MISSIONS } from '../../features/island/world'
+import { isInteractive, nextObjective, resetReveal, useGame } from './store'
+import { KEYS, MISSIONS, PLAYER_START } from '../../features/island/world'
 import { BIRTHDAY, FEAST } from '../../features/calendar/calendar'
 import { INTERIORS } from '../../features/interior/interiors'
 import { liftArrival, liftStance } from '../../features/lift/lift'
@@ -54,6 +54,9 @@ const PRISTINE = useGame.getState()
 beforeEach(() => {
   localStorage.clear()
   useGame.setState(PRISTINE, true)
+  /* The doorstep cutscene keeps a flag outside the store, so resetting the
+     store alone leaves it set and the next case never sees a reveal. */
+  resetReveal()
 })
 
 const state = () => useGame.getState()
@@ -540,5 +543,448 @@ describe('getting into the lift and out of it', () => {
     const once = useGame.getState().spawn.token
     useGame.getState().arriveLift(at)
     expect(useGame.getState().spawn.token).toBe(once)
+  })
+})
+
+/**
+ * The launch: the suit that gates it, the flight that cannot be interrupted,
+ * and the shirt he comes home in.
+ *
+ * Two rules the rest of the island assumes. The first is that the button does
+ * nothing until he has been to the rack — the walk across the room is the
+ * whole of the ceremony, and skipping it would make the deck a checkbox. The
+ * second is that while he is up there the game is sealed: every other screen
+ * on the island can be backed out of sideways, and this one has exactly one
+ * door, which is the ride home.
+ */
+describe('the launch', () => {
+  /** On the deck with the walk his, which is where the button is pressed. */
+  const onDeck = () => {
+    useGame.setState({ area: 'lighthouse', mode: 'explore' })
+  }
+
+  /** On the deck and dressed for it: what the button actually answers. */
+  const suited = () => {
+    onDeck()
+    useGame.getState().toggleSuit()
+  }
+
+  it('will not go up in shirtsleeves', () => {
+    onDeck()
+    useGame.getState().beginLaunch()
+
+    expect(useGame.getState().launch).toBeNull()
+    expect(useGame.getState().mode).toBe('explore')
+    /* And it says why, rather than simply not answering. */
+    expect(useGame.getState().toast).not.toBeNull()
+  })
+
+  it('puts the suit on at the rack, and takes it off again', () => {
+    onDeck()
+    useGame.getState().toggleSuit()
+    expect(useGame.getState().suited).toBe(true)
+    expect(useGame.getState().outfit).toBe('spacesuit')
+
+    useGame.getState().toggleSuit()
+    expect(useGame.getState().suited).toBe(false)
+    expect(useGame.getState().outfit).toBe('islander')
+  })
+
+  it('only hands out the suit on the deck', () => {
+    useGame.setState({ area: 'island', mode: 'explore' })
+    useGame.getState().toggleSuit()
+    expect(useGame.getState().suited).toBe(false)
+  })
+
+  it('is only offered from the deck', () => {
+    useGame.setState({ area: 'island', mode: 'explore', suited: true })
+    useGame.getState().beginLaunch()
+    expect(useGame.getState().launch).toBeNull()
+    expect(useGame.getState().mode).toBe('explore')
+  })
+
+  it('starts the count and takes the walk away', () => {
+    suited()
+    useGame.getState().beginLaunch()
+
+    const { launch, mode } = useGame.getState()
+    expect(launch).not.toBeNull()
+    expect(launch?.arrived).toBe(false)
+    expect(mode).toBe('launch')
+    /* Nothing is left on the screen to click through mid-count. */
+    expect(useGame.getState().nearby).toBeNull()
+    expect(useGame.getState().panel).toBeNull()
+    expect(useGame.getState().dialogue).toBeNull()
+  })
+
+  it('cannot be started twice', () => {
+    suited()
+    useGame.getState().beginLaunch()
+    const first = useGame.getState().launch
+    useGame.getState().beginLaunch()
+    /* The same flight, not a second one that restarts the clock. */
+    expect(useGame.getState().launch).toBe(first)
+  })
+
+  it('reaches orbit once, however many frames call it', () => {
+    suited()
+    useGame.getState().beginLaunch()
+    useGame.getState().reachOrbit()
+
+    const arrived = useGame.getState().launch
+    expect(arrived?.arrived).toBe(true)
+    expect(useGame.getState().mode).toBe('orbit')
+
+    useGame.getState().reachOrbit()
+    expect(useGame.getState().launch).toBe(arrived)
+  })
+
+  it('does not reach orbit without a flight', () => {
+    useGame.getState().reachOrbit()
+    expect(useGame.getState().launch).toBeNull()
+    expect(useGame.getState().mode).not.toBe('orbit')
+  })
+
+  it('remembers across visits that the ship has flown', () => {
+    suited()
+    useGame.getState().beginLaunch()
+    expect(useGame.getState().launched).toBe(true)
+  })
+
+  it('is forgotten, like everything else, when the island is cleared', () => {
+    suited()
+    useGame.getState().beginLaunch()
+    useGame.getState().clearProgress()
+
+    expect(useGame.getState().launched).toBe(false)
+    expect(useGame.getState().launch).toBeNull()
+    expect(useGame.getState().starShirt).toBe(false)
+    expect(useGame.getState().outfit).toBe('islander')
+  })
+})
+
+describe('coming home', () => {
+  const flown = () => {
+    useGame.setState({ area: 'lighthouse', mode: 'explore' })
+    useGame.getState().toggleSuit()
+    useGame.getState().beginLaunch()
+    useGame.getState().reachOrbit()
+  }
+
+  it('will not land a flight that has not arrived', () => {
+    useGame.setState({ area: 'lighthouse', mode: 'explore' })
+    useGame.getState().toggleSuit()
+    useGame.getState().beginLaunch()
+    /* Still climbing: there is nothing to step out of yet. */
+    useGame.getState().flyHome()
+    expect(useGame.getState().mode).toBe('launch')
+  })
+
+  it('puts him down in the middle of the island', () => {
+    flown()
+    useGame.getState().flyHome()
+
+    const { area, mode, spawn, launch } = useGame.getState()
+    expect(area).toBe('island')
+    expect(mode).toBe('explore')
+    expect(spawn.position).toEqual([...PLAYER_START])
+    /* The flight is over rather than merely finished. */
+    expect(launch).toBeNull()
+  })
+
+  it('takes the suit off and leaves the shirt on', () => {
+    flown()
+    useGame.getState().flyHome()
+
+    expect(useGame.getState().suited).toBe(false)
+    expect(useGame.getState().starShirt).toBe(true)
+    expect(useGame.getState().outfit).toBe('star')
+  })
+
+  it('lets him change back out of the shirt, and into it again', () => {
+    flown()
+    useGame.getState().flyHome()
+
+    useGame.getState().wearStarShirt(false)
+    expect(useGame.getState().outfit).toBe('islander')
+    useGame.getState().wearStarShirt(true)
+    expect(useGame.getState().outfit).toBe('star')
+  })
+
+  it('does not offer the shirt to somebody who has not earned it', () => {
+    useGame.getState().wearStarShirt(true)
+    expect(useGame.getState().outfit).toBe('islander')
+  })
+
+  it('leaves the island walkable again', () => {
+    flown()
+    useGame.getState().flyHome()
+    /* The seal is off: the ordinary screens answer once more. */
+    useGame.getState().openMap()
+    expect(useGame.getState().mode).toBe('map')
+  })
+})
+
+/**
+ * The skip-ahead card, and the line it must not cross.
+ *
+ * Nothing a recruiter needs is locked away, so the greeting hands over the
+ * whole CV on request. What it must not do is hand over the island with it:
+ * the lighthouse is the reward for walking the place, and opening its door
+ * for somebody who has just said they would rather not is the one way to
+ * make that reward mean nothing.
+ */
+describe('unlocking the CV', () => {
+  it('hands over the CV', () => {
+    useGame.getState().unlockCv()
+
+    expect(useGame.getState().cvUnlocked).toBe(true)
+    expect(useGame.getState().mode).toBe('panel')
+    expect(useGame.getState().panel?.kind).toBe('cv')
+  })
+
+  it('does not open the lighthouse with it', () => {
+    useGame.getState().unlockCv()
+
+    /* The door stays shut, the keyring quest stays unfinished, and the
+       arcade's locked game stays locked. */
+    expect(useGame.getState().lighthouseOpen).toBe(false)
+  })
+
+  it('leaves the keys still worth finding', () => {
+    useGame.getState().unlockCv()
+
+    const objective = nextObjective(useGame.getState())
+    /* Still pointing at the hunt rather than at nothing. */
+    expect(objective).not.toBeNull()
+  })
+})
+
+/**
+ * The credits, and the one thing they gate.
+ *
+ * The certificate is the end of the game and so is the roll, so the card
+ * waits for it: throwing the certificate up over the first title card is how
+ * you make sure nobody reads either.
+ */
+describe('the credits', () => {
+  const inOrbit = () => {
+    useGame.setState({ area: 'lighthouse', mode: 'explore' })
+    useGame.getState().toggleSuit()
+    useGame.getState().beginLaunch()
+    useGame.getState().reachOrbit()
+  }
+
+  it('start the moment the engines cut', () => {
+    inOrbit()
+    expect(useGame.getState().credits).toBe(true)
+  })
+
+  it('end when the roll says so, and only once', () => {
+    inOrbit()
+    useGame.getState().endCredits()
+    expect(useGame.getState().credits).toBe(false)
+
+    /* A second call from a frame still in flight changes nothing. */
+    useGame.getState().endCredits()
+    expect(useGame.getState().credits).toBe(false)
+  })
+
+  it('leave him in orbit rather than handing the island back', () => {
+    inOrbit()
+    useGame.getState().endCredits()
+    /* The roll finishing is not the flight finishing: only flyHome is. */
+    expect(useGame.getState().mode).toBe('orbit')
+    expect(useGame.getState().launch?.arrived).toBe(true)
+  })
+
+  it('are over once he lands, however far they got', () => {
+    inOrbit()
+    /* Flying home mid-roll must not leave the credits playing over the
+       island he has just landed on. */
+    useGame.getState().flyHome()
+    expect(useGame.getState().credits).toBe(false)
+  })
+})
+
+/**
+ * The reveal on the doorstep.
+ *
+ * It plays every time he walks in, which is the rule worth pinning: the
+ * tower coming apart is the best thing on the island and there is no reason
+ * to show it once and never again. What must not happen is it starting on
+ * top of itself, which is what the guard inside `enterBuilding` is for.
+ */
+describe('the reveal', () => {
+  it('holds him on the doorstep', () => {
+    useGame.getState().enterBuilding('lighthouse')
+
+    /* Not inside yet: the cutscene has the screen. */
+    expect(useGame.getState().mode).toBe('reveal')
+    expect(useGame.getState().reveal).not.toBeNull()
+    expect(useGame.getState().area).toBe('island')
+  })
+
+  it('lets him in when it has run', () => {
+    useGame.getState().enterBuilding('lighthouse')
+    useGame.getState().endReveal()
+
+    expect(useGame.getState().area).toBe('lighthouse')
+    expect(useGame.getState().mode).toBe('explore')
+    expect(useGame.getState().reveal).toBeNull()
+  })
+
+  it('leaves him somewhere he can act if nothing ever ends it', () => {
+    /*
+     * A guard on the shape of the bug rather than on the wiring, which is
+     * what actually broke: `endReveal` is called from the tower's own frame
+     * loop, and when the component that used to hold that call was deleted
+     * the cutscene ran forever with him stood outside watching.
+     *
+     * A store test cannot see a missing caller - it is the one calling. So
+     * what is pinned here is that the mode a stuck reveal leaves him in is
+     * one the rest of the game refuses input in, which is why the symptom
+     * was "left outside" rather than something subtler and worse.
+     */
+    useGame.getState().enterBuilding('lighthouse')
+    expect(isInteractive(useGame.getState().mode)).toBe(false)
+  })
+
+  it('plays again the next time he walks in', () => {
+    useGame.getState().enterBuilding('lighthouse')
+    useGame.getState().endReveal()
+    useGame.getState().leaveBuilding()
+
+    /* Every visit, not just the first. */
+    useGame.getState().enterBuilding('lighthouse')
+    expect(useGame.getState().reveal).not.toBeNull()
+    expect(useGame.getState().mode).toBe('reveal')
+    expect(useGame.getState().area).toBe('island')
+  })
+
+  it('does not restart itself on the way through the door', () => {
+    /* `endReveal` calls `enterBuilding`, which is the call that started the
+       cutscene in the first place - it must fall through rather than loop. */
+    useGame.getState().enterBuilding('lighthouse')
+    useGame.getState().endReveal()
+
+    expect(useGame.getState().area).toBe('lighthouse')
+    expect(useGame.getState().reveal).toBeNull()
+  })
+
+  it('never plays for any other door', () => {
+    useGame.getState().enterBuilding('house')
+    expect(useGame.getState().reveal).toBeNull()
+    expect(useGame.getState().area).toBe('house')
+  })
+
+  it('cannot be started twice over', () => {
+    useGame.getState().enterBuilding('lighthouse')
+    const first = useGame.getState().reveal
+    useGame.getState().enterBuilding('lighthouse')
+    expect(useGame.getState().reveal).toBe(first)
+  })
+
+  it('is not left running when the island is cleared', () => {
+    useGame.getState().enterBuilding('lighthouse')
+    useGame.getState().clearProgress()
+
+    expect(useGame.getState().reveal).toBeNull()
+  })
+})
+
+/**
+ * The suit, and the door.
+ *
+ * Sealed for vacuum is not a state you walk the island in, so the front door
+ * refuses while it is on. What it must never be is a trap: the keeper's
+ * logbook and the CV are in that room, and the rack is what gets him out.
+ */
+describe('leaving the deck while suited', () => {
+  const suitedOnDeck = () => {
+    useGame.setState({ area: 'lighthouse', mode: 'explore' })
+    useGame.getState().toggleSuit()
+  }
+
+  it('refuses, and says why', () => {
+    suitedOnDeck()
+    useGame.getState().leaveBuilding()
+
+    expect(useGame.getState().area).toBe('lighthouse')
+    /* A door that simply does nothing reads as broken. */
+    expect(useGame.getState().toast).not.toBeNull()
+  })
+
+  it('lets him out again the moment the suit is off', () => {
+    suitedOnDeck()
+    useGame.getState().leaveBuilding()
+    expect(useGame.getState().area).toBe('lighthouse')
+
+    /* The rack is the way out, and it always works. */
+    useGame.getState().toggleSuit()
+    useGame.getState().leaveBuilding()
+    expect(useGame.getState().area).toBe('island')
+  })
+
+  it('never shuts anybody in', () => {
+    /*
+     * The rule the whole thing hangs on. However he got suited, hanging it
+     * up is available - so there is no arrangement of presses that leaves a
+     * visitor in a room they cannot leave.
+     */
+    suitedOnDeck()
+    expect(useGame.getState().suited).toBe(true)
+    useGame.getState().toggleSuit()
+    expect(useGame.getState().suited).toBe(false)
+  })
+
+  it('does not lock any other building', () => {
+    /* The suit only exists on the deck, but the guard has to be specific to
+       it rather than to being dressed oddly. */
+    useGame.setState({ area: 'house', mode: 'explore', suited: true })
+    useGame.getState().leaveBuilding()
+    expect(useGame.getState().area).toBe('island')
+  })
+})
+
+/**
+ * The stickers, which are the record of what somebody managed rather than
+ * how they are doing now.
+ */
+describe('winning a sticker', () => {
+  it('records a win', () => {
+    useGame.getState().winTrophy('moto')
+    expect(useGame.getState().trophies.moto).toBe(true)
+  })
+
+  it('does not award the same one twice', () => {
+    useGame.getState().winTrophy('moto')
+    const first = useGame.getState().trophies
+    useGame.getState().winTrophy('moto')
+    /* The same object, so nothing re-rendered and no second toast fired. */
+    expect(useGame.getState().trophies).toBe(first)
+  })
+
+  it('keeps a sticker after a later loss', () => {
+    /*
+     * There is no `loseTrophy`, and that is the rule: the certificate says
+     * what somebody managed, not what they last did. Losing the circuit
+     * four times after winning it once takes nothing off the sheet.
+     */
+    useGame.getState().winTrophy('rescue')
+    useGame.setState({ rescue: null })
+    expect(useGame.getState().trophies.rescue).toBe(true)
+  })
+
+  it('treats the two halves of hide and seek separately', () => {
+    useGame.getState().winTrophy('hide-seeking')
+    expect(useGame.getState().trophies['hide-seeking']).toBe(true)
+    expect(useGame.getState().trophies['hide-hiding']).toBeUndefined()
+  })
+
+  it('is forgotten when the island is cleared', () => {
+    useGame.getState().winTrophy('balloon')
+    useGame.getState().clearProgress()
+    expect(useGame.getState().trophies).toEqual({})
   })
 })

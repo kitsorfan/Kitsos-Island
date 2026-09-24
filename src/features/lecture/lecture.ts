@@ -75,7 +75,7 @@ export const SLIDES: Slide[] = [
     title: 'Compliance analysis of movement exercises',
     lines: [
       'Diploma thesis · NTUA, School of ECE, 2022',
-      'Christos Orfanopoulos',
+      'Kitsos Orfanopoulos',
       'Supervisor: Prof. Panagiotis Tsanakas, Dean of the School',
     ],
     hold: 5,

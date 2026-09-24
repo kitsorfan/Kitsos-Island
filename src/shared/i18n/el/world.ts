@@ -12,8 +12,7 @@ export const WORLD: Record<string, string> = {
   /* ------------------------------ Buildings --------------------------- */
   'Kitsos House': 'Το Σπίτι του Κίτσου',
   House: 'Σπίτι',
-  'Home of Christos "Kitsos" Orfanopoulos':
-    'Το σπίτι του Χρήστου «Κίτσου» Ορφανόπουλου',
+  'Home of Kitsos Orfanopoulos': 'Το σπίτι του Κίτσου Ορφανόπουλου',
   'National Technical University of Athens': 'Εθνικό Μετσόβιο Πολυτεχνείο',
   NTUA: 'ΕΜΠ',
   'School of Electrical & Computer Engineering':
@@ -177,8 +176,8 @@ export const WORLD: Record<string, string> = {
 
   /* --------------------------- Journal entries ------------------------ */
   'Welcome to Kitsos Town': 'Καλώς ήρθες στην Πόλη του Κίτσου',
-  'Christos "Kitsos" Orfanopoulos, Senior Full Stack Software Engineer & Technical Lead, based in Athens, Greece. Five keys, one per district, open the Old Lighthouse on the north-west cape.':
-    'Χρήστος «Κίτσος» Ορφανόπουλος, Senior Full Stack Software Engineer & Technical Lead, με έδρα την Αθήνα. Πέντε κλειδιά, ένα ανά συνοικία, ανοίγουν τον Παλιό Φάρο στο βορειοδυτικό ακρωτήρι.',
+  'Kitsos Orfanopoulos, Senior Full Stack Software Engineer & Technical Lead, based in Athens, Greece. Five keys, one per district, open the Old Lighthouse on the north-west cape.':
+    'Κίτσος Ορφανόπουλος, Senior Full Stack Software Engineer & Technical Lead, με έδρα την Αθήνα. Πέντε κλειδιά, ένα ανά συνοικία, ανοίγουν τον Παλιό Φάρο στο βορειοδυτικό ακρωτήρι.',
   Volunteering: 'Εθελοντισμός',
   'Leading volunteer (2017–2021, 2023–today) and Director (2021–2022) at the Christian Youth Foundation "Pantokrator", Paleo Faliro. Blood donor since 2017.':
     'Επικεφαλής εθελοντής (2017–2021, 2023–σήμερα) και Διευθυντής (2021–2022) στο Χριστιανικό Ίδρυμα Νεότητας «Παντοκράτωρ», Παλαιό Φάληρο. Αιμοδότης από το 2017.',
@@ -289,6 +288,8 @@ export const WORLD: Record<string, string> = {
     'Επτά δρόμοι φεύγουν από αυτή την πλατεία, και ο καθένας τους πήρε το όνομά του από αυτό που κέρδισε εκεί. Κίνητρο, Πειθαρχία, Περιέργεια, Φροντίδα, Ηγεσία, Συνεργασία.',
   'And north-west, Freedom Road, out to the Old Lighthouse on the cape. Sealed for years. Five district keys open it, one hidden in each building.':
     'Και βορειοδυτικά, η Οδός Ελευθερίας, μέχρι τον Παλιό Φάρο στο ακρωτήρι. Σφραγισμένος χρόνια. Τον ανοίγουν πέντε κλειδιά των συνοικιών, ένα κρυμμένο σε κάθε κτίριο.',
+  'Sealed, I said. Though the night watch tells me there has been hammering out there lately. Probably the wind.':
+    'Σφραγισμένος, είπα. Αν και η νυχτερινή βάρδια μού λέει πως τελευταία ακούγονται σφυριές από εκεί. Ο αέρας, μάλλον.',
   'Press M for the map if the walk gets long. Once you have found a place, you can travel straight back to it.':
     'Πάτα M για τον χάρτη αν σου φανεί μακρύς ο δρόμος. Μόλις βρεις ένα μέρος, μπορείς να πας κατευθείαν ξανά εκεί.',
 
@@ -367,6 +368,8 @@ export const WORLD: Record<string, string> = {
     'Ψάχνεις τον Φάρο; Οδός Ελευθερίας, βορειοδυτικά, μέχρι το ακρωτήρι.',
   'Locked since before I moved here. Five keys, they say. One per district.':
     'Κλειδωμένος από πριν έρθω εδώ. Πέντε κλειδιά, λένε. Ένα ανά συνοικία.',
+  'Funny, though. I walk past it in the evenings, and these last few days there is banging inside. Metal on metal.':
+    'Περίεργο πάντως. Περνάω από εκεί τα βράδια, και τις τελευταίες μέρες κάτι χτυπάει μέσα. Μέταλλο πάνω σε μέταλλο.',
 
   /* -------------------------------- Nikos ----------------------------- */
   'Cannot stop, halfway through the loop!':
@@ -381,6 +384,8 @@ export const WORLD: Record<string, string> = {
     'Η θάλασσα είναι λάδι. Καλή μέρα για μεγάλη κουβέντα.',
   'Athens is over that horizon. That is where he lives and works.':
     'Η Αθήνα είναι πίσω από εκείνο τον ορίζοντα. Εκεί ζει και δουλεύει.',
+  'Light in the old lighthouse the last few nights. Not the lamp, lower down. Somebody is working in there.':
+    'Φως στον παλιό φάρο τις τελευταίες νύχτες. Όχι ο φανός, πιο χαμηλά. Κάποιος δουλεύει εκεί μέσα.',
   'Hiking, camping, a boat when he can get one. Then back to the screens.':
     'Πεζοπορία, κάμπινγκ, και μια βάρκα όποτε προλάβει. Και μετά πάλι στις οθόνες.',
   'If you have a job for him, do not shout it at the sea. Use the Radio Center.':
@@ -391,6 +396,8 @@ export const WORLD: Record<string, string> = {
     'Ράφι δίπλα στη σκακιέρα. Δεν γίνεται να μην το δεις, ποτέ δεν συμμαζεύει.',
   'That is his house, right there. Lights on late, always.':
     'Να το σπίτι του, εκεί. Πάντα με τα φώτα αναμμένα ως αργά.',
+  'Not this week, mind. This week he is out before dark with a toolbox, up Freedom Road, and back when the birds start.':
+    'Όχι αυτή τη βδομάδα, βέβαια. Αυτή τη βδομάδα φεύγει πριν σκοτεινιάσει με μια εργαλειοθήκη, προς την Οδό Ελευθερίας, και γυρίζει με τα πρώτα πουλιά.',
   'I have watched that boy grow up from this spot. Seventy years I have been across the road from them.':
     'Από εδώ τον είδα να μεγαλώνει αυτό το παιδί. Εβδομήντα χρόνια απέναντί τους.',
   'I knew his grandfather. Same walk, same way of standing in a doorway to finish a sentence.':
@@ -682,6 +689,8 @@ export const WORLD: Record<string, string> = {
     'Εκπροσώπησε και το σχολείο. Όταν με ρώτησαν ποιος θα έπρεπε να μιλήσει για εμάς, δεν χρειάστηκε να το σκεφτώ.',
   'Robotics. That year the whole class built a submarine drone. It floated, it dived, it came back, mostly.':
     'Ρομποτική. Εκείνη τη χρονιά όλη η τάξη έφτιαξε ένα υποβρύχιο drone. Επέπλεε, βουτούσε, επέστρεφε, τις περισσότερες φορές.',
+  'He was the one who asked, once it worked, what it would take to build one that went up instead of down.':
+    'Εκείνος ήταν που ρώτησε, μόλις δούλεψε, τι θα χρειαζόταν για να φτιάξουμε ένα που να πηγαίνει προς τα πάνω αντί για κάτω.',
   'Kitsos built a proof-of-concept electric bicycle on his own. Twelve volts, a motor, a frame off the rack, and it moved. Truly remarkable, at that age.':
     'Ο Κίτσος έφτιαξε μόνος του ένα πρωτότυπο ηλεκτρικού ποδηλάτου. Δώδεκα βολτ, ένα μοτέρ, ένας σκελετός από το ράφι, και κινήθηκε. Πραγματικά αξιοσημείωτο, σε αυτή την ηλικία.',
   'That bicycle by the bench? That is the one.':
@@ -735,6 +744,8 @@ export const WORLD: Record<string, string> = {
     'Φυσική γενικής παιδείας και κατεύθυνσης, και τις δύο χρονιές. Άριστος σε όλη τη διάρκεια, το έγραψα σε έντυπο υποτροφίας, και τη λέξη αυτή δεν τη μοιράζω.',
   'He captained our EUSO team: the science olympiad where three of you share one bench of experiments and a problem that changes the moment you touch it. He kept the bench calm.':
     'Ήταν αρχηγός της ομάδας μας στη EUSO: την ολυμπιάδα φυσικών επιστημών όπου τρεις μοιράζεστε έναν πάγκο πειραμάτων και ένα πρόβλημα που αλλάζει μόλις το ακουμπήσεις. Κρατούσε τον πάγκο ήρεμο.',
+  'He asked me once how fast you would have to go to leave the Earth for good. Eleven kilometres a second, I told him. He wrote it on the back of his hand.':
+    'Με ρώτησε κάποτε πόσο γρήγορα πρέπει να πας για να φύγεις από τη Γη για πάντα. Έντεκα χιλιόμετρα το δευτερόλεπτο, του είπα. Το έγραψε στην παλάμη του.',
   'Every event, competition and presentation this school put on, he was in it. And he argued well: a very good conversationalist, with clear arguments and a sense of humour. You need one, in physics.':
     'Σε κάθε εκδήλωση, διαγωνισμό και παρουσίαση που έκανε αυτό το σχολείο, ήταν μέσα. Και επιχειρηματολογούσε καλά: πολύ καλός συνομιλητής, με ξεκάθαρα επιχειρήματα και χιούμορ. Το χρειάζεσαι, στη φυσική.',
   'The EUSO bench': 'Ο πάγκος της EUSO',

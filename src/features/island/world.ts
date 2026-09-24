@@ -195,7 +195,7 @@ export const BUILDINGS: Building[] = [
     kind: 'house',
     name: 'Kitsos House',
     short: 'House',
-    subtitle: 'Home of Christos "Kitsos" Orfanopoulos',
+    subtitle: 'Home of Kitsos Orfanopoulos',
     position: [-62, 56],
     door: [-62, 47],
     half: [7.2, 6.5],
@@ -429,11 +429,12 @@ export const NPCS: Npc[] = [
       `Everything here belongs to ${PROFILE.nickname} ${PROFILE.lastName}, a senior full stack engineer and technical lead out of ${PROFILE.location}.`,
       'Seven roads leave this square, and every one of them is named for what he took out of it. Motivation, Discipline, Curiosity, Caring, Leadership, Collaboration.',
       'And north-west, Freedom Road, out to the Old Lighthouse on the cape. Sealed for years. Five district keys open it, one hidden in each building.',
+      'Sealed, I said. Though the night watch tells me there has been hammering out there lately. Probably the wind.',
       'Press M for the map if the walk gets long. Once you have found a place, you can travel straight back to it.',
     ],
     journal: {
       title: 'Welcome to Kitsos Town',
-      body: 'Christos "Kitsos" Orfanopoulos, Senior Full Stack Software Engineer & Technical Lead, based in Athens, Greece. Five keys, one per district, open the Old Lighthouse on the north-west cape.',
+      body: 'Kitsos Orfanopoulos, Senior Full Stack Software Engineer & Technical Lead, based in Athens, Greece. Five keys, one per district, open the Old Lighthouse on the north-west cape.',
     },
   },
   {
@@ -608,6 +609,7 @@ export const NPCS: Npc[] = [
     lines: [
       'Looking for the Lighthouse? Freedom Road, north-west, out to the cape.',
       'Locked since before I moved here. Five keys, they say. One per district.',
+      'Funny, though. I walk past it in the evenings, and these last few days there is banging inside. Metal on metal.',
     ],
   },
   /* --------------------------- the coast --------------------------- */
@@ -659,6 +661,7 @@ export const NPCS: Npc[] = [
     lines: [
       'Sea is calm. Good day for a long conversation.',
       'Athens is over that horizon. That is where he lives and works.',
+      'Light in the old lighthouse the last few nights. Not the lamp, lower down. Somebody is working in there.',
       'Hiking, camping, a boat when he can get one. Then back to the screens.',
       'If you have a job for him, do not shout it at the sea. Use the Radio Center.',
     ],
@@ -691,6 +694,7 @@ export const NPCS: Npc[] = [
     ],
     lines: [
       'That is his house, right there. Lights on late, always.',
+      'Not this week, mind. This week he is out before dark with a toolbox, up Freedom Road, and back when the birds start.',
       'I have watched that boy grow up from this spot. Seventy years I have been across the road from them.',
       'I knew his grandfather. Same walk, same way of standing in a doorway to finish a sentence.',
       'Whatever is broken, he is out there with it. The shutter, the gate, the car up on the drive with the bonnet open all Sunday.',
@@ -1364,6 +1368,7 @@ export const NPCS: Npc[] = [
     prop: 'cap',
     lines: [
       'Robotics. That year the whole class built a submarine drone. It floated, it dived, it came back, mostly.',
+      'He was the one who asked, once it worked, what it would take to build one that went up instead of down.',
       'Kitsos built a proof-of-concept electric bicycle on his own. Twelve volts, a motor, a frame off the rack, and it moved. Truly remarkable, at that age.',
       'That bicycle by the bench? That is the one.',
     ],
@@ -1494,6 +1499,7 @@ export const NPCS: Npc[] = [
     lines: [
       'General physics and science-stream physics, both years. Excellent throughout. I wrote that on a scholarship form, and I do not hand the word out.',
       'He captained our EUSO team: the science olympiad where three of you share one bench of experiments and a problem that changes the moment you touch it. He kept the bench calm.',
+      'He asked me once how fast you would have to go to leave the Earth for good. Eleven kilometres a second, I told him. He wrote it on the back of his hand.',
       'Every event, competition and presentation this school put on, he was in it. And he argued well: a very good conversationalist, with clear arguments and a sense of humour. You need one, in physics.',
     ],
     journal: {

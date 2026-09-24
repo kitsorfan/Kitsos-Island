@@ -1,4 +1,4 @@
-import { PROFILE } from '../../features/cv/profile'
+import { NAME, PROFILE } from '../../features/cv/profile'
 import { useGame } from '../state/store'
 import * as sfx from '../engine/audio'
 import { useT } from '../i18n/useT'
@@ -22,9 +22,7 @@ export function TitleScreen() {
           <span>{t('KITSOS')}</span>
           <span>{t('ISLAND')}</span>
         </h1>
-        <p className="title__name">
-          {PROFILE.firstName} “{PROFILE.nickname}” {PROFILE.lastName}
-        </p>
+        <p className="title__name">{NAME}</p>
         <p className="title__role">
           {t(PROFILE.title)} · {t(PROFILE.location)}
         </p>

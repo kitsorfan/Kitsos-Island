@@ -1,6 +1,6 @@
 # Kitsos Island — a playable CV
 
-A frontend-only 3D personal site for **Christos "Kitsos" Orfanopoulos**, built as a
+A frontend-only 3D personal site for **Kitsos Orfanopoulos**, built as a
 Pokémon-style island you walk around. Townspeople tell you about him, seven
 buildings open up and let you walk **inside**, five hidden keys unlock the Old
 Lighthouse — which turns out to be a spaceship — and the Radio Center hands

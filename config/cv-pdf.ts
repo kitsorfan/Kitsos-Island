@@ -7,8 +7,7 @@
  * making it takes a real browser and the build should not need one. So this
  * is run by hand whenever the CV changes, and the result checked in with it.
  *
- * Any Chromium will do — Edge, Chrome, Chromium, Brave. It finds the usual
- * installs by itself; point CV_BROWSER at anything else.
+ * Any Chromium will do; see browser.ts for how it finds one.
  *
  * A portrait at public/cv/photo.jpg goes into the header if it is there.
  */
@@ -25,30 +24,14 @@ import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { RESUME_PDF } from '../src/features/cv/resume.ts'
 import { buildResumeHtml } from '../src/features/cv/resumeHtml.ts'
+import { findBrowser } from './browser.ts'
 import { readResumeFont } from './resumeFont.ts'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const PHOTO = join(ROOT, 'public', 'cv', 'photo.jpg')
 const OUT = join(ROOT, 'public', RESUME_PDF)
 
-const CANDIDATES = [
-  process.env.CV_BROWSER,
-  'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
-  'C:/Program Files/Microsoft/Edge/Application/msedge.exe',
-  'C:/Program Files/Google/Chrome/Application/chrome.exe',
-  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
-  '/usr/bin/google-chrome',
-  '/usr/bin/chromium',
-  '/usr/bin/chromium-browser',
-  '/usr/bin/microsoft-edge',
-]
-
-const browser = CANDIDATES.find((p): p is string => !!p && existsSync(p))
-if (!browser) {
-  console.error('cv:pdf needs a Chromium browser; set CV_BROWSER to one.')
-  process.exit(1)
-}
+const browser = findBrowser('cv:pdf')
 
 // Inlined, so the render does not depend on where the temp file sits.
 const photo = existsSync(PHOTO)

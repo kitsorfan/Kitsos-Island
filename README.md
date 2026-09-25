@@ -72,6 +72,17 @@ npm run cv:pdf   # needs Edge or Chrome installed; CV_BROWSER=<path> for others
 A square portrait at `public/cv/photo.jpg` goes into the header; without one,
 the header simply goes without a photo.
 
+### The link preview
+
+A link to the island unfurls (LinkedIn, Slack, email) with
+`public/og-image.png`, 1200 × 630, drawn from the CV data in the island's own
+palette and typefaces. Like the PDF it takes a browser, so it is committed;
+redraw it when the name or the title changes:
+
+```bash
+npm run og:image   # same browser lookup as cv:pdf
+```
+
 ## Deploying
 
 [www.kitsorfan.com](https://www.kitsorfan.com) is a Cloudflare Worker with static assets, set out in

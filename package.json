@@ -13,6 +13,7 @@
     "lint": "oxlint --config config/.oxlintrc.json",
     "typecheck": "tsc -b",
     "cv:pdf": "node config/cv-pdf.ts",
+    "og:image": "node config/og-image.ts",
     "format": "prettier --write . --config config/.prettierrc.json --ignore-path config/.prettierignore",
     "format:check": "prettier --check . --config config/.prettierrc.json --ignore-path config/.prettierignore",
     "test": "vitest run --config config/vitest.config.ts",

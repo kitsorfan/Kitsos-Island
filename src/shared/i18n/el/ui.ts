@@ -433,6 +433,8 @@ export const UI: Record<string, string> = {
   'Saved — take another': 'Αποθηκεύτηκε — πάρε κι άλλο',
   'And the full CV': 'Και το πλήρες βιογραφικό',
   'Preview of your certificate': 'Προεπισκόπηση του πιστοποιητικού σου',
+  'Credential ID': 'Αναγνωριστικό πιστοποιητικού',
+  'Credential URL': 'Σύνδεσμος επαλήθευσης',
   'Signed by': 'Υπογραφή',
   'Thanks for walking the whole of it.':
     'Ευχαριστώ που το περπάτησες ολόκληρο.',

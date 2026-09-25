@@ -37,7 +37,7 @@ describe('the name on the certificate', () => {
 describe('the filename', () => {
   it('slugs the name and keeps the extension', () => {
     expect(certFilename('Ada Lovelace')).toBe(
-      'kitsos-island-certificate-ada-lovelace.png',
+      'kitsos-island-certificate-ada-lovelace.pdf',
     )
   })
 
@@ -45,14 +45,14 @@ describe('the filename', () => {
     /* A Greek name that slugged to nothing would hand every Greek visitor
        the same anonymous file. */
     expect(certFilename('Χρήστος')).toBe(
-      'kitsos-island-certificate-χρήστος.png',
+      'kitsos-island-certificate-χρήστος.pdf',
     )
   })
 
   it('falls back rather than producing a bare or trailing-hyphen name', () => {
-    expect(certFilename('!!!')).toBe('kitsos-island-certificate-visitor.png')
-    expect(certFilename('  ')).toBe('kitsos-island-certificate-visitor.png')
-    expect(certFilename('Ada!')).toBe('kitsos-island-certificate-ada.png')
+    expect(certFilename('!!!')).toBe('kitsos-island-certificate-visitor.pdf')
+    expect(certFilename('  ')).toBe('kitsos-island-certificate-visitor.pdf')
+    expect(certFilename('Ada!')).toBe('kitsos-island-certificate-ada.pdf')
   })
 })
 

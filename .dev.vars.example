@@ -1,0 +1,4 @@
+# Copy to .dev.vars for `npm run worker:dev`. This is Turnstile's published
+# always-passes test secret, not a real one: the real secret is set on the
+# deployed Worker with `npx wrangler secret put TURNSTILE_SECRET`.
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA

@@ -1,13 +1,15 @@
 # Kitsos Island — a playable CV
 
-A frontend-only 3D personal site for **Kitsos Orfanopoulos**, built as a
-Pokémon-style island you walk around. Townspeople tell you about him, seven
-buildings open up and let you walk **inside**, five hidden keys unlock the Old
-Lighthouse — which turns out to be a spaceship — and the Radio Center hands
-your message straight to your own mail client.
+A 3D personal site for **Kitsos Orfanopoulos**, built as a Pokémon-style
+island you walk around. Townspeople tell you about him, seven buildings open
+up and let you walk **inside**, five hidden keys unlock the Old Lighthouse —
+which turns out to be a spaceship — and the Radio Center sends your message
+straight to his inbox.
 
-No backend, no API keys, no runtime network calls beyond the Google Fonts
-stylesheet — it deploys as static files anywhere.
+It is static files plus one small Cloudflare Worker. The island makes no
+runtime network calls to anyone else (even its fonts are served from its own
+origin), and the only thing that ever reaches the Worker is a message from the
+Radio Center.
 
 ## Stack
 
@@ -31,7 +33,30 @@ npm run lint
 npm test         # the whole suite, once
 npm run test:watch     # re-runs what a change touches
 npm run test:coverage  # text summary, plus coverage/ for the full report
+npm run worker:dev     # the built island and the Worker together, on :8787
 ```
+
+`npm run dev` has no Worker behind it, so the Radio Center's Transmit fails
+there and falls back to the mail client. To try the real thing locally, copy
+`.dev.vars.example` to `.dev.vars` and run `npm run worker:dev`. It uses
+Turnstile's always-pass test keys, and Wrangler writes the mail it would have
+sent under `.wrangler/tmp/email/` instead of sending it.
+
+### Quality gates
+
+`npm install` wires up the git hooks (via husky), so every clone checks the
+same things before anything leaves it:
+
+| Hook         | Runs                                                                                                                           |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `pre-commit` | Prettier and oxlint on the staged files only (lint-staged), and a warning if the CV data changed but the PDF was not reprinted |
+| `commit-msg` | commitlint: [Conventional Commits](https://www.conventionalcommits.org), `type(scope): subject`                                |
+| `pre-push`   | `npm run typecheck` and the whole test suite                                                                                   |
+
+GitHub Actions runs the same gates again on every push to `main` and
+`develop` and on every pull request — lint with warnings denied, formatting,
+types, tests with coverage, the build — and checks every commit message in a
+pull request. Dependabot opens weekly dependency updates against `develop`.
 
 ### The PDF CV
 
@@ -46,6 +71,59 @@ npm run cv:pdf   # needs Edge or Chrome installed; CV_BROWSER=<path> for others
 
 A square portrait at `public/cv/photo.jpg` goes into the header; without one,
 the header simply goes without a photo.
+
+### The link preview
+
+A link to the island unfurls (LinkedIn, Slack, email) with
+`public/og-image.png`, 1200 × 630, drawn from the CV data in the island's own
+palette and typefaces. Like the PDF it takes a browser, so it is committed;
+redraw it when the name or the title changes:
+
+```bash
+npm run og:image   # same browser lookup as cv:pdf
+```
+
+The rest of what crawlers read is in `index.html`: the Open Graph tags, a
+`<noscript>` card pointing at the plain CV for anything that does not run the
+island, and a JSON-LD `Person` that the build writes from the CV data.
+`public/robots.txt` and `public/sitemap.xml` list what is worth finding.
+
+## Deploying
+
+[www.kitsorfan.com](https://www.kitsorfan.com) is a Cloudflare Worker with static assets, set out in
+`wrangler.jsonc`. Cloudflare serves `dist/` directly, with the headers in
+`public/_headers`; only `/api/*` runs `worker/index.ts`, which checks a Radio
+Center message (honeypot, timing, Turnstile, a rate limit) and mails it
+through the `send_email` binding. That binding can only deliver to an address
+verified in Email Routing, which is what keeps it free and what stops it ever
+mailing anyone else. It is a Worker rather than Pages because Pages Functions
+cannot be given a `send_email` binding.
+
+One-time setup, in the Cloudflare dashboard:
+
+1. **Domain.** Register `kitsorfan.com` with Cloudflare Registrar, so its DNS
+   is on Cloudflare.
+2. **Email Routing.** Turn it on for the domain, then add and verify
+   `kitsorfan@protonmail.com` as a destination address. The Worker sends as
+   `radio@kitsorfan.com`, a name on the domain that needs no mailbox.
+3. **Turnstile.** Add a widget for `kitsorfan.com` and `www.kitsorfan.com`
+   (managed mode). Put its **site key** in `.env.production` as
+   `VITE_TURNSTILE_SITE_KEY=...` and commit it (it is public by design), and
+   give the Worker the **secret** with
+   `npx wrangler secret put TURNSTILE_SECRET`. Until a site key is built in,
+   the desk goes on handing messages to the mail client.
+4. **Workers Builds.** Workers & Pages → Create → import this repository.
+   Build command `npm run build`, deploy command `npx wrangler deploy`,
+   production branch `main`, build variables `NODE_VERSION=24` and `HUSKY=0`.
+   Every merge to `main` then deploys, and other branches get preview URLs.
+5. **Bare domain.** A Redirect Rule sending `kitsorfan.com/*` to
+   `https://www.kitsorfan.com/${1}` (301), since www is the address the CV
+   prints.
+
+The custom domains in `wrangler.jsonc` only deploy once the zone exists. For a
+first deploy before that, comment out `routes` and use the `*.workers.dev`
+address. Once the domain has served cleanly over HTTPS for a couple of weeks,
+raise the HSTS `max-age` in `public/_headers`, as the comment there says.
 
 ## Controls
 
@@ -126,6 +204,7 @@ src/
     state/        zustand: area, dialogue, journal, keys, missions, saves
     i18n/         the translator, and the Greek dictionary it fetches
   test/           shared fixtures, and the setup every test file runs first
+worker/           the Cloudflare Worker behind the Radio Center's transmitter
 config/           vite, vitest, oxlint, prettier and the project tsconfigs
 ```
 
@@ -140,7 +219,8 @@ Some notes on how it hangs together:
 
 - **Nothing is fetched.** Terrain, water, characters, buildings, furniture and
   props are all procedural geometry; signage text is drawn to a canvas at runtime
-  (`shared/engine/TextSign.tsx`). The only external request is the font stylesheet.
+  (`shared/engine/TextSign.tsx`). The fonts are self-hosted (`@fontsource`), so
+  nothing is requested from anywhere else.
 - **The music is composed in code**, not shipped as a file — a I–V–vi–IV loop in
   D major with a pad, bass, arpeggio, melody and light percussion, scheduled a
   bar and a half ahead of the audio clock. Original by construction, so there is

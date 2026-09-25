@@ -106,17 +106,94 @@ export function formatSerial(serial: number, signature: number): string {
 }
 
 /**
+ * Splits a printed reference into its two numbers, without checking them.
+ * Null if it is not the shape of one of ours.
+ */
+export function parseReference(
+  text: string,
+): { serial: number; signature: number } | null {
+  const match = /^KI-([0-9A-Z]{1,6})-([0-9A-Z]{1,6})$/.exec(
+    text.trim().toUpperCase(),
+  )
+  if (!match) return null
+  return { serial: parseInt(match[1], 36), signature: parseInt(match[2], 36) }
+}
+
+/**
  * Reads a printed reference back. Null if it is not one of ours — a wrong
  * shape, a bad character, or a signature that does not check out.
+ *
+ * This is the 1.1 check, which signs the serial alone. Certificates from
+ * then on sign the name with it; see `checkReference`.
  */
 export function readSerial(
   text: string,
 ): { serial: number; signature: number } | null {
-  const match = /^KI-([0-9A-Z]+)-([0-9A-Z]+)$/.exec(text.trim().toUpperCase())
-  if (!match) return null
-  const serial = parseInt(match[1], 36)
-  const signature = parseInt(match[2], 36)
-  if (!Number.isFinite(serial) || !Number.isFinite(signature)) return null
-  if (!verify(serial, signature)) return null
-  return { serial, signature }
+  const parsed = parseReference(text)
+  if (!parsed || !verify(parsed.serial, parsed.signature)) return null
+  return parsed
+}
+
+/**
+ * The name, reduced to what the signature covers.
+ *
+ * Spacing and case are forgiven, because the name comes back in through a
+ * link somebody may have retyped; the letters themselves are not. NFC first,
+ * so an accented letter typed as one character and as two is the same name.
+ */
+export function nameKey(name: string): number {
+  const text = name.normalize('NFC').replace(/\s+/g, ' ').trim().toLowerCase()
+  /* FNV-1a, 32 bits, then folded into the modulus. Not a secure hash, and
+     it does not need to be: the modulus beside it is not a secure key. */
+  let hash = 0x811c9dc5
+  for (const unit of new TextEncoder().encode(text)) {
+    hash ^= unit
+    hash = Math.imul(hash, 0x01000193) >>> 0
+  }
+  return hash % MODULUS
+}
+
+/**
+ * Signs a serial and a name together.
+ *
+ * The number signed is the serial shifted by the name's key, so the printed
+ * reference only checks out against the name it was made for: change a
+ * letter of the name in the link and the arithmetic no longer closes.
+ */
+export const signFor = (serial: number, name: string) =>
+  sign((serial + nameKey(name)) % MODULUS)
+
+/**
+ * What the verifier makes of a reference and a name.
+ *
+ * - `valid`: signed here, for exactly this name.
+ * - `unbound`: signed here, but by the 1.1 scheme, which did not sign the
+ *   name — so the reference is genuine and the name is only as good as the
+ *   link it came in.
+ * - `mismatch`: a reference of the right shape that does not check out
+ *   against this name — the wrong name, or a mistyped reference.
+ * - `invalid`: not one of ours at all.
+ */
+export type ReferenceCheck = 'valid' | 'unbound' | 'mismatch' | 'invalid'
+
+export function checkReference(text: string, name: string): ReferenceCheck {
+  const parsed = parseReference(text)
+  if (!parsed) return 'invalid'
+  const { serial, signature } = parsed
+  if (serial >= MODULUS || signature >= MODULUS) return 'invalid'
+  const recovered = recover(signature)
+  if (name.trim() && recovered === (serial + nameKey(name)) % MODULUS) {
+    return 'valid'
+  }
+  if (recovered === serial) return 'unbound'
+  return name.trim() ? 'mismatch' : 'invalid'
+}
+
+/** Where a certificate is checked. */
+export const VERIFY_ORIGIN = 'https://www.kitsorfan.com'
+
+/** The link printed on a certificate: its reference, and the name on it. */
+export function verifyUrl(reference: string, name: string): string {
+  const clean = name.normalize('NFC').replace(/\s+/g, ' ').trim()
+  return `${VERIFY_ORIGIN}/verify/${reference}?name=${encodeURIComponent(clean)}`
 }

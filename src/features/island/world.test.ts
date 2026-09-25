@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { BUILDINGS, ISLAND_WALK_RADIUS, NPCS } from './world'
 import { FEAST_AREA, placed } from '../party/feast'
+import { PARTY_BUTTON } from '../party/partyData'
+import { BOARD } from '../arcade/minigames'
 
 /**
  * The island's people, held to the handful of rules that the world cannot
@@ -68,6 +70,48 @@ describe('the people who walk the island', () => {
           )
         }
       }
+    }
+  })
+
+  /*
+   * Nothing stops a walker at runtime: a route is walked in straight lines,
+   * and only somebody bolting from a water bomb is pushed out of things. So
+   * a leg drawn across the plaza's two fixtures walks straight through the
+   * middle of them, which is what the mayor and Thanasis both used to do.
+   *
+   * Every leg is checked, the one from the last waypoint back to the first
+   * included, a step at a time, and has to keep a body's width clear.
+   */
+  it('walks every leg clear of the games board and the party button', () => {
+    const BODY = 0.5
+    const board = (x: number, z: number) =>
+      Math.hypot(
+        Math.max(0, Math.abs(x - BOARD.position[0]) - BOARD.half[0]),
+        Math.max(0, Math.abs(z - BOARD.position[1]) - BOARD.half[1]),
+      )
+    const button = (x: number, z: number) =>
+      Math.hypot(x - PARTY_BUTTON.position[0], z - PARTY_BUTTON.position[1]) -
+      PARTY_BUTTON.half[0]
+
+    for (const npc of WALKERS) {
+      const route = npc.route ?? []
+      route.forEach((from, i) => {
+        const to = route[(i + 1) % route.length]
+        const steps = Math.ceil(
+          Math.hypot(to[0] - from[0], to[1] - from[1]) / 0.05,
+        )
+        for (let s = 0; s <= steps; s++) {
+          const x = from[0] + ((to[0] - from[0]) * s) / steps
+          const z = from[1] + ((to[1] - from[1]) * s) / steps
+          const leg = `${npc.name}, [${from}] to [${to}]`
+          expect(board(x, z), `${leg}, walks into the board`).toBeGreaterThan(
+            BODY,
+          )
+          expect(button(x, z), `${leg}, walks into the button`).toBeGreaterThan(
+            BODY,
+          )
+        }
+      })
     }
   })
 

@@ -32,6 +32,8 @@ export interface CharacterMotion {
   fright?: number
   /** 0 to 1: one arm straight out — stop where you are. */
   halt?: number
+  /** 0 to 1: the map out of his pocket and open, held up to show you. */
+  showing?: number
   /** 0 to 1: both arms up over the head, cheering. */
   cheer?: number
   /** 0 to 1: chest-deep in the sea and pulling, rather than standing. */
@@ -106,6 +108,12 @@ interface CharacterProps {
   buttonhole?: string
   /** A bunch of flowers, in whichever hand is free. */
   bouquet?: boolean
+  /**
+   * Carries the island map, put away until `motion.showing` brings it out:
+   * then it comes up open in the right hand, in front of the chest rather
+   * than down at the side where flowers go.
+   */
+  map?: boolean
   /** A crash helmet in this colour, over the hair. Nobody rides without one. */
   helmet?: string
   /** Match kit in a team colour: a bib over the shirt and a mask over the eyes. */
@@ -202,6 +210,7 @@ export function Character({
   bowTie,
   buttonhole,
   bouquet = false,
+  map = false,
   helmet,
   spacesuit,
   starShirt,
@@ -248,8 +257,11 @@ export function Character({
   const adrift = useRef(0)
   /** The wrist that whatever he is carrying hangs in, and a torch's flame. */
   const gripRef = useRef<Group>(null)
-  /** The other wrist, for the flowers. */
-  const bouquetRef = useRef<Group>(null)
+  /** The other wrist, for the flowers or the map. */
+  const carryRef = useRef<Group>(null)
+  /** Eased showing, so the map comes out and opens rather than appearing. */
+  const unfold = useRef(0)
+  const mapRef = useRef<Group>(null)
 
   useFrame((state, delta) => {
     const m = motion?.current ?? IDLE
@@ -278,6 +290,8 @@ export function Character({
     natter.current += ((m.chat ?? 0) - natter.current) * Math.min(1, delta * 4)
     alarm.current += ((m.fright ?? 0) - alarm.current) * Math.min(1, delta * 9)
     bar.current += ((m.halt ?? 0) - bar.current) * Math.min(1, delta * 10)
+    unfold.current +=
+      ((map ? (m.showing ?? 0) : 0) - unfold.current) * Math.min(1, delta * 5)
     ovation.current +=
       ((m.cheer ?? 0) - ovation.current) * Math.min(1, delta * 5)
     paddle.current +=
@@ -642,6 +656,27 @@ export function Character({
       if (head.current) head.current.rotation.x -= 0.08 * mix
     }
 
+    /* --------------------------------- the map -------------------------- */
+
+    // Out of the pocket and open, held up for whoever has walked over, and
+    // folded away again as they leave. Nothing of it shows in between: it
+    // opens out from the one folded panel in his hand to all three.
+    const shown = unfold.current
+    if (shown > 0.01 && armR.current) {
+      armR.current.rotation.x =
+        armR.current.rotation.x * (1 - shown) +
+        (-1 - lean + Math.sin(t * 1.4) * 0.02) * shown
+      // In towards the middle, so the map is in front of him.
+      armR.current.rotation.z =
+        armR.current.rotation.z * (1 - shown) + -0.2 * shown
+    }
+    if (mapRef.current) {
+      mapRef.current.visible = shown > 0.02
+      mapRef.current.scale
+        .set(0.34 + 0.66 * shown, 1, 1)
+        .multiplyScalar(0.55 + 0.45 * shown)
+    }
+
     /* -------------------------------- ovation --------------------------- */
 
     // A room cheering: both arms thrown up over the head, bouncing.
@@ -956,15 +991,16 @@ export function Character({
 
     // Wrists, last of all, so they read whatever the arms finally settled on
     // — including the dance. Cancelling the arm and the lean above it is what
-    // keeps a torch upright, a beam on the road and the flowers pointing up.
+    // keeps a torch upright, a beam on the road, the flowers pointing up and
+    // the map the right way up to read.
     if (gripRef.current && armL.current) {
       gripRef.current.rotation.x =
         -(lean + armL.current.rotation.x) + (hand === 'flashlight' ? 0.12 : 0)
       gripRef.current.rotation.z = -armL.current.rotation.z
     }
-    if (bouquetRef.current && armR.current) {
-      bouquetRef.current.rotation.x = -(lean + armR.current.rotation.x)
-      bouquetRef.current.rotation.z = -armR.current.rotation.z
+    if (carryRef.current && armR.current) {
+      carryRef.current.rotation.x = -(lean + armR.current.rotation.x)
+      carryRef.current.rotation.z = -armR.current.rotation.z
     }
   })
 
@@ -1360,9 +1396,15 @@ export function Character({
                 )}
                 {spacesuit && <SpaceGlove />}
                 {gun && arm.ref === armR && <Marker accent={gunColor} />}
-                {bouquet && !gun && arm.ref === armR && (
-                  <group ref={bouquetRef} position={[0, -0.6, 0]}>
-                    <Bouquet />
+                {(bouquet || map) && !gun && arm.ref === armR && (
+                  <group ref={carryRef} position={[0, -0.6, 0]}>
+                    {bouquet ? (
+                      <Bouquet />
+                    ) : (
+                      <group ref={mapRef} visible={false}>
+                        <IslandMap />
+                      </group>
+                    )}
                   </group>
                 )}
                 {(hand || ring) && arm.ref === armL && (
@@ -2223,6 +2265,82 @@ function RingBand() {
           emissive={RING.stone}
           emissiveIntensity={0.6}
         />
+      </mesh>
+    </group>
+  )
+}
+
+/**
+ * The island map, open in the hand that holds it by its right-hand edge.
+ *
+ * Paper, folded in three, with the island drawn on it: the sea, a sand
+ * shore and a green middle, the cape running off to the lighthouse, and the
+ * road out to it in red. It is held up and open with the drawing facing out,
+ * the way you show somebody where they are: held flat it was a sliver from
+ * any camera not right above him. The cover, blue with a yellow title, is
+ * on the back, towards him.
+ */
+function IslandMap() {
+  const PAPER = '#f1e7cf'
+  const SAND = '#f3dca0'
+  return (
+    <group position={[-0.18, 0.04, 0.02]} rotation={[1, 0, 0]} scale={1.25}>
+      <mesh castShadow>
+        <boxGeometry args={[0.36, 0.008, 0.26]} />
+        <meshStandardMaterial color={PAPER} flatShading roughness={0.9} />
+      </mesh>
+
+      {/* The sea, inside a paper margin */}
+      <mesh position={[0, 0.005, 0]}>
+        <boxGeometry args={[0.33, 0.002, 0.23]} />
+        <meshStandardMaterial color="#7ec8e3" roughness={0.9} />
+      </mesh>
+      {/* The two creases it opens along */}
+      {[-0.06, 0.06].map((x) => (
+        <mesh key={x} position={[x, 0.0065, 0]}>
+          <boxGeometry args={[0.004, 0.001, 0.23]} />
+          <meshStandardMaterial color="#63b0cf" roughness={0.9} />
+        </mesh>
+      ))}
+
+      {/* The island: shore, then grass, both a little wider than deep */}
+      <mesh position={[0.02, 0.0085, 0.01]} scale={[1.35, 1, 1]}>
+        <cylinderGeometry args={[0.078, 0.078, 0.002, 14]} />
+        <meshStandardMaterial color={SAND} roughness={0.9} />
+      </mesh>
+      <mesh position={[0.025, 0.011, 0.015]} scale={[1.3, 1, 1]}>
+        <cylinderGeometry args={[0.06, 0.06, 0.002, 14]} />
+        <meshStandardMaterial color="#7cc36a" roughness={0.9} />
+      </mesh>
+      {/* The cape, and the lighthouse at the end of it */}
+      <mesh position={[-0.085, 0.0085, -0.06]} rotation={[0, 0.62, 0]}>
+        <boxGeometry args={[0.07, 0.002, 0.024]} />
+        <meshStandardMaterial color={SAND} roughness={0.9} />
+      </mesh>
+      <mesh position={[-0.11, 0.014, -0.078]}>
+        <boxGeometry args={[0.02, 0.012, 0.02]} />
+        <meshStandardMaterial color="#e0524a" roughness={0.7} />
+      </mesh>
+      {/* The road out to it */}
+      {[
+        [0.01, 0.005],
+        [-0.025, -0.018],
+        [-0.058, -0.04],
+      ].map(([x, z]) => (
+        <mesh key={x} position={[x, 0.0135, z]} rotation={[0, 0.58, 0]}>
+          <boxGeometry args={[0.024, 0.002, 0.007]} />
+          <meshStandardMaterial color="#e0524a" roughness={0.7} />
+        </mesh>
+      ))}
+
+      {/* The cover, on the underside of the panel in his hand */}
+      <mesh position={[0.12, -0.005, 0]}>
+        <boxGeometry args={[0.11, 0.002, 0.24]} />
+        <meshStandardMaterial color="#3f7bd6" roughness={0.85} />
+      </mesh>
+      <mesh position={[0.12, -0.0065, -0.07]}>
+        <boxGeometry args={[0.08, 0.001, 0.035]} />
+        <meshStandardMaterial color="#ffd166" roughness={0.7} />
       </mesh>
     </group>
   )

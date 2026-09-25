@@ -1,0 +1,2 @@
+npx lint-staged --config config/lint-staged.config.js
+node config/check-cv-pdf.ts

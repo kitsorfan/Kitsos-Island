@@ -1,0 +1,3 @@
+# Git hooks are shell scripts: a CRLF checkout on Windows would hand sh a
+#  at the end of every line. Keep them LF everywhere.
+.husky/* text eol=lf

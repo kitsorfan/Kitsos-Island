@@ -3,13 +3,17 @@ import {
   MODULUS,
   PRIVATE_KEY,
   PUBLIC_KEY,
+  checkReference,
   formatSerial,
+  nameKey,
   mintSerial,
   powMod,
   readSerial,
   recover,
   sign,
+  signFor,
   verify,
+  verifyUrl,
 } from './certId'
 
 /** A deterministic 0→1 source, so a test never depends on the draw. */
@@ -134,5 +138,75 @@ describe('the reference printed on the certificate', () => {
 
   it('looks like a reference somebody could read out', () => {
     expect(printed).toMatch(/^KI-[0-9A-Z]+-[0-9A-Z]+$/)
+  })
+})
+
+describe('the name, signed in with the serial', () => {
+  const serial = mintSerial(seeded(11))
+  const printed = formatSerial(serial, signFor(serial, 'Ada Lovelace'))
+
+  it('checks out against the name it was made for', () => {
+    expect(checkReference(printed, 'Ada Lovelace')).toBe('valid')
+  })
+
+  it('forgives spacing and case, which a retyped link will not keep', () => {
+    expect(checkReference(printed, '  ada   LOVELACE ')).toBe('valid')
+    expect(checkReference(printed.toLowerCase(), 'Ada Lovelace')).toBe('valid')
+  })
+
+  it('does not check out against anybody else', () => {
+    /* The whole point of signing the name: the link cannot be edited to
+       somebody else's and still verify. */
+    expect(checkReference(printed, 'Ada Lovelac')).toBe('mismatch')
+    expect(checkReference(printed, 'Charles Babbage')).toBe('mismatch')
+  })
+
+  it('treats one accented letter and its two-part spelling as the same', () => {
+    const composed = 'Χρήστος'
+    const decomposed = composed.normalize('NFD')
+    expect(decomposed).not.toBe(composed)
+    expect(nameKey(decomposed)).toBe(nameKey(composed))
+    const greek = formatSerial(serial, signFor(serial, composed))
+    expect(checkReference(greek, decomposed)).toBe('valid')
+  })
+
+  it('asks for the name rather than passing a reference without one', () => {
+    expect(checkReference(printed, '')).toBe('invalid')
+  })
+
+  it('still honours a 1.1 certificate, which signed the serial alone', () => {
+    const old = formatSerial(serial, sign(serial))
+    expect(checkReference(old, 'Anyone at all')).toBe('unbound')
+    expect(checkReference(old, '')).toBe('unbound')
+  })
+
+  it('refuses a reference that is not ours', () => {
+    expect(checkReference('hello', 'Ada Lovelace')).toBe('invalid')
+    expect(checkReference('KI-ZZZZZZ-ZZZZZZ', 'Ada Lovelace')).toBe('invalid')
+  })
+
+  it('round-trips for every name and serial it might be handed', () => {
+    const draw = seeded(3)
+    for (let i = 0; i < 500; i++) {
+      const s = mintSerial(draw)
+      const name = `Visitor ${i} ${String.fromCharCode(0x391 + (i % 24))}`
+      expect(checkReference(formatSerial(s, signFor(s, name)), name)).toBe(
+        'valid',
+      )
+    }
+  })
+})
+
+describe('the verify link', () => {
+  it('carries the reference in the path and the name in the query', () => {
+    expect(verifyUrl('KI-00001-00002', ' Ada  Lovelace ')).toBe(
+      'https://www.kitsorfan.com/verify/KI-00001-00002?name=Ada%20Lovelace',
+    )
+  })
+
+  it('escapes a name that would otherwise break the link', () => {
+    expect(verifyUrl('KI-1-2', 'A&B?=Ω')).toBe(
+      'https://www.kitsorfan.com/verify/KI-1-2?name=A%26B%3F%3D%CE%A9',
+    )
   })
 })

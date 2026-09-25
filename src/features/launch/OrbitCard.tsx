@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   CERT_HEIGHT,
   CERT_TEXT,
@@ -11,7 +11,7 @@ import {
 } from './certificate'
 import { NAME_LIMIT } from './certificate'
 import { downloadCv } from '../cv/downloadCv'
-import { mintSerial, sign } from './certId'
+import { formatSerial, mintSerial, signFor, verifyUrl } from './certId'
 import { TROPHIES, trophyCount } from './trophies'
 import * as sfx from '../../shared/engine/audio'
 import { useGame } from '../../shared/state/store'
@@ -38,17 +38,20 @@ export function OrbitCard() {
    * It has to be stable: the preview he is looking at and the file he takes
    * away carry the same reference, and a number redrawn each frame would
    * make the certificate a different document every time he typed a letter
-   * of his name.
+   * of his name. The signature half is another matter - it signs the name
+   * too, so it moves as the name does, and settles when he stops typing.
    */
-  const [stamp] = useState(() => {
-    const serial = mintSerial()
-    return { serial, signature: sign(serial) }
-  })
+  const [serial] = useState(() => mintSerial())
   const [name, setName] = useState('')
   const [saved, setSaved] = useState(false)
   const canvas = useRef<HTMLCanvasElement>(null)
 
   const ready = nameReady(name)
+  const stamp = useMemo(
+    () => ({ serial, signature: signFor(serial, cleanName(name)) }),
+    [serial, name],
+  )
+  const reference = formatSerial(stamp.serial, stamp.signature)
 
   /*
    * Whether the card is on screen at all, which the early return below acts
@@ -85,7 +88,7 @@ export function OrbitCard() {
   const take = () => {
     if (!ready) return
     sfx.jingle()
-    downloadCertificate(name, { trophies, serial: stamp })
+    void downloadCertificate(name, { trophies, serial: stamp })
     setSaved(true)
   }
 
@@ -152,6 +155,25 @@ export function OrbitCard() {
             {t('And the full CV')}
           </button>
         </div>
+
+        {ready && (
+          /* The two fields LinkedIn asks for when a certification is added,
+             so they can be copied straight across. */
+          <dl className="orbit__credential">
+            <dt>{t('Credential ID')}</dt>
+            <dd>{reference}</dd>
+            <dt>{t('Credential URL')}</dt>
+            <dd>
+              <a
+                href={verifyUrl(reference, cleanName(name))}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {verifyUrl(reference, cleanName(name))}
+              </a>
+            </dd>
+          </dl>
+        )}
 
         <p className="orbit__stickers">
           {trophyCount(trophies) === TROPHIES.length

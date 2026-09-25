@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "../node_modules/.tmp/tsconfig.worker.tsbuildinfo",
+    "target": "es2023",
+    /* The Workers runtime is a service worker, not a page: fetch, Request
+       and Response, and no document. */
+    "lib": ["ES2023", "WebWorker"],
+    "types": [],
+    "skipLibCheck": true,
+
+    /* Bundler mode: wrangler bundles the Worker with esbuild. */
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  /* The shared rules in transmission.ts are checked here a second time, under
+     the Worker's lib, so neither side can come to depend on something only
+     the other one has. */
+  "include": ["../worker", "../src/features/radio/transmission.ts"],
+  "exclude": ["../worker/**/*.test.ts"]
+}

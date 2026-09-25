@@ -1,0 +1,57 @@
+// How kitsorfan.com is served: a Cloudflare Worker with static assets.
+//
+// A Worker rather than Pages because the Radio Center mails through the
+// send_email binding, and Pages Functions cannot be given one. Everything is
+// still free: static files are served without the Worker running at all, and
+// only /api/* ever reaches worker/index.ts.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kitsos-island",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-01",
+
+  // What `npm run build` writes. _headers in there applies to every file
+  // served from it, and not to the Worker's own answers (it sets its own).
+  "assets": {
+    "directory": "./dist",
+    "run_worker_first": ["/api/*"],
+  },
+
+  // The island lives at both. www is the canonical one (the CV prints it);
+  // the bare domain is sent there by a Redirect Rule in the dashboard.
+  "routes": [
+    { "pattern": "www.kitsorfan.com", "custom_domain": true },
+    { "pattern": "kitsorfan.com", "custom_domain": true },
+  ],
+  // The *.workers.dev address and per-version preview links, for trying a
+  // build before it is on the real domain.
+  "workers_dev": true,
+  "preview_urls": true,
+
+  "vars": {
+    "RADIO_TO": "kitsorfan@protonmail.com",
+    "RADIO_FROM": "radio@kitsorfan.com",
+  },
+
+  // The only inbox this binding can reach, and the only address it may send
+  // as. Even a bug in the Worker cannot mail anyone else.
+  "send_email": [
+    {
+      "name": "RADIO",
+      "destination_address": "kitsorfan@protonmail.com",
+      "allowed_sender_addresses": ["radio@kitsorfan.com"],
+    },
+  ],
+
+  // Five messages a minute from one address is already more than a person
+  // writes. Turnstile is the real gate; this caps what gets past it.
+  "ratelimits": [
+    {
+      "name": "RADIO_LIMIT",
+      "namespace_id": "1001",
+      "simple": { "limit": 5, "period": 60 },
+    },
+  ],
+
+  "observability": { "enabled": true },
+}

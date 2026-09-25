@@ -1,0 +1,26 @@
+# Dependency updates as pull requests, which CI then vets like any other.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: weekly
+    # three.js and its React bindings move together; one PR, not three.
+    groups:
+      three:
+        patterns: ['three', '@types/three', '@react-three/*']
+      tooling:
+        dependency-type: development
+        exclude-patterns: ['three', '@types/three', '@react-three/*']
+    commit-message:
+      prefix: chore
+      include: scope
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci

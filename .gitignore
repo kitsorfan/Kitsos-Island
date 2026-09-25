@@ -42,3 +42,8 @@ public/letters/*.jpeg
 public/letters/*.png
 public/letters/*.webp
 public/letters/*.pdf
+
+# Wrangler's local state, and the Worker's local secrets. .dev.vars.example
+# is the committed template; .dev.vars is the copy with real values in it.
+.wrangler
+.dev.vars

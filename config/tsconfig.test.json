@@ -35,5 +35,10 @@
      against one is handed to the other: the two agree at run time and their
      `Plugin` types do not. Vitest loads the file through esbuild, the same
      way vite.config.ts is loaded, so it is checked by neither. */
-  "include": ["../src/**/*.test.ts", "../src/**/*.test.tsx", "../src/test/**/*"]
+  "include": [
+    "../src/**/*.test.ts",
+    "../src/**/*.test.tsx",
+    "../src/test/**/*",
+    "../worker/**/*.test.ts"
+  ]
 }

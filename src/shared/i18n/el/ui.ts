@@ -365,6 +365,26 @@ export const UI: Record<string, string> = {
   '📡 Transmit': '📡 Εκπομπή',
   'Hi Kitsos, I found you on your island…':
     'Γεια σου Κίτσο, σε βρήκα στο νησί σου…',
+  'Messages from this desk come straight to my inbox. Leave an address and I will write back.':
+    'Τα μηνύματα από αυτό το γραφείο έρχονται κατευθείαν στα εισερχόμενά μου. Άφησε μια διεύθυνση και θα σου απαντήσω.',
+  '📡 Transmitting…': '📡 Εκπέμπεται…',
+  'Signal received. I will answer at the address you left.':
+    'Το σήμα ελήφθη. Θα απαντήσω στη διεύθυνση που άφησες.',
+  'That email address does not look right. I need it to reply.':
+    'Αυτή η διεύθυνση email δεν φαίνεται σωστή. Τη χρειάζομαι για να απαντήσω.',
+  'That name is too long for the desk.':
+    'Το όνομα είναι πολύ μεγάλο για το γραφείο.',
+  'The message is empty, or longer than the desk can carry.':
+    'Το μήνυμα είναι άδειο ή μεγαλύτερο απ’ όσο χωράει το γραφείο.',
+  'Pick one of the subjects on the list.':
+    'Διάλεξε ένα από τα θέματα της λίστας.',
+  'The check that you are a person did not pass. Try once more.':
+    'Ο έλεγχος ότι είσαι άνθρωπος δεν πέρασε. Δοκίμασε ξανά.',
+  'Too many messages in a minute. Wait a little and try again.':
+    'Πάρα πολλά μηνύματα σε ένα λεπτό. Περίμενε λίγο και δοκίμασε ξανά.',
+  'The transmitter is down. Your message is still here: send it from your own mail client instead.':
+    'Ο πομπός είναι εκτός λειτουργίας. Το μήνυμά σου είναι ακόμα εδώ: στείλ’ το από το δικό σου πρόγραμμα αλληλογραφίας.',
+  'Open it in my mail client': 'Άνοιξέ το στο πρόγραμμα αλληλογραφίας μου',
 
   /* --------------------------- Buttons and titles -------------------- */
 

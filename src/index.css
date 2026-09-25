@@ -1268,6 +1268,22 @@ canvas {
   font-size: 0.94rem;
 }
 
+/* A failure reads as one: solid rather than dashed, and warmer. */
+.radio__status--failed {
+  border-style: solid;
+  border-color: #d9826b;
+  background: #fff1ec;
+}
+
+/*
+ * Turnstile's own box, when it shows one. It draws itself; this only gives it
+ * room. Empty until then, so it takes no space for the visitors who never see
+ * it.
+ */
+.radio__turnstile:not(:empty) {
+  margin: 0.2rem 0 0.8rem;
+}
+
 /* ------------------------------ toy shelf ----------------------------- */
 
 /*
@@ -5727,6 +5743,30 @@ canvas {
 .orbit__take:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.orbit__credential {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.2rem 0.8rem;
+  margin: 0;
+  max-width: 100%;
+  font-size: 0.85rem;
+  text-align: left;
+  color: #94a2b8;
+}
+
+.orbit__credential dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: 'Courier New', Courier, monospace;
+  color: #dbe5f3;
+  user-select: all;
+}
+
+.orbit__credential a {
+  color: inherit;
 }
 
 .orbit__signoff {

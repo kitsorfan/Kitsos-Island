@@ -1,0 +1,6 @@
+# Everything on the island is meant to be found, except the transmitter,
+# which only ever answers a POST from the Radio Center.
+User-agent: *
+Disallow: /api/
+
+Sitemap: https://www.kitsorfan.com/sitemap.xml

@@ -358,10 +358,26 @@ export interface ResumeOptions {
   photo?: string
   /** Leave out the on-screen toolbar, as the PDF render does. */
   bare?: boolean
+  /**
+   * Where Inter comes from. The site serves it itself at RESUME_FONT; the
+   * PDF render, which loads the page from a temp file, inlines it instead.
+   */
+  font?: string
 }
 
+/**
+ * Inter, latin only (nothing on the CV is outside it), in the one variable
+ * file that carries every weight. The build writes it here from
+ * @fontsource-variable/inter.
+ */
+export const RESUME_FONT = '/fonts/inter-latin-wght-normal.woff2'
+
 /** The two-sheet CV as one standalone HTML document. */
-export function buildResumeHtml({ photo, bare }: ResumeOptions = {}): string {
+export function buildResumeHtml({
+  photo,
+  bare,
+  font = RESUME_FONT,
+}: ResumeOptions = {}): string {
   const r = RESUME
 
   const portrait = photo
@@ -472,9 +488,8 @@ ${section('Interests', `<p class="tags">${r.hobbies.map(esc).join(' · ')}</p>`)
 <title>${esc(r.name)} · CV</title>
 <meta name="description" content="${esc(`${r.name} · ${r.title}, ${r.profile[0].value}.`)}">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=block">
-<style>${STYLE}</style>
+<style>@font-face { font-family: "Inter"; font-style: normal; font-weight: 100 900; font-display: block; src: url("${font}") format("woff2"); }
+${STYLE}</style>
 </head>
 <body>
 ${toolbar}

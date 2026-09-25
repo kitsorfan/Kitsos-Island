@@ -1,15 +1,18 @@
 import { PROFILE } from '../cv/profile'
 import { TROPHIES } from './trophies'
 import type { Trophy } from './trophies'
-import { formatSerial } from './certId'
+import { formatSerial, verifyUrl } from './certId'
+import { buildPdf } from './certPdf'
 
 /**
  * The prize: a certificate, in the visitor's own name, saying they walked the
  * whole island and left it by rocket.
  *
- * It is drawn to a canvas and handed over as a PNG rather than written as
- * text, because this is the one thing on the island somebody might actually
- * print or put in a message, and a wall of Markdown is not that. The whole
+ * It is drawn to a canvas and handed over as a one-page PDF rather than
+ * written as text, because this is the one thing on the island somebody
+ * might actually print or put on LinkedIn, and a wall of Markdown is not
+ * that. The PDF is the picture plus a link: the reference along the bottom
+ * opens the verifier, with the name it was made for. The whole
  * drawing is procedural, like everything else here: no image is fetched, no
  * font beyond what the page already loads, and the bundle does not grow.
  */
@@ -48,7 +51,7 @@ export function certFilename(name: string): string {
          stripped, so a Greek or German name still reads as a name. */
       .replace(/[^\p{L}\p{N}]+/gu, '-')
       .replace(/^-+|-+$/g, '') || 'visitor'
-  return `kitsos-island-certificate-${slug}.png`
+  return `kitsos-island-certificate-${slug}.pdf`
 }
 
 /** The date on the certificate, written out long. */
@@ -227,8 +230,22 @@ export function drawCertificate(
     )
     ctx.fillStyle = '#b8ae9c'
     ctx.font = '15px Georgia, "Times New Roman", serif'
-    ctx.fillText('Certificate reference · verifiable', mid, H - 74)
+    ctx.fillText(CERT_VERIFY_LINE, mid, H - 74)
   }
+}
+
+/** What is lettered under the reference: where to check it. */
+export const CERT_VERIFY_LINE = 'Verify at kitsorfan.com/verify'
+
+/**
+ * The two lines along the bottom, as a box: the part of the page the PDF
+ * makes clickable. In the drawing's own pixels, from its top left.
+ */
+export const CERT_LINK_BOX = {
+  x: CERT_WIDTH / 2 - 240,
+  y: CERT_HEIGHT - 118,
+  w: 480,
+  h: 52,
 }
 
 /**
@@ -495,32 +512,76 @@ export function splitLines(
 }
 
 /**
- * Draws the certificate and hands it over as a PNG.
+ * How many pixels the PDF is drawn at, per pixel of the certificate.
+ *
+ * Twice over, so the page prints sharp at A4: at one to one it comes to
+ * under 140 dots to the inch, which shows in the lettering.
+ */
+const PDF_SCALE = 2
+
+/**
+ * Draws the certificate and hands it over as a PDF, with the reference on it
+ * a link to the verifier.
  *
  * Touches the document, so it sits apart from the drawing above the way
  * `downloadCv` sits apart from the CV data.
  */
-export function downloadCertificate(
+export async function downloadCertificate(
   name: string,
   detail: CertificateDetail = {},
-): void {
+): Promise<void> {
   const canvas = document.createElement('canvas')
-  canvas.width = CERT_WIDTH
-  canvas.height = CERT_HEIGHT
+  canvas.width = CERT_WIDTH * PDF_SCALE
+  canvas.height = CERT_HEIGHT * PDF_SCALE
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
+  ctx.scale(PDF_SCALE, PDF_SCALE)
   drawCertificate(ctx, name, certDate(), detail)
 
-  canvas.toBlob((blob) => {
-    if (!blob) return
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = certFilename(name)
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    URL.revokeObjectURL(url)
-  }, 'image/png')
+  const blob = await new Promise<Blob | null>((done) =>
+    canvas.toBlob(done, 'image/jpeg', 0.92),
+  )
+  if (!blob) return
+
+  const clean = cleanName(name)
+  const reference = detail.serial
+    ? formatSerial(detail.serial.serial, detail.serial.signature)
+    : null
+  const pdf = buildPdf(
+    {
+      jpeg: new Uint8Array(await blob.arrayBuffer()),
+      width: canvas.width,
+      height: canvas.height,
+    },
+    reference
+      ? {
+          url: verifyUrl(reference, clean),
+          ...scaleBox(CERT_LINK_BOX, PDF_SCALE),
+        }
+      : null,
+    {
+      title: `${CERT_TEXT.title} — ${clean}`,
+      author: CERT_TEXT.signatory,
+      subject: reference ?? undefined,
+    },
+  )
+
+  const url = URL.createObjectURL(
+    new Blob([pdf as BlobPart], { type: 'application/pdf' }),
+  )
+  const link = document.createElement('a')
+  link.href = url
+  link.download = certFilename(name)
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
 }
+
+const scaleBox = (box: typeof CERT_LINK_BOX, by: number) => ({
+  x: box.x * by,
+  y: box.y * by,
+  w: box.w * by,
+  h: box.h * by,
+})

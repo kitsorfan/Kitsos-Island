@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 import { buildCvHtml } from '../src/features/cv/cvHtml.ts'
+import { personLdScript } from '../src/features/cv/personLd.ts'
 import { RESUME_FONT, buildResumeHtml } from '../src/features/cv/resumeHtml.ts'
 import { readResumeFont } from './resumeFont.ts'
 
@@ -46,6 +47,26 @@ function cvPage(): Plugin {
   }
 }
 
+/**
+ * Puts the JSON-LD Person into the island's <head>, from the CV data.
+ *
+ * A data block, not a script: the browser never runs it, so the CSP's
+ * script-src has nothing to say about it.
+ */
+function personLd(): Plugin {
+  return {
+    name: 'person-ld',
+    transformIndexHtml: () => [
+      {
+        tag: 'script',
+        attrs: { type: 'application/ld+json' },
+        children: personLdScript(),
+        injectTo: 'head',
+      },
+    ],
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   /*
@@ -58,7 +79,7 @@ export default defineConfig({
    * index.html in the wrong place.
    */
   root: fileURLToPath(new URL('..', import.meta.url)),
-  plugins: [react(), cvPage()],
+  plugins: [react(), cvPage(), personLd()],
   build: {
     /**
      * three.js and the r3f helpers on top of it come to well over half the

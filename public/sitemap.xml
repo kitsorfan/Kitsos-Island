@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The pages worth finding. /cv and /resume without the .html: that is where
+  Cloudflare serves them, and it redirects the .html spellings there.
+  Certificates at /verify/... are left out on purpose; each is one visitor's.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://www.kitsorfan.com/</loc></url>
+  <url><loc>https://www.kitsorfan.com/cv</loc></url>
+  <url><loc>https://www.kitsorfan.com/resume</loc></url>
+  <url><loc>https://www.kitsorfan.com/Orfanopoulos-Christos-CV.pdf</loc></url>
+</urlset>

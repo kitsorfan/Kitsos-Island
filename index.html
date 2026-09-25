@@ -38,6 +38,56 @@
     <link rel="canonical" href="https://www.kitsorfan.com/" />
   </head>
   <body>
+    <!--
+      For whatever does not run the island: crawlers that read the HTML and
+      stop, and browsers with scripts off. Both get the plain CV, which says
+      everything the island does. Fixed on top, since the page itself never
+      scrolls.
+    -->
+    <noscript>
+      <div
+        style="
+          position: fixed;
+          inset: 0;
+          z-index: 1;
+          overflow: auto;
+          padding: 2rem 1.25rem;
+          background: #7ec8e3;
+          font-family: 'Trebuchet MS', system-ui, sans-serif;
+          color: #241c2e;
+        "
+      >
+        <div
+          style="
+            max-width: 36rem;
+            margin: 0 auto;
+            padding: 1.5rem 1.75rem;
+            background: #fdf7e9;
+            border: 3px solid #2a2033;
+            border-radius: 14px;
+          "
+        >
+          <h1 style="margin-top: 0">Christos (Kitsos) Orfanopoulos</h1>
+          <p>Senior Software Engineer &amp; Technical Lead, Athens, Greece.</p>
+          <p>
+            Kitsos Island is a 3D CV you walk around, and it needs JavaScript.
+            Everything on it is also here as plain pages:
+          </p>
+          <ul>
+            <li><a href="/cv.html">The full CV</a></li>
+            <li>
+              <a href="/Orfanopoulos-Christos-CV.pdf"
+                >The two-page CV, as a PDF</a
+              >
+            </li>
+            <li>
+              <a href="https://linkedin.com/in/kitsorfan/">LinkedIn</a> ·
+              kitsorfan@protonmail.com
+            </li>
+          </ul>
+        </div>
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

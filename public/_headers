@@ -14,7 +14,8 @@
   # own message goes to /api/transmit, which is 'self'.
   #
   # 'unsafe-inline' is here for styles only, never for scripts: the no-WebGL
-  # card writes its own <style> element and the generated CV page inlines one.
+  # card writes its own <style> element, the generated CV pages inline one,
+  # and the <noscript> card in index.html is styled in place.
   # blob: covers the Markdown CV the download hands over.
   Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
 

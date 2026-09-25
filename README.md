@@ -83,6 +83,11 @@ redraw it when the name or the title changes:
 npm run og:image   # same browser lookup as cv:pdf
 ```
 
+The rest of what crawlers read is in `index.html`: the Open Graph tags, a
+`<noscript>` card pointing at the plain CV for anything that does not run the
+island, and a JSON-LD `Person` that the build writes from the CV data.
+`public/robots.txt` and `public/sitemap.xml` list what is worth finding.
+
 ## Deploying
 
 [www.kitsorfan.com](https://www.kitsorfan.com) is a Cloudflare Worker with static assets, set out in

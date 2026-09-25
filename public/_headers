@@ -1,4 +1,4 @@
-# Security headers for Cloudflare Pages.
+# Response headers for the static files, served by Cloudflare Workers.
 #
 # Cloudflare serves everything in public/ as-is, so this file ships to the
 # edge with the island and is applied to every response. Nothing here is load
@@ -35,3 +35,10 @@
 
   # The island asks for none of these, so the answer is settled here.
   Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=(), interest-cohort=()
+
+/assets/*
+  # Everything Vite builds lands here with a hash of its contents in the
+  # name, so a file at a given address never changes: a new build is a new
+  # address. That makes it safe to keep for a year without asking again,
+  # which spares a returning visitor re-checking the engine on every visit.
+  Cache-Control: public, max-age=31536000, immutable

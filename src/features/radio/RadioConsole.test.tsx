@@ -63,6 +63,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllEnvs()
   vi.unstubAllGlobals()
+  vi.restoreAllMocks()
   delete window.turnstile
 })
 
@@ -146,6 +147,37 @@ describe('with the transmitter on', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'The transmitter is down',
     )
+  })
+
+  it('gives up on a transmitter that never answers', async () => {
+    // Stand in for the clock running out: the desk's own timeout signal is
+    // one the test aborts, and the Worker is a fetch that never settles
+    // until it is.
+    const clock = new AbortController()
+    const timeout = vi
+      .spyOn(AbortSignal, 'timeout')
+      .mockReturnValue(clock.signal)
+    fetchMock.mockImplementation(
+      (_url, init: RequestInit) =>
+        new Promise((_resolve, reject) =>
+          init.signal?.addEventListener('abort', () =>
+            reject(init.signal?.reason),
+          ),
+        ),
+    )
+    await openDesk('site-key')
+    const user = await fillIn()
+    await waitFor(() => expect(transmit()).toBeEnabled())
+    await user.click(transmit())
+
+    expect(transmit()).toHaveTextContent('Transmitting…')
+    expect(timeout).toHaveBeenCalledWith(15_000)
+    clock.abort(new DOMException('The operation timed out.', 'TimeoutError'))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'The transmitter is down',
+    )
+    expect(transmit()).not.toHaveTextContent('Transmitting…')
   })
 
   it('says when to wait, rather than offering a workaround', async () => {

@@ -35,6 +35,14 @@ type Status =
 const SITE_KEY: string | undefined =
   import.meta.env.VITE_TURNSTILE_SITE_KEY || undefined
 
+/**
+ * How long the desk waits on the transmitter before giving up on it. Turnstile
+ * and the mail hand-off take a second or two between them; past this, it is
+ * hanging rather than slow, and the visitor is better off with the mail
+ * client than with a button that says "Transmitting…" forever.
+ */
+const TRANSMIT_TIMEOUT_MS = 15_000
+
 export function RadioConsole() {
   const t = useT()
   const [name, setName] = useState('')
@@ -117,6 +125,8 @@ export function RadioConsole() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(draft),
+        // Covers reading the answer too, so a stalled body counts as well.
+        signal: AbortSignal.timeout(TRANSMIT_TIMEOUT_MS),
       })
       reply = (await res.json()) as Reply
     } catch {

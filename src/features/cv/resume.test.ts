@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest'
 import { RESUME, RESUME_UPDATED } from './resume'
-import { buildResumeHtml } from './resumeHtml'
+import { RESUME_FONT, buildResumeHtml } from './resumeHtml'
 import { PROFILE } from './profile'
 
 /**
@@ -74,6 +74,16 @@ describe('the resume', () => {
     expect(
       parse(buildResumeHtml({ bare: true })).querySelector('.toolbar'),
     ).toBeNull()
+  })
+
+  it('is set in its own copy of Inter, not one fetched from Google', () => {
+    const html = buildResumeHtml()
+    expect(html).not.toMatch(/fonts\.(googleapis|gstatic)\.com/)
+    expect(html).toContain(`url("${RESUME_FONT}")`)
+    // The PDF render hands the font over inline instead.
+    expect(buildResumeHtml({ font: 'data:font/woff2;base64,AA' })).toContain(
+      'url("data:font/woff2;base64,AA")',
+    )
   })
 })
 

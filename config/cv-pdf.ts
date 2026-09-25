@@ -25,6 +25,7 @@ import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { RESUME_PDF } from '../src/features/cv/resume.ts'
 import { buildResumeHtml } from '../src/features/cv/resumeHtml.ts'
+import { readResumeFont } from './resumeFont.ts'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const PHOTO = join(ROOT, 'public', 'cv', 'photo.jpg')
@@ -53,11 +54,12 @@ if (!browser) {
 const photo = existsSync(PHOTO)
   ? `data:image/jpeg;base64,${readFileSync(PHOTO).toString('base64')}`
   : undefined
+const font = `data:font/woff2;base64,${readResumeFont().toString('base64')}`
 
 const dir = mkdtempSync(join(tmpdir(), 'cv-pdf-'))
 try {
   const page = join(dir, 'cv.html')
-  writeFileSync(page, buildResumeHtml({ photo, bare: true }))
+  writeFileSync(page, buildResumeHtml({ photo, font, bare: true }))
   execFileSync(
     browser,
     [

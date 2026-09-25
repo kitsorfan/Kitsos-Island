@@ -2,34 +2,45 @@ import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 import { buildCvHtml } from '../src/features/cv/cvHtml.ts'
-import { buildResumeHtml } from '../src/features/cv/resumeHtml.ts'
+import { RESUME_FONT, buildResumeHtml } from '../src/features/cv/resumeHtml.ts'
+import { readResumeFont } from './resumeFont.ts'
 
 /**
  * Writes the plain HTML CVs out beside the island: the long one at /cv.html,
- * and the two-page printed one at /resume.html that the PDF is made from.
+ * and the two-page printed one at /resume.html that the PDF is made from,
+ * with the Inter file the second one is set in.
  *
  * They are generated rather than kept by hand so that they cannot fall behind
  * the data the island reads from, and they are served in dev too so the
  * fallbacks can be checked without a build.
  */
 function cvPage(): Plugin {
-  const PAGES: Record<string, () => string> = {
-    'cv.html': buildCvHtml,
-    'resume.html': () => buildResumeHtml(),
+  /** A file served by the dev server and written into the build alike. */
+  interface Generated {
+    type: string
+    body: () => string | Uint8Array
+  }
+  const FILES: Record<string, Generated> = {
+    'cv.html': { type: 'text/html; charset=utf-8', body: buildCvHtml },
+    'resume.html': {
+      type: 'text/html; charset=utf-8',
+      body: () => buildResumeHtml(),
+    },
+    [RESUME_FONT.slice(1)]: { type: 'font/woff2', body: readResumeFont },
   }
   return {
     name: 'cv-page',
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        const page = PAGES[req.url?.split('?')[0].slice(1) ?? '']
-        if (!page) return next()
-        res.setHeader('Content-Type', 'text/html; charset=utf-8')
-        res.end(page())
+        const file = FILES[req.url?.split('?')[0].slice(1) ?? '']
+        if (!file) return next()
+        res.setHeader('Content-Type', file.type)
+        res.end(file.body())
       })
     },
     generateBundle() {
-      for (const [fileName, page] of Object.entries(PAGES)) {
-        this.emitFile({ type: 'asset', fileName, source: page() })
+      for (const [fileName, file] of Object.entries(FILES)) {
+        this.emitFile({ type: 'asset', fileName, source: file.body() })
       }
     },
   }

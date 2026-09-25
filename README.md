@@ -7,8 +7,9 @@ which turns out to be a spaceship — and the Radio Center sends your message
 straight to his inbox.
 
 It is static files plus one small Cloudflare Worker. The island makes no
-runtime network calls beyond the Google Fonts stylesheet, and the only thing
-that ever reaches the Worker is a message from the Radio Center.
+runtime network calls to anyone else (even its fonts are served from its own
+origin), and the only thing that ever reaches the Worker is a message from the
+Radio Center.
 
 ## Stack
 
@@ -202,7 +203,8 @@ Some notes on how it hangs together:
 
 - **Nothing is fetched.** Terrain, water, characters, buildings, furniture and
   props are all procedural geometry; signage text is drawn to a canvas at runtime
-  (`shared/engine/TextSign.tsx`). The only external request is the font stylesheet.
+  (`shared/engine/TextSign.tsx`). The fonts are self-hosted (`@fontsource`), so
+  nothing is requested from anywhere else.
 - **The music is composed in code**, not shipped as a file — a I–V–vi–IV loop in
   D major with a pad, bass, arpeggio, melody and light percussion, scheduled a
   bar and a half ahead of the audio clock. Original by construction, so there is

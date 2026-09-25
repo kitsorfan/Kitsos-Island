@@ -8,15 +8,15 @@
 /*
   # Everything the island needs, and nothing else. The island builds its own
   # world at runtime — textures are drawn onto canvases, audio is synthesised
-  # through Web Audio — so the only origins it reaches out to are Google Fonts
-  # and, from the Radio Center only, Cloudflare Turnstile: its script, and the
-  # frame it draws its check in. The desk's own message goes to /api/transmit,
-  # which is 'self'.
+  # through Web Audio, and its typefaces are its own files — so the only
+  # origin it reaches out to is, from the Radio Center only, Cloudflare
+  # Turnstile: its script, and the frame it draws its check in. The desk's
+  # own message goes to /api/transmit, which is 'self'.
   #
   # 'unsafe-inline' is here for styles only, never for scripts: the no-WebGL
   # card writes its own <style> element and the generated CV page inlines one.
   # blob: covers the Markdown CV the download hands over.
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
 
   # No one frames the island on their own page.
   X-Frame-Options: DENY

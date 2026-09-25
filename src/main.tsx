@@ -1,3 +1,12 @@
+// The island's two typefaces, served from its own origin rather than Google
+// Fonts, so no visitor's address is handed to a third party just for opening
+// the page. Every script ships, but each is only fetched by a browser that
+// has text in it to draw (Press Start 2P covers Greek; Baloo 2 has none).
+import '@fontsource/baloo-2/400.css'
+import '@fontsource/baloo-2/600.css'
+import '@fontsource/baloo-2/700.css'
+import '@fontsource/baloo-2/800.css'
+import '@fontsource/press-start-2p/400.css'
 import './index.css'
 import { hasWebGL2 } from './shared/engine/webgl'
 import { showUnsupported } from './shared/ui/Unsupported'

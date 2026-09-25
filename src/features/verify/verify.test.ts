@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { formatSerial, mintSerial, sign, signFor } from '../launch/certId'
 import { judge, readRequest } from './verify'
@@ -64,5 +66,24 @@ describe('the verdict', () => {
 
   it('offers the form on the bare page', () => {
     expect(judge({ reference: '', name: '' }).check).toBe('empty')
+  })
+})
+
+describe('the address on a certificate', () => {
+  /*
+   * There is no file at /verify/<reference>: the page is index.html, and
+   * main.tsx draws the verifier when it sees the path. So the host has to
+   * answer an address it has no file for with index.html. Pages did that
+   * unasked; a Worker with static assets only does it when told, and until
+   * it was, every link printed on a certificate came back a bare 404.
+   */
+  it('is answered with the island page, not a 404', () => {
+    const config = readFileSync(
+      join(import.meta.dirname, '../../../wrangler.jsonc'),
+      'utf8',
+    )
+      // A line commented out is a setting that is not there.
+      .replace(/^\s*\/\/.*$/gm, '')
+    expect(config).toMatch(/"not_found_handling":\s*"single-page-application"/)
   })
 })

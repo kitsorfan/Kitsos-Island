@@ -1,0 +1,154 @@
+/*
+ * The verifier is a document, not a game: it scrolls, it can be selected,
+ * and it sits on paper rather than sky. The island's own rules on html and
+ * body are undone here, and only when this page is the one showing.
+ */
+.verify-doc,
+.verify-doc body,
+.verify-doc #root {
+  height: auto;
+  min-height: 100%;
+  overflow: auto;
+  background: var(--paper);
+}
+
+.verify-doc body {
+  touch-action: auto;
+  overscroll-behavior: auto;
+}
+
+.verify {
+  max-width: 38rem;
+  margin: 0 auto;
+  padding: 3rem 1.25rem 4rem;
+  line-height: 1.5;
+}
+
+.verify__kicker {
+  margin: 0 0 1.5rem;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+
+.verify__headline {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 0.5rem;
+  font-size: 1.9rem;
+  line-height: 1.2;
+}
+
+.verify__mark {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  color: #fff;
+  background: var(--ink-soft);
+}
+
+.verify__headline--good .verify__mark {
+  background: #2e8b57;
+}
+
+.verify__headline--fair .verify__mark {
+  background: #c98a1b;
+}
+
+.verify__headline--bad .verify__mark {
+  background: #c0392b;
+}
+
+.verify__detail {
+  margin: 0 0 1.5rem;
+  color: var(--ink-soft);
+}
+
+.verify__facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 1.2rem;
+  margin: 0 0 2rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--paper-edge);
+  border-radius: 12px;
+  background: var(--paper-2);
+}
+
+.verify__facts dt {
+  color: var(--ink-soft);
+}
+
+.verify__facts dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}
+
+.verify__mono {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.verify__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin: 0 0 2rem;
+}
+
+.verify__field {
+  display: grid;
+  gap: 0.2rem;
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.verify__label {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.verify__input {
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--paper-edge);
+  border-radius: 8px;
+  font: inherit;
+  color: var(--ink);
+  background: #fff;
+}
+
+.verify__input:focus-visible,
+.verify__submit:focus-visible,
+.verify__home:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.verify__submit {
+  padding: 0.55rem 1.3rem;
+  border: 0;
+  border-radius: 999px;
+  font-weight: 700;
+  color: #2b1d08;
+  background: linear-gradient(180deg, #f6b85a, #e08c22);
+}
+
+.verify__note {
+  margin: 0 0 1.2rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.verify__home {
+  font-weight: 700;
+  color: var(--accent);
+}

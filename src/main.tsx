@@ -4,10 +4,19 @@ import { showUnsupported } from './shared/ui/Unsupported'
 
 const root = document.getElementById('root')!
 
+// A certificate being checked is not the island: the verifier is a page of
+// its own, fetched on its own, and needs neither WebGL nor React. The host
+// serves index.html for any path it has no file for, which is what lets
+// /verify/<reference> arrive here at all.
+if (/^\/verify(\/|$)/.test(location.pathname)) {
+  void import('./features/verify/VerifyPage').then(({ showVerify }) =>
+    showVerify(root),
+  )
+}
 // React and three.js are worth about 400 kB gzipped between them, and they
 // are no use whatsoever to a visitor who cannot run WebGL. So the check comes
 // first and the app is fetched only once it passes.
-if (hasWebGL2()) {
+else if (hasWebGL2()) {
   void (async () => {
     /*
      * A visitor who chose Greek last time gets it fetched alongside the app

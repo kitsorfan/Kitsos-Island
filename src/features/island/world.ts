@@ -417,9 +417,17 @@ export const NPCS: Npc[] = [
       pants: '#2c3242',
     },
     prop: 'glasses',
+    // Never without it: he is the one who tells you to press M.
+    map: true,
+    /*
+     * Out of his spot by the games board he goes south first, round the
+     * front of it and below the party button: the straight line west he
+     * used to take ran through the middle of both.
+     */
     route: [
       [8, 10],
-      [-8, 8],
+      [7, 6],
+      [-7, 5.5],
       [-10, -6],
       [6, -8],
     ],
@@ -574,11 +582,21 @@ export const NPCS: Npc[] = [
       shirt: '#7a6fb0',
       pants: '#3a3f4d',
     },
+    /*
+     * A loop inside the lamp ring, out along the east road and back, and
+     * home down the west side. The old one ran round the ring itself, which
+     * is lined with lamps, planters and benches, and cut back across the
+     * square through the games board.
+     */
     route: [
       [-14, -14],
-      [14, -18],
+      [-2, -11],
+      [6, -2],
       [22, 4],
-      [-6, 14],
+      [9, 3],
+      [-6, 3.5],
+      [-10, 10],
+      [-8.5, -4],
     ],
     pace: 1.5,
     lines: [

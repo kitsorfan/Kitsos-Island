@@ -269,6 +269,9 @@ function NpcActor({
     // hiding place they were tucked into — puts them back on their feet.
     motion.current.crouching = false
     motion.current.chat = 0
+    // The mayor's map only comes out for somebody standing in front of him,
+    // so it goes away the moment a match, a party or a water bomb takes over.
+    motion.current.showing = 0
 
     // A match takes the wheel: paintball.ts owns where everyone stands.
     const unit = ARENA.active ? ARENA.units.get(npc.id) : undefined
@@ -735,6 +738,7 @@ function NpcActor({
     const dz = PLAYER_POS.z - at.current[1]
     const toPlayer = Math.hypot(dx, dz)
     const greeting = toPlayer < GREET_RANGE
+    if (npc.map && greeting) motion.current.showing = 1
 
     let heading: number | null = null
 
@@ -819,6 +823,7 @@ function NpcActor({
           buttonhole={npc.suit?.buttonhole}
           smile={npc.smile}
           hand={searching ? 'flashlight' : npc.hand}
+          map={npc.map}
           gun={Boolean(team) && !painted}
           gunColor={team === 'friend' ? PAINT.friend : PAINT.enemy}
           kit={

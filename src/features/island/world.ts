@@ -417,6 +417,8 @@ export const NPCS: Npc[] = [
       pants: '#2c3242',
     },
     prop: 'glasses',
+    // Never without it: he is the one who tells you to press M.
+    map: true,
     /*
      * Out of his spot by the games board he goes south first, round the
      * front of it and below the party button: the straight line west he

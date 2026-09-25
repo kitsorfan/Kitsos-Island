@@ -172,6 +172,11 @@ export interface Npc {
   /** Carried in the off hand, for anyone working in the dark. */
   hand?: HandLight
   /**
+   * The island map, which comes out of the pocket and opens for whoever
+   * walks up. The mayor's, and only his.
+   */
+  map?: boolean
+  /**
    * A child: the same figure built smaller, so height alone tells you who is
    * a grown-up across a green. Their chat bubble and journal marker are
    * raised back off the top of the head, which a bare scale would sink.

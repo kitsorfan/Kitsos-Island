@@ -15,6 +15,12 @@
   "assets": {
     "directory": "./dist",
     "run_worker_first": ["/api/*"],
+    // A page address with no file behind it gets index.html, the way Pages
+    // did it. That is what /verify/<reference> stands on: there is no file
+    // there, and main.tsx reads the path and draws the verifier. Left off,
+    // the request fell through to the Worker, which answers anything that
+    // is not the transmitter with a bare 404.
+    "not_found_handling": "single-page-application",
   },
 
   // The island lives at both. www is the canonical one (the CV prints it);

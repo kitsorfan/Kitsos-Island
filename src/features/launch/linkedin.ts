@@ -1,8 +1,10 @@
+import { PROFILE } from '../cv/profile'
 import { CERT_TEXT } from './certificate'
 import { verifyUrl } from './certId'
 
 /**
- * The two ways a certificate goes to LinkedIn, as links.
+ * The two ways the end of the island goes to LinkedIn, as links: the
+ * certificate onto the visitor's profile, and the island into their feed.
  *
  * Links rather than an API: LinkedIn opens both of these in its own tab, on
  * its own login, so nothing here needs a key, an app, or a backend - and the
@@ -36,14 +38,16 @@ export function linkedinAddUrl(
 }
 
 /**
- * A post, with the verify link in it.
+ * A post, with the island in it.
  *
- * LinkedIn takes only the link and writes the rest itself: the card it
- * unfurls comes from the page's own og tags, which the verify route serves
- * because it answers with the island page. The text of the post is theirs to
- * write; the old `title` and `summary` parameters are ignored now.
+ * The site rather than the certificate: the certificate goes on the profile,
+ * and what is worth telling a feed about is the place, so the next person
+ * can walk it too. The same address the og:url names, so the post unfurls
+ * with the island's own card. LinkedIn takes only the link; the text of the
+ * post is theirs to write, and the old `title` and `summary` parameters are
+ * ignored now.
  */
-export function linkedinShareUrl(reference: string, name: string): string {
-  const params = new URLSearchParams({ url: verifyUrl(reference, name) })
+export function linkedinShareUrl(): string {
+  const params = new URLSearchParams({ url: `${PROFILE.website}/` })
   return `https://www.linkedin.com/sharing/share-offsite/?${params}`
 }

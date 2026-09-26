@@ -37,15 +37,14 @@ describe('adding the certificate to a LinkedIn profile', () => {
   })
 })
 
-describe('sharing the certificate as a post', () => {
-  it('hands LinkedIn the verify link and nothing else', () => {
-    const url = new URL(linkedinShareUrl('KI-00001-00002', 'Ada Lovelace'))
+describe('sharing the island as a post', () => {
+  it('hands LinkedIn the site itself and nothing else', () => {
+    const url = new URL(linkedinShareUrl())
     expect(`${url.origin}${url.pathname}`).toBe(
       'https://www.linkedin.com/sharing/share-offsite/',
     )
     expect([...url.searchParams.keys()]).toEqual(['url'])
-    expect(url.searchParams.get('url')).toBe(
-      verifyUrl('KI-00001-00002', 'Ada Lovelace'),
-    )
+    /* The address og:url names, so the post unfurls with the island card. */
+    expect(url.searchParams.get('url')).toBe('https://www.kitsorfan.com/')
   })
 })

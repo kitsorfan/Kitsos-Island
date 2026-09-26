@@ -472,7 +472,7 @@ export const UI: Record<string, string> = {
   'Credential ID': 'Αναγνωριστικό πιστοποιητικού',
   'Credential URL': 'Σύνδεσμος επαλήθευσης',
   'Add to your LinkedIn profile': 'Πρόσθεσέ το στο προφίλ σου στο LinkedIn',
-  'Share on LinkedIn': 'Κοινοποίησέ το στο LinkedIn',
+  'Share the island on LinkedIn': 'Μοιράσου το νησί στο LinkedIn',
   'Signed by': 'Υπογραφή',
   'Thanks for walking the whole of it.':
     'Ευχαριστώ που το περπάτησες ολόκληρο.',

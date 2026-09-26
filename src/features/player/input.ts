@@ -6,6 +6,9 @@ export const zoomHold = { in: false, out: false }
 /** Set true while an on-screen turn button is held: Q's side, or E's. */
 export const turnHold = { left: false, right: false }
 
+/** Set true while the balloon's on-screen up or down is held: Shift, or Ctrl. */
+export const liftHold = { up: false, down: false }
+
 /** Virtual stick written by the on-screen joystick, range -1..1. */
 export const touchStick = { x: 0, y: 0, active: false }
 
@@ -61,6 +64,8 @@ export function clearKeys() {
   zoomHold.out = false
   turnHold.left = false
   turnHold.right = false
+  liftHold.up = false
+  liftHold.down = false
 }
 
 /* ------------------------------ the long hold ---------------------------- */

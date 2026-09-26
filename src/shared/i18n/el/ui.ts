@@ -69,6 +69,8 @@ export const UI: Record<string, string> = {
   'Map, journal, games, day or night, and the camera':
     'Χάρτης, ημερολόγιο, παιχνίδια, μέρα ή νύχτα και η κάμερα',
   'First person (X)': 'Πρώτο πρόσωπο (X)',
+  'Climb (Shift)': 'Άνοδος (Shift)',
+  'Sink (Ctrl)': 'Κάθοδος (Ctrl)',
   'Turn the camera left (Q)': 'Στρίψε την κάμερα αριστερά (Q)',
   'Turn the camera right (E)': 'Στρίψε την κάμερα δεξιά (E)',
   'The light stays as it is until the game is over':
@@ -260,7 +262,9 @@ export const UI: Record<string, string> = {
   Drift: 'Πλεύση',
   Stick: 'Μοχλός',
   Climb: 'Άνοδος',
-  'Hold BURN': 'Κράτα BURN',
+  'Hold UP': 'Κράτα UP',
+  'Hold DOWN': 'Κράτα DOWN',
+  Sink: 'Κάθοδος',
   '💧 button': 'Κουμπί 💧',
   '🎉 button': 'Κουμπί 🎉',
   'Lean into the drift': 'Γείρε προς την πλεύση',
@@ -428,6 +432,7 @@ export const UI: Record<string, string> = {
   'Z and C, or the wheel': 'Z και C, ή η ρόδα',
   drift: 'πλεύση',
   climb: 'άνοδος',
+  'climb and sink': 'άνοδος και κάθοδος',
   drop: 'ρίψη',
   turn: 'στροφή',
   burner: 'καυστήρας',

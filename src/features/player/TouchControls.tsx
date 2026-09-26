@@ -14,6 +14,7 @@ import { useGame } from '../../shared/state/store'
 import { dialogueBridge } from './useKeyboard'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
 import { useScreen } from '../../shared/ui/useScreen'
+import { LiftButtons } from '../balloon/LiftButtons'
 import { useT } from '../../shared/i18n/useT'
 import * as sfx from '../../shared/engine/audio'
 
@@ -75,7 +76,7 @@ export function TouchControls() {
   }
 
   return (
-    <div className="touch">
+    <div className={`touch${mobile ? ' touch--mobile' : ''}`}>
       <div
         className="stick"
         ref={base}
@@ -133,21 +134,9 @@ export function TouchControls() {
           </button>
         ) : flying ? (
           <>
-            {/* The burner is the only altitude control on a touch screen —
-                let go of it and the balloon sinks back down on its own. */}
-            <button
-              className="round-button round-button--burn"
-              onPointerDown={(e) => {
-                e.preventDefault()
-                setKey('ShiftLeft', true)
-              }}
-              onPointerUp={() => setKey('ShiftLeft', false)}
-              onPointerCancel={() => setKey('ShiftLeft', false)}
-              onPointerLeave={() => setKey('ShiftLeft', false)}
-              aria-label={t('Burner')}
-            >
-              BURN
-            </button>
+            {/* Up and down, the burner and the vent: let go of both and the
+                balloon sinks back on its own, only slower. */}
+            <LiftButtons look="round" />
             <button
               className="round-button round-button--water"
               onPointerDown={(e) => {

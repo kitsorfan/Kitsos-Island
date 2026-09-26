@@ -53,7 +53,7 @@ function TurnButton({
   return (
     <button
       type="button"
-      className={`turn-button turn-button--${side}`}
+      className={`edge-button turn-button turn-button--${side}`}
       aria-label={label}
       title={label}
       onPointerDown={(event) => {

@@ -194,8 +194,8 @@ export function BalloonHud() {
       <p className="bl__keys">
         {coarse ? (
           <>
-            <kbd>Stick</kbd> {t('drift')} · <kbd>BURN</kbd> {t('climb')} ·{' '}
-            <kbd>💧</kbd>
+            <kbd>Stick</kbd> {t('drift')} · <kbd>UP</kbd>
+            <kbd>DOWN</kbd> {t('climb and sink')} · <kbd>💧</kbd>
             <kbd>🎉</kbd> {t('drop')}
           </>
         ) : (

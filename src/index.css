@@ -580,12 +580,10 @@ canvas {
 
 /* ------------------------- turning the camera -------------------------- */
 
-/* Q and E on the screen, halfway down each edge, where nothing else lives.
-   See-through until pressed, so the island reads through them. */
-.turn-button {
-  position: absolute;
-  top: 50%;
-  translate: 0 -50%;
+/* The see-through pills that stand at the edges of the screen: Q and E while
+   he walks, the balloon's up and down while it flies. See-through until
+   pressed, so the island reads through them. */
+.edge-button {
   display: grid;
   place-items: center;
   width: 3rem;
@@ -606,6 +604,25 @@ canvas {
     color 0.12s ease;
 }
 
+@media (hover: hover) {
+  .edge-button:hover {
+    background: rgba(253, 247, 233, 0.5);
+  }
+}
+
+.edge-button:active {
+  color: var(--ink);
+  border-color: rgba(42, 32, 51, 0.7);
+  background: rgba(253, 247, 233, 0.8);
+}
+
+/* Q and E, halfway down each edge, where nothing else lives. */
+.turn-button {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+}
+
 .turn-button--left {
   left: calc(env(safe-area-inset-left, 0px) + 0.4rem);
 }
@@ -614,16 +631,18 @@ canvas {
   right: calc(env(safe-area-inset-right, 0px) + 0.4rem);
 }
 
-@media (hover: hover) {
-  .turn-button:hover {
-    background: rgba(253, 247, 233, 0.5);
-  }
+/* The balloon's up over its down, on the right edge the turn has left. */
+.lift-pair {
+  position: absolute;
+  top: 50%;
+  right: calc(env(safe-area-inset-right, 0px) + 0.4rem);
+  translate: 0 -50%;
+  display: grid;
+  gap: 0.5rem;
 }
 
-.turn-button:active {
-  color: var(--ink);
-  border-color: rgba(42, 32, 51, 0.7);
-  background: rgba(253, 247, 233, 0.8);
+.lift-button {
+  height: 3.6rem;
 }
 
 .settings-card__hint {
@@ -1668,8 +1687,11 @@ canvas {
   pointer-events: auto;
 }
 
+/* It never gives up its width to the buttons beside it: squeezed, it went
+   oval and read wrong under the thumb. */
 .stick {
   position: relative;
+  flex-shrink: 0;
   width: 132px;
   height: 132px;
   border-radius: 50%;
@@ -4308,13 +4330,24 @@ canvas {
   font-size: 0.7rem;
 }
 
-.round-button--burn {
-  width: 72px;
-  height: 72px;
+/* Up over down, where the burner was: the burner's own orange, and the
+   same pair of them a touch smaller than the drops beside them. */
+.touch__lift {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.round-button--lift {
+  width: 52px;
+  height: 52px;
   font-family: var(--font-display);
   font-size: 0.5rem;
-  background: #f0a33c;
   color: var(--paper);
+  background: #f0a33c;
+}
+
+.round-button--down {
+  background: #c9812b;
 }
 
 .round-button--water {
@@ -4329,6 +4362,24 @@ canvas {
   height: 68px;
   font-size: 1.5rem;
   background: #ff5fa8;
+}
+
+/* On a phone the balloon's corner has the stick, the up and the down, and
+   both drops to fit across one narrow screen, so the drops come down to
+   the size of a thumb and the gaps close up a little. */
+.touch--mobile {
+  padding: 0.9rem;
+}
+
+.touch--mobile .touch__buttons {
+  gap: 0.4rem;
+}
+
+.touch--mobile .round-button--water,
+.touch--mobile .round-button--confetti {
+  width: 60px;
+  height: 60px;
+  font-size: 1.3rem;
 }
 
 /* ------------------------------ balloon card --------------------------- */

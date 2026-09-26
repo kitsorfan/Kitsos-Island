@@ -18,6 +18,7 @@ import {
   forgetLongSpace,
   isCrouching,
   isDown,
+  liftHold,
   longSpace,
   queueDrop,
   queueFire,
@@ -413,6 +414,14 @@ describe('clearKeys', () => {
     turnHold.left = true
     clearKeys()
     expect(readCameraTurn()).toBe(0)
+  })
+
+  it('lets go of the balloon’s up and down still held', () => {
+    // Or the basket would keep climbing with nobody on the burner.
+    liftHold.up = true
+    liftHold.down = true
+    clearKeys()
+    expect(liftHold).toEqual({ up: false, down: false })
   })
 
   it('keeps a latch the visitor set on purpose', () => {

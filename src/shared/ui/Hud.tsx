@@ -25,6 +25,7 @@ import { MotoHud } from '../../features/moto/MotoHud'
 import { RescueHud } from '../../features/rescue/RescueHud'
 import { PaintballHud } from '../../features/paintball/PaintballHud'
 import { TurnButtons } from '../../features/player/TurnButtons'
+import { LiftButtons } from '../../features/balloon/LiftButtons'
 import { useCoarsePointer } from './useCoarsePointer'
 import { useScreen } from './useScreen'
 
@@ -307,8 +308,11 @@ export function Hud() {
       }}
     >
       {/* First, so that a card opened from the top row draws over them
-          rather than under. */}
+          rather than under. The balloon's up and down take the right edge
+          while it flies, where the turn stands down; a touch screen has
+          them by the thumb instead, with the rest of the balloon's buttons. */}
       <TurnButtons />
+      {!coarse && <LiftButtons look="edge" />}
 
       <div className="hud__top">
         <div className="hud__left">

@@ -826,7 +826,8 @@ canvas {
   inset: 0;
   display: grid;
   place-items: center;
-  padding: clamp(0.6rem, 2.5vw, 1.8rem);
+  --overlay-pad: clamp(0.6rem, 2.5vw, 1.8rem);
+  padding: var(--overlay-pad);
   background: rgba(16, 12, 24, 0.55);
   backdrop-filter: blur(3px);
   animation: fade-in 0.18s ease both;
@@ -2401,14 +2402,32 @@ canvas {
 }
 
 @media (max-width: 720px) {
+  /* Stacked, the whole card scrolls, portrait and all, rather than the body
+     scrolling inside it. A body sharing a column with the portrait has to be
+     handed its height by the flexbox, and Safari hands it none: the card came
+     out as the portrait alone, with every word under it out of reach. Capped
+     by the screen itself too, not only by a percentage of the overlay. */
   .greeting {
     flex-direction: column;
+    max-height: calc(100vh - 2 * var(--overlay-pad));
+    max-height: calc(100dvh - 2 * var(--overlay-pad));
+    overflow: hidden auto;
+    overscroll-behavior: contain;
   }
 
+  /* No minimum from the canvas inside: its drawing buffer keeps the shape of
+     the last layout, so a phone turned wider would grow the portrait to
+     match it rather than hold it at its 190. */
   .greeting__portrait {
     flex: 0 0 190px;
+    min-height: 0;
     border-right: none;
     border-bottom: 4px solid var(--line);
+  }
+
+  .greeting__body {
+    flex: none;
+    overflow: visible;
   }
 
   .greeting__speech::before {

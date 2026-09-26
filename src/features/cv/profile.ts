@@ -72,6 +72,11 @@ export const HOUSE_SECTIONS: PanelSection[] = [
           },
         ],
       },
+    ],
+  },
+  {
+    heading: 'Volunteering',
+    blocks: [
       {
         type: 'text',
         text: 'Leading volunteer at the Christian Youth Foundation "Pantokrator" in Paleo Faliro, and a blood donor since 2017.',

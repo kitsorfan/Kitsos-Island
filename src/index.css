@@ -1979,6 +1979,17 @@ canvas {
   color: #a8402f;
 }
 
+/* Every key in hand: the locks are still shut, but this press turns them.
+   Gold like the keys, so it reads as something to do, not a refusal. */
+.prompt--unlock {
+  border-color: #b8860b;
+  background: rgba(255, 244, 204, 0.97);
+}
+
+.prompt--unlock strong {
+  color: #9a6b00;
+}
+
 /* ------------------------------- map -------------------------------- */
 
 .panel--map {

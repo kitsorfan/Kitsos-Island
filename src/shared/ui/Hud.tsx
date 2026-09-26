@@ -471,7 +471,9 @@ export function Hud() {
       <HoldMeter />
 
       {mode === 'explore' && nearby && !playing && (
-        <div className={`prompt${nearby.blocked ? ' prompt--locked' : ''}`}>
+        <div
+          className={`prompt${nearby.blocked ? ' prompt--locked' : ''}${nearby.unlock ? ' prompt--unlock' : ''}`}
+        >
           {/* A door on a sensor has no key to offer: it names itself and
               opens as he reaches it. */}
           {nearby.silent ? (

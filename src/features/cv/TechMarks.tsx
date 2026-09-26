@@ -1044,6 +1044,8 @@ export const TECH_GROUPS: TechGroup[] = [
     label: 'Frontend',
     marks: [
       { id: 'react', name: 'React', draw: react },
+      // React Native's own mark is the same atom.
+      { id: 'react-native', name: 'React Native', draw: react },
       { id: 'angular', name: 'Angular', draw: angular },
       { id: 'html', name: 'HTML', draw: html },
       { id: 'css', name: 'CSS', draw: css },

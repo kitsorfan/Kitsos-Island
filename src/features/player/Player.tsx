@@ -1130,7 +1130,14 @@ export function Player() {
     const active = isInteractive(store.mode)
 
     // Teleports: entering a building, leaving one, or travelling from the map.
-    if (store.spawn.token !== spawnToken.current) {
+    //
+    // Only once the scene on screen is the one the spawn is for. `area` here
+    // is the committed one, and the store's can be a frame or two ahead of it
+    // when the move was made from inside the frame loop — the end of the
+    // lighthouse reveal is one. Taking the spawn early put him at the room's
+    // coordinates on the island, and the camera cut to the middle of the
+    // plaza before the room came up.
+    if (store.spawn.token !== spawnToken.current && store.spawn.area === area) {
       spawnToken.current = store.spawn.token
       position.current[0] = store.spawn.position[0]
       position.current[1] = store.spawn.position[1]

@@ -537,6 +537,12 @@ canvas {
   max-height: min(34rem, calc(100dvh - 16rem));
 }
 
+/* On its side, the prompt shares the bottom edge with the stick on one side
+   and the round buttons on the other, so it keeps to the gap between them. */
+.hud--mobile:not(.hud--portrait) .prompt {
+  max-width: calc(100% - 23rem);
+}
+
 .settings-card__hint {
   margin: 0.6rem 0 0;
   font-size: 0.72rem;
@@ -544,11 +550,16 @@ canvas {
   color: var(--ink-soft);
 }
 
+/* Centred with translate rather than transform: the float animation below
+   owns transform, and would overwrite a centring put there, leaving the hint
+   hanging off to the right of the middle rather than sitting on it. */
 .nudge {
   position: absolute;
   left: 50%;
   bottom: 5.5rem;
-  transform: translateX(-50%);
+  translate: -50% 0;
+  width: max-content;
+  max-width: calc(100% - 2rem);
   margin: 0;
   padding: 0.5rem 1rem;
   border-radius: 99px;
@@ -559,11 +570,16 @@ canvas {
   animation: float 2.4s ease-in-out infinite;
 }
 
+/* Centred with translate for the same reason as the nudge: pop-in scales it
+   with a transform and holds its last frame. One line while that fits, and
+   wrapped rather than run off the edge of a narrow screen once it does not. */
 .prompt {
   position: absolute;
   left: 50%;
   bottom: 2rem;
-  transform: translateX(-50%);
+  translate: -50% 0;
+  width: max-content;
+  max-width: calc(100% - 2rem);
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -574,13 +590,19 @@ canvas {
   box-shadow: 0 4px 0 rgba(42, 32, 51, 0.3);
   font-size: 1rem;
   font-weight: 600;
-  white-space: nowrap;
+  text-wrap: balance;
   animation: pop-in 0.16s ease both;
 }
 
 /* A door that opens by itself has no key to show, so it shows a way in
    instead: the same weight as the keycap it stands in for, so the prompt
    does not jump about as you walk from one kind of door to another. */
+/* The key stays whole when the words beside it have to wrap. */
+.prompt kbd,
+.prompt__auto {
+  flex-shrink: 0;
+}
+
 .prompt__auto {
   padding: 0 0.15rem;
   color: var(--line);

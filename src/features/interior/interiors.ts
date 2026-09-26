@@ -1753,7 +1753,6 @@ export const INTERIORS: Interior[] = [
       { kind: 'toolChest', position: [-13.2, 8.4] },
       /* Leant against the west wall past the bench, on its wheels. */
       { kind: 'bicycle', position: [-13.4, 1.6], rotation: Math.PI / 2 },
-      { kind: 'crate', position: [-13.2, -1.4] },
 
       /* Astronomy in the far corner: the planetarium, and the sun it went
          round. */

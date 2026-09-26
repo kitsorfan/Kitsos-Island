@@ -552,6 +552,17 @@ canvas {
   padding-inline: 10rem;
 }
 
+/* The line under each game's panel naming its keys or its buttons. On a phone
+   the round buttons carry their own names, so it goes, on its side as well as
+   upright, where the narrow-screen rules already took it. */
+.hud--mobile .pb__keys,
+.hud--mobile .moto__keys,
+.hud--mobile .bl__keys,
+.hud--mobile .hd__keys,
+.hud--mobile .rescue__keys {
+  display: none;
+}
+
 .dialogue-layer--middle .dialogue {
   padding: 1.25rem 1.2rem 0.8rem;
 }

@@ -5,6 +5,7 @@ import { act, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DialogueBox } from './DialogueBox'
 import { useGame } from '../state/store'
+import { fakeScreen } from '../../test/screen'
 
 /**
  * A conversation on the island: one speaker, a page at a time, each line
@@ -120,5 +121,20 @@ describe('DialogueBox', () => {
       pressThrough()
     }
     expect(useGame.getState().mode).toBe('explore')
+  })
+
+  it('names the key to press on a keyboard', () => {
+    render(<DialogueBox />)
+    say(['Hello there.'])
+    expect(box().querySelector('.dialogue__hint kbd')).toHaveTextContent(
+      'Enter',
+    )
+  })
+
+  it('names the A button on a touch screen, where there is no Enter', () => {
+    fakeScreen({ mobile: true, coarse: true })
+    render(<DialogueBox />)
+    say(['Hello there.'])
+    expect(box().querySelector('.dialogue__hint kbd')).toHaveTextContent('A')
   })
 })

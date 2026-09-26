@@ -543,6 +543,19 @@ canvas {
   max-width: calc(100% - 23rem);
 }
 
+/* A phone on its side has the stick in one bottom corner and the A button in
+   the other, and the strip of island above them is too short to hold a line
+   of dialogue. So the box stays down at the bottom, in the middle, narrowed
+   to the gap between the two: it can then run to as many lines as it likes
+   without any of them going under a thumb. Upright, it sits at the top. */
+.dialogue-layer.dialogue-layer--middle {
+  padding-inline: 10rem;
+}
+
+.dialogue-layer--middle .dialogue {
+  padding: 1.25rem 1.2rem 0.8rem;
+}
+
 .settings-card__hint {
   margin: 0.6rem 0 0;
   font-size: 0.72rem;

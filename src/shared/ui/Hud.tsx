@@ -254,15 +254,6 @@ export function Hud() {
       >
         👟<span>{t(sprint ? 'Running' : 'Walk')}</span>
       </button>
-      {/* X on the keyboard, and the only way into his eyes on a phone. */}
-      <button
-        className={`icon-button${firstPerson ? ' icon-button--live' : ''}`}
-        aria-pressed={firstPerson}
-        onClick={toggleFirstPerson}
-        title={t('First person (X)')}
-      >
-        👁️<span>{t('First person')}</span>
-      </button>
       {/* Nothing to pull the camera back from when you are inside
           his head, so the pair of them stand down. */}
       {!firstPerson && (
@@ -279,6 +270,17 @@ export function Hud() {
           />
         </>
       )}
+      {/* X on the keyboard, and the only way into his eyes on a phone. Last,
+          because a big screen hangs this row off its right edge: at the end,
+          the zoom pair standing down leaves it where the pointer is. */}
+      <button
+        className={`icon-button${firstPerson ? ' icon-button--live' : ''}`}
+        aria-pressed={firstPerson}
+        onClick={toggleFirstPerson}
+        title={t('First person (X)')}
+      >
+        👁️<span>{t('First person')}</span>
+      </button>
     </>
   )
 

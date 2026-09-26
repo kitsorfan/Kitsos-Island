@@ -66,6 +66,9 @@ straight in. GitHub keeps the live copies under Settings → Rules;
 [`.github/rulesets/`](.github/rulesets/) holds the same rulesets in a form
 Rulesets → New ruleset → Import a ruleset takes, so change both together.
 
+A security problem goes to a private advisory, not an issue: see
+[`.github/SECURITY.md`](.github/SECURITY.md).
+
 ### The PDF CV
 
 The island hands out a two-page A4 PDF, `public/Orfanopoulos-Christos-CV.pdf`,

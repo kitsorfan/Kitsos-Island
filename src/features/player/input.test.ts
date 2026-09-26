@@ -28,6 +28,7 @@ import {
   setKey,
   sprintLock,
   touchStick,
+  turnHold,
   zoomBy,
 } from './input'
 
@@ -172,6 +173,14 @@ describe('readCameraTurn', () => {
     setKey('KeyQ', true)
     setKey('KeyE', true)
     expect(readCameraTurn()).toBe(0)
+  })
+
+  it('turns with the buttons at the screen edges, the same way as the keys', () => {
+    turnHold.left = true
+    expect(Math.sign(readCameraTurn())).toBe(1)
+    turnHold.left = false
+    turnHold.right = true
+    expect(Math.sign(readCameraTurn())).toBe(-1)
   })
 })
 
@@ -397,6 +406,13 @@ describe('clearKeys', () => {
     expect(isDown('KeyW')).toBe(false)
     expect(isCrouching()).toBe(false)
     expect(readMove()).toMatchObject({ x: 0, y: 0 })
+  })
+
+  it('lets go of a turn button still held', () => {
+    // Otherwise the camera would keep going round while nobody is looking.
+    turnHold.left = true
+    clearKeys()
+    expect(readCameraTurn()).toBe(0)
   })
 
   it('keeps a latch the visitor set on purpose', () => {

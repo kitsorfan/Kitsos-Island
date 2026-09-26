@@ -556,6 +556,54 @@ canvas {
   padding: 1.25rem 1.2rem 0.8rem;
 }
 
+/* ------------------------- turning the camera -------------------------- */
+
+/* Q and E on the screen, halfway down each edge, where nothing else lives.
+   See-through until pressed, so the island reads through them. */
+.turn-button {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 4.5rem;
+  padding: 0;
+  pointer-events: auto;
+  color: rgba(42, 32, 51, 0.7);
+  border: 3px solid rgba(42, 32, 51, 0.32);
+  border-radius: 16px;
+  background: rgba(253, 247, 233, 0.26);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.turn-button--left {
+  left: calc(env(safe-area-inset-left, 0px) + 0.4rem);
+}
+
+.turn-button--right {
+  right: calc(env(safe-area-inset-right, 0px) + 0.4rem);
+}
+
+@media (hover: hover) {
+  .turn-button:hover {
+    background: rgba(253, 247, 233, 0.5);
+  }
+}
+
+.turn-button:active {
+  color: var(--ink);
+  border-color: rgba(42, 32, 51, 0.7);
+  background: rgba(253, 247, 233, 0.8);
+}
+
 .settings-card__hint {
   margin: 0.6rem 0 0;
   font-size: 0.72rem;

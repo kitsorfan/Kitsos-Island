@@ -24,6 +24,7 @@ import { Minimap } from '../../features/map/Minimap'
 import { MotoHud } from '../../features/moto/MotoHud'
 import { RescueHud } from '../../features/rescue/RescueHud'
 import { PaintballHud } from '../../features/paintball/PaintballHud'
+import { TurnButtons } from '../../features/player/TurnButtons'
 import { useCoarsePointer } from './useCoarsePointer'
 import { useScreen } from './useScreen'
 
@@ -293,6 +294,10 @@ export function Hud() {
         ;(event.target as HTMLElement).closest('button')?.blur()
       }}
     >
+      {/* First, so that a card opened from the top row draws over them
+          rather than under. */}
+      <TurnButtons />
+
       <div className="hud__top">
         <div className="hud__left">
           {fighting && <PaintballHud />}

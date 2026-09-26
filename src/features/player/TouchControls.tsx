@@ -13,6 +13,7 @@ import {
 import { useGame } from '../../shared/state/store'
 import { dialogueBridge } from './useKeyboard'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
+import { useScreen } from '../../shared/ui/useScreen'
 import { useT } from '../../shared/i18n/useT'
 import * as sfx from '../../shared/engine/audio'
 
@@ -21,6 +22,7 @@ const RADIUS = 52
 export function TouchControls() {
   const t = useT()
   const coarse = useCoarsePointer()
+  const { mobile } = useScreen()
   const mode = useGame((s) => s.mode)
   const fighting = useGame((s) => s.paintball?.status === 'playing')
   const riding = useGame((s) => s.moto?.status === 'riding')
@@ -92,16 +94,19 @@ export function TouchControls() {
       <div className="touch__buttons">
         {mode === 'explore' && !fighting && !riding && !flying && !onWatch && (
           <>
-            <button
-              className="round-button round-button--small"
-              onPointerDown={(e) => {
-                e.preventDefault()
-                sfx.confirm()
-                openJournal()
-              }}
-            >
-              J
-            </button>
+            {/* A phone has the journal in its controls card already. */}
+            {!mobile && (
+              <button
+                className="round-button round-button--small"
+                onPointerDown={(e) => {
+                  e.preventDefault()
+                  sfx.confirm()
+                  openJournal()
+                }}
+              >
+                J
+              </button>
+            )}
             <button
               className="round-button round-button--jump"
               onPointerDown={(e) => {

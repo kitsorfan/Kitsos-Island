@@ -479,6 +479,64 @@ canvas {
   }
 }
 
+/* ---------------------------- hud on a phone --------------------------- */
+
+/* Three buttons have the room to say what they are, so they do. */
+.hud--mobile .hud__buttons .icon-button span {
+  display: inline;
+}
+
+/* Everything the phone's HUD folds away, laid out as the buttons it was:
+   four to a row held upright, and one long row on its side, where height is
+   what there is least of. */
+.controls-card {
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  max-width: 100%;
+  padding: 0.6rem;
+  border-radius: 14px;
+  border: 3px solid var(--line);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  animation: pop-in 0.18s ease both;
+}
+
+.hud--mobile:not(.hud--portrait) .controls-card {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+}
+
+.controls-card .icon-button {
+  min-width: 0;
+  padding-inline: 0.35rem;
+}
+
+/* Upright, the top is too narrow for a game's panel and the buttons side by
+   side, so the buttons keep the top and the panel drops in under them. */
+.hud--portrait .hud__top {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.6rem;
+}
+
+.hud--portrait .hud__right {
+  order: -1;
+}
+
+/* The settings card stops short of the stick's buttons rather than running
+   on underneath them, where the last rows could be seen and not pressed.
+   Upright, the stick is the taller thing to clear. */
+.hud--mobile .settings-card {
+  max-height: min(34rem, calc(100dvh - 13rem));
+}
+
+.hud--mobile.hud--portrait .settings-card {
+  max-height: min(34rem, calc(100dvh - 16rem));
+}
+
 .settings-card__hint {
   margin: 0.6rem 0 0;
   font-size: 0.72rem;

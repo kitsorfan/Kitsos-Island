@@ -66,6 +66,8 @@ export const UI: Record<string, string> = {
   'Zoom out (- or the wheel)': 'Ζουμ μακριά (- ή η ροδέλα)',
   'Sound, music, quality, and the controls':
     'Ήχος, μουσική, ποιότητα και χειριστήρια',
+  'Map, journal, games, day or night, and the camera':
+    'Χάρτης, ημερολόγιο, παιχνίδια, μέρα ή νύχτα και η κάμερα',
   'The light stays as it is until the game is over':
     'Το φως μένει όπως είναι μέχρι να τελειώσει το παιχνίδι',
   'Nothing stays alight in the water': 'Τίποτα δεν μένει αναμμένο στο νερό',

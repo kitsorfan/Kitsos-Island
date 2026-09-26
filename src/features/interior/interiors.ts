@@ -2010,6 +2010,15 @@ export const INTERIORS: Interior[] = [
               blocks: [
                 {
                   type: 'text',
+                  text: 'Plays on a phone, with buttons for the camera, the balloon and the cape; the certificate carries your name and a link to verify it; and the message desk really transmits.',
+                },
+              ],
+            },
+            {
+              heading: 'Version 1.1 · 2026-09-25',
+              blocks: [
+                {
+                  type: 'text',
                   text: 'A two-page PDF CV, printed from the island, to download from the full CV.',
                 },
               ],
@@ -2022,7 +2031,7 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'Release notes',
-          body: `Version ${LATEST_RELEASE.version}, ${LATEST_RELEASE.date}: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.`,
+          body: `Version ${LATEST_RELEASE.version}, ${LATEST_RELEASE.date}: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.`,
         },
       },
     ],

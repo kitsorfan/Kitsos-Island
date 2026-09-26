@@ -521,16 +521,20 @@ canvas {
   padding-inline: 0.35rem;
 }
 
-/* Upright, the top is too narrow for a game's panel and the buttons side by
-   side, so the buttons keep the top and the panel drops in under them. */
+/* Upright, a game's panel shares the top line with the buttons when it is
+   small enough to (the paintball scoreboard is), and otherwise drops in under
+   them. wrap-reverse is what puts the buttons on top once the two no longer
+   fit, and it turns the cross axis over too: flex-end is the top here. */
 .hud--portrait .hud__top {
-  flex-direction: column;
-  align-items: stretch;
+  flex-wrap: wrap-reverse;
+  align-items: flex-end;
   gap: 0.6rem;
 }
 
+/* On a line of its own the right half would start at the left, so it is
+   pushed over to where it lives. */
 .hud--portrait .hud__right {
-  order: -1;
+  margin-left: auto;
 }
 
 /* The settings card stops short of the stick's buttons rather than running
@@ -2818,18 +2822,23 @@ canvas {
   border-left: 5px solid #e63c58;
 }
 
-/* On a phone the same scoreboard in half the room: no title and no row
+/* On a phone the same scoreboard in a third of the room, small enough to
+   share the top line with the buttons even held upright: no title and no row
    names, since hearts and paint balls say what they are, the two of them on
    one line, and everything under them drawn smaller. */
+.hud--mobile .pb {
+  position: relative;
+  width: 8rem;
+}
+
 .hud--mobile .pb__panel {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.3rem 0.7rem;
+  gap: 0.25rem 0.4rem;
   min-width: 0;
-  width: 11.5rem;
-  padding: 0.4rem 0.6rem 0.45rem;
+  padding: 0.35rem 0.5rem 0.4rem;
   border-radius: 12px;
 }
 
@@ -2843,12 +2852,18 @@ canvas {
 }
 
 .hud--mobile .pb__hearts {
-  font-size: 0.85rem;
+  gap: 0.05rem;
+  font-size: 0.72rem;
+}
+
+.hud--mobile .pb__ammo {
+  gap: 0.15rem;
 }
 
 .hud--mobile .pb__ball {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
+  border-width: 1.5px;
 }
 
 .hud--mobile .pb__down,
@@ -2858,26 +2873,39 @@ canvas {
   margin: 0;
 }
 
+.hud--mobile .pb__down {
+  padding: 0.15rem 0.35rem;
+  font-size: 0.62rem;
+}
+
 .hud--mobile .pb__reload {
-  height: 14px;
+  height: 12px;
 }
 
 .hud--mobile .pb__reload span {
-  font-size: 0.58rem;
-  line-height: 10px;
+  font-size: 0.5rem;
+  line-height: 8px;
 }
 
 .hud--mobile .pb__row--tally {
-  font-size: 0.68rem;
+  gap: 0.3rem;
+  font-size: 0.6rem;
 }
 
 .hud--mobile .pb__row--tally strong {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
 }
 
+/* Who painted whom hangs under the scoreboard rather than widening it, which
+   would push it off the top line every time somebody was hit. */
 .hud--mobile .pb__feed {
-  font-size: 0.74rem;
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  width: max-content;
+  max-width: calc(100vw - 2rem);
   padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
 }
 
 @keyframes pb-feed {
@@ -3434,6 +3462,68 @@ canvas {
   font-size: 0.76rem;
   font-weight: 700;
   color: var(--ink-soft);
+}
+
+/* On a phone the same panel in a third of the room, small enough to share
+   the top line with the buttons held upright, as the scoreboard does: the
+   place and the lap, the speed and the clock, and whatever the bike is up
+   to. The title, the order of the whole grid and the best lap are left to
+   the result card. */
+.hud--mobile .moto {
+  width: 8rem;
+}
+
+.hud--mobile .moto__panel {
+  min-width: 0;
+  padding: 0.35rem 0.5rem 0.4rem;
+  border-radius: 12px;
+}
+
+.hud--mobile .moto__label,
+.hud--mobile .moto-board,
+.hud--mobile .moto__next,
+.hud--mobile .moto__place em {
+  display: none;
+}
+
+.hud--mobile .moto__place {
+  margin: 0;
+  gap: 0.25rem;
+}
+
+.hud--mobile .moto__place strong {
+  font-size: 0.8rem;
+}
+
+.hud--mobile .moto__lap {
+  font-size: 0.46rem;
+}
+
+.hud--mobile .moto__row {
+  flex-wrap: wrap;
+  gap: 0.2rem 0.3rem;
+  margin-top: 0.25rem;
+}
+
+.hud--mobile .moto__row:empty {
+  display: none;
+}
+
+.hud--mobile .moto__speed {
+  font-size: 0.75rem;
+}
+
+.hud--mobile .moto__speed em {
+  font-size: 0.58rem;
+}
+
+.hud--mobile .moto__time {
+  font-size: 0.5rem;
+}
+
+.hud--mobile .moto__flag {
+  padding: 0.1rem 0.4rem;
+  font-size: 0.52rem;
 }
 
 /* The place you are running, then the order of the whole grid under it. */
@@ -4121,6 +4211,103 @@ canvas {
   color: var(--ink-soft);
 }
 
+/* On a phone the same panel in a third of the room, small enough to share
+   the top line with the buttons held upright, as the scoreboard does: the
+   count, what is left to drop, the height and the drift, and where to go
+   next. The title, the bar that repeats the count, the gauge that repeats
+   the height and the names on the racks are left off. What just landed
+   hangs under the panel rather than widening it. */
+.hud--mobile .bl {
+  position: relative;
+  width: 8rem;
+}
+
+.hud--mobile .bl__panel {
+  min-width: 0;
+  max-width: none;
+  padding: 0.35rem 0.5rem 0.4rem;
+  border-radius: 12px;
+}
+
+.hud--mobile .bl__label,
+.hud--mobile .bl__bar,
+.hud--mobile .bl__gauge,
+.hud--mobile .bl__rack-label {
+  display: none;
+}
+
+.hud--mobile .bl__served {
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.hud--mobile .bl__balloon {
+  font-size: 0.75rem;
+}
+
+.hud--mobile .bl__served strong {
+  font-size: 0.8rem;
+}
+
+.hud--mobile .bl__served em {
+  font-size: 0.6rem;
+}
+
+.hud--mobile .bl__racks {
+  gap: 0.2rem;
+  margin-top: 0.25rem;
+}
+
+.hud--mobile .bl__rack {
+  padding: 0.2rem 0.2rem;
+  border-width: 1.5px;
+}
+
+.hud--mobile .bl__rack-dots {
+  gap: 1.5px;
+}
+
+.hud--mobile .bl__pip {
+  width: 5px;
+  height: 5px;
+  border-width: 1px;
+}
+
+.hud--mobile .bl__row {
+  flex-wrap: wrap;
+  gap: 0.2rem 0.3rem;
+  margin-top: 0.25rem;
+}
+
+.hud--mobile .bl__alt,
+.hud--mobile .bl__drift {
+  font-size: 0.75rem;
+}
+
+.hud--mobile .bl__alt em,
+.hud--mobile .bl__drift em {
+  font-size: 0.58rem;
+}
+
+.hud--mobile .bl__flag {
+  padding: 0.1rem 0.4rem;
+  font-size: 0.52rem;
+}
+
+.hud--mobile .bl__next {
+  font-size: 0.6rem;
+}
+
+.hud--mobile .bl__feed {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
+}
+
 .round-button--burn {
   width: 72px;
   height: 72px;
@@ -4501,6 +4688,81 @@ canvas {
   font-size: 0.76rem;
   font-weight: 700;
   color: var(--ink-soft);
+}
+
+/* On a phone the same panel in a third of the room, small enough to share
+   the top line with the buttons held upright, as the scoreboard does. The
+   title, the bar that repeats the count and the seeker's hint are left off:
+   the edges of the screen already say how near somebody is. */
+.hud--mobile .hd {
+  position: relative;
+  width: 8rem;
+}
+
+.hud--mobile .hd__panel {
+  min-width: 0;
+  max-width: none;
+  padding: 0.35rem 0.5rem 0.4rem;
+  border-radius: 12px;
+}
+
+.hud--mobile .hd__label,
+.hud--mobile .hd__bar,
+.hud--mobile .hd__task {
+  display: none;
+}
+
+.hud--mobile .hd__found {
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.hud--mobile .hd__torch {
+  font-size: 0.75rem;
+}
+
+.hud--mobile .hd__found strong {
+  font-size: 0.8rem;
+}
+
+.hud--mobile .hd__found em {
+  font-size: 0.6rem;
+}
+
+.hud--mobile .hd__meter {
+  height: 15px;
+  margin-top: 0.25rem;
+}
+
+.hud--mobile .hd__meter span {
+  font-size: 0.5rem;
+  line-height: 11px;
+}
+
+.hud--mobile .hd__states {
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.hud--mobile .hd__state {
+  padding: 0.1rem 0.3rem;
+  font-size: 0.52rem;
+}
+
+.hud--mobile .hd__warn {
+  margin-top: 0.25rem;
+  padding: 0.15rem 0.35rem;
+  font-size: 0.56rem;
+}
+
+.hud--mobile .hd__feed {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
 }
 
 /* --------------------------- hide and seek card ------------------------ */
@@ -5084,6 +5346,103 @@ canvas {
   font-size: 0.76rem;
   font-weight: 700;
   color: var(--ink-soft);
+}
+
+/* On a phone the same panel in a third of the room, small enough to share
+   the top line with the buttons held upright, as the scoreboard does. The
+   rows give up their boxes so their pieces can be laid out afresh: the
+   count and the clock on one line, the flares under them, and the speed
+   with whatever is wrong at the foot. The title, the bar that repeats the
+   count and the raft count the flares already show are left off. */
+.hud--mobile .rescue {
+  width: 8rem;
+}
+
+.hud--mobile .rescue__panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 0.4rem;
+  min-width: 0;
+  padding: 0.35rem 0.5rem 0.4rem;
+  border-radius: 12px;
+}
+
+.hud--mobile .rescue__label,
+.hud--mobile .rescue__bar,
+.hud--mobile .rescue__afloat {
+  display: none;
+}
+
+.hud--mobile .rescue__row {
+  display: contents;
+}
+
+.hud--mobile .rescue__saved {
+  order: 1;
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.hud--mobile .rescue__buoy {
+  width: 10px;
+  height: 10px;
+  border-width: 2px;
+}
+
+.hud--mobile .rescue__saved strong {
+  font-size: 0.8rem;
+}
+
+.hud--mobile .rescue__saved em {
+  font-size: 0.6rem;
+}
+
+.hud--mobile .rescue__time {
+  order: 2;
+  font-size: 0.55rem;
+}
+
+.hud--mobile .rescue__flares,
+.hud--mobile .rescue__none {
+  order: 3;
+  flex: 1 0 100%;
+  margin: 0;
+}
+
+.hud--mobile .rescue__flares {
+  gap: 0.2rem;
+}
+
+.hud--mobile .rescue__flare {
+  height: 14px;
+  border-radius: 5px;
+}
+
+.hud--mobile .rescue__flare span {
+  padding: 0 0.3rem;
+  font-size: 0.56rem;
+  line-height: 10px;
+}
+
+.hud--mobile .rescue__none {
+  font-size: 0.6rem;
+}
+
+.hud--mobile .rescue__way {
+  order: 4;
+  font-size: 0.75rem;
+}
+
+.hud--mobile .rescue__way em {
+  font-size: 0.58rem;
+}
+
+.hud--mobile .rescue__flag {
+  order: 5;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.52rem;
 }
 
 /* ---------------------------- the rescue card -------------------------- */

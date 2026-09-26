@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { LAST_GASP, RESCUE, SLOW, SOULS } from './rescue'
 import { useGame } from '../../shared/state/store'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
+import { useScreen } from '../../shared/ui/useScreen'
 import { useT } from '../../shared/i18n/useT'
 
 interface Light {
@@ -88,6 +89,7 @@ export function RescueHud() {
   const sailing = useGame((s) => s.rescue?.status === 'sailing')
   const readout = useReadout(Boolean(sailing))
   const coarse = useCoarsePointer()
+  const { mobile } = useScreen()
 
   if (!sailing) return null
   const close = readout.lights.some((l) => l.left < LAST_GASP && l.haul <= 0)
@@ -104,7 +106,8 @@ export function RescueHud() {
         <div className="rescue__saved">
           <span className="rescue__buoy" aria-hidden />
           <strong key={readout.saved}>{readout.saved}</strong>
-          <em>of {SOULS} aboard</em>
+          {/* The buoy says what is being counted; a phone has no room to. */}
+          <em>{mobile ? `of ${SOULS}` : `of ${SOULS} aboard`}</em>
         </div>
 
         <div className="rescue__bar">

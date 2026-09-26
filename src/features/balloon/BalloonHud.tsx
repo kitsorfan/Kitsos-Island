@@ -11,6 +11,7 @@ import type { Payload } from './balloonLogic'
 import { groundHeight } from '../island/terrainLogic'
 import { useGame } from '../../shared/state/store'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
+import { useScreen } from '../../shared/ui/useScreen'
 import { useT } from '../../shared/i18n/useT'
 
 interface Readout {
@@ -109,6 +110,7 @@ export function BalloonHud() {
   const flying = useGame((s) => s.balloon?.status === 'flying')
   const readout = useReadout(Boolean(flying))
   const coarse = useCoarsePointer()
+  const { mobile } = useScreen()
 
   if (!flying) return null
 
@@ -128,7 +130,8 @@ export function BalloonHud() {
             🎈
           </span>
           <strong key={readout.served}>{readout.served}</strong>
-          <em>of {CALL_TOTAL} served</em>
+          {/* The balloon says what is being counted; a phone has no room to. */}
+          <em>{mobile ? `of ${CALL_TOTAL}` : `of ${CALL_TOTAL} served`}</em>
         </div>
 
         <div className="bl__bar">

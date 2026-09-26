@@ -376,15 +376,8 @@ export const PROFILE: Record<string, string> = {
   'Worked alongside the degree from the third year: part-time at first, then full-time as Director of the "Pantokrator" Foundation through the fourth and fifth.':
     'Δούλευε παράλληλα με τις σπουδές από το τρίτο έτος: μερική απασχόληση στην αρχή, μετά πλήρης ως Διευθυντής του Ιδρύματος «Παντοκράτωρ» στο τέταρτο και το πέμπτο.',
   'The Independent movement': 'Το Ανεξάρτητο κίνημα',
-  'In his third year the faculty assemblies were being run by party-political groups with their own interests, and the students’ own problems were not getting a hearing. He and a few others founded an independent movement of ECE students, to get real representation by democratic means and to solve students’ issues rather than political ones.':
-    'Στο τρίτο του έτος οι Γενικές Συνελεύσεις της Σχολής κυριαρχούνταν από κομματικές παρατάξεις με δικά τους συμφέροντα, και τα πραγματικά προβλήματα των φοιτητών δεν ακούγονταν. Μαζί με λίγους ακόμη ίδρυσε ένα ανεξάρτητο κίνημα φοιτητών ΗΜΜΥ, για πραγματική εκπροσώπηση με δημοκρατικά μέσα και για λύσεις σε φοιτητικά ζητήματα, όχι πολιτικά.',
-  'Petition signatures': 'Υπογραφές στο ψήφισμα',
-  'Collected in': 'Μαζεύτηκαν σε',
-  '2 days': '2 μέρες',
-  'Spoke in front of': 'Μίλησε μπροστά σε',
-  '800 people': '800 άτομα',
-  'Independent representative': 'Ανεξάρτητος εκπρόσωπος',
-  '2 years': '2 χρόνια',
+  'In his third year, party-political groups ran the faculty assemblies and students’ own problems went unheard. He co-founded an independent movement of ECE students to win real representation by democratic means.':
+    'Στο τρίτο του έτος τις Γενικές Συνελεύσεις της Σχολής τις κρατούσαν κομματικές παρατάξεις και τα πραγματικά προβλήματα των φοιτητών δεν ακούγονταν. Συνίδρυσε ένα ανεξάρτητο κίνημα φοιτητών ΗΜΜΥ, για πραγματική εκπροσώπηση με δημοκρατικά μέσα.',
   'Ran a petition that more than 700 students signed in two days.':
     'Οργάνωσε ψήφισμα που υπέγραψαν πάνω από 700 φοιτητές σε δύο μέρες.',
   'Spoke at the councils and at a general meeting of 800.':

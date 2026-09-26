@@ -391,16 +391,7 @@ export const STUDENT_LIFE_SECTIONS: PanelSection[] = [
     blocks: [
       {
         type: 'text',
-        text: 'In his third year the faculty assemblies were being run by party-political groups with their own interests, and the students’ own problems were not getting a hearing. He and a few others founded an independent movement of ECE students, to get real representation by democratic means and to solve students’ issues rather than political ones.',
-      },
-      {
-        type: 'stats',
-        stats: [
-          { label: 'Petition signatures', value: '700+' },
-          { label: 'Collected in', value: '2 days' },
-          { label: 'Spoke in front of', value: '800 people' },
-          { label: 'Independent representative', value: '2 years' },
-        ],
+        text: 'In his third year, party-political groups ran the faculty assemblies and students’ own problems went unheard. He co-founded an independent movement of ECE students to win real representation by democratic means.',
       },
       {
         type: 'list',

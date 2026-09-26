@@ -9,6 +9,13 @@ export const turnHold = { left: false, right: false }
 /** Set true while the balloon's on-screen up or down is held: Shift, or Ctrl. */
 export const liftHold = { up: false, down: false }
 
+/**
+ * Set true while the cape's on-screen up or down is held: Space leaned on, or
+ * the dive. Its own pair rather than the balloon's, so a thumb on one can
+ * never be read as the other.
+ */
+export const capeHold = { up: false, down: false }
+
 /** Virtual stick written by the on-screen joystick, range -1..1. */
 export const touchStick = { x: 0, y: 0, active: false }
 
@@ -66,6 +73,8 @@ export function clearKeys() {
   turnHold.right = false
   liftHold.up = false
   liftHold.down = false
+  capeHold.up = false
+  capeHold.down = false
 }
 
 /* ------------------------------ the long hold ---------------------------- */

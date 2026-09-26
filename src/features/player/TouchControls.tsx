@@ -15,6 +15,7 @@ import { dialogueBridge } from './useKeyboard'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
 import { useScreen } from '../../shared/ui/useScreen'
 import { LiftButtons } from '../balloon/LiftButtons'
+import { CapeButtons } from './CapeButtons'
 import { useT } from '../../shared/i18n/useT'
 import * as sfx from '../../shared/engine/audio'
 
@@ -35,6 +36,8 @@ export function TouchControls() {
    * and nothing to press A at.
    */
   const sailing = useGame((s) => s.rescue?.status === 'sailing')
+  /* The star shirt out in the world, which is where the cape flies. */
+  const caped = useGame((s) => s.outfit === 'star' && s.area === 'island')
   const openJournal = useGame((s) => s.openJournal)
   const base = useRef<HTMLDivElement>(null)
   const knob = useRef<HTMLDivElement>(null)
@@ -119,16 +122,22 @@ export function TouchControls() {
                   J
                 </button>
               )}
-              <button
-                className="round-button round-button--jump"
-                onPointerDown={(e) => {
-                  e.preventDefault()
-                  queueJump()
-                }}
-                aria-label={t('Jump')}
-              >
-                ⤒
-              </button>
+              {/* Under the cape the jump is a take-off, and it wants holding
+                  to climb and a way back down, which one tap cannot give. */}
+              {caped ? (
+                <CapeButtons />
+              ) : (
+                <button
+                  className="round-button round-button--jump"
+                  onPointerDown={(e) => {
+                    e.preventDefault()
+                    queueJump()
+                  }}
+                  aria-label={t('Jump')}
+                >
+                  ⤒
+                </button>
+              )}
             </>
           )}
 

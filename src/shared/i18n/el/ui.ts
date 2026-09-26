@@ -71,6 +71,8 @@ export const UI: Record<string, string> = {
   'First person (X)': 'Πρώτο πρόσωπο (X)',
   'Climb (Shift)': 'Άνοδος (Shift)',
   'Sink (Ctrl)': 'Κάθοδος (Ctrl)',
+  'Fly up': 'Πέτα ψηλότερα',
+  'Fly down': 'Κατέβα',
   'Turn the camera left (Q)': 'Στρίψε την κάμερα αριστερά (Q)',
   'Turn the camera right (E)': 'Στρίψε την κάμερα δεξιά (E)',
   'The light stays as it is until the game is over':

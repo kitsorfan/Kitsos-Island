@@ -29,6 +29,12 @@ export function TouchControls() {
   const riding = useGame((s) => s.moto?.status === 'riding')
   const flying = useGame((s) => s.balloon?.status === 'flying')
   const onWatch = useGame((s) => s.hide?.status === 'playing')
+  /*
+   * At the helm the stick is the whole of it: a raft comes aboard by itself
+   * once the boat is alongside and slow, so there is nothing to jump over
+   * and nothing to press A at.
+   */
+  const sailing = useGame((s) => s.rescue?.status === 'sailing')
   const openJournal = useGame((s) => s.openJournal)
   const base = useRef<HTMLDivElement>(null)
   const knob = useRef<HTMLDivElement>(null)
@@ -93,33 +99,38 @@ export function TouchControls() {
       </div>
 
       <div className="touch__buttons">
-        {mode === 'explore' && !fighting && !riding && !flying && !onWatch && (
-          <>
-            {/* A phone has the journal in its controls card already. */}
-            {!mobile && (
+        {mode === 'explore' &&
+          !fighting &&
+          !riding &&
+          !flying &&
+          !onWatch &&
+          !sailing && (
+            <>
+              {/* A phone has the journal in its controls card already. */}
+              {!mobile && (
+                <button
+                  className="round-button round-button--small"
+                  onPointerDown={(e) => {
+                    e.preventDefault()
+                    sfx.confirm()
+                    openJournal()
+                  }}
+                >
+                  J
+                </button>
+              )}
               <button
-                className="round-button round-button--small"
+                className="round-button round-button--jump"
                 onPointerDown={(e) => {
                   e.preventDefault()
-                  sfx.confirm()
-                  openJournal()
+                  queueJump()
                 }}
+                aria-label={t('Jump')}
               >
-                J
+                ⤒
               </button>
-            )}
-            <button
-              className="round-button round-button--jump"
-              onPointerDown={(e) => {
-                e.preventDefault()
-                queueJump()
-              }}
-              aria-label={t('Jump')}
-            >
-              ⤒
-            </button>
-          </>
-        )}
+            </>
+          )}
 
         {onWatch ? (
           <button
@@ -234,7 +245,7 @@ export function TouchControls() {
               FIRE
             </button>
           </>
-        ) : (
+        ) : sailing ? null : (
           <button
             className="round-button"
             onPointerDown={(e) => {

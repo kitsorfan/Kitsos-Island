@@ -535,8 +535,8 @@ export const PROFILE: Record<string, string> = {
     'Η ναυαρχίδα πλατφόρμα Nurse Scheduling, σε παραγωγή σε μεγάλα νοσοκομεία των ΗΠΑ.',
   'Technical lead on every one of these: the architecture, the decisions, the reviews and the delivery into the hospital.':
     'Technical lead σε κάθε ένα από αυτά: η αρχιτεκτονική, οι αποφάσεις, οι ανασκοπήσεις και η παράδοση μέσα στο νοσοκομείο.',
-  'A React Native mobile application for the platform.':
-    'Εφαρμογή κινητού σε React Native για την πλατφόρμα.',
+  'A React Native mobile app for the nurses themselves: their schedule, their shift preferences and the rest of the platform on their phone, not only on the web.':
+    'Εφαρμογή κινητού σε React Native για τους ίδιους τους νοσηλευτές: το πρόγραμμά τους, οι προτιμήσεις βαρδιών τους και η υπόλοιπη πλατφόρμα στο κινητό τους, όχι μόνο στο web.',
   'An AI-powered documentation assistant built on Spring AI, retrieval-augmented generation and agentic AI.':
     'Βοηθός τεκμηρίωσης με τεχνητή νοημοσύνη, χτισμένος πάνω σε Spring AI, retrieval-augmented generation και agentic AI.',
   'A SMART on FHIR application embedded inside Epic EHR.':

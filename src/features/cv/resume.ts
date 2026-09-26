@@ -145,6 +145,7 @@ export const RESUME = {
       [
         'One of the first engineers at an AI healthcare startup founded by MIT Professor Dimitris Bertsimas; grew into Technical Lead of the flagship Nurse Scheduling platform and project lead on three projects.',
         'Architected and built the cloud-native Nurse Scheduling platform (Java, Spring Boot, React, MySQL, AWS), now live in four major U.S. hospitals.',
+        'Took it beyond the web with a React Native mobile app, so nurses check their schedule and set their shift preferences from their phone.',
         'Leads cross-functional teams of 5–10 developers across Greece, Boston (USA) and Morocco: architecture, technical decisions, code reviews and sprint planning.',
         'Delivered an AI documentation assistant (Spring AI, RAG), SMART on FHIR apps inside Epic EHR, SAML 2.0 SSO, UKG integration, notifications and audit logging.',
         'Modernised a legacy Java/Angular application through Agile practices, engineering standards, CI/CD, documentation and incremental refactoring.',
@@ -155,6 +156,7 @@ export const RESUME = {
         'Spring Boot',
         'Spring AI',
         'React',
+        'React Native',
         'MySQL',
         'AWS',
         'Docker',

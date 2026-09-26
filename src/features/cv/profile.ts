@@ -656,6 +656,7 @@ export const VELTISTON_SECTIONS: PanelSection[] = [
               'Spring Boot',
               'Spring AI',
               'React',
+              'React Native',
               'MySQL',
               'AWS',
               'Docker',
@@ -715,7 +716,7 @@ export const PLATFORM_SECTIONS: PanelSection[] = [
           'A Length of Stay analytics plugin delivered into Epic EHR through SMART on FHIR.',
           'Integration with UKG workforce management systems.',
           'SAML 2.0 single sign-on against Microsoft ADFS.',
-          'A React Native mobile application for the platform.',
+          'A React Native mobile app for the nurses themselves: their schedule, their shift preferences and the rest of the platform on their phone, not only on the web.',
           'A secure notification framework and comprehensive activity audit logging, reaching nurses through Microsoft Teams and Twilio SMS.',
           'A Jira-integrated ticketing system with Google reCAPTCHA for secure issue submission and workflow automation.',
           'HIPAA-compliant security and data handling architecture across all of it.',
@@ -1045,7 +1046,14 @@ export const SKILLS_SECTIONS: PanelSection[] = [
           },
           {
             label: 'Frontend',
-            tags: ['React', 'Angular', 'HTML', 'CSS', 'Tailwind CSS'],
+            tags: [
+              'React',
+              'React Native',
+              'Angular',
+              'HTML',
+              'CSS',
+              'Tailwind CSS',
+            ],
           },
           { label: 'Databases', tags: ['MySQL', 'Flyway'] },
           {

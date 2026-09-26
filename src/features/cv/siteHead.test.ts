@@ -5,7 +5,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { buildPersonLd, personLdScript } from './personLd'
-import { CV_NAME, PROFILE } from './profile'
+import { CV_NAME, NAME, PROFILE } from './profile'
 import { RESUME_PDF } from './resume'
 
 /**
@@ -43,8 +43,8 @@ describe('the link preview', () => {
     ).toBe(`${PROFILE.website}/`)
   })
 
-  it('names him the way the CV does', () => {
-    expect(meta('og:image:alt')).toContain(CV_NAME)
+  it('names him the way the picture does', () => {
+    expect(meta('og:image:alt')).toContain(NAME)
   })
 })
 

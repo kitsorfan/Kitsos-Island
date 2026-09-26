@@ -239,6 +239,12 @@ export const UI: Record<string, string> = {
   'Island Games': 'Παιχνίδια του Νησιού',
   'Four in daylight, one after the lamps go out. Leave any of them with Esc.':
     'Τέσσερα με το φως της μέρας, ένα αφού σβήσουν τα φώτα. Βγες από οποιοδήποτε με Esc.',
+  'Behind five locks. Find every district key first.':
+    'Πίσω από πέντε κλειδαριές. Βρες πρώτα όλα τα κλειδιά των συνοικιών.',
+  'After dark only. Press L.': 'Μόνο όταν νυχτώσει. Πάτα L.',
+  'Daylight only. Press L.': 'Μόνο με το φως της μέρας. Πάτα L.',
+  'After dark only.': 'Μόνο όταν νυχτώσει.',
+  'Daylight only.': 'Μόνο με το φως της μέρας.',
 
   /* ------------------------------ Balloon ----------------------------- */
   'Balloon drop': 'Ρίψη από αερόστατο',

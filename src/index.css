@@ -3187,10 +3187,19 @@ canvas {
   color: var(--ink-soft);
 }
 
+/* Two to a row where there is room for two, one where there is not, and
+   never a column wider than the card: a bare 370px ran the rows off the right
+   edge of a phone. */
 .arcade__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(370px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(370px, 100%), 1fr));
   gap: 0.45rem;
+}
+
+/* Without its rules a row is a name and a line, so a phone on its side has
+   the room for two of them abreast. Upright it is still one. */
+.arcade--compact .arcade__grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
 }
 
 /* One game to a card, two to a row: a colour, a name, what it is, and the

@@ -498,11 +498,6 @@ export const PROFILE: Record<string, string> = {
   'May 2026 – present': 'Μάιος 2026 – σήμερα',
   'Full-stack Software Engineer': 'Full-stack Software Engineer',
   'May 2024 – May 2026': 'Μάιος 2024 – Μάιος 2026',
-  'Alongside it': 'Παράλληλα',
-  'Lead Software Engineer': 'Lead Software Engineer',
-  'Holistic Hospital Optimization · contract, remote':
-    'Holistic Hospital Optimization · σύμβαση, εξ αποστάσεως',
-  'May 2024 – present': 'Μάιος 2024 – σήμερα',
   'What I shipped': 'Τι παρέδωσα',
   'Secure and scalable, or it does not ship.':
     'Ασφαλές και κλιμακώσιμο, αλλιώς δεν βγαίνει.',
@@ -527,10 +522,8 @@ export const PROFILE: Record<string, string> = {
     'Ηγήθηκε των εγκαταστάσεων σε παραγωγή σε μεγάλα νοσοκομεία των ΗΠΑ, σε άμεση συνεργασία με τους εμπλεκόμενους των νοσοκομείων.',
   'Modernized legacy applications: Agile practices, engineering standards, CI/CD pipelines, documentation, automated testing and incremental refactoring.':
     'Εκσυγχρόνισε παλαιές εφαρμογές: Agile πρακτικές, πρότυπα μηχανικής, pipelines CI/CD, τεκμηρίωση, αυτοματοποιημένες δοκιμές και σταδιακό refactoring.',
-  'Software lead on AI-powered healthcare applications for U.S. hospitals.':
-    'Επικεφαλής λογισμικού σε εφαρμογές υγείας με τεχνητή νοημοσύνη για νοσοκομεία των ΗΠΑ.',
-  'Nurse scheduling, hospital length-of-stay optimization, SMART on FHIR integrations and enterprise healthcare platform work.':
-    'Προγραμματισμός βαρδιών νοσηλευτών, βελτιστοποίηση διάρκειας νοσηλείας, ενσωματώσεις SMART on FHIR και εργασία σε εταιρική πλατφόρμα υγείας.',
+  'Also the software lead at Holistic Hospital Optimization, its sister company in the Dynamic Ideas group: AI-powered applications for U.S. hospitals, from nurse scheduling to length-of-stay optimization and SMART on FHIR integrations.':
+    'Επίσης επικεφαλής λογισμικού στη Holistic Hospital Optimization, την αδελφή της εταιρεία στον όμιλο Dynamic Ideas: εφαρμογές με τεχνητή νοημοσύνη για νοσοκομεία των ΗΠΑ, από τον προγραμματισμό βαρδιών νοσηλευτών ως τη βελτιστοποίηση διάρκειας νοσηλείας και τις ενσωματώσεις SMART on FHIR.',
   'The flagship Nurse Scheduling platform, live in major U.S. hospitals.':
     'Η ναυαρχίδα πλατφόρμα Nurse Scheduling, σε παραγωγή σε μεγάλα νοσοκομεία των ΗΠΑ.',
   'Technical lead on every one of these: the architecture, the decisions, the reviews and the delivery into the hospital.':
@@ -813,7 +806,6 @@ export const PROFILE: Record<string, string> = {
   'The Marvel run, watched properly and in sequence like a serious person':
     'Όλο το Marvel, δει σωστά και με τη σειρά σαν σοβαρός άνθρωπος',
   'Clinical Research': 'Κλινική έρευνα',
-  'Healthcare platforms': 'Πλατφόρμες υγείας',
   'Artificial Neural Networks': 'Τεχνητά νευρωνικά δίκτυα',
   'And anything well made: give me a good film and I will give you the evening':
     'Και οτιδήποτε καλοφτιαγμένο: δώσε μου μια καλή ταινία και σου δίνω το βράδυ',

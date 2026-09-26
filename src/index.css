@@ -1315,6 +1315,26 @@ canvas {
   color: var(--ink-soft);
 }
 
+/* A promotion: the employer on top, then each title held there in turn,
+   the earlier ones set back so the current one leads. */
+.timeline__org--above {
+  margin: 0 0 0.2rem;
+}
+
+.timeline__step .timeline__meta {
+  margin-bottom: 0.35rem;
+}
+
+.timeline__step:last-child .timeline__meta {
+  margin-bottom: 0.6rem;
+}
+
+.timeline__step + .timeline__step h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
 /* -------------------------------- radio ------------------------------- */
 
 .radio {

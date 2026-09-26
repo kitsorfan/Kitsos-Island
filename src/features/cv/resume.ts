@@ -87,20 +87,20 @@ function role(
  * Several titles at one employer, told as one job: the titles and their
  * dates stacked at the top, then a single account of the work across all of
  * them. A promotion reads better that way than as two jobs that repeat each
- * other.
+ * other. The island tells it the same way, so the steps and their dates are
+ * read from its entry rather than restated here.
  */
 function promoted(
   sections: PanelSection[],
-  titles: string[],
+  title: string,
   bullets: string[],
   tags?: string[],
 ): Entry {
-  const steps = titles.map((title) => ({
-    title,
-    meta: entry(sections, title).meta,
-  }))
-  const { org } = entry(sections, titles[0])
-  return { ...steps[0], org, bullets, tags, steps }
+  const { org, meta, steps } = entry(sections, title)
+  if (!steps) {
+    throw new Error(`resume: "${title}" in profile.ts has no steps`)
+  }
+  return { title, org, meta, bullets, tags, steps }
 }
 
 export const RESUME = {
@@ -141,12 +141,13 @@ export const RESUME = {
   experience: [
     promoted(
       VELTISTON_SECTIONS,
-      ['Senior Software Engineer', 'Full-stack Software Engineer'],
+      'Senior Software Engineer',
       [
         'One of the first engineers at an AI healthcare startup founded by MIT Professor Dimitris Bertsimas; grew into Technical Lead of the flagship Nurse Scheduling platform and project lead on three projects.',
         'Architected and built the cloud-native Nurse Scheduling platform (Java, Spring Boot, React, MySQL, AWS), now live in four major U.S. hospitals.',
         'Took it beyond the web with a React Native mobile app, so nurses check their schedule and set their shift preferences from their phone.',
         'Leads cross-functional teams of 5–10 developers across Greece, Boston (USA) and Morocco: architecture, technical decisions, code reviews and sprint planning.',
+        'Also software lead at Holistic Hospital Optimization, a sister company in the Dynamic Ideas group: length-of-stay optimisation and SMART on FHIR integrations.',
         'Delivered an AI documentation assistant (Spring AI, RAG), SMART on FHIR apps inside Epic EHR, SAML 2.0 SSO, UKG integration, notifications and audit logging.',
         'Modernised a legacy Java/Angular application through Agile practices, engineering standards, CI/CD, documentation and incremental refactoring.',
         'Ships weekly, secure, HIPAA-compliant releases with customers, Product, QA and DevOps; runs technical interviews, mentors and onboards engineers.',
@@ -169,9 +170,6 @@ export const RESUME = {
         'Sentry',
       ],
     ),
-    role(VELTISTON_SECTIONS, 'Lead Software Engineer', [
-      'Software lead on AI-powered healthcare applications for U.S. hospitals: nurse scheduling, length-of-stay optimisation and SMART on FHIR integrations.',
-    ]),
     role(
       IBM_SECTIONS,
       'DevOps Engineer',

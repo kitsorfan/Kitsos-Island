@@ -67,9 +67,17 @@ function renderBlock(block: PanelBlock): string {
                 .map((t) => `<li>${esc(t)}</li>`)
                 .join('')}</ul>`
             : ''
-          return `<article class="entry"><h3>${esc(e.title)}${org}</h3><p class="meta">${esc(
-            e.meta,
-          )}</p>${bullets}${tags}</article>`
+          // A promotion names every title held, each with its dates, and the
+          // employer once, on the first.
+          const head = (e.steps ?? [e])
+            .map(
+              (s, i) =>
+                `<h3>${esc(s.title)}${i === 0 ? org : ''}</h3><p class="meta">${esc(
+                  s.meta,
+                )}</p>`,
+            )
+            .join('')
+          return `<article class="entry">${head}${bullets}${tags}</article>`
         })
         .join('')
 

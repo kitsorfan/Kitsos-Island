@@ -6351,14 +6351,6 @@ canvas {
   line-height: 1.15;
 }
 
-.orbit__lead {
-  margin: 0;
-  max-width: 54ch;
-  color: #c3ccdc;
-  font-size: clamp(0.86rem, 2.4vw, 0.98rem);
-  line-height: 1.5;
-}
-
 /* The certificate itself, shown at whatever width the card has going. */
 .orbit__cert {
   width: 100%;
@@ -6442,30 +6434,6 @@ canvas {
 .orbit__take:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-}
-
-.orbit__credential {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.2rem 0.8rem;
-  margin: 0;
-  max-width: 100%;
-  font-size: 0.85rem;
-  text-align: left;
-  color: #94a2b8;
-}
-
-.orbit__credential dd {
-  margin: 0;
-  min-width: 0;
-  overflow-wrap: anywhere;
-  font-family: 'Courier New', Courier, monospace;
-  color: #dbe5f3;
-  user-select: all;
-}
-
-.orbit__credential a {
-  color: inherit;
 }
 
 .orbit__linkedin {

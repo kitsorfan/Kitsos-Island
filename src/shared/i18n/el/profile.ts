@@ -640,8 +640,8 @@ export const PROFILE: Record<string, string> = {
     'Το Ραδιοφωνικό Κέντρο εκπέμπει σε τρεις συχνότητες. Διάλεξε μία και το μήνυμα έρχεται κατευθείαν σε μένα, χωρίς κανέναν χειριστή στη μέση.',
 
   /* -------------------------- The keeper’s logbook -------------------- */
-  'Nine years of building things other people depend on: five at NTUA, one in uniform, half a year at IBM inside a bank, and two and a half leading platform work at an AI healthcare startup whose software now runs in four U.S. hospitals. One published paper along the way.':
-    'Εννιά χρόνια χτίζοντας πράγματα από τα οποία εξαρτώνται άλλοι: πέντε στο ΕΜΠ, ένα με στολή, μισό στην IBM μέσα σε μια τράπεζα, και δυόμισι ηγούμενος της δουλειάς σε πλατφόρμα μιας startup τεχνητής νοημοσύνης για την υγεία, της οποίας το λογισμικό τρέχει πλέον σε τέσσερα νοσοκομεία των ΗΠΑ. Και μία δημοσιευμένη εργασία στον δρόμο.',
+  'Senior full-stack engineer and technical lead with a track record of taking healthcare products from concept to production. Java and Spring Boot on the backend, React on the front, AWS underneath, and teams of 5–10 engineers across three countries shipping weekly into U.S. hospitals under HIPAA.':
+    'Senior full-stack μηχανικός και technical lead, με πορεία στο να πηγαίνει προϊόντα υγείας από τη σύλληψη ως την παραγωγή. Java και Spring Boot στο backend, React στο front, AWS από κάτω, και ομάδες 5–10 μηχανικών σε τρεις χώρες που παραδίδουν κάθε εβδομάδα σε νοσοκομεία των ΗΠΑ, με συμμόρφωση στο HIPAA.',
   Now: 'Τώρα',
   'Senior Software Engineer, Veltiston AI':
     'Senior Software Engineer, Veltiston AI',

@@ -1396,7 +1396,7 @@ export const LIGHTHOUSE_SECTIONS: PanelSection[] = [
     blocks: [
       {
         type: 'text',
-        text: 'Nine years of building things other people depend on: five at NTUA, one in uniform, half a year at IBM inside a bank, and two and a half leading platform work at an AI healthcare startup whose software now runs in four U.S. hospitals. One published paper along the way.',
+        text: 'Senior full-stack engineer and technical lead with a track record of taking healthcare products from concept to production. Java and Spring Boot on the backend, React on the front, AWS underneath, and teams of 5–10 engineers across three countries shipping weekly into U.S. hospitals under HIPAA.',
       },
       {
         type: 'stats',

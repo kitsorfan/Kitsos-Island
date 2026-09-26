@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { act, render } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { OrbitCard } from './OrbitCard'
 import { useGame } from '../../shared/state/store'
@@ -68,5 +68,40 @@ describe('the certificate preview', () => {
       useGame.setState({ credits: false })
     })
     expect(drawn).toHaveBeenCalled()
+  })
+})
+
+describe('the LinkedIn links', () => {
+  beforeEach(() => {
+    act(() => {
+      useGame.setState({
+        launch: { started: 0, arrived: true },
+        credits: false,
+      })
+    })
+  })
+
+  const link = (name: RegExp) => screen.queryByRole('link', { name })
+
+  it('offer the island to share before any name is typed', () => {
+    render(<OrbitCard />)
+    expect(link(/Share the island/)).toHaveAttribute(
+      'href',
+      expect.stringContaining(encodeURIComponent('https://www.kitsorfan.com/')),
+    )
+    expect(link(/Add to your LinkedIn profile/)).toBeNull()
+  })
+
+  it('offer the certificate for the profile once it has a name on it', () => {
+    render(<OrbitCard />)
+    fireEvent.change(screen.getByPlaceholderText('Your name'), {
+      target: { value: 'Ada Lovelace' },
+    })
+    const add = link(/Add to your LinkedIn profile/)
+    expect(add).toHaveAttribute(
+      'href',
+      expect.stringContaining('startTask=CERTIFICATION_NAME'),
+    )
+    expect(add?.getAttribute('href')).toContain('certId=KI-')
   })
 })

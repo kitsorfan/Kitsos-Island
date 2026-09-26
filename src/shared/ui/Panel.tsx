@@ -10,6 +10,7 @@ import { TechIcon } from '../../features/cv/TechIcon'
 import { hasTechIcon } from '../../features/cv/techMarkIcons'
 import type { Letter, PanelBlock } from '../../types'
 import { useT } from '../i18n/useT'
+import { CloseMark } from './CloseMark'
 
 export function Panel() {
   const t = useT()
@@ -72,7 +73,7 @@ export function Panel() {
               onClick={close}
               aria-label={t('Close')}
             >
-              ✕<kbd>Esc</kbd>
+              <CloseMark />
             </button>
           </div>
         </header>

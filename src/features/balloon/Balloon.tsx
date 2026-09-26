@@ -14,7 +14,7 @@ import {
 } from './balloonLogic'
 import { REACTIONS } from '../npc/actors'
 import type { Bystander, Call, Payload } from './balloonLogic'
-import { consumeDrop, isCrouching, readMove } from '../player/input'
+import { consumeDrop, isCrouching, liftHold, readMove } from '../player/input'
 import { groundHeight } from '../island/terrainLogic'
 import { isInteractive, useGame } from '../../shared/state/store'
 import { Character, type CharacterMotion } from '../player/Character'
@@ -792,8 +792,8 @@ export function BalloonGame() {
       const events = stepBalloon(delta, {
         throttle: move.y,
         steer: move.x,
-        burn: move.run,
-        vent: isCrouching(),
+        burn: move.run || liftHold.up,
+        vent: isCrouching() || liftHold.down,
         water: consumeDrop('water'),
         confetti: consumeDrop('confetti'),
       })

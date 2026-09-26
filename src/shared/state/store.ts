@@ -322,6 +322,12 @@ export interface Nearby {
   /** Set when the target cannot be used yet. */
   blocked?: boolean
   /**
+   * Set on a locked door he now holds every key for. Pressing it turns the
+   * locks and nothing else - going in is a second press - so the prompt has
+   * to say "Unlock", and look like a thing to do rather than a refusal.
+   */
+  unlock?: boolean
+  /**
    * Set when there is no key to press: the thing opens by itself as you
    * reach it. The label still shows, so you know what you are walking into,
    * but offering a keycap for a door already sliding would be a lie.
@@ -1043,7 +1049,15 @@ export const useGame = create<GameState>((raw, get) => {
 
     setNearby: (n) => {
       const current = get().nearby
-      if (current?.id === n?.id && current?.blocked === n?.blocked) return
+      /* The verb as well as the id: the same door can say Unlock and then
+         Enter, and a prompt that kept the first would offer the wrong press. */
+      if (
+        current?.id === n?.id &&
+        current?.blocked === n?.blocked &&
+        current?.verb === n?.verb &&
+        current?.unlock === n?.unlock
+      )
+        return
       set({ nearby: n })
     },
 
@@ -2770,7 +2784,7 @@ export function nextObjective(state: {
     return {
       buildingId: 'lighthouse',
       title: 'Five of five',
-      detail: 'Every key is in hand. The Old Lighthouse will open now.',
+      detail: 'Every key is in hand. Unlock the Old Lighthouse, then go in.',
     }
   }
   return null

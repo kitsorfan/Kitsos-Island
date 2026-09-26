@@ -3,6 +3,12 @@ const pressed = new Set<string>()
 /** Set true while a zoom button is held down; see readZoomHold. */
 export const zoomHold = { in: false, out: false }
 
+/** Set true while an on-screen turn button is held: Q's side, or E's. */
+export const turnHold = { left: false, right: false }
+
+/** Set true while the balloon's on-screen up or down is held: Shift, or Ctrl. */
+export const liftHold = { up: false, down: false }
+
 /** Virtual stick written by the on-screen joystick, range -1..1. */
 export const touchStick = { x: 0, y: 0, active: false }
 
@@ -56,6 +62,10 @@ export function clearKeys() {
   // camera running all the way to the stop while nobody is looking.
   zoomHold.in = false
   zoomHold.out = false
+  turnHold.left = false
+  turnHold.right = false
+  liftHold.up = false
+  liftHold.down = false
 }
 
 /* ------------------------------ the long hold ---------------------------- */
@@ -282,13 +292,18 @@ export function readMove(): MoveAxis {
   return { x, y, run }
 }
 
-/** Camera yaw nudge, in radians per second: Q swings it one way, E the other. */
+/**
+ * Camera yaw nudge, in radians per second: Q swings it one way, E the other,
+ * and the turn buttons at the edges of the screen stand in for each.
+ */
 export function readCameraTurn() {
   let turn = 0
   if (pressed.has('KeyQ')) turn += 1
   if (pressed.has('BracketLeft')) turn += 1
+  if (turnHold.left) turn += 1
   if (pressed.has('KeyE')) turn -= 1
   if (pressed.has('BracketRight')) turn -= 1
+  if (turnHold.right) turn -= 1
   return turn
 }
 

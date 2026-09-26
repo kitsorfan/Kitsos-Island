@@ -13,6 +13,8 @@ import {
 import { useGame } from '../../shared/state/store'
 import { dialogueBridge } from './useKeyboard'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
+import { useScreen } from '../../shared/ui/useScreen'
+import { LiftButtons } from '../balloon/LiftButtons'
 import { useT } from '../../shared/i18n/useT'
 import * as sfx from '../../shared/engine/audio'
 
@@ -21,11 +23,18 @@ const RADIUS = 52
 export function TouchControls() {
   const t = useT()
   const coarse = useCoarsePointer()
+  const { mobile } = useScreen()
   const mode = useGame((s) => s.mode)
   const fighting = useGame((s) => s.paintball?.status === 'playing')
   const riding = useGame((s) => s.moto?.status === 'riding')
   const flying = useGame((s) => s.balloon?.status === 'flying')
   const onWatch = useGame((s) => s.hide?.status === 'playing')
+  /*
+   * At the helm the stick is the whole of it: a raft comes aboard by itself
+   * once the boat is alongside and slow, so there is nothing to jump over
+   * and nothing to press A at.
+   */
+  const sailing = useGame((s) => s.rescue?.status === 'sailing')
   const openJournal = useGame((s) => s.openJournal)
   const base = useRef<HTMLDivElement>(null)
   const knob = useRef<HTMLDivElement>(null)
@@ -73,7 +82,7 @@ export function TouchControls() {
   }
 
   return (
-    <div className="touch">
+    <div className={`touch${mobile ? ' touch--mobile' : ''}`}>
       <div
         className="stick"
         ref={base}
@@ -90,30 +99,38 @@ export function TouchControls() {
       </div>
 
       <div className="touch__buttons">
-        {mode === 'explore' && !fighting && !riding && !flying && !onWatch && (
-          <>
-            <button
-              className="round-button round-button--small"
-              onPointerDown={(e) => {
-                e.preventDefault()
-                sfx.confirm()
-                openJournal()
-              }}
-            >
-              J
-            </button>
-            <button
-              className="round-button round-button--jump"
-              onPointerDown={(e) => {
-                e.preventDefault()
-                queueJump()
-              }}
-              aria-label={t('Jump')}
-            >
-              ⤒
-            </button>
-          </>
-        )}
+        {mode === 'explore' &&
+          !fighting &&
+          !riding &&
+          !flying &&
+          !onWatch &&
+          !sailing && (
+            <>
+              {/* A phone has the journal in its controls card already. */}
+              {!mobile && (
+                <button
+                  className="round-button round-button--small"
+                  onPointerDown={(e) => {
+                    e.preventDefault()
+                    sfx.confirm()
+                    openJournal()
+                  }}
+                >
+                  J
+                </button>
+              )}
+              <button
+                className="round-button round-button--jump"
+                onPointerDown={(e) => {
+                  e.preventDefault()
+                  queueJump()
+                }}
+                aria-label={t('Jump')}
+              >
+                ⤒
+              </button>
+            </>
+          )}
 
         {onWatch ? (
           <button
@@ -128,21 +145,9 @@ export function TouchControls() {
           </button>
         ) : flying ? (
           <>
-            {/* The burner is the only altitude control on a touch screen —
-                let go of it and the balloon sinks back down on its own. */}
-            <button
-              className="round-button round-button--burn"
-              onPointerDown={(e) => {
-                e.preventDefault()
-                setKey('ShiftLeft', true)
-              }}
-              onPointerUp={() => setKey('ShiftLeft', false)}
-              onPointerCancel={() => setKey('ShiftLeft', false)}
-              onPointerLeave={() => setKey('ShiftLeft', false)}
-              aria-label={t('Burner')}
-            >
-              BURN
-            </button>
+            {/* Up and down, the burner and the vent: let go of both and the
+                balloon sinks back on its own, only slower. */}
+            <LiftButtons look="round" />
             <button
               className="round-button round-button--water"
               onPointerDown={(e) => {
@@ -240,7 +245,7 @@ export function TouchControls() {
               FIRE
             </button>
           </>
-        ) : (
+        ) : sailing ? null : (
           <button
             className="round-button"
             onPointerDown={(e) => {

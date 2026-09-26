@@ -9,6 +9,7 @@ import {
 import * as sfx from '../../shared/engine/audio'
 import { drawMap, worldToMap } from './mapDraw'
 import { useT } from '../../shared/i18n/useT'
+import { CloseMark } from '../../shared/ui/CloseMark'
 
 export function MapOverlay() {
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -101,7 +102,7 @@ export function MapOverlay() {
             onClick={dismiss}
             aria-label={t('Close')}
           >
-            ✕<kbd>Esc</kbd>
+            <CloseMark />
           </button>
         </header>
 

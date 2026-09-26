@@ -6,6 +6,7 @@ import { useGame } from '../state/store'
 import { Character } from '../../features/player/Character'
 import * as sfx from '../engine/audio'
 import { useT } from '../i18n/useT'
+import { CloseMark } from './CloseMark'
 
 /**
  * The shortcut out of the game. Always reachable, so nobody who just wants the
@@ -83,7 +84,7 @@ export function Greeting() {
             onClick={dismiss}
             aria-label={t('Close')}
           >
-            ✕<kbd>Esc</kbd>
+            <CloseMark />
           </button>
 
           <p className="greeting__kicker">

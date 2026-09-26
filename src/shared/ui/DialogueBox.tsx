@@ -3,6 +3,8 @@ import { useGame } from '../state/store'
 import * as sfx from '../engine/audio'
 import { dialogueBridge } from '../../features/player/useKeyboard'
 import { useT } from '../i18n/useT'
+import { useCoarsePointer } from './useCoarsePointer'
+import { useScreen } from './useScreen'
 
 const CHARS_PER_SECOND = 120
 
@@ -12,6 +14,8 @@ export function DialogueBox() {
   const advance = useGame((s) => s.advance)
   const choose = useGame((s) => s.choose)
   const [typed, setTyped] = useState({ line: '', shown: 0 })
+  const coarse = useCoarsePointer()
+  const { mobile, portrait } = useScreen()
 
   const line = dialogue?.lines[dialogue.page] ?? ''
   // A new line always starts empty, without a reset render.
@@ -64,7 +68,10 @@ export function DialogueBox() {
   const choices = isLast && done ? dialogue.choices : undefined
 
   return (
-    <div className="dialogue-layer" onPointerDown={step}>
+    <div
+      className={`dialogue-layer${mobile && !portrait ? ' dialogue-layer--middle' : ''}`}
+      onPointerDown={step}
+    >
       <div className="dialogue" role="dialog" aria-live="polite">
         <div className="dialogue__name">
           <span>{dialogue.speaker}</span>
@@ -105,7 +112,9 @@ export function DialogueBox() {
           ) : (
             <span className="dialogue__hint">
               {t(done ? (isLast ? 'Close' : 'Next') : 'Skip')}
-              <kbd>Enter</kbd>
+              {/* Whichever the visitor has to press: the on-screen A on a
+                  touch screen, the same one that got them talking. */}
+              <kbd>{coarse ? 'A' : 'Enter'}</kbd>
             </span>
           )}
           {done && !choices && (

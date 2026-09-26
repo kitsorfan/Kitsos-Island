@@ -479,6 +479,172 @@ canvas {
   }
 }
 
+/* ---------------------------- hud on a phone --------------------------- */
+
+/* Three buttons have the room to say what they are, so they do. */
+.hud--mobile .hud__buttons .icon-button span {
+  display: inline;
+}
+
+/* Everything the phone's HUD folds away, laid out as the buttons it was:
+   four to a row held upright, and on its side, where height is what there is
+   least of, one row of as many as fit up to five. */
+.controls-card {
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  max-width: 100%;
+  padding: 0.6rem;
+  border-radius: 14px;
+  border: 3px solid var(--line);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  animation: pop-in 0.18s ease both;
+}
+
+/* A wrapping row rather than a grid, so a short set (a game's four) stays
+   one row as wide as it needs, and the full nine break at five instead of
+   running off the edge of a small phone. */
+.hud--mobile:not(.hud--portrait) .controls-card {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: calc(5 * 4.8rem + 4 * 0.5rem + 1.2rem + 6px);
+}
+
+.hud--mobile:not(.hud--portrait) .controls-card .icon-button {
+  flex: 0 0 4.8rem;
+}
+
+.controls-card .icon-button {
+  min-width: 0;
+  padding-inline: 0.35rem;
+}
+
+/* Upright, a game's panel shares the top line with the buttons when it is
+   small enough to (the paintball scoreboard is), and otherwise drops in under
+   them. wrap-reverse is what puts the buttons on top once the two no longer
+   fit, and it turns the cross axis over too: flex-end is the top here. */
+.hud--portrait .hud__top {
+  flex-wrap: wrap-reverse;
+  align-items: flex-end;
+  gap: 0.6rem;
+}
+
+/* On a line of its own the right half would start at the left, so it is
+   pushed over to where it lives. */
+.hud--portrait .hud__right {
+  margin-left: auto;
+}
+
+/* The settings card stops short of the stick's buttons rather than running
+   on underneath them, where the last rows could be seen and not pressed.
+   Upright, the stick is the taller thing to clear. */
+.hud--mobile .settings-card {
+  max-height: min(34rem, calc(100dvh - 13rem));
+}
+
+.hud--mobile.hud--portrait .settings-card {
+  max-height: min(34rem, calc(100dvh - 16rem));
+}
+
+/* On its side, the prompt shares the bottom edge with the stick on one side
+   and the round buttons on the other, so it keeps to the gap between them. */
+.hud--mobile:not(.hud--portrait) .prompt {
+  max-width: calc(100% - 23rem);
+}
+
+/* A phone on its side has the stick in one bottom corner and the A button in
+   the other, and the strip of island above them is too short to hold a line
+   of dialogue. So the box stays down at the bottom, in the middle, narrowed
+   to the gap between the two: it can then run to as many lines as it likes
+   without any of them going under a thumb. Upright, it sits at the top. */
+.dialogue-layer.dialogue-layer--middle {
+  padding-inline: 10rem;
+}
+
+/* The line under each game's panel naming its keys or its buttons. On a phone
+   the round buttons carry their own names, so it goes, on its side as well as
+   upright, where the narrow-screen rules already took it. */
+.hud--mobile .pb__keys,
+.hud--mobile .moto__keys,
+.hud--mobile .bl__keys,
+.hud--mobile .hd__keys,
+.hud--mobile .rescue__keys {
+  display: none;
+}
+
+.dialogue-layer--middle .dialogue {
+  padding: 1.25rem 1.2rem 0.8rem;
+}
+
+/* ------------------------- turning the camera -------------------------- */
+
+/* The see-through pills that stand at the edges of the screen: Q and E while
+   he walks, the balloon's up and down while it flies. See-through until
+   pressed, so the island reads through them. */
+.edge-button {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 4.5rem;
+  padding: 0;
+  pointer-events: auto;
+  color: rgba(42, 32, 51, 0.7);
+  border: 3px solid rgba(42, 32, 51, 0.32);
+  border-radius: 16px;
+  background: rgba(253, 247, 233, 0.26);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
+}
+
+@media (hover: hover) {
+  .edge-button:hover {
+    background: rgba(253, 247, 233, 0.5);
+  }
+}
+
+.edge-button:active {
+  color: var(--ink);
+  border-color: rgba(42, 32, 51, 0.7);
+  background: rgba(253, 247, 233, 0.8);
+}
+
+/* Q and E, halfway down each edge, where nothing else lives. */
+.turn-button {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.turn-button--left {
+  left: calc(env(safe-area-inset-left, 0px) + 0.4rem);
+}
+
+.turn-button--right {
+  right: calc(env(safe-area-inset-right, 0px) + 0.4rem);
+}
+
+/* The balloon's up over its down, on the right edge the turn has left. */
+.lift-pair {
+  position: absolute;
+  top: 50%;
+  right: calc(env(safe-area-inset-right, 0px) + 0.4rem);
+  translate: 0 -50%;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.lift-button {
+  height: 3.6rem;
+}
+
 .settings-card__hint {
   margin: 0.6rem 0 0;
   font-size: 0.72rem;
@@ -486,11 +652,16 @@ canvas {
   color: var(--ink-soft);
 }
 
+/* Centred with translate rather than transform: the float animation below
+   owns transform, and would overwrite a centring put there, leaving the hint
+   hanging off to the right of the middle rather than sitting on it. */
 .nudge {
   position: absolute;
   left: 50%;
   bottom: 5.5rem;
-  transform: translateX(-50%);
+  translate: -50% 0;
+  width: max-content;
+  max-width: calc(100% - 2rem);
   margin: 0;
   padding: 0.5rem 1rem;
   border-radius: 99px;
@@ -501,11 +672,16 @@ canvas {
   animation: float 2.4s ease-in-out infinite;
 }
 
+/* Centred with translate for the same reason as the nudge: pop-in scales it
+   with a transform and holds its last frame. One line while that fits, and
+   wrapped rather than run off the edge of a narrow screen once it does not. */
 .prompt {
   position: absolute;
   left: 50%;
   bottom: 2rem;
-  transform: translateX(-50%);
+  translate: -50% 0;
+  width: max-content;
+  max-width: calc(100% - 2rem);
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -516,13 +692,19 @@ canvas {
   box-shadow: 0 4px 0 rgba(42, 32, 51, 0.3);
   font-size: 1rem;
   font-weight: 600;
-  white-space: nowrap;
+  text-wrap: balance;
   animation: pop-in 0.16s ease both;
 }
 
 /* A door that opens by itself has no key to show, so it shows a way in
    instead: the same weight as the keycap it stands in for, so the prompt
    does not jump about as you walk from one kind of door to another. */
+/* The key stays whole when the words beside it have to wrap. */
+.prompt kbd,
+.prompt__auto {
+  flex-shrink: 0;
+}
+
 .prompt__auto {
   padding: 0 0.15rem;
   color: var(--line);
@@ -733,7 +915,8 @@ canvas {
   inset: 0;
   display: grid;
   place-items: center;
-  padding: clamp(0.6rem, 2.5vw, 1.8rem);
+  --overlay-pad: clamp(0.6rem, 2.5vw, 1.8rem);
+  padding: var(--overlay-pad);
   background: rgba(16, 12, 24, 0.55);
   backdrop-filter: blur(3px);
   animation: fade-in 0.18s ease both;
@@ -1504,8 +1687,11 @@ canvas {
   pointer-events: auto;
 }
 
+/* It never gives up its width to the buttons beside it: squeezed, it went
+   oval and read wrong under the thumb. */
 .stick {
   position: relative;
+  flex-shrink: 0;
   width: 132px;
   height: 132px;
   border-radius: 50%;
@@ -1791,6 +1977,17 @@ canvas {
 
 .prompt--locked strong {
   color: #a8402f;
+}
+
+/* Every key in hand: the locks are still shut, but this press turns them.
+   Gold like the keys, so it reads as something to do, not a refusal. */
+.prompt--unlock {
+  border-color: #b8860b;
+  background: rgba(255, 244, 204, 0.97);
+}
+
+.prompt--unlock strong {
+  color: #9a6b00;
 }
 
 /* ------------------------------- map -------------------------------- */
@@ -2308,14 +2505,32 @@ canvas {
 }
 
 @media (max-width: 720px) {
+  /* Stacked, the whole card scrolls, portrait and all, rather than the body
+     scrolling inside it. A body sharing a column with the portrait has to be
+     handed its height by the flexbox, and Safari hands it none: the card came
+     out as the portrait alone, with every word under it out of reach. Capped
+     by the screen itself too, not only by a percentage of the overlay. */
   .greeting {
     flex-direction: column;
+    max-height: calc(100vh - 2 * var(--overlay-pad));
+    max-height: calc(100dvh - 2 * var(--overlay-pad));
+    overflow: hidden auto;
+    overscroll-behavior: contain;
   }
 
+  /* No minimum from the canvas inside: its drawing buffer keeps the shape of
+     the last layout, so a phone turned wider would grow the portrait to
+     match it rather than hold it at its 190. */
   .greeting__portrait {
     flex: 0 0 190px;
+    min-height: 0;
     border-right: none;
     border-bottom: 4px solid var(--line);
+  }
+
+  .greeting__body {
+    flex: none;
+    overflow: visible;
   }
 
   .greeting__speech::before {
@@ -2638,6 +2853,92 @@ canvas {
 
 .pb__feed--bad {
   border-left: 5px solid #e63c58;
+}
+
+/* On a phone the same scoreboard in a third of the room, small enough to
+   share the top line with the buttons even held upright: no title and no row
+   names, since hearts and paint balls say what they are, the two of them on
+   one line, and everything under them drawn smaller. */
+.hud--mobile .pb {
+  position: relative;
+  width: 8rem;
+}
+
+.hud--mobile .pb__panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 0.4rem;
+  min-width: 0;
+  padding: 0.35rem 0.5rem 0.4rem;
+  border-radius: 12px;
+}
+
+.hud--mobile .pb__label,
+.hud--mobile .pb__row-label {
+  display: none;
+}
+
+.hud--mobile .pb__row {
+  margin: 0;
+}
+
+.hud--mobile .pb__hearts {
+  gap: 0.05rem;
+  font-size: 0.72rem;
+}
+
+.hud--mobile .pb__ammo {
+  gap: 0.15rem;
+}
+
+.hud--mobile .pb__ball {
+  width: 8px;
+  height: 8px;
+  border-width: 1.5px;
+}
+
+.hud--mobile .pb__down,
+.hud--mobile .pb__reload,
+.hud--mobile .pb__row--tally {
+  flex: 1 0 100%;
+  margin: 0;
+}
+
+.hud--mobile .pb__down {
+  padding: 0.15rem 0.35rem;
+  font-size: 0.62rem;
+}
+
+.hud--mobile .pb__reload {
+  height: 12px;
+}
+
+.hud--mobile .pb__reload span {
+  font-size: 0.5rem;
+  line-height: 8px;
+}
+
+.hud--mobile .pb__row--tally {
+  gap: 0.3rem;
+  font-size: 0.6rem;
+}
+
+.hud--mobile .pb__row--tally strong {
+  font-size: 0.72rem;
+}
+
+/* Who painted whom hangs under the scoreboard rather than widening it, which
+   would push it off the top line every time somebody was hit. */
+.hud--mobile .pb__feed {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
 }
 
 @keyframes pb-feed {
@@ -3027,10 +3328,19 @@ canvas {
   color: var(--ink-soft);
 }
 
+/* Two to a row where there is room for two, one where there is not, and
+   never a column wider than the card: a bare 370px ran the rows off the right
+   edge of a phone. */
 .arcade__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(370px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(370px, 100%), 1fr));
   gap: 0.45rem;
+}
+
+/* Without its rules a row is a name and a line, so a phone on its side has
+   the room for two of them abreast. Upright it is still one. */
+.arcade--compact .arcade__grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
 }
 
 /* One game to a card, two to a row: a colour, a name, what it is, and the
@@ -3185,6 +3495,68 @@ canvas {
   font-size: 0.76rem;
   font-weight: 700;
   color: var(--ink-soft);
+}
+
+/* On a phone the same panel in a third of the room, small enough to share
+   the top line with the buttons held upright, as the scoreboard does: the
+   place and the lap, the speed and the clock, and whatever the bike is up
+   to. The title, the order of the whole grid and the best lap are left to
+   the result card. */
+.hud--mobile .moto {
+  width: 8rem;
+}
+
+.hud--mobile .moto__panel {
+  min-width: 0;
+  padding: 0.35rem 0.5rem 0.4rem;
+  border-radius: 12px;
+}
+
+.hud--mobile .moto__label,
+.hud--mobile .moto-board,
+.hud--mobile .moto__next,
+.hud--mobile .moto__place em {
+  display: none;
+}
+
+.hud--mobile .moto__place {
+  margin: 0;
+  gap: 0.25rem;
+}
+
+.hud--mobile .moto__place strong {
+  font-size: 0.8rem;
+}
+
+.hud--mobile .moto__lap {
+  font-size: 0.46rem;
+}
+
+.hud--mobile .moto__row {
+  flex-wrap: wrap;
+  gap: 0.2rem 0.3rem;
+  margin-top: 0.25rem;
+}
+
+.hud--mobile .moto__row:empty {
+  display: none;
+}
+
+.hud--mobile .moto__speed {
+  font-size: 0.75rem;
+}
+
+.hud--mobile .moto__speed em {
+  font-size: 0.58rem;
+}
+
+.hud--mobile .moto__time {
+  font-size: 0.5rem;
+}
+
+.hud--mobile .moto__flag {
+  padding: 0.1rem 0.4rem;
+  font-size: 0.52rem;
 }
 
 /* The place you are running, then the order of the whole grid under it. */
@@ -3359,6 +3731,15 @@ canvas {
   font-size: 0.5rem;
   background: #2fb59a;
   color: var(--paper);
+}
+
+/* Five letters of the display face did not fit the round button at its
+   default size, and the last of them ran off the edge of it. */
+.round-button--pulse {
+  width: 78px;
+  height: 78px;
+  font-family: var(--font-display);
+  font-size: 0.6rem;
 }
 
 /* ---------------------------- motocross card --------------------------- */
@@ -3872,13 +4253,121 @@ canvas {
   color: var(--ink-soft);
 }
 
-.round-button--burn {
-  width: 72px;
-  height: 72px;
+/* On a phone the same panel in a third of the room, small enough to share
+   the top line with the buttons held upright, as the scoreboard does: the
+   count, what is left to drop, the height and the drift, and where to go
+   next. The title, the bar that repeats the count, the gauge that repeats
+   the height and the names on the racks are left off. What just landed
+   hangs under the panel rather than widening it. */
+.hud--mobile .bl {
+  position: relative;
+  width: 8rem;
+}
+
+.hud--mobile .bl__panel {
+  min-width: 0;
+  max-width: none;
+  padding: 0.35rem 0.5rem 0.4rem;
+  border-radius: 12px;
+}
+
+.hud--mobile .bl__label,
+.hud--mobile .bl__bar,
+.hud--mobile .bl__gauge,
+.hud--mobile .bl__rack-label {
+  display: none;
+}
+
+.hud--mobile .bl__served {
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.hud--mobile .bl__balloon {
+  font-size: 0.75rem;
+}
+
+.hud--mobile .bl__served strong {
+  font-size: 0.8rem;
+}
+
+.hud--mobile .bl__served em {
+  font-size: 0.6rem;
+}
+
+.hud--mobile .bl__racks {
+  gap: 0.2rem;
+  margin-top: 0.25rem;
+}
+
+.hud--mobile .bl__rack {
+  padding: 0.2rem 0.2rem;
+  border-width: 1.5px;
+}
+
+.hud--mobile .bl__rack-dots {
+  gap: 1.5px;
+}
+
+.hud--mobile .bl__pip {
+  width: 5px;
+  height: 5px;
+  border-width: 1px;
+}
+
+.hud--mobile .bl__row {
+  flex-wrap: wrap;
+  gap: 0.2rem 0.3rem;
+  margin-top: 0.25rem;
+}
+
+.hud--mobile .bl__alt,
+.hud--mobile .bl__drift {
+  font-size: 0.75rem;
+}
+
+.hud--mobile .bl__alt em,
+.hud--mobile .bl__drift em {
+  font-size: 0.58rem;
+}
+
+.hud--mobile .bl__flag {
+  padding: 0.1rem 0.4rem;
+  font-size: 0.52rem;
+}
+
+.hud--mobile .bl__next {
+  font-size: 0.6rem;
+}
+
+.hud--mobile .bl__feed {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
+}
+
+/* Up over down, where the burner was: the burner's own orange, and the
+   same pair of them a touch smaller than the drops beside them. */
+.touch__lift {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.round-button--lift {
+  width: 52px;
+  height: 52px;
   font-family: var(--font-display);
   font-size: 0.5rem;
-  background: #f0a33c;
   color: var(--paper);
+  background: #f0a33c;
+}
+
+.round-button--down {
+  background: #c9812b;
 }
 
 .round-button--water {
@@ -3893,6 +4382,24 @@ canvas {
   height: 68px;
   font-size: 1.5rem;
   background: #ff5fa8;
+}
+
+/* On a phone the balloon's corner has the stick, the up and the down, and
+   both drops to fit across one narrow screen, so the drops come down to
+   the size of a thumb and the gaps close up a little. */
+.touch--mobile {
+  padding: 0.9rem;
+}
+
+.touch--mobile .touch__buttons {
+  gap: 0.4rem;
+}
+
+.touch--mobile .round-button--water,
+.touch--mobile .round-button--confetti {
+  width: 60px;
+  height: 60px;
+  font-size: 1.3rem;
 }
 
 /* ------------------------------ balloon card --------------------------- */
@@ -4252,6 +4759,81 @@ canvas {
   font-size: 0.76rem;
   font-weight: 700;
   color: var(--ink-soft);
+}
+
+/* On a phone the same panel in a third of the room, small enough to share
+   the top line with the buttons held upright, as the scoreboard does. The
+   title, the bar that repeats the count and the seeker's hint are left off:
+   the edges of the screen already say how near somebody is. */
+.hud--mobile .hd {
+  position: relative;
+  width: 8rem;
+}
+
+.hud--mobile .hd__panel {
+  min-width: 0;
+  max-width: none;
+  padding: 0.35rem 0.5rem 0.4rem;
+  border-radius: 12px;
+}
+
+.hud--mobile .hd__label,
+.hud--mobile .hd__bar,
+.hud--mobile .hd__task {
+  display: none;
+}
+
+.hud--mobile .hd__found {
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.hud--mobile .hd__torch {
+  font-size: 0.75rem;
+}
+
+.hud--mobile .hd__found strong {
+  font-size: 0.8rem;
+}
+
+.hud--mobile .hd__found em {
+  font-size: 0.6rem;
+}
+
+.hud--mobile .hd__meter {
+  height: 15px;
+  margin-top: 0.25rem;
+}
+
+.hud--mobile .hd__meter span {
+  font-size: 0.5rem;
+  line-height: 11px;
+}
+
+.hud--mobile .hd__states {
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.hud--mobile .hd__state {
+  padding: 0.1rem 0.3rem;
+  font-size: 0.52rem;
+}
+
+.hud--mobile .hd__warn {
+  margin-top: 0.25rem;
+  padding: 0.15rem 0.35rem;
+  font-size: 0.56rem;
+}
+
+.hud--mobile .hd__feed {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
 }
 
 /* --------------------------- hide and seek card ------------------------ */
@@ -4835,6 +5417,103 @@ canvas {
   font-size: 0.76rem;
   font-weight: 700;
   color: var(--ink-soft);
+}
+
+/* On a phone the same panel in a third of the room, small enough to share
+   the top line with the buttons held upright, as the scoreboard does. The
+   rows give up their boxes so their pieces can be laid out afresh: the
+   count and the clock on one line, the flares under them, and the speed
+   with whatever is wrong at the foot. The title, the bar that repeats the
+   count and the raft count the flares already show are left off. */
+.hud--mobile .rescue {
+  width: 8rem;
+}
+
+.hud--mobile .rescue__panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 0.4rem;
+  min-width: 0;
+  padding: 0.35rem 0.5rem 0.4rem;
+  border-radius: 12px;
+}
+
+.hud--mobile .rescue__label,
+.hud--mobile .rescue__bar,
+.hud--mobile .rescue__afloat {
+  display: none;
+}
+
+.hud--mobile .rescue__row {
+  display: contents;
+}
+
+.hud--mobile .rescue__saved {
+  order: 1;
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.hud--mobile .rescue__buoy {
+  width: 10px;
+  height: 10px;
+  border-width: 2px;
+}
+
+.hud--mobile .rescue__saved strong {
+  font-size: 0.8rem;
+}
+
+.hud--mobile .rescue__saved em {
+  font-size: 0.6rem;
+}
+
+.hud--mobile .rescue__time {
+  order: 2;
+  font-size: 0.55rem;
+}
+
+.hud--mobile .rescue__flares,
+.hud--mobile .rescue__none {
+  order: 3;
+  flex: 1 0 100%;
+  margin: 0;
+}
+
+.hud--mobile .rescue__flares {
+  gap: 0.2rem;
+}
+
+.hud--mobile .rescue__flare {
+  height: 14px;
+  border-radius: 5px;
+}
+
+.hud--mobile .rescue__flare span {
+  padding: 0 0.3rem;
+  font-size: 0.56rem;
+  line-height: 10px;
+}
+
+.hud--mobile .rescue__none {
+  font-size: 0.6rem;
+}
+
+.hud--mobile .rescue__way {
+  order: 4;
+  font-size: 0.75rem;
+}
+
+.hud--mobile .rescue__way em {
+  font-size: 0.58rem;
+}
+
+.hud--mobile .rescue__flag {
+  order: 5;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.52rem;
 }
 
 /* ---------------------------- the rescue card -------------------------- */
@@ -5767,6 +6446,34 @@ canvas {
 
 .orbit__credential a {
   color: inherit;
+}
+
+.orbit__linkedin {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* LinkedIn's own blue, kept to the outline so the amber button above stays
+   the one thing on the card asking to be pressed. */
+.orbit__share {
+  padding: 0.45rem 1rem;
+  border: 1px solid rgba(80, 160, 230, 0.55);
+  border-radius: 999px;
+  color: #cfe4f7;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    transform 0.12s ease,
+    background 0.12s ease;
+}
+
+.orbit__share:hover,
+.orbit__share:focus-visible {
+  transform: translateY(-1px);
+  background: rgba(10, 102, 194, 0.28);
 }
 
 .orbit__signoff {

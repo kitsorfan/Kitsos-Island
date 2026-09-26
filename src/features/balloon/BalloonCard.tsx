@@ -85,7 +85,11 @@ export function BalloonCard() {
                   </div>
                   <div>
                     <dt>{t('Climb')}</dt>
-                    <dd>{t('Hold BURN')}</dd>
+                    <dd>{t('Hold UP')}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Sink')}</dt>
+                    <dd>{t('Hold DOWN')}</dd>
                   </div>
                   <div>
                     <dt>{t('Water bomb')}</dt>

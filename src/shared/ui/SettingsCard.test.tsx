@@ -10,6 +10,7 @@ import { LEVELS } from '../engine/audio'
 import { KEYS } from '../../features/island/world'
 import { EL } from '../i18n/el/index'
 import { loadLocale } from '../i18n'
+import { fakeScreen } from '../../test/screen'
 
 /**
  * Everything the visitor is allowed to turn down.
@@ -172,5 +173,18 @@ describe('taking the visit back', () => {
     act(() => button(new RegExp(EL['Clear it'])).click())
     expect(useGame.getState().locale).toBe('el')
     expect(useGame.getState().entries).toEqual([])
+  })
+})
+
+describe('the controls chart', () => {
+  it('lists the keys on a screen that has a keyboard', () => {
+    render(<SettingsCard />)
+    expect(screen.getByRole('heading', { name: 'Controls' })).toBeVisible()
+  })
+
+  it('is left off a phone, which has no keys to press', () => {
+    fakeScreen({ mobile: true, coarse: true })
+    render(<SettingsCard />)
+    expect(screen.queryByRole('heading', { name: 'Controls' })).toBeNull()
   })
 })

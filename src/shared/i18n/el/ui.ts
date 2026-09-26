@@ -66,6 +66,13 @@ export const UI: Record<string, string> = {
   'Zoom out (- or the wheel)': 'Ζουμ μακριά (- ή η ροδέλα)',
   'Sound, music, quality, and the controls':
     'Ήχος, μουσική, ποιότητα και χειριστήρια',
+  'Map, journal, games, day or night, and the camera':
+    'Χάρτης, ημερολόγιο, παιχνίδια, μέρα ή νύχτα και η κάμερα',
+  'First person (X)': 'Πρώτο πρόσωπο (X)',
+  'Climb (Shift)': 'Άνοδος (Shift)',
+  'Sink (Ctrl)': 'Κάθοδος (Ctrl)',
+  'Turn the camera left (Q)': 'Στρίψε την κάμερα αριστερά (Q)',
+  'Turn the camera right (E)': 'Στρίψε την κάμερα δεξιά (E)',
   'The light stays as it is until the game is over':
     'Το φως μένει όπως είναι μέχρι να τελειώσει το παιχνίδι',
   'Nothing stays alight in the water': 'Τίποτα δεν μένει αναμμένο στο νερό',
@@ -235,6 +242,12 @@ export const UI: Record<string, string> = {
   'Island Games': 'Παιχνίδια του Νησιού',
   'Four in daylight, one after the lamps go out. Leave any of them with Esc.':
     'Τέσσερα με το φως της μέρας, ένα αφού σβήσουν τα φώτα. Βγες από οποιοδήποτε με Esc.',
+  'Behind five locks. Find every district key first.':
+    'Πίσω από πέντε κλειδαριές. Βρες πρώτα όλα τα κλειδιά των συνοικιών.',
+  'After dark only. Press L.': 'Μόνο όταν νυχτώσει. Πάτα L.',
+  'Daylight only. Press L.': 'Μόνο με το φως της μέρας. Πάτα L.',
+  'After dark only.': 'Μόνο όταν νυχτώσει.',
+  'Daylight only.': 'Μόνο με το φως της μέρας.',
 
   /* ------------------------------ Balloon ----------------------------- */
   'Balloon drop': 'Ρίψη από αερόστατο',
@@ -249,7 +262,9 @@ export const UI: Record<string, string> = {
   Drift: 'Πλεύση',
   Stick: 'Μοχλός',
   Climb: 'Άνοδος',
-  'Hold BURN': 'Κράτα BURN',
+  'Hold UP': 'Κράτα UP',
+  'Hold DOWN': 'Κράτα DOWN',
+  Sink: 'Κάθοδος',
   '💧 button': 'Κουμπί 💧',
   '🎉 button': 'Κουμπί 🎉',
   'Lean into the drift': 'Γείρε προς την πλεύση',
@@ -417,6 +432,7 @@ export const UI: Record<string, string> = {
   'Z and C, or the wheel': 'Z και C, ή η ρόδα',
   drift: 'πλεύση',
   climb: 'άνοδος',
+  'climb and sink': 'άνοδος και κάθοδος',
   drop: 'ρίψη',
   turn: 'στροφή',
   burner: 'καυστήρας',
@@ -455,6 +471,8 @@ export const UI: Record<string, string> = {
   'Preview of your certificate': 'Προεπισκόπηση του πιστοποιητικού σου',
   'Credential ID': 'Αναγνωριστικό πιστοποιητικού',
   'Credential URL': 'Σύνδεσμος επαλήθευσης',
+  'Add to your LinkedIn profile': 'Πρόσθεσέ το στο προφίλ σου στο LinkedIn',
+  'Share the island on LinkedIn': 'Μοιράσου το νησί στο LinkedIn',
   'Signed by': 'Υπογραφή',
   'Thanks for walking the whole of it.':
     'Ευχαριστώ που το περπάτησες ολόκληρο.',

@@ -3,6 +3,7 @@ import { COUNT, HEAD_START, HIDE, HOLD_OUT } from './hideLogic'
 import { isCrouching } from '../player/input'
 import { useGame } from '../../shared/state/store'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
+import { useScreen } from '../../shared/ui/useScreen'
 import { useT } from '../../shared/i18n/useT'
 
 interface Readout {
@@ -79,6 +80,8 @@ export function HideHud() {
   const handLight = useGame((s) => s.handLight)
   const readout = useReadout(Boolean(playing))
   const coarse = useCoarsePointer()
+  /* Shorter counts on a phone, where the panel shares the top line. */
+  const { mobile } = useScreen()
 
   if (!playing) return null
   const seeking = role === 'seeker'
@@ -122,7 +125,7 @@ export function HideHud() {
                 🔦
               </span>
               <strong key={readout.found}>{readout.found}</strong>
-              <em>of {COUNT} found</em>
+              <em>{mobile ? `of ${COUNT}` : `of ${COUNT} found`}</em>
             </div>
             <div className="hd__bar">
               <div
@@ -151,8 +154,11 @@ export function HideHud() {
               <span className="hd__torch" aria-hidden>
                 🌒
               </span>
-              <strong>{Math.ceil(readout.left)}</strong>
-              <em>{t('seconds to hold out')}</em>
+              <strong>
+                {Math.ceil(readout.left)}
+                {mobile ? 's' : ''}
+              </strong>
+              {!mobile && <em>{t('seconds to hold out')}</em>}
             </div>
             <div className="hd__bar">
               <div

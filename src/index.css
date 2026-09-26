@@ -5827,6 +5827,34 @@ canvas {
   color: inherit;
 }
 
+.orbit__linkedin {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* LinkedIn's own blue, kept to the outline so the amber button above stays
+   the one thing on the card asking to be pressed. */
+.orbit__share {
+  padding: 0.45rem 1rem;
+  border: 1px solid rgba(80, 160, 230, 0.55);
+  border-radius: 999px;
+  color: #cfe4f7;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    transform 0.12s ease,
+    background 0.12s ease;
+}
+
+.orbit__share:hover,
+.orbit__share:focus-visible {
+  transform: translateY(-1px);
+  background: rgba(10, 102, 194, 0.28);
+}
+
 .orbit__signoff {
   margin: 0;
   max-width: 52ch;

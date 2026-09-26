@@ -12,6 +12,7 @@ import {
 import { NAME_LIMIT } from './certificate'
 import { downloadCv } from '../cv/downloadCv'
 import { formatSerial, mintSerial, signFor, verifyUrl } from './certId'
+import { linkedinAddUrl, linkedinShareUrl } from './linkedin'
 import { TROPHIES, trophyCount } from './trophies'
 import * as sfx from '../../shared/engine/audio'
 import { useGame } from '../../shared/state/store'
@@ -157,22 +158,45 @@ export function OrbitCard() {
         </div>
 
         {ready && (
-          /* The two fields LinkedIn asks for when a certification is added,
-             so they can be copied straight across. */
-          <dl className="orbit__credential">
-            <dt>{t('Credential ID')}</dt>
-            <dd>{reference}</dd>
-            <dt>{t('Credential URL')}</dt>
-            <dd>
+          <>
+            {/* The two fields LinkedIn asks for when a certification is
+                added, so they can be copied straight across - or skipped,
+                since the first link below fills them in. */}
+            <dl className="orbit__credential">
+              <dt>{t('Credential ID')}</dt>
+              <dd>{reference}</dd>
+              <dt>{t('Credential URL')}</dt>
+              <dd>
+                <a
+                  href={verifyUrl(reference, cleanName(name))}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {verifyUrl(reference, cleanName(name))}
+                </a>
+              </dd>
+            </dl>
+            <div className="orbit__linkedin">
               <a
-                href={verifyUrl(reference, cleanName(name))}
+                className="orbit__share"
+                href={linkedinAddUrl(reference, cleanName(name))}
                 target="_blank"
                 rel="noreferrer"
+                onClick={() => sfx.confirm()}
               >
-                {verifyUrl(reference, cleanName(name))}
+                {t('Add to your LinkedIn profile')}
               </a>
-            </dd>
-          </dl>
+              <a
+                className="orbit__share"
+                href={linkedinShareUrl(reference, cleanName(name))}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => sfx.confirm()}
+              >
+                {t('Share on LinkedIn')}
+              </a>
+            </div>
+          </>
         )}
 
         <p className="orbit__stickers">

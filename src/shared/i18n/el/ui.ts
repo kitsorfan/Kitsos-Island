@@ -457,6 +457,8 @@ export const UI: Record<string, string> = {
   'Preview of your certificate': 'Προεπισκόπηση του πιστοποιητικού σου',
   'Credential ID': 'Αναγνωριστικό πιστοποιητικού',
   'Credential URL': 'Σύνδεσμος επαλήθευσης',
+  'Add to your LinkedIn profile': 'Πρόσθεσέ το στο προφίλ σου στο LinkedIn',
+  'Share on LinkedIn': 'Κοινοποίησέ το στο LinkedIn',
   'Signed by': 'Υπογραφή',
   'Thanks for walking the whole of it.':
     'Ευχαριστώ που το περπάτησες ολόκληρο.',

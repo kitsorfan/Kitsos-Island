@@ -501,7 +501,6 @@ export const PROFILE: Record<string, string> = {
   'What I shipped': 'Τι παρέδωσα',
   'Secure and scalable, or it does not ship.':
     'Ασφαλές και κλιμακώσιμο, αλλιώς δεν βγαίνει.',
-  'How it stays up': 'Πώς μένει όρθιο',
   Observability: 'Παρατηρησιμότητα',
   Delivery: 'Παράδοση',
   Testing: 'Δοκιμές',

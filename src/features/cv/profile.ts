@@ -716,22 +716,6 @@ export const PLATFORM_SECTIONS: PanelSection[] = [
       },
     ],
   },
-  {
-    heading: 'How it stays up',
-    blocks: [
-      {
-        type: 'tags',
-        groups: [
-          { label: 'Observability', tags: ['Grafana', 'Graylog', 'Sentry'] },
-          {
-            label: 'Delivery',
-            tags: ['Docker', 'Jenkins', 'GitLab CI', 'Flyway'],
-          },
-          { label: 'Testing', tags: ['JUnit', 'Mockito', 'JaCoCo'] },
-        ],
-      },
-    ],
-  },
 ]
 
 export const IBM_SECTIONS: PanelSection[] = [

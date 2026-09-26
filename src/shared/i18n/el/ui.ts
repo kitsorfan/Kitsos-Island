@@ -68,6 +68,7 @@ export const UI: Record<string, string> = {
     'Ήχος, μουσική, ποιότητα και χειριστήρια',
   'Map, journal, games, day or night, and the camera':
     'Χάρτης, ημερολόγιο, παιχνίδια, μέρα ή νύχτα και η κάμερα',
+  'First person (X)': 'Πρώτο πρόσωπο (X)',
   'Turn the camera left (Q)': 'Στρίψε την κάμερα αριστερά (Q)',
   'Turn the camera right (E)': 'Στρίψε την κάμερα δεξιά (E)',
   'The light stays as it is until the game is over':

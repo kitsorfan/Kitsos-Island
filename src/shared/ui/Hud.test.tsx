@@ -52,6 +52,23 @@ describe('the HUD on a big screen', () => {
     expect(button(/Turn the camera left \(Q\)/)).toBeInTheDocument()
     expect(button(/Turn the camera right \(E\)/)).toBeInTheDocument()
   })
+
+  it('offers first person on a button as well as on X', () => {
+    render(<Hud />)
+    const eyes = button(/First person/)!
+    expect(eyes).toHaveAttribute('aria-pressed', 'false')
+    fireEvent.click(eyes)
+    expect(useGame.getState().firstPerson).toBe(true)
+    expect(button(/First person/)).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('stands the zoom down while he is looking out of his own eyes', () => {
+    render(<Hud />)
+    fireEvent.click(button(/First person/)!)
+    expect(button(/^🔍/)).not.toBeInTheDocument()
+    fireEvent.click(button(/First person/)!)
+    expect(button(/^🔍/)).toBeInTheDocument()
+  })
 })
 
 describe('the turn buttons', () => {
@@ -127,6 +144,7 @@ describe('the HUD on a phone', () => {
       'Games',
       'Day',
       'Walk',
+      'First person',
       'In',
       'Out',
     ]) {

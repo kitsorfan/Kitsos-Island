@@ -83,6 +83,7 @@ export function Hud() {
   const openGreeting = useGame((s) => s.openGreeting)
   const night = useGame((s) => s.night)
   const firstPerson = useGame((s) => s.firstPerson)
+  const toggleFirstPerson = useGame((s) => s.toggleFirstPerson)
   const toggleNight = useGame((s) => s.toggleNight)
   const handLight = useGame((s) => s.handLight)
   const toggleHandLight = useGame((s) => s.toggleHandLight)
@@ -252,6 +253,15 @@ export function Hud() {
         title={t('Keep running, the same as holding Shift')}
       >
         👟<span>{t(sprint ? 'Running' : 'Walk')}</span>
+      </button>
+      {/* X on the keyboard, and the only way into his eyes on a phone. */}
+      <button
+        className={`icon-button${firstPerson ? ' icon-button--live' : ''}`}
+        aria-pressed={firstPerson}
+        onClick={toggleFirstPerson}
+        title={t('First person (X)')}
+      >
+        👁️<span>{t('First person')}</span>
       </button>
       {/* Nothing to pull the camera back from when you are inside
           his head, so the pair of them stand down. */}

@@ -2800,6 +2800,68 @@ canvas {
   border-left: 5px solid #e63c58;
 }
 
+/* On a phone the same scoreboard in half the room: no title and no row
+   names, since hearts and paint balls say what they are, the two of them on
+   one line, and everything under them drawn smaller. */
+.hud--mobile .pb__panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3rem 0.7rem;
+  min-width: 0;
+  width: 11.5rem;
+  padding: 0.4rem 0.6rem 0.45rem;
+  border-radius: 12px;
+}
+
+.hud--mobile .pb__label,
+.hud--mobile .pb__row-label {
+  display: none;
+}
+
+.hud--mobile .pb__row {
+  margin: 0;
+}
+
+.hud--mobile .pb__hearts {
+  font-size: 0.85rem;
+}
+
+.hud--mobile .pb__ball {
+  width: 10px;
+  height: 10px;
+}
+
+.hud--mobile .pb__down,
+.hud--mobile .pb__reload,
+.hud--mobile .pb__row--tally {
+  flex: 1 0 100%;
+  margin: 0;
+}
+
+.hud--mobile .pb__reload {
+  height: 14px;
+}
+
+.hud--mobile .pb__reload span {
+  font-size: 0.58rem;
+  line-height: 10px;
+}
+
+.hud--mobile .pb__row--tally {
+  font-size: 0.68rem;
+}
+
+.hud--mobile .pb__row--tally strong {
+  font-size: 0.8rem;
+}
+
+.hud--mobile .pb__feed {
+  font-size: 0.74rem;
+  padding: 0.25rem 0.6rem;
+}
+
 @keyframes pb-feed {
   0% {
     opacity: 0;

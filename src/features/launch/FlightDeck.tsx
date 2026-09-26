@@ -309,7 +309,8 @@ function Hologram() {
  */
 function Bulkheads() {
   /* Ribs round the wall, skipping the arcs the window and the airlock have
-     already taken. */
+     already taken, and the one behind the logbook on the east wall - it
+     stood straight up out of the book like a dark stick. */
   const ribs = useMemo(() => {
     const out: { at: [number, number]; turn: number }[] = []
     const count = 16
@@ -318,6 +319,7 @@ function Bulkheads() {
       const x = Math.cos(a) * 9.5
       const z = Math.sin(a) * 9.5
       if (z < -6.5 || x < -7.5) continue
+      if (x > 0 && Math.abs(z) < 1) continue
       out.push({ at: [x, z], turn: -a })
     }
     return out

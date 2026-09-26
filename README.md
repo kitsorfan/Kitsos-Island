@@ -58,6 +58,17 @@ GitHub Actions runs the same gates again on every push to `main` and
 types, tests with coverage, the build — and checks every commit message in a
 pull request. Dependabot opens weekly dependency updates against `develop`.
 
+`main` only moves when the repository owner pushes to it: a ruleset blocks
+every other push, merge, force push and deletion. `develop` cannot be deleted
+or force-pushed either, and a pull request into it, Dependabot's included,
+cannot merge until the CI checks have passed; the owner's own pushes go
+straight in. GitHub keeps the live copies under Settings → Rules;
+[`.github/rulesets/`](.github/rulesets/) holds the same rulesets in a form
+Rulesets → New ruleset → Import a ruleset takes, so change both together.
+
+A security problem goes to a private advisory, not an issue: see
+[`.github/SECURITY.md`](.github/SECURITY.md).
+
 ### The PDF CV
 
 The island hands out a two-page A4 PDF, `public/Orfanopoulos-Christos-CV.pdf`,

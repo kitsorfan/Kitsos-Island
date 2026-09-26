@@ -4,6 +4,7 @@ import { TOTAL_ENTRIES, hasProgress, keyCount, useGame } from '../state/store'
 import * as sfx from '../engine/audio'
 import type { Quality } from '../../types'
 import { LOCALES, useTranslate } from '../i18n'
+import { useScreen } from './useScreen'
 
 /**
  * Everything the visitor is allowed to turn down, in one place.
@@ -47,6 +48,7 @@ export function SettingsCard() {
   const wearStarShirt = useGame((s) => s.wearStarShirt)
   const walked = useGame(hasProgress)
   const t = useTranslate(locale)
+  const { mobile } = useScreen()
 
   // Asking twice, because the button sits one tap away from the volume and
   // there is no way back from it.
@@ -219,99 +221,102 @@ export function SettingsCard() {
         )}
       </div>
 
-      <div className="settings-card__controls">
-        <h4>{t('Controls')}</h4>
-        <dl>
-          <div>
-            <dt>{t('Move')}</dt>
-            <dd>{t('WASD / Arrows')}</dd>
-          </div>
-          <div>
-            <dt>{t('Sprint')}</dt>
-            <dd>{t('Shift')}</dd>
-          </div>
-          <div>
-            <dt>{t('Interact')}</dt>
-            <dd>{t('Enter')}</dd>
-          </div>
-          <div>
-            <dt>{t('Jump')}</dt>
-            <dd>{t('Space')}</dd>
-          </div>
-          <div>
-            <dt>{t('Turn camera')}</dt>
-            <dd>{t('Q and E')}</dd>
-          </div>
-          <div>
-            <dt>{t('Zoom')}</dt>
-            <dd>{t('Z and C, or the wheel')}</dd>
-          </div>
-          <div>
-            <dt>{t('First person')}</dt>
-            <dd>X</dd>
-          </div>
-          <div>
-            <dt>{t('Map & travel')}</dt>
-            <dd>{t('M')}</dd>
-          </div>
-          <div>
-            <dt>{t('Journal')}</dt>
-            <dd>{t('J')}</dd>
-          </div>
-          <div>
-            <dt>{t('Day / night')}</dt>
-            <dd>{t('L')}</dd>
-          </div>
-          <div>
-            <dt>{t('Torch / flashlight')}</dt>
-            <dd>{t('T')}</dd>
-          </div>
-          <div>
-            <dt>{t('Contact & CV')}</dt>
-            <dd>{t('C')}</dd>
-          </div>
-          <div>
-            <dt>{t('Games board')}</dt>
-            <dd>{t('P')}</dd>
-          </div>
-          <div>
-            <dt>{t('Shoot paint')}</dt>
-            <dd>{t('Space / click')}</dd>
-          </div>
-          <div>
-            <dt>{t('Get down')}</dt>
-            <dd>{t('Ctrl')}</dd>
-          </div>
-          <div>
-            <dt>{t('Wheelie')}</dt>
-            <dd>{t('Space')}</dd>
-          </div>
-          <div>
-            <dt>{t('Burner / vent')}</dt>
-            <dd>{t('Shift / Ctrl')}</dd>
-          </div>
-          <div>
-            <dt>{t('Water bomb')}</dt>
-            <dd>{t('Space')}</dd>
-          </div>
-          <div>
-            <dt>{t('Confetti')}</dt>
-            <dd>{t('F')}</dd>
-          </div>
-          <div>
-            <dt>{t('Swing the beam')}</dt>
-            <dd>{t('A and D')}</dd>
-          </div>
-          <div>
-            <dt>{t('Wide pulse')}</dt>
-            <dd>{t('Space')}</dd>
-          </div>
-          <div>
-            <dt>{t('Back / leave')}</dt>
-            <dd>{t('Esc')}</dd>
-          </div>
-        </dl>
-      </div>
+      {/* A keyboard chart, and a phone has no keyboard to read it against. */}
+      {!mobile && (
+        <div className="settings-card__controls">
+          <h4>{t('Controls')}</h4>
+          <dl>
+            <div>
+              <dt>{t('Move')}</dt>
+              <dd>{t('WASD / Arrows')}</dd>
+            </div>
+            <div>
+              <dt>{t('Sprint')}</dt>
+              <dd>{t('Shift')}</dd>
+            </div>
+            <div>
+              <dt>{t('Interact')}</dt>
+              <dd>{t('Enter')}</dd>
+            </div>
+            <div>
+              <dt>{t('Jump')}</dt>
+              <dd>{t('Space')}</dd>
+            </div>
+            <div>
+              <dt>{t('Turn camera')}</dt>
+              <dd>{t('Q and E')}</dd>
+            </div>
+            <div>
+              <dt>{t('Zoom')}</dt>
+              <dd>{t('Z and C, or the wheel')}</dd>
+            </div>
+            <div>
+              <dt>{t('First person')}</dt>
+              <dd>X</dd>
+            </div>
+            <div>
+              <dt>{t('Map & travel')}</dt>
+              <dd>{t('M')}</dd>
+            </div>
+            <div>
+              <dt>{t('Journal')}</dt>
+              <dd>{t('J')}</dd>
+            </div>
+            <div>
+              <dt>{t('Day / night')}</dt>
+              <dd>{t('L')}</dd>
+            </div>
+            <div>
+              <dt>{t('Torch / flashlight')}</dt>
+              <dd>{t('T')}</dd>
+            </div>
+            <div>
+              <dt>{t('Contact & CV')}</dt>
+              <dd>{t('C')}</dd>
+            </div>
+            <div>
+              <dt>{t('Games board')}</dt>
+              <dd>{t('P')}</dd>
+            </div>
+            <div>
+              <dt>{t('Shoot paint')}</dt>
+              <dd>{t('Space / click')}</dd>
+            </div>
+            <div>
+              <dt>{t('Get down')}</dt>
+              <dd>{t('Ctrl')}</dd>
+            </div>
+            <div>
+              <dt>{t('Wheelie')}</dt>
+              <dd>{t('Space')}</dd>
+            </div>
+            <div>
+              <dt>{t('Burner / vent')}</dt>
+              <dd>{t('Shift / Ctrl')}</dd>
+            </div>
+            <div>
+              <dt>{t('Water bomb')}</dt>
+              <dd>{t('Space')}</dd>
+            </div>
+            <div>
+              <dt>{t('Confetti')}</dt>
+              <dd>{t('F')}</dd>
+            </div>
+            <div>
+              <dt>{t('Swing the beam')}</dt>
+              <dd>{t('A and D')}</dd>
+            </div>
+            <div>
+              <dt>{t('Wide pulse')}</dt>
+              <dd>{t('Space')}</dd>
+            </div>
+            <div>
+              <dt>{t('Back / leave')}</dt>
+              <dd>{t('Esc')}</dd>
+            </div>
+          </dl>
+        </div>
+      )}
     </div>
   )
 }

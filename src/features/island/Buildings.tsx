@@ -96,6 +96,13 @@ function DoorMarker({ building }: { building: Building }) {
   const locked = useGame(
     (s) => Boolean(building.locksWith) && !s.lighthouseOpen,
   )
+  /* Locked, but every key is in hand: gold like the prompt, not red. */
+  const unlockable = useGame(
+    (s) =>
+      Boolean(building.locksWith) &&
+      !s.lighthouseOpen &&
+      keyCount(s.keys) >= (building.locksWith ?? 0),
+  )
 
   useFrame((state) => {
     if (!ring.current) return
@@ -116,7 +123,7 @@ function DoorMarker({ building }: { building: Building }) {
     >
       <ringGeometry args={[0.95, 1.35, 28]} />
       <meshBasicMaterial
-        color={locked ? '#c9553f' : building.accent}
+        color={unlockable ? '#e0a526' : locked ? '#c9553f' : building.accent}
         transparent
         opacity={0.6}
         depthWrite={false}

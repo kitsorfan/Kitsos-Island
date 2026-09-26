@@ -3,6 +3,7 @@ import { ARENA, MAG_SIZE, RELOAD_MS, START_LIVES } from './paintballLogic'
 import { isCrouching } from '../player/input'
 import { useGame } from '../../shared/state/store'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
+import { useScreen } from '../../shared/ui/useScreen'
 import { useT } from '../../shared/i18n/useT'
 
 /**
@@ -54,6 +55,7 @@ export function PaintballHud() {
   const t = useT()
   const game = useGame((s) => s.paintball)
   const coarse = useCoarsePointer()
+  const { mobile } = useScreen()
   const left = useReload(game?.reloadAt ?? null)
   const field = useField(game?.status === 'playing')
 
@@ -121,8 +123,9 @@ export function PaintballHud() {
         </div>
 
         <div className="pb__row pb__row--tally">
+          {/* Shorter on a phone, where the scoreboard shares its line. */}
           <span>
-            <strong>{standing}</strong> against you
+            <strong>{standing}</strong> {mobile ? 'left' : 'against you'}
           </span>
           <span>
             <strong>{game.hits}</strong> painted

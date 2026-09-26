@@ -5,6 +5,7 @@ import { act, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Toast } from './Toast'
 import { useGame } from '../state/store'
+import { fakeScreen } from '../../test/screen'
 
 /**
  * The toast is how the island says something happened without stopping the
@@ -74,6 +75,28 @@ describe('Toast', () => {
         vi.advanceTimersByTime(5000)
       })
       expect(screen.queryByText('The lamp')).not.toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('stays off a phone, where there is no corner to spare for it', () => {
+    fakeScreen({ mobile: true, portrait: true })
+    const { container } = render(<Toast />)
+    raise('journal')
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('still clears itself on a phone, so it cannot turn up late', () => {
+    vi.useFakeTimers()
+    try {
+      fakeScreen({ mobile: true })
+      render(<Toast />)
+      raise('journal')
+      act(() => {
+        vi.advanceTimersByTime(5000)
+      })
+      expect(useGame.getState().toast).toBeNull()
     } finally {
       vi.useRealTimers()
     }

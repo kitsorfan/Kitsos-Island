@@ -376,15 +376,8 @@ export const PROFILE: Record<string, string> = {
   'Worked alongside the degree from the third year: part-time at first, then full-time as Director of the "Pantokrator" Foundation through the fourth and fifth.':
     'Δούλευε παράλληλα με τις σπουδές από το τρίτο έτος: μερική απασχόληση στην αρχή, μετά πλήρης ως Διευθυντής του Ιδρύματος «Παντοκράτωρ» στο τέταρτο και το πέμπτο.',
   'The Independent movement': 'Το Ανεξάρτητο κίνημα',
-  'In his third year the faculty assemblies were being run by party-political groups with their own interests, and the students’ own problems were not getting a hearing. He and a few others founded an independent movement of ECE students, to get real representation by democratic means and to solve students’ issues rather than political ones.':
-    'Στο τρίτο του έτος οι Γενικές Συνελεύσεις της Σχολής κυριαρχούνταν από κομματικές παρατάξεις με δικά τους συμφέροντα, και τα πραγματικά προβλήματα των φοιτητών δεν ακούγονταν. Μαζί με λίγους ακόμη ίδρυσε ένα ανεξάρτητο κίνημα φοιτητών ΗΜΜΥ, για πραγματική εκπροσώπηση με δημοκρατικά μέσα και για λύσεις σε φοιτητικά ζητήματα, όχι πολιτικά.',
-  'Petition signatures': 'Υπογραφές στο ψήφισμα',
-  'Collected in': 'Μαζεύτηκαν σε',
-  '2 days': '2 μέρες',
-  'Spoke in front of': 'Μίλησε μπροστά σε',
-  '800 people': '800 άτομα',
-  'Independent representative': 'Ανεξάρτητος εκπρόσωπος',
-  '2 years': '2 χρόνια',
+  'In his third year, party-political groups ran the faculty assemblies and students’ own problems went unheard. He co-founded an independent movement of ECE students to win real representation by democratic means.':
+    'Στο τρίτο του έτος τις Γενικές Συνελεύσεις της Σχολής τις κρατούσαν κομματικές παρατάξεις και τα πραγματικά προβλήματα των φοιτητών δεν ακούγονταν. Συνίδρυσε ένα ανεξάρτητο κίνημα φοιτητών ΗΜΜΥ, για πραγματική εκπροσώπηση με δημοκρατικά μέσα.',
   'Ran a petition that more than 700 students signed in two days.':
     'Οργάνωσε ψήφισμα που υπέγραψαν πάνω από 700 φοιτητές σε δύο μέρες.',
   'Spoke at the councils and at a general meeting of 800.':
@@ -498,15 +491,9 @@ export const PROFILE: Record<string, string> = {
   'May 2026 – present': 'Μάιος 2026 – σήμερα',
   'Full-stack Software Engineer': 'Full-stack Software Engineer',
   'May 2024 – May 2026': 'Μάιος 2024 – Μάιος 2026',
-  'Alongside it': 'Παράλληλα',
-  'Lead Software Engineer': 'Lead Software Engineer',
-  'Holistic Hospital Optimization · contract, remote':
-    'Holistic Hospital Optimization · σύμβαση, εξ αποστάσεως',
-  'May 2024 – present': 'Μάιος 2024 – σήμερα',
   'What I shipped': 'Τι παρέδωσα',
   'Secure and scalable, or it does not ship.':
     'Ασφαλές και κλιμακώσιμο, αλλιώς δεν βγαίνει.',
-  'How it stays up': 'Πώς μένει όρθιο',
   Observability: 'Παρατηρησιμότητα',
   Delivery: 'Παράδοση',
   Testing: 'Δοκιμές',
@@ -527,16 +514,14 @@ export const PROFILE: Record<string, string> = {
     'Ηγήθηκε των εγκαταστάσεων σε παραγωγή σε μεγάλα νοσοκομεία των ΗΠΑ, σε άμεση συνεργασία με τους εμπλεκόμενους των νοσοκομείων.',
   'Modernized legacy applications: Agile practices, engineering standards, CI/CD pipelines, documentation, automated testing and incremental refactoring.':
     'Εκσυγχρόνισε παλαιές εφαρμογές: Agile πρακτικές, πρότυπα μηχανικής, pipelines CI/CD, τεκμηρίωση, αυτοματοποιημένες δοκιμές και σταδιακό refactoring.',
-  'Software lead on AI-powered healthcare applications for U.S. hospitals.':
-    'Επικεφαλής λογισμικού σε εφαρμογές υγείας με τεχνητή νοημοσύνη για νοσοκομεία των ΗΠΑ.',
-  'Nurse scheduling, hospital length-of-stay optimization, SMART on FHIR integrations and enterprise healthcare platform work.':
-    'Προγραμματισμός βαρδιών νοσηλευτών, βελτιστοποίηση διάρκειας νοσηλείας, ενσωματώσεις SMART on FHIR και εργασία σε εταιρική πλατφόρμα υγείας.',
+  'Also the software lead at Holistic Hospital Optimization, its sister company in the Dynamic Ideas group: AI-powered applications for U.S. hospitals, from nurse scheduling to length-of-stay optimization and SMART on FHIR integrations.':
+    'Επίσης επικεφαλής λογισμικού στη Holistic Hospital Optimization, την αδελφή της εταιρεία στον όμιλο Dynamic Ideas: εφαρμογές με τεχνητή νοημοσύνη για νοσοκομεία των ΗΠΑ, από τον προγραμματισμό βαρδιών νοσηλευτών ως τη βελτιστοποίηση διάρκειας νοσηλείας και τις ενσωματώσεις SMART on FHIR.',
   'The flagship Nurse Scheduling platform, live in major U.S. hospitals.':
     'Η ναυαρχίδα πλατφόρμα Nurse Scheduling, σε παραγωγή σε μεγάλα νοσοκομεία των ΗΠΑ.',
   'Technical lead on every one of these: the architecture, the decisions, the reviews and the delivery into the hospital.':
     'Technical lead σε κάθε ένα από αυτά: η αρχιτεκτονική, οι αποφάσεις, οι ανασκοπήσεις και η παράδοση μέσα στο νοσοκομείο.',
-  'A React Native mobile application for the platform.':
-    'Εφαρμογή κινητού σε React Native για την πλατφόρμα.',
+  'A React Native mobile app for the nurses themselves: their schedule, their shift preferences and the rest of the platform on their phone, not only on the web.':
+    'Εφαρμογή κινητού σε React Native για τους ίδιους τους νοσηλευτές: το πρόγραμμά τους, οι προτιμήσεις βαρδιών τους και η υπόλοιπη πλατφόρμα στο κινητό τους, όχι μόνο στο web.',
   'An AI-powered documentation assistant built on Spring AI, retrieval-augmented generation and agentic AI.':
     'Βοηθός τεκμηρίωσης με τεχνητή νοημοσύνη, χτισμένος πάνω σε Spring AI, retrieval-augmented generation και agentic AI.',
   'A SMART on FHIR application embedded inside Epic EHR.':
@@ -647,8 +632,8 @@ export const PROFILE: Record<string, string> = {
     'Το Ραδιοφωνικό Κέντρο εκπέμπει σε τρεις συχνότητες. Διάλεξε μία και το μήνυμα έρχεται κατευθείαν σε μένα, χωρίς κανέναν χειριστή στη μέση.',
 
   /* -------------------------- The keeper’s logbook -------------------- */
-  'Nine years of building things other people depend on: five at NTUA, one in uniform, half a year at IBM inside a bank, and two and a half leading platform work at an AI healthcare startup whose software now runs in four U.S. hospitals. One published paper along the way.':
-    'Εννιά χρόνια χτίζοντας πράγματα από τα οποία εξαρτώνται άλλοι: πέντε στο ΕΜΠ, ένα με στολή, μισό στην IBM μέσα σε μια τράπεζα, και δυόμισι ηγούμενος της δουλειάς σε πλατφόρμα μιας startup τεχνητής νοημοσύνης για την υγεία, της οποίας το λογισμικό τρέχει πλέον σε τέσσερα νοσοκομεία των ΗΠΑ. Και μία δημοσιευμένη εργασία στον δρόμο.',
+  'Senior full-stack engineer and technical lead with a track record of taking healthcare products from concept to production. Java and Spring Boot on the backend, React on the front, AWS underneath, and teams of 5–10 engineers across three countries shipping weekly into U.S. hospitals under HIPAA.':
+    'Senior full-stack μηχανικός και technical lead, με πορεία στο να πηγαίνει προϊόντα υγείας από τη σύλληψη ως την παραγωγή. Java και Spring Boot στο backend, React στο front, AWS από κάτω, και ομάδες 5–10 μηχανικών σε τρεις χώρες που παραδίδουν κάθε εβδομάδα σε νοσοκομεία των ΗΠΑ, με συμμόρφωση στο HIPAA.',
   Now: 'Τώρα',
   'Senior Software Engineer, Veltiston AI':
     'Senior Software Engineer, Veltiston AI',
@@ -813,7 +798,6 @@ export const PROFILE: Record<string, string> = {
   'The Marvel run, watched properly and in sequence like a serious person':
     'Όλο το Marvel, δει σωστά και με τη σειρά σαν σοβαρός άνθρωπος',
   'Clinical Research': 'Κλινική έρευνα',
-  'Healthcare platforms': 'Πλατφόρμες υγείας',
   'Artificial Neural Networks': 'Τεχνητά νευρωνικά δίκτυα',
   'And anything well made: give me a good film and I will give you the evening':
     'Και οτιδήποτε καλοφτιαγμένο: δώσε μου μια καλή ταινία και σου δίνω το βράδυ',

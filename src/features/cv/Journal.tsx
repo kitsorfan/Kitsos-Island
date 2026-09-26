@@ -8,6 +8,7 @@ import {
 } from '../../shared/state/store'
 import * as sfx from '../../shared/engine/audio'
 import { useT } from '../../shared/i18n/useT'
+import { CloseMark } from '../../shared/ui/CloseMark'
 
 /** One card per entry the island holds, found or not, in catalogue order. */
 const ORDER = CATALOGUE.map((entry) => entry.id)
@@ -46,7 +47,7 @@ export function Journal() {
             onClick={dismiss}
             aria-label={t('Close')}
           >
-            ✕<kbd>Esc</kbd>
+            <CloseMark />
           </button>
         </header>
 

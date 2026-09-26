@@ -77,6 +77,7 @@ import {
 import { PLAYER_POS, PLAYER_VIEW } from './playerLogic'
 import {
   cameraZoom,
+  capeHold,
   consumeFire,
   consumeInteract,
   consumeJump,
@@ -420,6 +421,8 @@ export function Player() {
   const night = useGame((s) => s.night)
   /** The five locks: whether the lighthouse has given, which one door reads. */
   const lighthouseOpen = useGame((s) => s.lighthouseOpen)
+  /** And the keys against them, which turn its prompt from Enter to Unlock. */
+  const keysHeld = useGame((s) => keyCount(s.keys))
   const firstPerson = useGame((s) => s.firstPerson)
   const handLight = useGame((s) => s.handLight)
   /** Her prompt only exists once she is down there, so it is subscribed. */
@@ -739,11 +742,18 @@ export function Player() {
         /* The glass only slides while it would have let him in anyway — see
            game/doors.ts, which owns the rule and the reason for it. */
         const opens = autoOpens(b, { night, lighthouseOpen })
+        /* Every key in hand and the locks still shut: this press unlocks,
+           and going in is the next one, so the prompt says which. */
+        const unlock =
+          Boolean(b.locksWith) &&
+          !lighthouseOpen &&
+          keysHeld >= (b.locksWith ?? 0)
         list.push({
           id: b.id,
           kind: 'door',
           label: b.name,
-          verb: 'Enter',
+          verb: unlock ? 'Unlock' : 'Enter',
+          unlock: unlock || undefined,
           x: b.door[0],
           z: b.door[1],
           range: b.sentries ? 7 : 4.2,
@@ -785,7 +795,7 @@ export function Player() {
                 role: 'Unlocked',
                 lines: [
                   'All five locks turn at once. The door gives with a long, dry groan.',
-                  'Stairs spiral up into the light. Step inside.',
+                  'Unlocked. Press again at the door to go in.',
                 ],
               })
               state.discover(b.id)
@@ -1101,6 +1111,7 @@ export function Player() {
     amaliaHere,
     night,
     lighthouseOpen,
+    keysHeld,
     christmas,
     /* The rack's own verb reads off this, so the prompt has to be rebuilt
        when it changes: otherwise it offers to put on a suit he is wearing. */
@@ -1120,7 +1131,14 @@ export function Player() {
     const active = isInteractive(store.mode)
 
     // Teleports: entering a building, leaving one, or travelling from the map.
-    if (store.spawn.token !== spawnToken.current) {
+    //
+    // Only once the scene on screen is the one the spawn is for. `area` here
+    // is the committed one, and the store's can be a frame or two ahead of it
+    // when the move was made from inside the frame loop — the end of the
+    // lighthouse reveal is one. Taking the spawn early put him at the room's
+    // coordinates on the island, and the camera cut to the middle of the
+    // plaza before the room came up.
+    if (store.spawn.token !== spawnToken.current && store.spawn.area === area) {
       spawnToken.current = store.spawn.token
       position.current[0] = store.spawn.position[0]
       position.current[1] = store.spawn.position[1]
@@ -1368,7 +1386,8 @@ export function Player() {
       !SWIM.active
 
     if (caped) {
-      const held = isDown('Space')
+      // The on-screen UP is Space leaned on, take-off from the grass and all.
+      const held = isDown('Space') || capeHold.up
 
       /*
        * Two quick taps, which means opposite things at opposite ends of a
@@ -1429,7 +1448,10 @@ export function Player() {
       if (flying.current) {
         // Gravity is off. He goes where he is asked, easing into it rather
         // than snapping, and drifts down when nothing is asked at all.
-        const down = diving.current
+        // The on-screen DOWN dives for as long as the thumb is on it rather
+        // than latching: a button has a let-go, which a double tap does not.
+        if (capeHold.down) store.noteDived()
+        const down = diving.current || capeHold.down
         const wanted = down ? -FLY_DOWN : up ? FLY_UP : -FLY_SINK
         hop.current.vy +=
           (wanted - hop.current.vy) *
@@ -2078,7 +2100,12 @@ export function Player() {
               kind: best.kind,
               label: best.label,
               verb: best.verb,
-              blocked: best.kind === 'door' && shutDoor(best.id, store),
+              /* A door he can unlock is shut, but it is not a refusal. */
+              blocked:
+                best.kind === 'door' &&
+                !best.unlock &&
+                shutDoor(best.id, store),
+              unlock: best.unlock,
               /* Nothing to press, and the leaves read this to know to open:
                  only a door actually within its own reach is sensing. */
               silent: sensing || undefined,

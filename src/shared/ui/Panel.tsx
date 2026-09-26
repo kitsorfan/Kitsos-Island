@@ -10,6 +10,7 @@ import { TechIcon } from '../../features/cv/TechIcon'
 import { hasTechIcon } from '../../features/cv/techMarkIcons'
 import type { Letter, PanelBlock } from '../../types'
 import { useT } from '../i18n/useT'
+import { CloseMark } from './CloseMark'
 
 export function Panel() {
   const t = useT()
@@ -72,7 +73,7 @@ export function Panel() {
               onClick={close}
               aria-label={t('Close')}
             >
-              ✕<kbd>Esc</kbd>
+              <CloseMark />
             </button>
           </div>
         </header>
@@ -278,11 +279,28 @@ function Block({ block }: { block: PanelBlock }) {
           {block.entries.map((entry, i) => (
             <li key={i} className="timeline__item">
               <span className="timeline__dot" aria-hidden />
-              <div className="timeline__head">
-                <h4>{entry.title}</h4>
-                {entry.org && <p className="timeline__org">{entry.org}</p>}
-                <p className="timeline__meta">{entry.meta}</p>
-              </div>
+              {entry.steps ? (
+                // A promotion: the employer once, over every title held there.
+                <div className="timeline__head">
+                  {entry.org && (
+                    <p className="timeline__org timeline__org--above">
+                      {entry.org}
+                    </p>
+                  )}
+                  {entry.steps.map((step) => (
+                    <div key={step.title} className="timeline__step">
+                      <h4>{step.title}</h4>
+                      <p className="timeline__meta">{step.meta}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="timeline__head">
+                  <h4>{entry.title}</h4>
+                  {entry.org && <p className="timeline__org">{entry.org}</p>}
+                  <p className="timeline__meta">{entry.meta}</p>
+                </div>
+              )}
               {entry.bullets && (
                 <ul className="panel__list">
                   {entry.bullets.map((b, j) => (

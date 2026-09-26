@@ -16,7 +16,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { CV_NAME, PROFILE } from '../src/features/cv/profile.ts'
+import { NAME, PROFILE } from '../src/features/cv/profile.ts'
 import { findBrowser } from './browser.ts'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
@@ -96,8 +96,8 @@ h1 { margin: 22px 0 8px; font-size: 58px; line-height: 1.02; font-weight: 800; }
 ${ISLAND}
 <div class="card">
   <div class="kicker">KITSOS ISLAND</div>
-  <h1>${esc(CV_NAME)}</h1>
-  <p class="title">${esc(PROFILE.title)}<br>${esc(PROFILE.location)}</p>
+  <h1>${esc(NAME)}</h1>
+  <p class="title">${esc(PROFILE.title)}</p>
   <div class="footer">
     <span class="pill">A playable CV</span>
     <span class="url">${esc(PROFILE.websiteLabel)}</span>

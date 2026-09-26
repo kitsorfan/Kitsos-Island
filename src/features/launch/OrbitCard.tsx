@@ -11,7 +11,7 @@ import {
 } from './certificate'
 import { NAME_LIMIT } from './certificate'
 import { downloadCv } from '../cv/downloadCv'
-import { formatSerial, mintSerial, signFor, verifyUrl } from './certId'
+import { formatSerial, mintSerial, signFor } from './certId'
 import { linkedinAddUrl, linkedinShareUrl } from './linkedin'
 import { TROPHIES, trophyCount } from './trophies'
 import * as sfx from '../../shared/engine/audio'
@@ -104,12 +104,6 @@ export function OrbitCard() {
         <span className="orbit__kicker">{t('Orbit')}</span>
         <h2 className="orbit__title">{t('You made it off the island')}</h2>
 
-        <p className="orbit__lead">
-          {t(
-            'The lighthouse was a gantry all along, and the summit room was the flight deck. Kitsos Island is the blue-green shape under the window now, with every road you walked on it.',
-          )}
-        </p>
-
         <div className="orbit__cert">
           <canvas
             ref={canvas}
@@ -156,26 +150,6 @@ export function OrbitCard() {
             {t('And the full CV')}
           </button>
         </div>
-
-        {ready && (
-          /* The two fields LinkedIn asks for when a certification is added,
-             so they can be copied straight across - or skipped, since the
-             link below fills them in. */
-          <dl className="orbit__credential">
-            <dt>{t('Credential ID')}</dt>
-            <dd>{reference}</dd>
-            <dt>{t('Credential URL')}</dt>
-            <dd>
-              <a
-                href={verifyUrl(reference, cleanName(name))}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {verifyUrl(reference, cleanName(name))}
-              </a>
-            </dd>
-          </dl>
-        )}
 
         <div className="orbit__linkedin">
           {/* The certificate needs a name to go on the profile; the island

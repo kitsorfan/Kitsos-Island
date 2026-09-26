@@ -72,6 +72,11 @@ export const HOUSE_SECTIONS: PanelSection[] = [
           },
         ],
       },
+    ],
+  },
+  {
+    heading: 'Volunteering',
+    blocks: [
       {
         type: 'text',
         text: 'Leading volunteer at the Christian Youth Foundation "Pantokrator" in Paleo Faliro, and a blood donor since 2017.',
@@ -391,16 +396,7 @@ export const STUDENT_LIFE_SECTIONS: PanelSection[] = [
     blocks: [
       {
         type: 'text',
-        text: 'In his third year the faculty assemblies were being run by party-political groups with their own interests, and the students’ own problems were not getting a hearing. He and a few others founded an independent movement of ECE students, to get real representation by democratic means and to solve students’ issues rather than political ones.',
-      },
-      {
-        type: 'stats',
-        stats: [
-          { label: 'Petition signatures', value: '700+' },
-          { label: 'Collected in', value: '2 days' },
-          { label: 'Spoke in front of', value: '800 people' },
-          { label: 'Independent representative', value: '2 years' },
-        ],
+        text: 'In his third year, party-political groups ran the faculty assemblies and students’ own problems went unheard. He co-founded an independent movement of ECE students to win real representation by democratic means.',
       },
       {
         type: 'list',
@@ -641,56 +637,45 @@ export const VELTISTON_SECTIONS: PanelSection[] = [
       {
         type: 'timeline',
         entries: [
+          /*
+           * One job, told once: the promotion is two steps in the head, and
+           * the lead work for Holistic Hospital Optimization is part of the
+           * same role, both companies sitting in the Dynamic Ideas group.
+           */
           {
             title: 'Senior Software Engineer',
             org: 'Veltiston AI · Athens, hybrid',
             meta: 'May 2026 – present',
+            steps: [
+              { title: 'Senior Software Engineer', meta: 'May 2026 – present' },
+              {
+                title: 'Full-stack Software Engineer',
+                meta: 'May 2024 – May 2026',
+              },
+            ],
             bullets: [
+              'One of the company’s first engineers; built the flagship Nurse Scheduling platform from concept to production.',
               'Project lead on three projects.',
               'Leads cross-functional teams of 5–10 developers: architecture, technical decisions, code reviews, sprint planning and customer delivery.',
-              'Mentors engineers, runs technical interviews and coordinates distributed international teams.',
+              'Also the software lead at Holistic Hospital Optimization, its sister company in the Dynamic Ideas group: AI-powered applications for U.S. hospitals, from nurse scheduling to length-of-stay optimization and SMART on FHIR integrations.',
+              'Led production deployments across major U.S. hospitals, working directly with hospital stakeholders.',
               'Works with Product, Design, QA and DevOps to deliver weekly production releases.',
+              'Mentors engineers, runs technical interviews and coordinates distributed international teams.',
+              'Modernized legacy applications: Agile practices, engineering standards, CI/CD pipelines, documentation, automated testing and incremental refactoring.',
             ],
             tags: [
               'Java',
               'Spring Boot',
               'Spring AI',
               'React',
+              'React Native',
               'MySQL',
               'AWS',
               'Docker',
               'Microservices',
+              'SMART on FHIR',
+              'HIPAA',
             ],
-          },
-          {
-            title: 'Full-stack Software Engineer',
-            org: 'Veltiston AI · Athens, hybrid',
-            meta: 'May 2024 – May 2026',
-            bullets: [
-              'One of the company’s first engineers; built the flagship Nurse Scheduling platform from concept to production.',
-              'Led production deployments across major U.S. hospitals, working directly with hospital stakeholders.',
-              'Modernized legacy applications: Agile practices, engineering standards, CI/CD pipelines, documentation, automated testing and incremental refactoring.',
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    heading: 'Alongside it',
-    blocks: [
-      {
-        type: 'timeline',
-        entries: [
-          {
-            title: 'Lead Software Engineer',
-            org: 'Holistic Hospital Optimization · contract, remote',
-            meta: 'May 2024 – present',
-            bullets: [
-              'Software lead on AI-powered healthcare applications for U.S. hospitals.',
-              'Nurse scheduling, hospital length-of-stay optimization, SMART on FHIR integrations and enterprise healthcare platform work.',
-            ],
-            tags: ['HIPAA', 'FHIR', 'Healthcare platforms'],
           },
         ],
       },
@@ -715,7 +700,7 @@ export const PLATFORM_SECTIONS: PanelSection[] = [
           'A Length of Stay analytics plugin delivered into Epic EHR through SMART on FHIR.',
           'Integration with UKG workforce management systems.',
           'SAML 2.0 single sign-on against Microsoft ADFS.',
-          'A React Native mobile application for the platform.',
+          'A React Native mobile app for the nurses themselves: their schedule, their shift preferences and the rest of the platform on their phone, not only on the web.',
           'A secure notification framework and comprehensive activity audit logging, reaching nurses through Microsoft Teams and Twilio SMS.',
           'A Jira-integrated ticketing system with Google reCAPTCHA for secure issue submission and workflow automation.',
           'HIPAA-compliant security and data handling architecture across all of it.',
@@ -724,22 +709,6 @@ export const PLATFORM_SECTIONS: PanelSection[] = [
       {
         type: 'quote',
         text: 'Secure and scalable, or it does not ship.',
-      },
-    ],
-  },
-  {
-    heading: 'How it stays up',
-    blocks: [
-      {
-        type: 'tags',
-        groups: [
-          { label: 'Observability', tags: ['Grafana', 'Graylog', 'Sentry'] },
-          {
-            label: 'Delivery',
-            tags: ['Docker', 'Jenkins', 'GitLab CI', 'Flyway'],
-          },
-          { label: 'Testing', tags: ['JUnit', 'Mockito', 'JaCoCo'] },
-        ],
       },
     ],
   },
@@ -1045,7 +1014,14 @@ export const SKILLS_SECTIONS: PanelSection[] = [
           },
           {
             label: 'Frontend',
-            tags: ['React', 'Angular', 'HTML', 'CSS', 'Tailwind CSS'],
+            tags: [
+              'React',
+              'React Native',
+              'Angular',
+              'HTML',
+              'CSS',
+              'Tailwind CSS',
+            ],
           },
           { label: 'Databases', tags: ['MySQL', 'Flyway'] },
           {
@@ -1400,7 +1376,7 @@ export const LIGHTHOUSE_SECTIONS: PanelSection[] = [
     blocks: [
       {
         type: 'text',
-        text: 'Nine years of building things other people depend on: five at NTUA, one in uniform, half a year at IBM inside a bank, and two and a half leading platform work at an AI healthcare startup whose software now runs in four U.S. hospitals. One published paper along the way.',
+        text: 'Senior full-stack engineer and technical lead with a track record of taking healthcare products from concept to production. Java and Spring Boot on the backend, React on the front, AWS underneath, and teams of 5–10 engineers across three countries shipping weekly into U.S. hospitals under HIPAA.',
       },
       {
         type: 'stats',

@@ -114,6 +114,46 @@ describe('Panel', () => {
     })
     expect(useGame.getState().mode).toBe('panel')
   })
+
+  it('tells a promotion as one job with every title in it', () => {
+    const { container } = render(<Panel />)
+    act(() => {
+      useGame.getState().openPanel({
+        kicker: 'The keeper',
+        title: 'The job',
+        accent: '#ff8c1a',
+        kind: 'board',
+        sections: [
+          {
+            heading: 'At the lighthouse',
+            blocks: [
+              {
+                type: 'timeline',
+                entries: [
+                  {
+                    title: 'Head keeper',
+                    org: 'The lighthouse',
+                    meta: '2026 – present',
+                    steps: [
+                      { title: 'Head keeper', meta: '2026 – present' },
+                      { title: 'Keeper', meta: '2024 – 2026' },
+                    ],
+                    bullets: ['Kept the lamp lit.'],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      })
+    })
+    // One entry, the employer named once, and each title with its dates.
+    expect(container.querySelectorAll('.timeline__item')).toHaveLength(1)
+    expect(container.querySelectorAll('.timeline__org')).toHaveLength(1)
+    expect(screen.getByText('Head keeper')).toBeInTheDocument()
+    expect(screen.getByText('Keeper')).toBeInTheDocument()
+    expect(screen.getByText('2024 – 2026')).toBeInTheDocument()
+  })
 })
 
 describe('the full CV panel', () => {

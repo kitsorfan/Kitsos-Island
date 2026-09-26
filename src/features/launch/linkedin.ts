@@ -15,10 +15,10 @@ import { verifyUrl } from './certId'
  * The "Add license or certification" form on the visitor's own profile, with
  * every field filled in.
  *
- * This is what the Credential ID and URL on the card are for; the link saves
- * copying them across by hand. `organizationName` is free text rather than a
- * company page id, so the entry carries no logo, which is the honest thing
- * for an island that has no company page.
+ * The credential ID and URL travel in the link, so the card does not show
+ * them for copying across by hand. `organizationName` is free text rather
+ * than a company page id, so the entry carries no logo, which is the honest
+ * thing for an island that has no company page.
  */
 export function linkedinAddUrl(
   reference: string,

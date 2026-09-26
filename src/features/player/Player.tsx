@@ -77,6 +77,7 @@ import {
 import { PLAYER_POS, PLAYER_VIEW } from './playerLogic'
 import {
   cameraZoom,
+  capeHold,
   consumeFire,
   consumeInteract,
   consumeJump,
@@ -1385,7 +1386,8 @@ export function Player() {
       !SWIM.active
 
     if (caped) {
-      const held = isDown('Space')
+      // The on-screen UP is Space leaned on, take-off from the grass and all.
+      const held = isDown('Space') || capeHold.up
 
       /*
        * Two quick taps, which means opposite things at opposite ends of a
@@ -1446,7 +1448,10 @@ export function Player() {
       if (flying.current) {
         // Gravity is off. He goes where he is asked, easing into it rather
         // than snapping, and drifts down when nothing is asked at all.
-        const down = diving.current
+        // The on-screen DOWN dives for as long as the thumb is on it rather
+        // than latching: a button has a let-go, which a double tap does not.
+        if (capeHold.down) store.noteDived()
+        const down = diving.current || capeHold.down
         const wanted = down ? -FLY_DOWN : up ? FLY_UP : -FLY_SINK
         hop.current.vy +=
           (wanted - hop.current.vy) *

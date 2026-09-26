@@ -47,6 +47,13 @@ export type PanelBlock =
         meta: string
         bullets?: string[]
         tags?: string[]
+        /**
+         * Titles held in turn at one employer, newest first, with their
+         * dates. A promotion told as one job: the steps stand in the head
+         * in place of the single title and date, and the work below is the
+         * account of all of them.
+         */
+        steps?: { title: string; meta: string }[]
       }[]
     }
 

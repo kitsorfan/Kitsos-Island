@@ -635,8 +635,12 @@ export const UI: Record<string, string> = {
   'Messages from this desk come straight to my inbox. Leave an address and I will write back.':
     'Ό,τι στέλνεις από εδώ έρχεται κατευθείαν στο email μου. Άφησε τη διεύθυνσή σου και θα σου απαντήσω.',
   '📡 Transmitting…': '📡 Στέλνεται…',
-  'Signal received. I will answer at the address you left.':
-    'Το μήνυμα έφτασε! Θα σου απαντήσω στη διεύθυνση που άφησες.',
+  'Message sent!': 'Το μήνυμα στάλθηκε!',
+  'Thanks, {name}! Your message has landed in my inbox, and I will write back to {email}.':
+    'Ευχαριστώ, {name}! Το μήνυμά σου έφτασε και θα σου απαντήσω στο {email}.',
+  'Thanks! Your message has landed in my inbox, and I will write back to {email}.':
+    'Ευχαριστώ! Το μήνυμά σου έφτασε και θα σου απαντήσω στο {email}.',
+  'Send another message': 'Στείλε κι άλλο μήνυμα',
   'Signal sent to your mail client. If nothing opened, copy the message instead. The address is {email}.':
     'Το μήνυμα πήγε στο πρόγραμμα email σου. Αν δεν άνοιξε τίποτα, αντίγραψε το μήνυμα. Η διεύθυνση είναι {email}.',
   'That email address does not look right. I need it to reply.':

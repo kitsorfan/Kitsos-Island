@@ -14,7 +14,7 @@ import {
   racerColors,
   stepMoto,
 } from './motoLogic'
-import { isDown, readMove } from '../player/input'
+import { readRide } from '../player/input'
 import { groundHeight } from '../island/terrainLogic'
 import { isInteractive, useGame } from '../../shared/state/store'
 import { Character, type CharacterMotion } from '../player/Character'
@@ -498,14 +498,10 @@ export function MotoGame() {
     const live =
       run?.status === 'riding' && MOTO.active && isInteractive(store.mode)
 
-    const move = live ? readMove() : { x: 0, y: 0, run: false }
+    const ride = live ? readRide() : { throttle: 0, steer: 0, wheelie: false }
 
     if (live) {
-      const events = stepMoto(delta, {
-        throttle: move.y,
-        steer: move.x,
-        wheelie: isDown('Space'),
-      })
+      const events = stepMoto(delta, ride)
 
       if (events.bumped) sfx.thud()
       if (events.light) sfx.blip()
@@ -524,7 +520,7 @@ export function MotoGame() {
     }
     if (rear.current) rear.current.rotation.x = MOTO.wheel
     if (front.current) front.current.rotation.x = MOTO.wheel
-    if (fork.current) fork.current.rotation.y = -move.x * 0.32
+    if (fork.current) fork.current.rotation.y = -ride.steer * 0.32
     if (shadow.current) shadow.current.position.set(MOTO.x, y + 0.04, MOTO.z)
 
     // The rider bobs a little with the engine.
@@ -537,7 +533,7 @@ export function MotoGame() {
     // steering axis that snaps between 0 and 1, and the note would snap with
     // it, where the roll is already eased into the corner.
     const revving = Math.min(1, Math.abs(MOTO.speed) / MAX_SPEED)
-    const throttle = live ? Math.max(0, move.y) : 0
+    const throttle = Math.max(0, ride.throttle)
     sfx.engineRevs(
       live ? 0.08 + revving * 0.92 : 0.08,
       throttle,

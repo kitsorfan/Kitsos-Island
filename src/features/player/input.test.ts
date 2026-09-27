@@ -26,6 +26,8 @@ import {
   queueJump,
   readCameraTurn,
   readMove,
+  readRide,
+  rideHold,
   setKey,
   sprintLock,
   touchStick,
@@ -182,6 +184,54 @@ describe('readCameraTurn', () => {
     turnHold.left = false
     turnHold.right = true
     expect(Math.sign(readCameraTurn())).toBe(-1)
+  })
+})
+
+describe('readRide', () => {
+  it('sits still with nothing held', () => {
+    expect(readRide()).toEqual({ throttle: 0, steer: 0, wheelie: false })
+  })
+
+  it('rides on the keys as it always has', () => {
+    setKey('KeyW', true)
+    setKey('KeyD', true)
+    setKey('Space', true)
+    const move = readMove()
+    expect(readRide()).toEqual({
+      throttle: move.y,
+      steer: move.x,
+      wheelie: true,
+    })
+  })
+
+  it('takes the gas and the brake from the pedals', () => {
+    rideHold.gas = true
+    expect(readRide().throttle).toBe(1)
+    rideHold.gas = false
+    rideHold.brake = true
+    expect(readRide().throttle).toBe(-1)
+  })
+
+  it('takes the steering from the bars, each way', () => {
+    rideHold.left = true
+    expect(readRide().steer).toBe(-1)
+    rideHold.left = false
+    rideHold.right = true
+    expect(readRide().steer).toBe(1)
+  })
+
+  it('keeps the gas on through an on-screen wheelie', () => {
+    // It is the gas thumb that goes up to it, so the gas has to come too.
+    rideHold.wheelie = true
+    expect(readRide()).toMatchObject({ throttle: 1, wheelie: true })
+  })
+
+  it('never reads past full, whatever is held at once', () => {
+    setKey('KeyW', true)
+    setKey('KeyA', true)
+    rideHold.gas = true
+    rideHold.left = true
+    expect(readRide()).toMatchObject({ throttle: 1, steer: -1 })
   })
 })
 
@@ -422,6 +472,15 @@ describe('clearKeys', () => {
     liftHold.down = true
     clearKeys()
     expect(liftHold).toEqual({ up: false, down: false })
+  })
+
+  it('lets go of the bike’s bars and pedals still held', () => {
+    // Or the bike would ride on by itself once the window came back.
+    rideHold.gas = true
+    rideHold.left = true
+    rideHold.wheelie = true
+    clearKeys()
+    expect(readRide()).toEqual({ throttle: 0, steer: 0, wheelie: false })
   })
 
   it('keeps a latch the visitor set on purpose', () => {

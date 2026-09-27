@@ -70,6 +70,17 @@ export function RadioConsole() {
     openedAt.current = Date.now()
   }, [])
 
+  /**
+   * Once a message is through, the form makes way for a card that says so.
+   * Focus goes with it: the button that was pressed has just gone, and
+   * whoever pressed it, by keyboard or by screen reader, should land on what
+   * took its place rather than on the top of the page.
+   */
+  const sentCard = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (status.at === 'sent') sentCard.current?.focus()
+  }, [status.at])
+
   const online = SITE_KEY !== undefined
   const body = messageBody({ name, from, message })
 
@@ -147,6 +158,16 @@ export function RadioConsole() {
     }
   }
 
+  /**
+   * Back to the form for another message. The name and the address are still
+   * there, being the same person; the message is empty, and Turnstile draws a
+   * fresh challenge, since the last token went with the last message.
+   */
+  const another = () => {
+    sfx.confirm()
+    setStatus({ at: 'idle' })
+  }
+
   const sending = status.at === 'sending'
   const failed = status.at === 'failed' ? status.problem : null
   /** A failure the visitor cannot fix from here: offer the mail client. */
@@ -192,152 +213,187 @@ export function RadioConsole() {
 
       <div className="radio__desk">
         <h3 className="panel__heading">{t('Channel 3 · Message desk')}</h3>
-        <p className="panel__text">
-          {online
-            ? t(
-                'Messages from this desk come straight to my inbox. Leave an address and I will write back.',
-              )
-            : t(
-                'This island has no backend. The desk hands your message to your own mail client, already addressed and written.',
-              )}
-        </p>
-
-        <div className="field-row">
-          <label className="field">
-            <span>{t('Your name')}</span>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('Ada Lovelace')}
-            />
-          </label>
-          <label className="field">
-            <span>{t('Your email')}</span>
-            <input
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              placeholder={t('ada@example.com')}
-              type="email"
-              required={online}
-              aria-invalid={failed === 'from' || undefined}
-            />
-          </label>
-        </div>
-
-        <label className="field">
-          <span>{t('Subject')}</span>
-          <select
-            value={subject}
-            onChange={(e) => setSubject(e.target.value as Subject)}
+        {status.at === 'sent' ? (
+          <div
+            className="radio__sent"
+            role="status"
+            tabIndex={-1}
+            ref={sentCard}
           >
-            {/* The value stays in English whatever the label says: it is
+            <span className="radio__sent-mark" aria-hidden="true">
+              📡
+            </span>
+            <h4 className="radio__sent-title">{t('Message sent!')}</h4>
+            <p className="radio__sent-text">
+              {fill(
+                t(
+                  name.trim()
+                    ? 'Thanks, {name}! Your message has landed in my inbox, and I will write back to {email}.'
+                    : 'Thanks! Your message has landed in my inbox, and I will write back to {email}.',
+                ),
+                { name: name.trim(), email: from.trim() },
+              )}
+            </p>
+            <button className="button" onClick={another}>
+              {t('Send another message')}
+            </button>
+          </div>
+        ) : (
+          <>
+            <p className="panel__text">
+              {online
+                ? t(
+                    'Messages from this desk come straight to my inbox. Leave an address and I will write back.',
+                  )
+                : t(
+                    'This island has no backend. The desk hands your message to your own mail client, already addressed and written.',
+                  )}
+            </p>
+
+            <div className="field-row">
+              <label className="field">
+                <span>{t('Your name')}</span>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={t('Ada Lovelace')}
+                />
+              </label>
+              <label className="field">
+                <span>{t('Your email')}</span>
+                <input
+                  value={from}
+                  onChange={(e) => setFrom(e.target.value)}
+                  placeholder={t('ada@example.com')}
+                  type="email"
+                  required={online}
+                  aria-invalid={failed === 'from' || undefined}
+                />
+              </label>
+            </div>
+
+            <label className="field">
+              <span>{t('Subject')}</span>
+              <select
+                value={subject}
+                onChange={(e) => setSubject(e.target.value as Subject)}
+              >
+                {/* The value stays in English whatever the label says: it is
                 what the Worker checks the subject against, and what lands
                 in the inbox. */}
-            {SUBJECTS.map((s) => (
-              <option key={s} value={s}>
-                {t(s)}
-              </option>
-            ))}
-          </select>
-        </label>
+                {SUBJECTS.map((s) => (
+                  <option key={s} value={s}>
+                    {t(s)}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-        <label className="field">
-          <span>{t('Message')}</span>
-          <textarea
-            rows={5}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder={t('Hi Kitsos, I found you on your island…')}
-          />
-        </label>
+            <label className="field">
+              <span>{t('Message')}</span>
+              <textarea
+                rows={5}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder={t('Hi Kitsos, I found you on your island…')}
+              />
+            </label>
 
-        {/*
+            {/*
           The honeypot, named like a field worth filling and left out of the
           tab order, off the screen and out of the accessibility tree. No
           person will ever put anything in it. Anything that does is not one.
         */}
-        <div className="honeypot" aria-hidden="true">
-          <label htmlFor="radio-company">Company</label>
-          <input
-            id="radio-company"
-            name="company"
-            type="text"
-            value={trap}
-            onChange={(e) => setTrap(e.target.value)}
-            tabIndex={-1}
-            autoComplete="off"
-          />
-        </div>
+            <div className="honeypot" aria-hidden="true">
+              <label htmlFor="radio-company">Company</label>
+              <input
+                id="radio-company"
+                name="company"
+                type="text"
+                value={trap}
+                onChange={(e) => setTrap(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+              />
+            </div>
 
-        {SITE_KEY !== undefined && (
-          <Turnstile key={challenge} siteKey={SITE_KEY} onToken={setToken} />
-        )}
-
-        <div className="radio__actions">
-          <button
-            className="button button--primary"
-            onClick={transmit}
-            disabled={!message.trim() || sending || (online && !token)}
-          >
-            {sending ? t('📡 Transmitting…') : t('📡 Transmit')}
-          </button>
-          <button
-            className="button"
-            onClick={() => {
-              // This one hands over the address too, so it gets the same
-              // test as the transmit button.
-              if (automated()) return
-              copy('message', `${PROFILE.email}\n\n${body}`)
-            }}
-          >
-            {t(copied === 'message' ? 'Copied ✓' : 'Copy message')}
-          </button>
-        </div>
-
-        {status.at === 'sent' && (
-          <p className="radio__status" role="status">
-            {t('Signal received. I will answer at the address you left.')}
-          </p>
-        )}
-        {status.at === 'mailed' && (
-          <p className="radio__status" role="status">
-            {fill(
-              t(
-                'Signal sent to your mail client. If nothing opened, copy the message instead. The address is {email}.',
-              ),
-              { email: PROFILE.email },
+            {SITE_KEY !== undefined && (
+              <Turnstile
+                key={challenge}
+                siteKey={SITE_KEY}
+                onToken={setToken}
+              />
             )}
-          </p>
-        )}
-        {failed && (
-          <p className="radio__status radio__status--failed" role="alert">
-            {failed === 'from' &&
-              t('That email address does not look right. I need it to reply.')}
-            {failed === 'name' && t('That name is too long for the desk.')}
-            {failed === 'message' &&
-              t('The message is empty, or longer than the desk can carry.')}
-            {failed === 'subject' && t('Pick one of the subjects on the list.')}
-            {failed === 'challenge' &&
-              t('The check that you are a person did not pass. Try once more.')}
-            {failed === 'busy' &&
-              t('Too many messages in a minute. Wait a little and try again.')}
-            {stranded && (
-              <>
-                {t(
-                  'The transmitter is down. Your message is still here: send it from your own mail client instead.',
-                )}{' '}
-                <a
-                  href={mailto}
-                  onClick={() => {
-                    sfx.jingle()
-                    setStatus({ at: 'mailed' })
-                  }}
-                >
-                  {t('Open it in my mail client')}
-                </a>
-              </>
+
+            <div className="radio__actions">
+              <button
+                className="button button--primary"
+                onClick={transmit}
+                disabled={!message.trim() || sending || (online && !token)}
+              >
+                {sending ? t('📡 Transmitting…') : t('📡 Transmit')}
+              </button>
+              <button
+                className="button"
+                onClick={() => {
+                  // This one hands over the address too, so it gets the same
+                  // test as the transmit button.
+                  if (automated()) return
+                  copy('message', `${PROFILE.email}\n\n${body}`)
+                }}
+              >
+                {t(copied === 'message' ? 'Copied ✓' : 'Copy message')}
+              </button>
+            </div>
+
+            {status.at === 'mailed' && (
+              <p className="radio__status" role="status">
+                {fill(
+                  t(
+                    'Signal sent to your mail client. If nothing opened, copy the message instead. The address is {email}.',
+                  ),
+                  { email: PROFILE.email },
+                )}
+              </p>
             )}
-          </p>
+            {failed && (
+              <p className="radio__status radio__status--failed" role="alert">
+                {failed === 'from' &&
+                  t(
+                    'That email address does not look right. I need it to reply.',
+                  )}
+                {failed === 'name' && t('That name is too long for the desk.')}
+                {failed === 'message' &&
+                  t('The message is empty, or longer than the desk can carry.')}
+                {failed === 'subject' &&
+                  t('Pick one of the subjects on the list.')}
+                {failed === 'challenge' &&
+                  t(
+                    'The check that you are a person did not pass. Try once more.',
+                  )}
+                {failed === 'busy' &&
+                  t(
+                    'Too many messages in a minute. Wait a little and try again.',
+                  )}
+                {stranded && (
+                  <>
+                    {t(
+                      'The transmitter is down. Your message is still here: send it from your own mail client instead.',
+                    )}{' '}
+                    <a
+                      href={mailto}
+                      onClick={() => {
+                        sfx.jingle()
+                        setStatus({ at: 'mailed' })
+                      }}
+                    >
+                      {t('Open it in my mail client')}
+                    </a>
+                  </>
+                )}
+              </p>
+            )}
+          </>
         )}
       </div>
     </div>

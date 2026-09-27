@@ -83,8 +83,10 @@ describe('with the transmitter on', () => {
     await waitFor(() => expect(transmit()).toBeEnabled())
     await user.click(transmit())
 
-    expect(await screen.findByRole('status')).toHaveTextContent(
-      'Signal received',
+    const card = await screen.findByRole('status')
+    expect(card).toHaveTextContent('Message sent!')
+    expect(card).toHaveTextContent(
+      'Thanks, Ada! Your message has landed in my inbox, and I will write back to ada@example.com.',
     )
     const [url, init] = fetchMock.mock.calls[0]
     expect(url).toBe('/api/transmit')
@@ -96,11 +98,56 @@ describe('with the transmitter on', () => {
       token: 'turnstile-token',
       elapsed: 20_000,
     })
-    // The message is cleared, and a fresh challenge drawn for the next one.
+  })
+
+  it('folds the form away once the message is through', async () => {
+    await openDesk('site-key')
+    const user = await fillIn()
+    await waitFor(() => expect(transmit()).toBeEnabled())
+    await user.click(transmit())
+
+    const card = await screen.findByRole('status')
+    // Focus lands on the card, since the button that was pressed is gone.
+    expect(card).toHaveFocus()
+    expect(
+      screen.queryByPlaceholderText('Hi Kitsos, I found you on your island…'),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /Transmit/ }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('brings back an empty form, with a fresh challenge, for another', async () => {
+    await openDesk('site-key')
+    const user = await fillIn()
+    await waitFor(() => expect(transmit()).toBeEnabled())
+    await user.click(transmit())
+    await user.click(
+      await screen.findByRole('button', { name: 'Send another message' }),
+    )
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
     expect(
       screen.getByPlaceholderText('Hi Kitsos, I found you on your island…'),
     ).toHaveValue('')
+    // Same person, so the name and the address are kept.
+    expect(screen.getByPlaceholderText('Ada Lovelace')).toHaveValue('Ada')
+    expect(screen.getByPlaceholderText('ada@example.com')).toHaveValue(
+      'ada@example.com',
+    )
+    // The last token went with the last message.
     expect(window.turnstile?.render).toHaveBeenCalledTimes(2)
+  })
+
+  it('thanks someone who left no name without a gap where it goes', async () => {
+    await openDesk('site-key')
+    const user = await fillIn()
+    await user.clear(screen.getByPlaceholderText('Ada Lovelace'))
+    await waitFor(() => expect(transmit()).toBeEnabled())
+    await user.click(transmit())
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Thanks! Your message has landed in my inbox, and I will write back to ada@example.com.',
+    )
   })
 
   it('waits for the challenge before it can be pressed', async () => {

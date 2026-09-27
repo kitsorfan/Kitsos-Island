@@ -43,13 +43,13 @@ export const FAMILY: Record<string, string> = {
     'Ο μεγαλύτερος αδελφός του, οδοντίατρος. Και οι δύο γονείς δίδασκαν στο λύκειο και πήραν προσωπικά τη μόρφωση των ίδιων τους των παιδιών, και το ότι ήταν ο μεγαλύτερος δεν γλίτωσε ποτέ τον Αλέξη από έναν καβγά.',
   'Alexandra, upstairs': 'Η Αλεξάνδρα, επάνω',
   'His youngest sister, a PE teacher who coaches basketball. The one he looked after, stood in front of, and played the fool for.':
-    'Η μικρότερη αδελφή του, γυμνάστρια και προπονήτρια μπάσκετ. Αυτή που πρόσεχε, μπροστά από την οποία στεκόταν, και για την οποία έκανε τον χαζό.',
+    'Η μικρότερη αδελφή του, γυμνάστρια και προπονήτρια μπάσκετ. Αυτή που πρόσεχε, που προστάτευε, και που έκανε τον χαζό για να τη δει να γελάει.',
   'Amalia, in the living room. The family he has now, one floor above the one he grew up in.':
-    'Η Αμαλία, στο σαλόνι. Η οικογένεια που έχει τώρα, έναν όροφο πάνω από εκείνη στην οποία μεγάλωσε.',
+    'Η Αμαλία, στο σαλόνι. Η οικογένεια που έχει τώρα, έναν όροφο πάνω από εκείνη όπου μεγάλωσε.',
 
   /* ------------------------------- The father ------------------------- */
   'Two degrees, and then a doctorate I crossed an ocean to New York for.':
-    'Δύο πτυχία, και μετά ένα διδακτορικό για το οποίο διέσχισα έναν ωκεανό ως τη Νέα Υόρκη.',
+    'Δύο πτυχία, και μετά ένα διδακτορικό για το οποίο πέρασα τον ωκεανό, ως τη Νέα Υόρκη.',
   'Ask me which of them I am proudest of and I will point at this table instead.':
     'Ρώτα με για ποιο από αυτά είμαι πιο περήφανος και θα σου δείξω αυτό εδώ το τραπέζι.',
   'You were never the one who waited to be asked. Something was broken and you already had it open on the floor.':
@@ -67,9 +67,9 @@ export const FAMILY: Record<string, string> = {
 
   /* -------------------------------- Kostis ---------------------------- */
   'Mechanical here, electrical over there. Between the two of us there was nothing in this house we could not take apart.':
-    'Μηχανολόγος από δω, ηλεκτρολόγος από κει. Μεταξύ μας, δεν υπήρχε τίποτα σε αυτό το σπίτι που να μην μπορούμε να το λύσουμε.',
+    'Μηχανολόγος από δω, ηλεκτρολόγος από κει. Οι δυο μας δεν αφήσαμε τίποτα σε αυτό το σπίτι που να μην το λύσουμε.',
   'You did the wiring and the code, I built the thing they went inside. We never once agreed on the schedule and it worked every time.':
-    'Εσύ έκανες τις καλωδιώσεις και τον κώδικα, εγώ έφτιαχνα αυτό μέσα στο οποίο έμπαιναν. Ποτέ δεν συμφωνήσαμε στο χρονοδιάγραμμα, και πάντα δούλευε.',
+    'Εσύ έκανες τις καλωδιώσεις και τον κώδικα, εγώ έφτιαχνα το κουτί όπου έμπαιναν. Ποτέ δεν συμφωνήσαμε στο χρονοδιάγραμμα, και πάντα δούλευε.',
   'The first machine we put together out of parts nobody else wanted ran for years. It is probably still running somewhere.':
     'Το πρώτο μηχάνημα που συναρμολογήσαμε από ανταλλακτικά που δεν ήθελε κανείς δούλεψε χρόνια. Μάλλον δουλεύει ακόμη κάπου.',
 

@@ -6,7 +6,6 @@ import {
   queueFire,
   queueInteract,
   queueJump,
-  setKey,
   touchCrouch,
   touchStick,
 } from './input'
@@ -16,6 +15,7 @@ import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
 import { useScreen } from '../../shared/ui/useScreen'
 import { LiftButtons } from '../balloon/LiftButtons'
 import { CapeButtons } from './CapeButtons'
+import { RideBars, RidePedals } from '../moto/RideButtons'
 import { useT } from '../../shared/i18n/useT'
 import * as sfx from '../../shared/engine/audio'
 
@@ -86,20 +86,26 @@ export function TouchControls() {
 
   return (
     <div className={`touch${mobile ? ' touch--mobile' : ''}`}>
-      <div
-        className="stick"
-        ref={base}
-        onPointerDown={(e) => {
-          pointerId.current = e.pointerId
-          e.currentTarget.setPointerCapture(e.pointerId)
-          move(e)
-        }}
-        onPointerMove={move}
-        onPointerUp={release}
-        onPointerCancel={release}
-      >
-        <div className="stick__knob" ref={knob} />
-      </div>
+      {/* On the bike the stick gives way to a pair of bars, and the gas and
+          the brake move over to the other thumb. */}
+      {riding ? (
+        <RideBars />
+      ) : (
+        <div
+          className="stick"
+          ref={base}
+          onPointerDown={(e) => {
+            pointerId.current = e.pointerId
+            e.currentTarget.setPointerCapture(e.pointerId)
+            move(e)
+          }}
+          onPointerMove={move}
+          onPointerUp={release}
+          onPointerCancel={release}
+        >
+          <div className="stick__knob" ref={knob} />
+        </div>
+      )}
 
       <div className="touch__buttons">
         {mode === 'explore' &&
@@ -150,7 +156,7 @@ export function TouchControls() {
             }}
             aria-label={t('Wide pulse')}
           >
-            PULSE
+            {t('PULSE')}
           </button>
         ) : flying ? (
           <>
@@ -199,19 +205,7 @@ export function TouchControls() {
             </button>
           </>
         ) : riding ? (
-          <button
-            className="round-button round-button--wheelie"
-            onPointerDown={(e) => {
-              e.preventDefault()
-              setKey('Space', true)
-            }}
-            onPointerUp={() => setKey('Space', false)}
-            onPointerCancel={() => setKey('Space', false)}
-            onPointerLeave={() => setKey('Space', false)}
-            aria-label={t('Wheelie')}
-          >
-            WHEELIE
-          </button>
+          <RidePedals />
         ) : fighting ? (
           <>
             <button
@@ -231,7 +225,7 @@ export function TouchControls() {
               }}
               aria-label={t('Get down')}
             >
-              DUCK
+              {t('DUCK')}
             </button>
             <button
               className="round-button round-button--fire"
@@ -251,7 +245,7 @@ export function TouchControls() {
               }}
               aria-label={t('Shoot paint')}
             >
-              FIRE
+              {t('FIRE')}
             </button>
           </>
         ) : sailing ? null : (

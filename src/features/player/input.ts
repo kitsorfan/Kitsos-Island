@@ -16,6 +16,19 @@ export const liftHold = { up: false, down: false }
  */
 export const capeHold = { up: false, down: false }
 
+/**
+ * Set while one of the bike's on-screen controls is held: the bars, left and
+ * right, under one thumb, and the gas, the brake and the wheelie under the
+ * other. A touch screen rides on these rather than on the stick.
+ */
+export const rideHold = {
+  left: false,
+  right: false,
+  gas: false,
+  brake: false,
+  wheelie: false,
+}
+
 /** Virtual stick written by the on-screen joystick, range -1..1. */
 export const touchStick = { x: 0, y: 0, active: false }
 
@@ -75,6 +88,11 @@ export function clearKeys() {
   liftHold.down = false
   capeHold.up = false
   capeHold.down = false
+  rideHold.left = false
+  rideHold.right = false
+  rideHold.gas = false
+  rideHold.brake = false
+  rideHold.wheelie = false
 }
 
 /* ------------------------------ the long hold ---------------------------- */
@@ -299,6 +317,36 @@ export function readMove(): MoveAxis {
   const run =
     sprintLock.on || pressed.has('ShiftLeft') || pressed.has('ShiftRight')
   return { x, y, run }
+}
+
+export interface RideAxis {
+  /** -1 to 1: brake to gas. */
+  throttle: number
+  /** -1 to 1: left to right. */
+  steer: number
+  wheelie: boolean
+}
+
+const unit = (value: number) => Math.max(-1, Math.min(1, value))
+
+/**
+ * The bike's controls, however they arrive: W, S, A and D or the stick, and
+ * the bars and pedals on a touch screen.
+ *
+ * The on-screen WHEELIE is gas as well as the front wheel up. It sits under
+ * the thumb that was on the gas, so without that the bike would drag down
+ * off the throttle for as long as the wheelie was held.
+ */
+export function readRide(): RideAxis {
+  const move = readMove()
+  const gas = rideHold.gas || rideHold.wheelie ? 1 : 0
+  const brake = rideHold.brake ? 1 : 0
+  const bars = (rideHold.right ? 1 : 0) - (rideHold.left ? 1 : 0)
+  return {
+    throttle: unit(move.y + gas - brake),
+    steer: unit(move.x + bars),
+    wheelie: pressed.has('Space') || rideHold.wheelie,
+  }
 }
 
 /**

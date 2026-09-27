@@ -78,7 +78,7 @@ export function LiftButtons({ look }: { look: 'round' | 'edge' }) {
       >
         {/* Words on the round buttons, as FIRE and DUCK have; a chevron on
             the pills, as the turn has its drawing. */}
-        {look === 'round' ? WORD[way] : <Chevron way={way} />}
+        {look === 'round' ? t(WORD[way]) : <Chevron way={way} />}
       </button>
     )
   }

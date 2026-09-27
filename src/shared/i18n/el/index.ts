@@ -6,9 +6,10 @@ import { FAMILY } from './family'
 import { FEAST } from './feast'
 import { LECTURE } from './lecture'
 import { GAMES } from './games'
+import { PROMPTS } from './prompts'
 
 /**
- * The Greek dictionary, split by where its English comes from so that 900-odd
+ * The Greek dictionary, split by where its English comes from so that two thousand-odd
  * entries stay findable. The parts are merged once at module load; keys are
  * unique across them, and a later part would win a collision.
  */
@@ -21,4 +22,5 @@ export const EL: Record<string, string> = {
   ...FEAST,
   ...LECTURE,
   ...GAMES,
+  ...PROMPTS,
 }

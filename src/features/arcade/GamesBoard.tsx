@@ -5,6 +5,8 @@ import { BOARD, MINIGAMES } from './minigames'
 import { groundHeight } from '../island/terrainLogic'
 import { useGame } from '../../shared/state/store'
 import { TextPlane } from '../../shared/engine/TextSign'
+import { useT } from '../../shared/i18n/useT'
+import { upper } from '../../shared/i18n'
 
 const WOOD = '#b07a42'
 const WOOD_DARK = '#8a5c2f'
@@ -46,6 +48,7 @@ const SLIP_PITCH = 0.27
  * name apiece, and what each game actually is waits on the pop-up.
  */
 export function GamesBoard() {
+  const t = useT()
   const [x, z] = BOARD.position
   const y = groundHeight(x, z)
   const nearby = useGame((s) => s.nearby?.id === 'games-board')
@@ -100,7 +103,7 @@ export function GamesBoard() {
           </mesh>
 
           <TextPlane
-            text="ISLAND GAMES"
+            text={t('ISLAND GAMES')}
             width={1.2}
             aspect={8}
             color="#ffe9b8"
@@ -129,7 +132,7 @@ export function GamesBoard() {
                   <meshStandardMaterial color={game.accent} roughness={0.7} />
                 </mesh>
                 <TextPlane
-                  text={game.title.toUpperCase()}
+                  text={upper(t(game.title))}
                   width={SLIP_W - 0.34}
                   aspect={10}
                   color="#3a2d22"

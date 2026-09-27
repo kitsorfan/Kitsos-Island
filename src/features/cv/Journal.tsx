@@ -8,6 +8,7 @@ import {
 } from '../../shared/state/store'
 import * as sfx from '../../shared/engine/audio'
 import { useT } from '../../shared/i18n/useT'
+import { fill } from '../../shared/i18n'
 import { CloseMark } from '../../shared/ui/CloseMark'
 
 /** One card per entry the island holds, found or not, in catalogue order. */
@@ -39,7 +40,10 @@ export function Journal() {
           <div>
             <p className="panel__kicker">{t('Field journal')}</p>
             <h2 className="panel__title">
-              {found} {t('of')} {TOTAL_ENTRIES} {t('discovered')}
+              {fill(t('{found} of {total} discovered'), {
+                found,
+                total: TOTAL_ENTRIES,
+              })}
             </h2>
           </div>
           <button
@@ -58,7 +62,10 @@ export function Journal() {
         <div className="panel__body">
           <section className="panel__section">
             <h3 className="panel__heading">
-              {t('Keyring')}: {keyCount(keys)} {t('of')} {TOTAL_KEYS}
+              {fill(t('Keyring: {have} of {total}'), {
+                have: keyCount(keys),
+                total: TOTAL_KEYS,
+              })}
             </h3>
             <div className="keycard-row">
               {KEYS.map((key) => {

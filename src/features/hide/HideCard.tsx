@@ -4,11 +4,13 @@ import { useGame } from '../../shared/state/store'
 import * as sfx from '../../shared/engine/audio'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
 import { useT } from '../../shared/i18n/useT'
+import { fill, rich } from '../../shared/i18n'
+import type { Translate } from '../../shared/i18n'
 
-const clock = (seconds: number) => {
+const clock = (seconds: number, t: Translate) => {
   const m = Math.floor(seconds / 60)
   const s = Math.floor(seconds % 60)
-  return m > 0 ? `${m}m ${s}s` : `${s}s`
+  return m > 0 ? fill(t('{m}m {s}s'), { m, s }) : fill(t('{s}s'), { s })
 }
 
 /** The briefing before a game of hide and seek, and the card after one. */
@@ -41,16 +43,20 @@ export function HideCard() {
     <div className="overlay">
       <div className={`hd-card${game.won && !briefing ? ' hd-card--won' : ''}`}>
         <span className="hd-card__kicker">
-          {briefing ? 'Hide and seek · after dark' : `Game ${game.round}`}
+          {briefing
+            ? t('Hide and seek · after dark')
+            : fill(t('Game {round}'), { round: game.round })}
         </span>
         <h2 className="hd-card__title">
-          {briefing
-            ? 'Lights out on the island'
-            : game.won
-              ? seeking
-                ? 'Every one of them found'
-                : 'Never found you'
-              : 'Found you'}
+          {t(
+            briefing
+              ? 'Lights out on the island'
+              : game.won
+                ? seeking
+                  ? 'Every one of them found'
+                  : 'Never found you'
+                : 'Found you',
+          )}
         </h2>
 
         {briefing ? (
@@ -64,13 +70,23 @@ export function HideCard() {
             <div className="hd-sides">
               {side(
                 'seeker',
-                'You seek',
-                `All ${COUNT} of them hide. Go and find them with your torch.`,
+                t('You seek'),
+                fill(
+                  t(
+                    'All {count} of them hide. Go and find them with your torch.',
+                  ),
+                  { count: COUNT },
+                ),
               )}
               {side(
                 'hider',
-                'You hide',
-                `${HEAD_START} seconds to disappear, then all ${COUNT} come looking.`,
+                t('You hide'),
+                fill(
+                  t(
+                    '{seconds} seconds to disappear, then all {count} come looking.',
+                  ),
+                  { seconds: HEAD_START, count: COUNT },
+                ),
               )}
             </div>
 
@@ -78,47 +94,66 @@ export function HideCard() {
               {seeking ? (
                 <>
                   <li>
-                    Shining a light on somebody is not finding them. You have to{' '}
-                    <strong>{t('walk up and touch them')}</strong>.
+                    {rich(
+                      t(
+                        'Shining a light on somebody is not finding them. You have to <b>walk up and touch them</b>.',
+                      ),
+                    )}
                   </li>
                   <li>
-                    Keep the torch <strong>{t('lit')}</strong>, or you will walk
-                    past every one of them in the dark. Nothing tells you where
-                    they are. They are behind things.
+                    {rich(
+                      t(
+                        'Keep the torch <b>lit</b>, or you will walk past every one of them in the dark. Nothing tells you where they are. They are behind things.',
+                      ),
+                    )}
                   </li>
                   <li>
-                    Nothing is timed against you. The clock only says how long
-                    it took to find all {COUNT}.
+                    {fill(
+                      t(
+                        'Nothing is timed against you. The clock only says how long it took to find all {count}.',
+                      ),
+                      { count: COUNT },
+                    )}
                   </li>
                 </>
               ) : (
                 <>
                   <li>
-                    <strong>{HEAD_START} seconds</strong> while they count.
-                    After that every one of them is out with a torch.
+                    {rich(
+                      t(
+                        '<b>{seconds} seconds</b> while they count. After that every one of them is out with a torch.',
+                      ),
+                      { seconds: HEAD_START },
+                    )}
                   </li>
                   <li>
-                    Stay out of their hands for{' '}
-                    <strong>{HOLD_OUT} seconds</strong> and you have won the
-                    night. Being seen is not being caught. Somebody has to reach
-                    you, the same rule you play by the other way round.
+                    {rich(
+                      t(
+                        'Stay out of their hands for <b>{seconds} seconds</b> and you have won the night. Being seen is not being caught. Somebody has to reach you, the same rule you play by the other way round.',
+                      ),
+                      { seconds: HOLD_OUT },
+                    )}
                   </li>
                   <li>
-                    <strong>{t('They run when they see you')}</strong>, and a
-                    shade faster than you can. Speed is no way out of it. Get
-                    something solid between you and them and they will lose you.
+                    {rich(
+                      t(
+                        '<b>They run when they see you</b>, and a shade faster than you can. Speed is no way out of it. Get something solid between you and them and they will lose you.',
+                      ),
+                    )}
                   </li>
                   <li>
-                    <strong>{t('Anything you do draws them.')}</strong> Walking
-                    is heard from a good way off, crouch-walking from barely
-                    any, and a lit torch is seen right across the town, so
-                    everyone inside that range stops looking where they were and
-                    comes to look at you.
+                    {rich(
+                      t(
+                        '<b>Anything you do draws them.</b> Walking is heard from a good way off, crouch-walking from barely any, and a lit torch is seen right across the town, so everyone inside that range stops looking where they were and comes to look at you.',
+                      ),
+                    )}
                   </li>
                   <li>
-                    <strong>{t('Still and dark is safe')}</strong>, up to a
-                    point. Every so often one of them takes it into their head
-                    to come and look exactly where you are anyway.
+                    {rich(
+                      t(
+                        '<b>Still and dark is safe</b>, up to a point. Every so often one of them takes it into their head to come and look exactly where you are anyway.',
+                      ),
+                    )}
                   </li>
                 </>
               )}
@@ -162,10 +197,22 @@ export function HideCard() {
           <>
             <p className="hd-card__lead">
               {seeking
-                ? `All ${COUNT} of them out of the dark, one torch beam at a time.`
+                ? fill(
+                    t(
+                      'All {count} of them out of the dark, one torch beam at a time.',
+                    ),
+                    { count: COUNT },
+                  )
                 : game.won
-                  ? `${HOLD_OUT} seconds with the whole island looking, and not one of them got a beam on you.`
-                  : 'Somebody held a light on you just long enough to be sure.'}
+                  ? fill(
+                      t(
+                        '{seconds} seconds with the whole island looking, and not one of them got a beam on you.',
+                      ),
+                      { seconds: HOLD_OUT },
+                    )
+                  : t(
+                      'Somebody held a light on you just long enough to be sure.',
+                    )}
             </p>
             <div className="hd-card__score">
               {seeking ? (
@@ -178,13 +225,15 @@ export function HideCard() {
               ) : (
                 <div>
                   <span>{t('Held out')}</span>
-                  <strong>{clock(game.seconds)}</strong>
+                  <strong>{clock(game.seconds, t)}</strong>
                 </div>
               )}
               <div>
-                <span>{seeking ? 'Took' : 'Needed'}</span>
+                <span>{t(seeking ? 'Took' : 'Needed')}</span>
                 <strong>
-                  {seeking ? clock(game.seconds) : `${HOLD_OUT}s`}
+                  {seeking
+                    ? clock(game.seconds, t)
+                    : fill(t('{s}s'), { s: HOLD_OUT })}
                 </strong>
               </div>
             </div>
@@ -196,7 +245,9 @@ export function HideCard() {
             className="button button--primary"
             onClick={() => (briefing ? begin() : again())}
           >
-            {briefing ? (seeking ? 'Start counting' : 'Go and hide') : 'Again'}
+            {t(
+              briefing ? (seeking ? 'Start counting' : 'Go and hide') : 'Again',
+            )}
           </button>
           <button
             className="button"
@@ -205,7 +256,7 @@ export function HideCard() {
               exit()
             }}
           >
-            Lights back on
+            {t('Lights back on')}
           </button>
         </div>
       </div>

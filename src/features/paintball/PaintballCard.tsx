@@ -13,6 +13,7 @@ import {
 import { useGame } from '../../shared/state/store'
 import * as sfx from '../../shared/engine/audio'
 import { useT } from '../../shared/i18n/useT'
+import { fill, rich } from '../../shared/i18n'
 
 const NPC_BY_ID = new Map(NPCS.map((n) => [n.id, n]))
 
@@ -37,14 +38,18 @@ export function PaintballCard() {
     <div className="overlay">
       <div className={`pb-card${won ? ' pb-card--won' : ''}`}>
         <span className="pb-card__kicker">
-          {briefing ? 'Paintball mode' : `Round ${game.round}`}
+          {briefing
+            ? t('Paintball mode')
+            : fill(t('Round {round}'), { round: game.round })}
         </span>
         <h2 className="pb-card__title">
-          {briefing
-            ? 'Pick up the marker'
-            : won
-              ? 'Field cleared'
-              : 'Painted out'}
+          {t(
+            briefing
+              ? 'Pick up the marker'
+              : won
+                ? 'Field cleared'
+                : 'Painted out',
+          )}
         </h2>
 
         {briefing ? (
@@ -58,12 +63,17 @@ export function PaintballCard() {
             <div className="pb-card__teams">
               <div className="pb-team pb-team--friend">
                 <span className="pb-team__label">
-                  On your side: {game.friends.length} of {MAX_FRIENDS}
+                  {fill(t('On your side: {count} of {max}'), {
+                    count: game.friends.length,
+                    max: MAX_FRIENDS,
+                  })}
                 </span>
                 <p className="pb-team__hint">
-                  {game.friends.length === 0
-                    ? 'Nobody yet. Tap a name and they will pick up a marker for you; leave it empty and the afternoon is yours alone.'
-                    : 'Tap a name to take them off it. Whoever you leave out lines up against you.'}
+                  {t(
+                    game.friends.length === 0
+                      ? 'Nobody yet. Tap a name and they will pick up a marker for you; leave it empty and the afternoon is yours alone.'
+                      : 'Tap a name to take them off it. Whoever you leave out lines up against you.',
+                  )}
                 </p>
                 <div className="pb-roster">
                   {ROSTER.map((id) => {
@@ -77,10 +87,10 @@ export function PaintballCard() {
                         className={`pb-pick${picked ? ' pb-pick--on' : ''}`}
                         disabled={full}
                         aria-pressed={picked}
-                        title={npc?.role}
+                        title={npc ? t(npc.role) : undefined}
                         onClick={() => toggleAlly(id)}
                       >
-                        {combatantName(id)}
+                        {t(combatantName(id))}
                       </button>
                     )
                   })}
@@ -89,12 +99,16 @@ export function PaintballCard() {
 
               <div className="pb-team pb-team--enemy">
                 <span className="pb-team__label">
-                  Against you: {game.enemies.length}
+                  {fill(t('Against you: {count}'), {
+                    count: game.enemies.length,
+                  })}
                 </span>
                 <p className="pb-team__hint">
-                  {game.enemies.length > ROSTER.length
-                    ? 'The island, plus enough of the next village along to make up the numbers.'
-                    : 'Islanders, spread across the fields around the plaza.'}
+                  {t(
+                    game.enemies.length > ROSTER.length
+                      ? 'The island, plus enough of the next village along to make up the numbers.'
+                      : 'Islanders, spread across the fields around the plaza.',
+                  )}
                 </p>
                 <label className="pb-dial">
                   <input
@@ -116,28 +130,42 @@ export function PaintballCard() {
                   className="pb-redraw"
                   onClick={() => redraw()}
                 >
-                  Draw both sides again
+                  {t('Draw both sides again')}
                 </button>
               </div>
             </div>
 
             <ul className="pb-card__rules">
               <li>
-                <strong>{MAG_SIZE} rounds</strong> per hopper, then a{' '}
-                {RELOAD_MS / 1000}-second refill.
+                {rich(
+                  t(
+                    '<b>{rounds} rounds</b> per hopper, then a {seconds}-second refill.',
+                  ),
+                  { rounds: MAG_SIZE, seconds: RELOAD_MS / 1000 },
+                )}
               </li>
               <li>
-                <strong>{START_LIVES} lives</strong>. A ball to the chest costs
-                one.
+                {rich(
+                  t('<b>{lives} lives</b>. A ball to the chest costs one.'),
+                  {
+                    lives: START_LIVES,
+                  },
+                )}
               </li>
               <li>
-                <strong>{t('Get down')}</strong> (Ctrl, or the DUCK button) and
-                their paint sails over you, but you cannot shoot back from down
-                there. Cover costs you the shot.
+                {rich(
+                  t(
+                    '<b>Get down</b> (Ctrl, or the DUCK button) and their paint sails over you, but you cannot shoot back from down there. Cover costs you the shot.',
+                  ),
+                )}
               </li>
               <li>
-                <strong>{COUNTDOWN} seconds</strong> on the clock before anybody
-                may fire. Use them to get behind something.
+                {rich(
+                  t(
+                    '<b>{seconds} seconds</b> on the clock before anybody may fire. Use them to get behind something.',
+                  ),
+                  { seconds: COUNTDOWN },
+                )}
               </li>
               <li>
                 {t(
@@ -149,9 +177,14 @@ export function PaintballCard() {
         ) : (
           <>
             <p className="pb-card__lead">
-              {won
-                ? `Every last one of them is sitting in the grass. You painted ${game.hits} of ${game.enemies.length} yourself.`
-                : `Three hits and the afternoon is over. ${painted} of ${game.enemies.length} went down first.`}
+              {fill(
+                t(
+                  won
+                    ? 'Every last one of them is sitting in the grass. You painted {hits} of {total} yourself.'
+                    : 'Three hits and the afternoon is over. {painted} of {total} went down first.',
+                ),
+                { hits: game.hits, painted, total: game.enemies.length },
+              )}
             </p>
             <div className="pb-card__score">
               <div>
@@ -181,7 +214,7 @@ export function PaintballCard() {
             className="button button--primary"
             onClick={() => (briefing ? begin() : rematch())}
           >
-            {briefing ? 'Start the match' : 'Rematch'}
+            {t(briefing ? 'Start the match' : 'Rematch')}
           </button>
           <button
             className="button"
@@ -190,7 +223,7 @@ export function PaintballCard() {
               exit()
             }}
           >
-            Back to the island
+            {t('Back to the island')}
           </button>
         </div>
       </div>

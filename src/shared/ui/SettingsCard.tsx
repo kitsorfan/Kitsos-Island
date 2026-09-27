@@ -3,7 +3,7 @@ import { LEVELS } from '../engine/audio'
 import { TOTAL_ENTRIES, hasProgress, keyCount, useGame } from '../state/store'
 import * as sfx from '../engine/audio'
 import type { Quality } from '../../types'
-import { LOCALES, useTranslate } from '../i18n'
+import { LOCALES, fill, useTranslate } from '../i18n'
 import { useScreen } from './useScreen'
 
 /**
@@ -121,7 +121,10 @@ export function SettingsCard() {
           step={1}
           value={musicLevel}
           onChange={(event) => setMusicLevel(Number(event.target.value))}
-          aria-label={`Music volume, ${musicLevel} of ${LEVELS}`}
+          aria-label={fill(t('Music volume, {level} of {max}'), {
+            level: musicLevel,
+            max: LEVELS,
+          })}
         />
         <span className="setting__value">
           {readout(musicLevel) ?? t('Off')}
@@ -138,7 +141,10 @@ export function SettingsCard() {
           step={1}
           value={sfxLevel}
           onChange={(event) => setSfxLevel(Number(event.target.value))}
-          aria-label={`Sound effect volume, ${sfxLevel} of ${LEVELS}`}
+          aria-label={fill(t('Sound effect volume, {level} of {max}'), {
+            level: sfxLevel,
+            max: LEVELS,
+          })}
         />
         <span className="setting__value">{readout(sfxLevel) ?? t('Off')}</span>
       </div>
@@ -177,8 +183,11 @@ export function SettingsCard() {
       <div className="settings-card__progress">
         <h4>{t('Progress')}</h4>
         <p>
-          {found} {t('of')} {TOTAL_ENTRIES} {t('discovered')} · {keyCount(keys)}{' '}
-          {t('keys')}
+          {fill(t('{found} of {total} discovered · {keys} keys'), {
+            found,
+            total: TOTAL_ENTRIES,
+            keys: keyCount(keys),
+          })}
         </p>
         {confirming ? (
           <>

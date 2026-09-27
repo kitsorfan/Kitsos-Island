@@ -1,6 +1,6 @@
 import './verify.css'
 import { judge, readRequest } from './verify'
-import type { VerifyRequest } from './verify'
+import type { Say, VerifyRequest } from './verify'
 
 /**
  * The page at /verify/<reference>?name=<name>: whether a certificate is one
@@ -15,17 +15,41 @@ import type { VerifyRequest } from './verify'
  * never as markup: the name in the query is whatever somebody typed into it.
  */
 export function showVerify(root: HTMLElement): void {
-  document.title = 'Verify a certificate · Kitsos Island'
   document.documentElement.classList.add('verify-doc')
-  render(root, readRequest(location.pathname, location.search))
+  const request = readRequest(location.pathname, location.search)
+  void speaker().then((say) => {
+    document.title = say('Verify a certificate · Kitsos Island')
+    render(root, request, say)
+  })
 }
 
-function render(root: HTMLElement, request: VerifyRequest): void {
-  const verdict = judge(request)
+/**
+ * The page's language: Greek for somebody who chose Greek on the island, and
+ * English for everybody else, which is most people who land here off a link
+ * on somebody's profile. Read straight from storage, as main.tsx reads it,
+ * because the store belongs to the island and this page never loads it. The
+ * words are this page's own short list, not the island's dictionary: they
+ * are all it needs, and a few of them mean something else here.
+ */
+async function speaker(): Promise<Say> {
+  try {
+    if (localStorage.getItem('island.settings')?.includes('"locale":"el"')) {
+      const { VERIFY } = await import('../../shared/i18n/el/verify')
+      document.documentElement.lang = 'el'
+      return (text) => VERIFY[text] ?? text
+    }
+  } catch {
+    /* No storage to read, or no dictionary to be had: English it is. */
+  }
+  return (text) => text
+}
+
+function render(root: HTMLElement, request: VerifyRequest, say: Say): void {
+  const verdict = judge(request, say)
 
   const card = el('main', 'verify')
   card.append(
-    el('p', 'verify__kicker', 'Kitsos Island · Certificate check'),
+    el('p', 'verify__kicker', say('Kitsos Island · Certificate check')),
     el('h1', `verify__headline verify__headline--${verdict.tone}`, [
       el('span', 'verify__mark', MARKS[verdict.tone]),
       verdict.headline,
@@ -36,39 +60,45 @@ function render(root: HTMLElement, request: VerifyRequest): void {
   if (verdict.check === 'valid' || verdict.check === 'unbound') {
     const facts = el('dl', 'verify__facts')
     if (request.name)
-      facts.append(el('dt', '', 'Name'), el('dd', '', request.name))
+      facts.append(el('dt', '', say('Name')), el('dd', '', request.name))
     facts.append(
-      el('dt', '', 'Reference'),
+      el('dt', '', say('Reference')),
       el('dd', 'verify__mono', request.reference),
-      el('dt', '', 'Issued for'),
-      el('dd', '', 'Completing Kitsos Island'),
+      el('dt', '', say('Issued for')),
+      el('dd', '', say('Completing Kitsos Island')),
     )
     card.append(facts)
   }
 
-  card.append(form(root, request))
+  card.append(form(root, request, say))
 
   card.append(
     el(
       'p',
       'verify__note',
-      'The reference is signed with RSA, and the signature covers the name. The key is deliberately tiny and ships with the site, so this shows how verification works rather than proving much: it is a souvenir, checked honestly.',
+      say(
+        'The reference is signed with RSA, and the signature covers the name. The key is deliberately tiny and ships with the site, so this shows how verification works rather than proving much: it is a souvenir, checked honestly.',
+      ),
     ),
-    link('/', 'Visit the island →', 'verify__home'),
+    link('/', say('Visit the island →'), 'verify__home'),
   )
 
   root.replaceChildren(card)
 }
 
 /** The boxes to check another reference, prefilled with this one. */
-function form(root: HTMLElement, request: VerifyRequest): HTMLFormElement {
+function form(
+  root: HTMLElement,
+  request: VerifyRequest,
+  say: Say,
+): HTMLFormElement {
   const f = el('form', 'verify__form')
   const reference = input('reference', 'KI-0ABCD-1EFGH', request.reference)
-  const name = input('name', 'Name on the certificate', request.name)
+  const name = input('name', say('Name on the certificate'), request.name)
   f.append(
-    field('Reference', reference),
-    field('Name', name),
-    el('button', 'verify__submit', 'Check'),
+    field(say('Reference'), reference),
+    field(say('Name'), name),
+    el('button', 'verify__submit', say('Check')),
   )
   f.addEventListener('submit', (e) => {
     e.preventDefault()
@@ -80,7 +110,7 @@ function form(root: HTMLElement, request: VerifyRequest): HTMLFormElement {
       `/verify/${encodeURIComponent(next.reference)}` +
       (next.name ? `?name=${encodeURIComponent(next.name)}` : '')
     history.replaceState(null, '', url)
-    render(root, next)
+    render(root, next, say)
   })
   return f
 }

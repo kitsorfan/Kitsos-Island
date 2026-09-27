@@ -15,6 +15,7 @@ import { groundHeight } from '../island/terrainLogic'
 import { Character, type CharacterMotion } from '../player/Character'
 import { PLAYER_POS } from '../player/playerLogic'
 import { TextPlane } from '../../shared/engine/TextSign'
+import { useT } from '../../shared/i18n/useT'
 
 const PINK = '#ff3d81'
 /** How many hearts are in the air over her at any time. */
@@ -52,6 +53,7 @@ export function Heart({ color = PINK }: { color?: string }) {
  * already doing.
  */
 export function Amalia() {
+  const t = useT()
   const root = useRef<Group>(null)
   const motion = useRef<CharacterMotion>({ moving: false, speed: 0, dance: 0 })
   const hearts = useRef<(Group | null)[]>([])
@@ -246,7 +248,7 @@ export function Amalia() {
       {/* Her name, turned to whoever is looking */}
       <Billboard position={[0, 3.55, 0]}>
         <TextPlane
-          text={AMALIA.name}
+          text={t(AMALIA.name)}
           width={1.9}
           aspect={5}
           color="#ffe9f2"

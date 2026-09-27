@@ -782,9 +782,10 @@ export function Player() {
                   speaker: b.name,
                   role: 'Locked',
                   lines: [
-                    `Five heavy locks, one for each district. ${have} of ${b.locksWith} keys turned.`,
+                    'Five heavy locks, one for each district. {have} of {total} keys turned.',
                     'Every district building hides one. Ask the people who work there.',
                   ],
+                  slots: { have, total: b.locksWith },
                 })
                 return
               }
@@ -1033,8 +1034,9 @@ export function Player() {
                 role: 'Key found',
                 lines: [
                   `You lift the ${key.name.toLowerCase()} from ${exhibit.label}.`,
-                  `${keyCount(state.keys) + 1} of 5 locks on the Old Lighthouse can turn now.`,
+                  '{count} of 5 locks on the Old Lighthouse can turn now.',
                 ],
+                slots: { count: keyCount(state.keys) + 1 },
               })
             },
           })

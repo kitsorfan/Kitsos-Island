@@ -8,11 +8,13 @@ import { useGame } from '../../shared/state/store'
 import * as sfx from '../../shared/engine/audio'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
 import { useT } from '../../shared/i18n/useT'
+import { fill, rich } from '../../shared/i18n'
+import type { Translate } from '../../shared/i18n'
 
-const clock = (seconds: number) => {
+const clock = (seconds: number, t: Translate) => {
   const m = Math.floor(seconds / 60)
   const s = Math.floor(seconds % 60)
-  return m > 0 ? `${m}m ${s}s` : `${s}s`
+  return m > 0 ? fill(t('{m}m {s}s'), { m, s }) : fill(t('{s}s'), { s })
 }
 
 /** The briefing before a flight, and the card at the end of one. */
@@ -36,19 +38,23 @@ export function BalloonCard() {
     <div className="overlay">
       <div className="bl-card">
         <span className="bl-card__kicker">
-          {briefing ? 'Balloon drop' : `Flight ${flight.round}`}
+          {briefing
+            ? t('Balloon drop')
+            : fill(t('Flight {round}'), { round: flight.round })}
         </span>
         <h2 className="bl-card__title">
-          {briefing ? 'Up over the town' : 'Nobody left waiting'}
+          {t(briefing ? 'Up over the town' : 'Nobody left waiting')}
         </h2>
 
         {briefing ? (
           <>
             <p className="bl-card__lead">
-              It is festival afternoon, and the balloon is tethered on
-              Collaboration Road. <strong>{CALL_TOTAL} gatherings</strong> are
-              spread across the island below, and every one of them is waiting
-              on something out of your basket.
+              {rich(
+                t(
+                  'It is festival afternoon, and the balloon is tethered on Collaboration Road. <b>{count} gatherings</b> are spread across the island below, and every one of them is waiting on something out of your basket.',
+                ),
+                { count: CALL_TOTAL },
+              )}
             </p>
 
             <div className="bl-wants">
@@ -56,7 +62,9 @@ export function BalloonCard() {
                 <span className="bl-want__icon" aria-hidden>
                   💧
                 </span>
-                <strong>{WATER_CALLS} want a water bomb</strong>
+                <strong>
+                  {fill(t('{count} want a water bomb'), { count: WATER_CALLS })}
+                </strong>
                 <p>
                   {t(
                     'Out in the sun on the roads and the parade ground. A bomb drops like a stone, so it lands close to under you, and everyone it catches scatters, hands over their heads.',
@@ -67,7 +75,9 @@ export function BalloonCard() {
                 <span className="bl-want__icon" aria-hidden>
                   🎉
                 </span>
-                <strong>{CONFETTI_CALLS} want confetti</strong>
+                <strong>
+                  {fill(t('{count} want confetti'), { count: CONFETTI_CALLS })}
+                </strong>
                 <p>
                   {t(
                     'Something to celebrate, at the doors and in the gardens. Confetti floats down, so it drifts a long way past the bomb, and everyone under it cheers.',
@@ -145,9 +155,12 @@ export function BalloonCard() {
                 )}
               </li>
               <li>
-                The basket holds {STOCK_MAX} of each and a fresh one comes up
-                every couple of seconds, so there is no running out, only
-                waiting.
+                {fill(
+                  t(
+                    'The basket holds {count} of each and a fresh one comes up every couple of seconds, so there is no running out, only waiting.',
+                  ),
+                  { count: STOCK_MAX },
+                )}
               </li>
               <li>
                 {t(
@@ -159,8 +172,12 @@ export function BalloonCard() {
         ) : (
           <>
             <p className="bl-card__lead">
-              All {CALL_TOTAL} of them served, and the whole island seen from
-              the one place you cannot walk to.
+              {fill(
+                t(
+                  'All {count} of them served, and the whole island seen from the one place you cannot walk to.',
+                ),
+                { count: CALL_TOTAL },
+              )}
             </p>
             <div className="bl-card__score">
               <div>
@@ -183,7 +200,7 @@ export function BalloonCard() {
               </div>
               <div>
                 <span>{t('Time aloft')}</span>
-                <strong>{clock(flight.seconds)}</strong>
+                <strong>{clock(flight.seconds, t)}</strong>
               </div>
             </div>
           </>
@@ -194,7 +211,7 @@ export function BalloonCard() {
             className="button button--primary"
             onClick={() => (briefing ? begin() : again())}
           >
-            {briefing ? 'Cast off' : 'Fly again'}
+            {t(briefing ? 'Cast off' : 'Fly again')}
           </button>
           <button
             className="button"
@@ -203,7 +220,7 @@ export function BalloonCard() {
               exit()
             }}
           >
-            Come down
+            {t('Come down')}
           </button>
         </div>
       </div>

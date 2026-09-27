@@ -41,7 +41,7 @@ export const LECTURE: Record<string, string> = {
 
   'Why not a bigger model': 'Γιατί όχι ένα μεγαλύτερο μοντέλο',
   'It runs on the client, on the phone in the patient’s hand.':
-    'Τρέχει στον πελάτη, στο κινητό που κρατά ο ασθενής.',
+    'Τρέχει στη συσκευή, στο κινητό που κρατά ο ασθενής.',
   'No upload, no server, no video of anybody leaving the room.':
     'Καμία αποστολή, κανένας διακομιστής, κανένα βίντεο δεν φεύγει από το δωμάτιο.',
   'A model is only as good as the pipeline feeding it.':
@@ -49,7 +49,7 @@ export const LECTURE: Record<string, string> = {
 
   Results: 'Αποτελέσματα',
   'Real time, on ordinary hardware, judged against physiotherapists.':
-    'Σε πραγματικό χρόνο, σε συνηθισμένο υλικό, κρινόμενο έναντι φυσικοθεραπευτών.',
+    'Σε πραγματικό χρόνο, σε απλές συσκευές, με αποτελέσματα που συγκρίθηκαν με φυσικοθεραπευτές.',
   'Graded with distinction — "scientific soundness and':
     'Βαθμολογήθηκε με άριστα — «επιστημονική αρτιότητα και',
   'technological originality".': 'τεχνολογική πρωτοτυπία».',
@@ -80,14 +80,15 @@ export const LECTURE: Record<string, string> = {
 
   'ECE student': 'Φοιτητής ΗΜΜΥ',
 
-  /* Their names. Six of the eight — Nikos, Sofia, Stelios, Eleni, Dimitris
-     and Giorgos — are already in the world dictionary, which is merged
-     before this one, so only the two new ones belong here. */
+  /* Their names. Five of the eight — Nikos, Sofia, Stelios, Eleni and
+     Giorgos — are already in the world dictionary, which is merged before
+     this one, so only the three new ones belong here. */
   Katerina: 'Κατερίνα',
   Maria: 'Μαρία',
+  Dimitris: 'Δημήτρης',
 
   'I sat through five years of these with him. This is the one I remember.':
-    'Κάθισα πέντε χρόνια σε τέτοια μαζί του. Αυτή είναι που θυμάμαι.',
+    'Πέντε χρόνια καθόμουν σε τέτοια μαζί του. Αυτή είναι που θυμάμαι.',
   'Very strong coding skills and a solution-oriented mindset. I wrote that down for him later, and I meant it.':
     'Πολύ δυνατές ικανότητες προγραμματισμού και νοοτροπία που ψάχνει λύσεις. Του το έγραψα αργότερα, και το εννοούσα.',
 
@@ -99,7 +100,7 @@ export const LECTURE: Record<string, string> = {
   'Running the whole thing on the phone. No server, no upload, no video of anybody.':
     'Όλο αυτό να τρέχει στο κινητό. Κανένας διακομιστής, καμία αποστολή, κανένα βίντεο κανενός.',
   'That is the part the committee asked about twice.':
-    'Αυτό είναι το σημείο που η επιτροπή ρώτησε δύο φορές.',
+    'Γι’ αυτό το κομμάτι η επιτροπή ρώτησε δύο φορές.',
 
   'The Dean supervised it. He does not supervise many.':
     'Την επέβλεψε ο Κοσμήτορας. Δεν επιβλέπει πολλές.',
@@ -109,7 +110,7 @@ export const LECTURE: Record<string, string> = {
   'We took Operating Systems together. He was the one who had actually read the manual.':
     'Κάναμε Λειτουργικά Συστήματα μαζί. Ήταν αυτός που είχε πράγματι διαβάσει το εγχειρίδιο.',
   'Physiotherapy, of all things. He picked a problem somebody has.':
-    'Φυσικοθεραπεία, από όλα τα πράγματα. Διάλεξε ένα πρόβλημα που το έχει κάποιος.',
+    'Φυσικοθεραπεία, ποιος να το φανταζόταν. Διάλεξε ένα πρόβλημα που το έχει πραγματικά κάποιος.',
 
   'Five years. Most of us took seven.':
     'Πέντε χρόνια. Οι περισσότεροι από εμάς κάναμε επτά.',

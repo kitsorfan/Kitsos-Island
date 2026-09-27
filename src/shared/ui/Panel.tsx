@@ -10,6 +10,7 @@ import { TechIcon } from '../../features/cv/TechIcon'
 import { hasTechIcon } from '../../features/cv/techMarkIcons'
 import type { Letter, PanelBlock } from '../../types'
 import { useT } from '../i18n/useT'
+import { fill } from '../i18n'
 import { CloseMark } from './CloseMark'
 
 export function Panel() {
@@ -187,7 +188,7 @@ function Scan({
     <a className="letter__scan" href={href} target="_blank" rel="noreferrer">
       <img
         src={href}
-        alt={`${t('Letter of reference from')} ${from}`}
+        alt={fill(t('Letter of reference from {name}'), { name: from })}
         loading="lazy"
         onError={onMissing}
       />
@@ -207,7 +208,9 @@ function Block({ block }: { block: PanelBlock }) {
           <p className="letters__hint">
             {block.letters.length === 1
               ? t('Click to read the letter.')
-              : `${t('Click a name to read the letter.')} ${block.letters.length} ${t('in total.')}`}
+              : fill(t('Click a name to read the letter. {count} in total.'), {
+                  count: block.letters.length,
+                })}
           </p>
           {block.letters.map((letter) => (
             <LetterEntry key={letter.id} letter={letter} />

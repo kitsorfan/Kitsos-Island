@@ -4,7 +4,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { TouchControls } from './TouchControls'
-import { capeHold, clearKeys } from './input'
+import { capeHold, clearKeys, rideHold } from './input'
 import { useGame } from '../../shared/state/store'
 import { INTERIORS } from '../interior/interiors'
 import { fakeScreen } from '../../test/screen'
@@ -61,6 +61,62 @@ describe('the touch controls', () => {
     render(<TouchControls />)
     expect(buttons()).toEqual(expect.arrayContaining(['UP', 'DOWN']))
     expect(buttons()).not.toContain('BURN')
+  })
+
+  describe('on the bike', () => {
+    const riding = () =>
+      act(() => {
+        useGame.setState({
+          moto: { status: 'riding' } as unknown as State['moto'],
+        })
+      })
+
+    afterEach(() => clearKeys())
+
+    it('trade the stick for bars on the left and pedals on the right', () => {
+      riding()
+      const { container } = render(<TouchControls />)
+      expect(container.querySelector('.stick')).toBeNull()
+      const left = container.querySelector('.ride-bars')
+      const right = container.querySelector('.touch__buttons')
+      expect(left?.querySelectorAll('button')).toHaveLength(2)
+      expect(
+        [...(right?.querySelectorAll('button') ?? [])].map(
+          (b) => b.textContent,
+        ),
+      ).toEqual(['WHEELIE', 'BRAKE', 'GAS'])
+    })
+
+    it('hold each one for as long as the thumb is on it, and no longer', () => {
+      riding()
+      render(<TouchControls />)
+      const holds = [
+        ['Steer left', 'left'],
+        ['Steer right', 'right'],
+        ['Gas', 'gas'],
+        ['Brake', 'brake'],
+        ['Wheelie', 'wheelie'],
+      ] as const
+      for (const [name, hold] of holds) {
+        const button = screen.getByRole('button', { name })
+        fireEvent.pointerDown(button)
+        expect(rideHold[hold]).toBe(true)
+        fireEvent.pointerUp(button)
+        expect(rideHold[hold]).toBe(false)
+      }
+    })
+
+    it('let go when the race ends under a held thumb', () => {
+      riding()
+      render(<TouchControls />)
+      fireEvent.pointerDown(screen.getByRole('button', { name: 'Gas' }))
+      fireEvent.pointerDown(screen.getByRole('button', { name: 'Steer left' }))
+      act(() => {
+        useGame.setState({ mode: 'moto' })
+      })
+      expect(rideHold.gas).toBe(false)
+      expect(rideHold.left).toBe(false)
+    })
   })
 
   describe('under the cape', () => {

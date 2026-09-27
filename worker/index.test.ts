@@ -196,18 +196,50 @@ describe('what is turned away', () => {
     expect(env.RADIO.send).not.toHaveBeenCalled()
   })
 
-  it('refuses a message whose challenge did not pass', async () => {
-    siteverify.mockResolvedValue(Response.json({ success: false }))
+  it('refuses a message whose challenge did not pass, and logs why', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    siteverify.mockResolvedValue(
+      Response.json({
+        success: false,
+        'error-codes': ['invalid-input-secret'],
+      }),
+    )
     const { status, json } = await send(post(MESSAGE))
     expect(status).toBe(403)
     expect(json).toEqual({ ok: false, problem: 'challenge' })
     expect(env.RADIO.send).not.toHaveBeenCalled()
+    expect(warn).toHaveBeenCalledWith(expect.any(String), [
+      'invalid-input-secret',
+    ])
   })
 
   it('does not count Turnstile being unreachable as a pass', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
     siteverify.mockRejectedValue(new TypeError('network down'))
     expect((await send(post(MESSAGE))).status).toBe(403)
     expect(env.RADIO.send).not.toHaveBeenCalled()
+    expect(error).toHaveBeenCalled()
+  })
+
+  it('says the transmitter is down when the secret was never set', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    for (const secret of [undefined, '', '  ']) {
+      env.TURNSTILE_SECRET = secret
+      const { status, json } = await send(post(MESSAGE))
+      expect(status).toBe(500)
+      expect(json).toEqual({ ok: false, problem: 'relay' })
+    }
+    expect(siteverify).not.toHaveBeenCalled()
+    expect(error).toHaveBeenCalledWith(
+      expect.stringContaining('TURNSTILE_SECRET is not set'),
+    )
+  })
+
+  it('trims a secret pasted with a stray space or line break', async () => {
+    env.TURNSTILE_SECRET = '  secret\n'
+    await send(post(MESSAGE))
+    const form = siteverify.mock.calls[0][1].body as FormData
+    expect(form.get('secret')).toBe('secret')
   })
 
   it('answers 502 when the mail cannot be handed on', async () => {

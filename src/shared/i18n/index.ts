@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { createElement, useEffect, useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
+import { fill } from './text'
+import type { Slots } from './text'
+
+export { fill, upper } from './text'
+export type { Slots } from './text'
 
 /**
  * Two languages, English first.
@@ -116,6 +122,24 @@ export function translator(locale: Locale): Translate {
 }
 
 export const EN: Translate = (value) => value
+
+/**
+ * The same, for a sentence with part of it in bold. The bold part is marked
+ * <b>…</b> inside the key and comes out as <strong>, wherever the translation
+ * has moved it to — which is why it is marked up in the sentence rather than
+ * split out of it.
+ */
+export function rich(template: string, slots: Slots = {}): ReactNode[] {
+  return template
+    .split(/(<b>.*?<\/b>)/)
+    .filter(Boolean)
+    .map((part, i) => {
+      const bold = /^<b>(.*)<\/b>$/.exec(part)
+      return bold
+        ? createElement('strong', { key: i }, fill(bold[1], slots))
+        : fill(part, slots)
+    })
+}
 
 /**
  * The translator for a locale, fetching its dictionary if it is not here yet.

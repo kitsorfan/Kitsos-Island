@@ -75,7 +75,7 @@ export function Greeting() {
               <Character colors={PLAYER_COLORS} wave look={look} />
             </group>
           </Canvas>
-          <span className="greeting__name">{NAME}</span>
+          <span className="greeting__name">{t(NAME)}</span>
         </div>
 
         <div className="greeting__body">

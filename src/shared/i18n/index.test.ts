@@ -1,5 +1,14 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import { EN, LOCALES, loadLocale, localeReady, translator } from './index'
+import {
+  EN,
+  LOCALES,
+  fill,
+  loadLocale,
+  localeReady,
+  rich,
+  translator,
+  upper,
+} from './index'
 import { EL } from './el/index'
 
 /**
@@ -146,5 +155,57 @@ describe('the Greek dictionary, fetched on demand', () => {
     for (const english of Object.keys(EL)) {
       expect(english.length).toBeGreaterThan(0)
     }
+  })
+})
+
+describe('putting the numbers into a sentence', () => {
+  it('fills each slot with its value', () => {
+    expect(fill('All {count} of {total} served', { count: 3, total: 14 })).toBe(
+      'All 3 of 14 served',
+    )
+  })
+
+  it('lets the translation move a slot wherever its language wants it', () => {
+    // The whole point of keying the sentence rather than its pieces: the
+    // number sits where Greek puts it, not where English happened to.
+    expect(fill('Μένουν {left}', { left: 5 })).toBe('Μένουν 5')
+  })
+
+  it('leaves a slot nobody filled showing, rather than dropping it', () => {
+    expect(fill('{count} of {total}', { count: 2 })).toBe('2 of {total}')
+  })
+
+  it('sets the marked part in bold, and only that part', () => {
+    const [before, bold, after] = rich(
+      'Keep the torch <b>{state}</b>, or else',
+      {
+        state: 'lit',
+      },
+    ) as [string, { type: string; props: { children: string } }, string]
+    expect(before).toBe('Keep the torch ')
+    expect(bold.type).toBe('strong')
+    expect(bold.props.children).toBe('lit')
+    expect(after).toBe(', or else')
+  })
+
+  it('reads as plain text when nothing is in bold', () => {
+    expect(rich('{s}s', { s: 12 })).toEqual(['12s'])
+  })
+})
+
+describe('capitals', () => {
+  it('drops the Greek stress marks, the way Greek capitals are set', () => {
+    expect(upper('Παιχνίδια του Νησιού')).toBe('ΠΑΙΧΝΙΔΙΑ ΤΟΥ ΝΗΣΙΟΥ')
+  })
+
+  it('keeps two vowels apart where the stress mark was doing it', () => {
+    // πέιντμπολ is said pe-int; without the diaeresis ΠΕΙΝΤΜΠΟΛ reads pint.
+    expect(upper('Πέιντμπολ')).toBe('ΠΕΪΝΤΜΠΟΛ')
+    expect(upper('προϊόν')).toBe('ΠΡΟΪΟΝ')
+  })
+
+  it('leaves the accents of other languages alone', () => {
+    expect(upper('Les Misérables')).toBe('LES MISÉRABLES')
+    expect(upper('Island Games')).toBe('ISLAND GAMES')
   })
 })

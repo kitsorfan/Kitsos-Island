@@ -208,7 +208,13 @@ export const HIDE = {
   found: 0,
   done: false,
   won: false,
-  feed: null as { text: string; kind: 'good' | 'bad'; at: number } | null,
+  /** A sentence with {slots}, translated whole on the way to the screen. */
+  feed: null as {
+    text: string
+    slots?: Record<string, string | number>
+    kind: 'good' | 'bad'
+    at: number
+  } | null,
 }
 
 function hash(n: number): number {
@@ -426,7 +432,8 @@ export function stepHide(delta: number, player: HidePlayer): HideEvents {
         HIDE.found++
         events.found++
         HIDE.feed = {
-          text: `Found. ${COUNT - HIDE.found} still out there`,
+          text: 'Found. {left} still out there',
+          slots: { left: COUNT - HIDE.found },
           kind: 'good',
           at: Date.now(),
         }

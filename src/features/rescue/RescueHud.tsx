@@ -4,6 +4,7 @@ import { useGame } from '../../shared/state/store'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
 import { useScreen } from '../../shared/ui/useScreen'
 import { useT } from '../../shared/i18n/useT'
+import { fill } from '../../shared/i18n'
 
 interface Light {
   id: number
@@ -107,7 +108,11 @@ export function RescueHud() {
           <span className="rescue__buoy" aria-hidden />
           <strong key={readout.saved}>{readout.saved}</strong>
           {/* The buoy says what is being counted; a phone has no room to. */}
-          <em>{mobile ? `of ${SOULS}` : `of ${SOULS} aboard`}</em>
+          <em>
+            {fill(t(mobile ? 'of {total}' : 'of {total} aboard'), {
+              total: SOULS,
+            })}
+          </em>
         </div>
 
         <div className="rescue__bar">
@@ -138,9 +143,15 @@ export function RescueHud() {
                   />
                   <span>
                     <em>
-                      {hauling ? 'Coming aboard' : `${Math.round(light.left)}s`}
+                      {hauling
+                        ? t('Coming aboard')
+                        : fill(t('{s}s'), { s: Math.round(light.left) })}
                     </em>
-                    <em>{Math.round(light.range)}m</em>
+                    <em>
+                      {fill(t('{metres}m'), {
+                        metres: Math.round(light.range),
+                      })}
+                    </em>
                   </span>
                 </div>
               )
@@ -158,8 +169,10 @@ export function RescueHud() {
         <div className="rescue__row">
           <span className="rescue__afloat">
             {readout.lights.length === 1
-              ? '1 raft out there'
-              : `${readout.lights.length} rafts out there`}
+              ? t('1 raft out there')
+              : fill(t('{count} rafts out there'), {
+                  count: readout.lights.length,
+                })}
           </span>
           {readout.aground ? (
             <span className="rescue__flag rescue__flag--bad">
@@ -183,7 +196,8 @@ export function RescueHud() {
       <p className="rescue__keys">
         {coarse ? (
           <>
-            <kbd>Stick</kbd> {t('helm')} · {t('pull back to stop alongside')}
+            <kbd>{t('Stick')}</kbd> {t('helm')} ·{' '}
+            {t('pull back to stop alongside')}
           </>
         ) : (
           <>

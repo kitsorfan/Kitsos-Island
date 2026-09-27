@@ -3,6 +3,8 @@ import { MOTO, racerName, standings } from './motoLogic'
 import { useGame } from '../../shared/state/store'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
 import { useT } from '../../shared/i18n/useT'
+import { fill, rich } from '../../shared/i18n'
+import type { Translate } from '../../shared/i18n'
 
 interface Board {
   id: string
@@ -85,11 +87,16 @@ function useReadout(active: boolean): Readout {
   return state
 }
 
-const clock = (seconds: number) => {
+/* A key like any other, so the decimal point is the translation's to pick. */
+const clock = (seconds: number, t: Translate) => {
   const m = Math.floor(seconds / 60)
   const s = Math.floor(seconds % 60)
-  const t = Math.floor((seconds * 10) % 10)
-  return `${m}:${s.toString().padStart(2, '0')}.${t}`
+  const tenth = Math.floor((seconds * 10) % 10)
+  return fill(t('{m}:{ss}.{tenth}'), {
+    m,
+    ss: s.toString().padStart(2, '0'),
+    tenth,
+  })
 }
 
 const ORDINAL = ['', '1st', '2nd', '3rd', '4th']
@@ -116,10 +123,13 @@ export function MotoHud() {
         <span className="moto__label">{t('Island Circuit')}</span>
 
         <div className="moto__place">
-          <strong key={readout.place}>{ORDINAL[readout.place]}</strong>
+          <strong key={readout.place}>{t(ORDINAL[readout.place])}</strong>
           <em>{t('of 4')}</em>
           <span className="moto__lap">
-            Lap {readout.lap}/{readout.laps}
+            {fill(t('Lap {lap}/{laps}'), {
+              lap: readout.lap,
+              laps: readout.laps,
+            })}
           </span>
         </div>
 
@@ -134,9 +144,11 @@ export function MotoHud() {
               }
             >
               <span className="moto-board__pos">{i + 1}</span>
-              <span className="moto-board__name">{entry.name}</span>
+              <span className="moto-board__name">{t(entry.name)}</span>
               <span className="moto-board__gap">
-                {i === 0 ? 'leader' : `+${Math.round(entry.gap)}m`}
+                {i === 0
+                  ? t('leader')
+                  : fill(t('+{gap}m'), { gap: Math.round(entry.gap) })}
               </span>
             </li>
           ))}
@@ -146,13 +158,15 @@ export function MotoHud() {
           <span className="moto__speed">
             {Math.round(readout.speed * 3)} <em>{t('km/h')}</em>
           </span>
-          <span className="moto__time">{clock(readout.elapsed)}</span>
+          <span className="moto__time">{clock(readout.elapsed, t)}</span>
         </div>
 
         <div className="moto__row">
           {readout.best > 0 && (
             <span className="moto__next">
-              Best lap <strong>{clock(readout.best)}</strong>
+              {rich(t('Best lap <b>{time}</b>'), {
+                time: clock(readout.best, t),
+              })}
             </span>
           )}
           {readout.offRoad ? (
@@ -175,7 +189,10 @@ export function MotoHud() {
       <p className="moto__keys">
         {coarse ? (
           <>
-            <kbd>Stick</kbd> {t('ride')} · <kbd>WHEELIE</kbd> {t('hold it')}
+            <kbd>&lt;</kbd>
+            <kbd>&gt;</kbd> {t('steer')} · <kbd>{t('GAS')}</kbd>
+            <kbd>{t('BRAKE')}</kbd> {t('gas & brake')} ·{' '}
+            <kbd>{t('WHEELIE')}</kbd> {t('hold it')}
           </>
         ) : (
           <>

@@ -9,6 +9,7 @@ import {
 import * as sfx from '../../shared/engine/audio'
 import { drawMap, worldToMap } from './mapDraw'
 import { useT } from '../../shared/i18n/useT'
+import { fill } from '../../shared/i18n'
 import { CloseMark } from '../../shared/ui/CloseMark'
 
 export function MapOverlay() {
@@ -92,9 +93,15 @@ export function MapOverlay() {
           <div>
             <p className="panel__kicker">{t('Kitsos Island')}</p>
             <h2 className="panel__title">
-              {keyCount(keys)} / {TOTAL_KEYS} {t('keys')} ·{' '}
-              {Object.keys(discovered).length} / {BUILDINGS.length}{' '}
-              {t('places found')}
+              {fill(
+                t('{keys} / {total} keys · {places} / {all} places found'),
+                {
+                  keys: keyCount(keys),
+                  total: TOTAL_KEYS,
+                  places: Object.keys(discovered).length,
+                  all: BUILDINGS.length,
+                },
+              )}
             </h2>
           </div>
           <button
@@ -132,7 +139,7 @@ export function MapOverlay() {
                       ? t('Not found yet')
                       : indoors
                         ? t('Step outside first')
-                        : `${t('Travel to')} ${t(b.name)}`
+                        : fill(t('Travel to {place}'), { place: t(b.name) })
                   }
                 >
                   {found ? b.short : '?'}
@@ -177,7 +184,15 @@ export function MapOverlay() {
                   <p>
                     {lighthouseOpen
                       ? t('Open. The keeper’s logbook is at the top.')
-                      : `${t('Sealed with five locks.')} ${keyCount(keys)} ${t('of')} ${TOTAL_KEYS} ${t('turned.')}`}
+                      : fill(
+                          t(
+                            'Sealed with five locks. {have} of {total} turned.',
+                          ),
+                          {
+                            have: keyCount(keys),
+                            total: TOTAL_KEYS,
+                          },
+                        )}
                   </p>
                 </div>
               </li>

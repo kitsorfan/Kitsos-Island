@@ -47,7 +47,7 @@ export function CapeButtons() {
         onPointerCancel={stop}
         onContextMenu={(event) => event.preventDefault()}
       >
-        {WORD[way]}
+        {t(WORD[way])}
       </button>
     )
   }

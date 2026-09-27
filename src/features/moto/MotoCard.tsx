@@ -152,12 +152,16 @@ export function MotoCard() {
               {coarse ? (
                 <>
                   <div>
-                    <dt>{t('Ride')}</dt>
-                    <dd>{t('Stick')}</dd>
+                    <dt>{t('Steer')}</dt>
+                    <dd>{t('The arrows on the left')}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('Gas')}</dt>
+                    <dd>{t('Hold GAS')}</dd>
                   </div>
                   <div>
                     <dt>{t('Brake')}</dt>
-                    <dd>{t('Pull the stick back')}</dd>
+                    <dd>{t('Hold BRAKE')}</dd>
                   </div>
                   <div>
                     <dt>{t('Wheelie')}</dt>

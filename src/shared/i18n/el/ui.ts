@@ -307,10 +307,14 @@ export const UI: Record<string, string> = {
 
   /* ------------------------------- Moto ------------------------------- */
   'Island Circuit': 'Πίστα του Νησιού',
-  Ride: 'Οδήγηση',
   Brake: 'Φρένο',
   'Pull the stick back': 'Τράβα τον μοχλό πίσω',
   'Hold WHEELIE': 'Κράτα WHEELIE',
+  'Hold GAS': 'Κράτα GAS',
+  'Hold BRAKE': 'Κράτα BRAKE',
+  'The arrows on the left': 'Τα βέλη αριστερά',
+  'Steer left': 'Στρίψε αριστερά',
+  'Steer right': 'Στρίψε δεξιά',
   Gas: 'Γκάζι',
   Steer: 'Τιμόνι',
   'Hold Space': 'Κράτα Space',
@@ -441,7 +445,6 @@ export const UI: Record<string, string> = {
   vent: 'εκτόνωση',
   bomb: 'βόμβα',
   confetti: 'κομφετί',
-  ride: 'οδήγηση',
   'hold it': 'κράτα το',
   'gas & brake': 'γκάζι & φρένο',
   steer: 'τιμόνι',

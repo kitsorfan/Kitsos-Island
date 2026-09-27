@@ -175,7 +175,10 @@ export function MotoHud() {
       <p className="moto__keys">
         {coarse ? (
           <>
-            <kbd>Stick</kbd> {t('ride')} · <kbd>WHEELIE</kbd> {t('hold it')}
+            <kbd>&lt;</kbd>
+            <kbd>&gt;</kbd> {t('steer')} · <kbd>GAS</kbd>
+            <kbd>BRAKE</kbd> {t('gas & brake')} · <kbd>WHEELIE</kbd>{' '}
+            {t('hold it')}
           </>
         ) : (
           <>

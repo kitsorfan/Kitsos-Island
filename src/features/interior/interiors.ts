@@ -2010,6 +2010,15 @@ export const INTERIORS: Interior[] = [
               blocks: [
                 {
                   type: 'text',
+                  text: 'The motorbike rides on a touch screen, with the bars under one thumb and the pedals under the other; the island speaks Greek all the way through; and Motivation Road is now Inspiration Road.',
+                },
+              ],
+            },
+            {
+              heading: 'Version 1.2 · 2026-09-26',
+              blocks: [
+                {
+                  type: 'text',
                   text: 'Plays on a phone, with buttons for the camera, the balloon and the cape; the certificate carries your name and a link to verify it; and the message desk really transmits.',
                 },
               ],
@@ -2031,7 +2040,7 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'Release notes',
-          body: `Version ${LATEST_RELEASE.version}, ${LATEST_RELEASE.date}: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.`,
+          body: `Version ${LATEST_RELEASE.version}, ${LATEST_RELEASE.date}: a motorbike you can ride on a touch screen, Greek all the way through, and Inspiration Road. Version 1.2: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.`,
         },
       },
     ],

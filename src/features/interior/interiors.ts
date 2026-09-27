@@ -2010,6 +2010,15 @@ export const INTERIORS: Interior[] = [
               blocks: [
                 {
                   type: 'text',
+                  text: 'Once your message is through, the message desk folds away into a card that says so and names the address the reply will go to, with a button to send another.',
+                },
+              ],
+            },
+            {
+              heading: 'Version 1.3 · 2026-09-27',
+              blocks: [
+                {
+                  type: 'text',
                   text: 'The motorbike rides on a touch screen, with the bars under one thumb and the pedals under the other; the island speaks Greek all the way through; and Motivation Road is now Inspiration Road.',
                 },
               ],
@@ -2040,7 +2049,7 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'Release notes',
-          body: `Version ${LATEST_RELEASE.version}, ${LATEST_RELEASE.date}: a motorbike you can ride on a touch screen, Greek all the way through, and Inspiration Road. Version 1.2: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.`,
+          body: `Version ${LATEST_RELEASE.version}, ${LATEST_RELEASE.date}: the message desk says plainly when your message is on its way. Version 1.3: a motorbike you can ride on a touch screen, Greek all the way through, and Inspiration Road. Version 1.2: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.`,
         },
       },
     ],

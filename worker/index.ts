@@ -40,8 +40,12 @@ export interface Env {
   RADIO: Mailer
   /** Optional, so a local run without the binding still works. */
   RADIO_LIMIT?: Limiter
-  /** Set with `wrangler secret put TURNSTILE_SECRET`, never committed. */
-  TURNSTILE_SECRET: string
+  /**
+   * A runtime Secret on the Worker (Settings → Variables and Secrets), never
+   * committed. Typed as optional because nothing makes it exist: a build
+   * variable of the same name is gone by the time the Worker runs.
+   */
+  TURNSTILE_SECRET?: string
   /** The verified Email Routing destination: my inbox. */
   RADIO_TO: string
   /** The address on kitsorfan.com the mail is sent from. */
@@ -72,7 +76,15 @@ function answer(status: number, reply: Reply, headers: HeadersInit = {}) {
   })
 }
 
-/** Asks Turnstile whether the token came from a browser that passed. */
+/**
+ * Asks Turnstile whether the token came from a browser that passed.
+ *
+ * A refusal is logged with Turnstile's own reason. The visitor is only ever
+ * told the check did not pass, but whoever reads the Worker's logs needs to
+ * know whether that was a bad token (`invalid-input-response`), a spent one
+ * (`timeout-or-duplicate`) or a secret that does not belong to the widget
+ * (`invalid-input-secret`), because only the first of those is the visitor's.
+ */
 async function challengePassed(token: string, secret: string, ip: string) {
   const form = new FormData()
   form.append('secret', secret)
@@ -80,10 +92,16 @@ async function challengePassed(token: string, secret: string, ip: string) {
   if (ip) form.append('remoteip', ip)
   try {
     const res = await fetch(SITEVERIFY, { method: 'POST', body: form })
-    const outcome = (await res.json()) as { success?: boolean }
-    return outcome.success === true
-  } catch {
+    const outcome = (await res.json()) as {
+      success?: boolean
+      'error-codes'?: string[]
+    }
+    if (outcome.success === true) return true
+    console.warn('radio: Turnstile refused the token', outcome['error-codes'])
+    return false
+  } catch (error) {
     // Turnstile being unreachable is not a pass.
+    console.error('radio: Turnstile could not be reached', error)
     return false
   }
 }
@@ -138,7 +156,17 @@ export async function handle(request: Request, env: Env): Promise<Response> {
   // A bot is told it succeeded. Telling it why it failed is how it learns.
   if (looksAutomated(t)) return answer(200, { ok: true })
 
-  if (!(await challengePassed(t.token, env.TURNSTILE_SECRET, ip))) {
+  // Trimmed, because a secret pasted into the dashboard easily brings a
+  // space or a line break with it, and Turnstile rejects it whole.
+  const secret = env.TURNSTILE_SECRET?.trim()
+  if (!secret) {
+    // Our fault, not the visitor's: say the transmitter is down, which is
+    // also what sends the desk back to the mail client.
+    console.error('radio: TURNSTILE_SECRET is not set on the Worker')
+    return answer(500, { ok: false, problem: 'relay' })
+  }
+
+  if (!(await challengePassed(t.token, secret, ip))) {
     return answer(403, { ok: false, problem: 'challenge' })
   }
 

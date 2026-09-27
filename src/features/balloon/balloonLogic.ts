@@ -94,7 +94,7 @@ const SPOTS: Omit<Call, 'y' | 'crowd'>[] = [
     want: 'water',
     x: 1,
     z: -36,
-    label: 'Halfway up Motivation Road',
+    label: 'Halfway up Inspiration Road',
   },
   { id: 'academy', want: 'confetti', x: 0, z: -59, label: 'The Academy steps' },
   {

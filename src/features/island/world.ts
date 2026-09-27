@@ -435,7 +435,7 @@ export const NPCS: Npc[] = [
     lines: [
       'Welcome to KITSOS TOWN! Small island, big CV.',
       `Everything here belongs to ${PROFILE.nickname} ${PROFILE.lastName}, a senior full stack engineer and technical lead out of ${PROFILE.location}.`,
-      'Seven roads leave this square, and every one of them is named for what he took out of it. Motivation, Discipline, Curiosity, Caring, Leadership, Collaboration.',
+      'Seven roads leave this square, and every one of them is named for what he took out of it. Inspiration, Discipline, Curiosity, Caring, Leadership, Collaboration.',
       'And north-west, Freedom Road, out to the Old Lighthouse on the cape. Sealed for years. Five district keys open it, one hidden in each building.',
       'Sealed, I said. Though the night watch tells me there has been hammering out there lately. Probably the wind.',
       'Press M for the map if the walk gets long. Once you have found a place, you can travel straight back to it.',
@@ -601,7 +601,7 @@ export const NPCS: Npc[] = [
     pace: 1.5,
     lines: [
       'Lovely square, is it not? He rebuilt those benches himself.',
-      'Careful on Motivation Road. The students cycle like maniacs.',
+      'Careful on Inspiration Road. The students cycle like maniacs.',
     ],
   },
   {
@@ -1803,7 +1803,7 @@ export const SIGNS: SignPost[] = [
     label: 'Town Plaza',
     lines: [
       'KITSOS TOWN: Town Plaza. Seven roads leave this square, and not one of them is named after where it goes.',
-      'North, Motivation Road, to the Polytechnic. East, Discipline Road, to the Work District. West, Curiosity Road, to the Town School.',
+      'North, Inspiration Road, to the Polytechnic. East, Discipline Road, to the Work District. West, Curiosity Road, to the Town School.',
       'South-west, Caring Road, to Kitsos House. South-east, Leadership Road, to the Army Camp. Due south, Collaboration Road, to the Radio Center.',
       'And north-west out to the cape: Freedom Road, and the Old Lighthouse at the end of it. Locked.',
       'They are named for what he carried out of each of them. Press M for the map, J for the journal.',
@@ -1813,9 +1813,9 @@ export const SIGNS: SignPost[] = [
     id: 'sign-north',
     position: [-4, -20],
     facing: 0,
-    label: 'Motivation Road',
+    label: 'Inspiration Road',
     lines: [
-      'MOTIVATION ROAD: the Polytechnic, straight on. Mind the bicycles.',
+      'INSPIRATION ROAD: the Polytechnic, straight on. Mind the bicycles.',
       'Electrical & Computer Engineering, and the lecture hall behind it.',
       'Five years of it. Nobody made him finish; that is rather the point of the name.',
     ],

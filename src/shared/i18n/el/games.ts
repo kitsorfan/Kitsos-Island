@@ -81,7 +81,7 @@ export const GAMES: Record<string, string> = {
   /* Where the fourteen gatherings are, as the HUD names the next one. */
   'The benches by the fountain': 'Τα παγκάκια δίπλα στο συντριβάνι',
   'The crowd at the games board': 'Ο κόσμος στον πίνακα παιχνιδιών',
-  'Halfway up Motivation Road': 'Στη μέση της Οδού Κινήτρου',
+  'Halfway up Inspiration Road': 'Στη μέση της Οδού Έμπνευσης',
   'The Academy steps': 'Τα σκαλιά του Πολυτεχνείου',
   'Discipline Road, no shade on it': 'Η Οδός Πειθαρχίας, χωρίς ίχνος σκιάς',
   'The Work District forecourt': 'Το προαύλιο της Συνοικίας Εργασίας',

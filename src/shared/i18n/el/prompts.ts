@@ -87,7 +87,7 @@ export const PROMPTS: Record<string, string> = {
   'Read <b>Games Board</b>': 'Δες τα <b>Παιχνίδια του Νησιού</b>',
   'Press <b>The Big Red Button</b>': 'Πάτα το <b>Μεγάλο Κόκκινο Κουμπί</b>',
   'Read <b>Town Plaza</b>': 'Διάβασε την πινακίδα <b>Κεντρική Πλατεία</b>',
-  'Read <b>Motivation Road</b>': 'Διάβασε την πινακίδα <b>Οδός Κινήτρου</b>',
+  'Read <b>Inspiration Road</b>': 'Διάβασε την πινακίδα <b>Οδός Έμπνευσης</b>',
   'Read <b>Discipline Road</b>': 'Διάβασε την πινακίδα <b>Οδός Πειθαρχίας</b>',
   'Read <b>Curiosity Road</b>': 'Διάβασε την πινακίδα <b>Οδός Περιέργειας</b>',
   'Read <b>Freedom Road</b>': 'Διάβασε την πινακίδα <b>Οδός Ελευθερίας</b>',

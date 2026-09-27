@@ -177,7 +177,7 @@ export const WORLD: Record<string, string> = {
   'Town Plaza': 'Κεντρική Πλατεία',
 
   /* -------------------------------- Roads ----------------------------- */
-  'Motivation Road': 'Οδός Κινήτρου',
+  'Inspiration Road': 'Οδός Έμπνευσης',
   'Discipline Road': 'Οδός Πειθαρχίας',
   'Curiosity Road': 'Οδός Περιέργειας',
   'Freedom Road': 'Οδός Ελευθερίας',
@@ -305,8 +305,8 @@ export const WORLD: Record<string, string> = {
   /* ------------------------------ The mayor --------------------------- */
   'Welcome to KITSOS TOWN! Small island, big CV.':
     'Καλώς ήρθες στην ΠΟΛΗ ΤΟΥ ΚΙΤΣΟΥ! Μικρό νησί, μεγάλο βιογραφικό.',
-  'Seven roads leave this square, and every one of them is named for what he took out of it. Motivation, Discipline, Curiosity, Caring, Leadership, Collaboration.':
-    'Επτά δρόμοι φεύγουν από αυτή την πλατεία, και ο καθένας τους πήρε το όνομά του από αυτό που κέρδισε εκεί. Κίνητρο, Πειθαρχία, Περιέργεια, Φροντίδα, Ηγεσία, Συνεργασία.',
+  'Seven roads leave this square, and every one of them is named for what he took out of it. Inspiration, Discipline, Curiosity, Caring, Leadership, Collaboration.':
+    'Επτά δρόμοι φεύγουν από αυτή την πλατεία, και ο καθένας τους πήρε το όνομά του από αυτό που κέρδισε εκεί. Έμπνευση, Πειθαρχία, Περιέργεια, Φροντίδα, Ηγεσία, Συνεργασία.',
   'And north-west, Freedom Road, out to the Old Lighthouse on the cape. Sealed for years. Five district keys open it, one hidden in each building.':
     'Και βορειοδυτικά, η Οδός Ελευθερίας, μέχρι τον Παλιό Φάρο στο ακρωτήρι. Σφραγισμένος χρόνια. Τον ανοίγουν πέντε κλειδιά των συνοικιών, ένα κρυμμένο σε κάθε κτίριο.',
   'Sealed, I said. Though the night watch tells me there has been hammering out there lately. Probably the wind.':
@@ -383,8 +383,8 @@ export const WORLD: Record<string, string> = {
   /* ------------------------- Townsfolk in the square ------------------ */
   'Lovely square, is it not? He rebuilt those benches himself.':
     'Ωραία πλατεία, ε; Αυτά τα παγκάκια τα ξαναέφτιαξε μόνος του.',
-  'Careful on Motivation Road. The students cycle like maniacs.':
-    'Πρόσεχε στην Οδό Κινήτρου. Οι φοιτητές κάνουν ποδήλατο σαν τρελοί.',
+  'Careful on Inspiration Road. The students cycle like maniacs.':
+    'Πρόσεχε στην Οδό Έμπνευσης. Οι φοιτητές κάνουν ποδήλατο σαν τρελοί.',
   'Looking for the Lighthouse? Freedom Road, north-west, out to the cape.':
     'Ψάχνεις τον Φάρο; Οδός Ελευθερίας, βορειοδυτικά, μέχρι το ακρωτήρι.',
   'Locked since before I moved here. Five keys, they say. One per district.':
@@ -877,16 +877,16 @@ export const WORLD: Record<string, string> = {
   /* ------------------------------ Road signs -------------------------- */
   'KITSOS TOWN: Town Plaza. Seven roads leave this square, and not one of them is named after where it goes.':
     'ΠΟΛΗ ΤΟΥ ΚΙΤΣΟΥ: Κεντρική Πλατεία. Επτά δρόμοι φεύγουν από εδώ, και κανένας τους δεν πήρε το όνομά του από το πού πάει.',
-  'North, Motivation Road, to the Polytechnic. East, Discipline Road, to the Work District. West, Curiosity Road, to the Town School.':
-    'Βόρεια, η Οδός Κινήτρου, προς το Πολυτεχνείο. Ανατολικά, η Οδός Πειθαρχίας, προς τη Συνοικία Εργασίας. Δυτικά, η Οδός Περιέργειας, προς το Σχολείο της Πόλης.',
+  'North, Inspiration Road, to the Polytechnic. East, Discipline Road, to the Work District. West, Curiosity Road, to the Town School.':
+    'Βόρεια, η Οδός Έμπνευσης, προς το Πολυτεχνείο. Ανατολικά, η Οδός Πειθαρχίας, προς τη Συνοικία Εργασίας. Δυτικά, η Οδός Περιέργειας, προς το Σχολείο της Πόλης.',
   'South-west, Caring Road, to Kitsos House. South-east, Leadership Road, to the Army Camp. Due south, Collaboration Road, to the Radio Center.':
     'Νοτιοδυτικά, η Οδός Φροντίδας, προς το Σπίτι του Κίτσου. Νοτιοανατολικά, η Οδός Ηγεσίας, προς το Στρατόπεδο. Κατευθείαν νότια, η Οδός Συνεργασίας, προς το Ραδιοφωνικό Κέντρο.',
   'And north-west out to the cape: Freedom Road, and the Old Lighthouse at the end of it. Locked.':
     'Και βορειοδυτικά προς το ακρωτήρι: η Οδός Ελευθερίας, και ο Παλιός Φάρος στο τέρμα της. Κλειδωμένος.',
   'They are named for what he carried out of each of them. Press M for the map, J for the journal.':
     'Πήραν το όνομά τους από αυτό που κουβάλησε από τον καθένα. Πάτα M για τον χάρτη, J για το ημερολόγιο.',
-  'MOTIVATION ROAD: the Polytechnic, straight on. Mind the bicycles.':
-    'ΟΔΟΣ ΚΙΝΗΤΡΟΥ: το Πολυτεχνείο, ευθεία. Πρόσεχε τα ποδήλατα.',
+  'INSPIRATION ROAD: the Polytechnic, straight on. Mind the bicycles.':
+    'ΟΔΟΣ ΕΜΠΝΕΥΣΗΣ: το Πολυτεχνείο, ευθεία. Πρόσεχε τα ποδήλατα.',
   'Electrical & Computer Engineering, and the lecture hall behind it.':
     'Ηλεκτρολόγοι Μηχανικοί & Μηχανικοί Υπολογιστών, και το αμφιθέατρο από πίσω.',
   'Five years of it. Nobody made him finish; that is rather the point of the name.':

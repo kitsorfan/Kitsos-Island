@@ -746,6 +746,7 @@ function TechWall({ accent }: { accent: string }) {
  * are the only thing that decides where it lands.
  */
 function TechTile({ mark, x }: { mark: TechMark; x: number }) {
+  const t = useT()
   const texture = useMarkTexture(mark.id, mark.draw)
   const centre = -TECH_HEAD_H - TECH_GAP - TECH_TILE / 2
 
@@ -766,7 +767,7 @@ function TechTile({ mark, x }: { mark: TechMark; x: number }) {
         neighbours. TextPlane shrinks the type to fit the plane it is given.
       */}
       <TextPlane
-        text={mark.name}
+        text={t(mark.name)}
         width={TECH_TILE_PITCH * 0.96}
         aspect={(TECH_TILE_PITCH * 0.96) / TECH_NAME_H}
         color="#dfe9ee"

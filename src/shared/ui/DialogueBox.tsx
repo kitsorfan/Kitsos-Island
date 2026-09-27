@@ -3,6 +3,7 @@ import { useGame } from '../state/store'
 import * as sfx from '../engine/audio'
 import { dialogueBridge } from '../../features/player/useKeyboard'
 import { useT } from '../i18n/useT'
+import { fill } from '../i18n'
 import { useCoarsePointer } from './useCoarsePointer'
 import { useScreen } from './useScreen'
 
@@ -17,7 +18,7 @@ export function DialogueBox() {
   const coarse = useCoarsePointer()
   const { mobile, portrait } = useScreen()
 
-  const line = dialogue?.lines[dialogue.page] ?? ''
+  const line = fill(dialogue?.lines[dialogue.page] ?? '', dialogue?.slots)
   // A new line always starts empty, without a reset render.
   const shown = typed.line === line ? typed.shown : 0
   const done = shown >= line.length

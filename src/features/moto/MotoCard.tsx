@@ -3,16 +3,41 @@ import { useGame } from '../../shared/state/store'
 import * as sfx from '../../shared/engine/audio'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
 import { useT } from '../../shared/i18n/useT'
+import { fill, rich } from '../../shared/i18n'
+import type { Translate } from '../../shared/i18n'
 
-const clock = (seconds: number) => {
+/* The formats are keys like any other phrase, so the decimal point is the
+   translation's to choose: Greek writes 12,3 where English writes 12.3. */
+const clock = (seconds: number, t: Translate) => {
   const m = Math.floor(seconds / 60)
   const s = Math.floor(seconds % 60)
-  const t = Math.floor((seconds * 10) % 10)
-  return m > 0 ? `${m}:${s.toString().padStart(2, '0')}.${t}` : `${s}.${t}s`
+  const tenth = Math.floor((seconds * 10) % 10)
+  return m > 0
+    ? fill(t('{m}:{ss}.{tenth}'), {
+        m,
+        ss: s.toString().padStart(2, '0'),
+        tenth,
+      })
+    : fill(t('{s}.{tenth}s'), { s, tenth })
 }
 
 const ORDINAL = ['', 'First', 'Second', 'Third', 'Fourth']
-const LAP_WORD: Record<number, string> = { 1: 'One', 3: 'Three', 5: 'Five' }
+
+/** The briefing's title for each distance on offer, whole, as Greek wants it. */
+const LAPS_TITLE: Record<number, string> = {
+  1: 'One lap of the island',
+  3: 'Three laps of the island',
+  5: 'Five laps of the island',
+}
+
+/** And where he came in, likewise, since first place has a line of its own. */
+const FINISH = [
+  '',
+  'Won it',
+  'Second across the line',
+  'Third across the line',
+  'Fourth across the line',
+]
 
 /**
  * Three bars, filled to the grade's rank. A meter says how hard this is at a
@@ -58,32 +83,41 @@ export function MotoCard() {
   if (!run) return null
   const briefing = run.status === 'briefing'
   const picked = GRADES.find((g) => g.id === setup.difficulty) ?? GRADES[1]
-  const won = run.place === 1
   const podium = run.place > 0 && run.place <= 3
+  const [whole, part] = ((LAP_LENGTH * setup.laps) / 1000).toFixed(2).split('.')
+  const distance = { whole, part }
 
   return (
     <div className="overlay">
       <div className="moto-card">
         <span className="moto-card__kicker">
-          {briefing ? 'Island Circuit' : `Race ${run.round}`}
+          {briefing
+            ? t('Island Circuit')
+            : fill(t('Race {round}'), { round: run.round })}
         </span>
         <h2 className="moto-card__title">
           {briefing
-            ? `${LAP_WORD[setup.laps] ?? setup.laps} lap${setup.laps > 1 ? 's' : ''} of the island`
-            : won
-              ? 'Won it'
-              : `${ORDINAL[run.place]} across the line`}
+            ? LAPS_TITLE[setup.laps]
+              ? t(LAPS_TITLE[setup.laps])
+              : fill(t('{count} laps of the island'), { count: setup.laps })
+            : t(FINISH[run.place] ?? '')}
         </h2>
 
         {briefing ? (
           <>
             <p className="moto-card__lead">
-              The ring road runs right round the town, through the woods and
-              across all seven district roads:{' '}
-              <strong>{Math.round(LAP_LENGTH)} metres</strong> of it,{' '}
-              {setup.laps === 1 ? 'once' : `${setup.laps} times`}. Three of the
-              islanders are on the grid ahead of you, and you start at the back
-              of it.
+              {rich(
+                t(
+                  'The ring road runs right round the town, through the woods and across all seven district roads: <b>{metres} metres</b> of it, {times}. Three of the islanders are on the grid ahead of you, and you start at the back of it.',
+                ),
+                {
+                  metres: Math.round(LAP_LENGTH),
+                  times:
+                    setup.laps === 1
+                      ? t('once')
+                      : fill(t('{count} times'), { count: setup.laps }),
+                },
+              )}
             </p>
 
             <div className="race-board">
@@ -91,7 +125,7 @@ export function MotoCard() {
                 <div className="race-board__head">
                   <span className="race-board__label">{t('Laps')}</span>
                   <span className="race-board__note">
-                    {((LAP_LENGTH * setup.laps) / 1000).toFixed(2)} km
+                    {fill(t('{whole}.{part} km'), distance)}
                   </span>
                 </div>
                 <div className="race-board__laps">
@@ -143,7 +177,7 @@ export function MotoCard() {
                     style={{ background: rival.bike }}
                     aria-hidden
                   />
-                  <strong>{racerName(rival.id)}</strong>
+                  <strong>{t(racerName(rival.id))}</strong>
                 </li>
               ))}
             </ul>
@@ -224,24 +258,26 @@ export function MotoCard() {
         ) : (
           <>
             <p className="moto-card__lead">
-              {won
-                ? 'Round the ring road, and nobody came past you on the last lap.'
-                : podium
-                  ? 'On the podium, and close enough to see the winner over the line.'
-                  : 'Round the back of the field the whole way. The line is there to be learned.'}
+              {t(
+                run.place === 1
+                  ? 'Round the ring road, and nobody came past you on the last lap.'
+                  : podium
+                    ? 'On the podium, and close enough to see the winner over the line.'
+                    : 'Round the back of the field the whole way. The line is there to be learned.',
+              )}
             </p>
             <div className="moto-card__score">
               <div>
                 <span>{t('Finished')}</span>
-                <strong>{ORDINAL[run.place] || '–'}</strong>
+                <strong>{t(ORDINAL[run.place]) || '–'}</strong>
               </div>
               <div>
                 <span>{t('Race time')}</span>
-                <strong>{clock(run.seconds)}</strong>
+                <strong>{clock(run.seconds, t)}</strong>
               </div>
               <div>
                 <span>{t('Best lap')}</span>
-                <strong>{run.best > 0 ? clock(run.best) : '–'}</strong>
+                <strong>{run.best > 0 ? clock(run.best, t) : '–'}</strong>
               </div>
             </div>
           </>
@@ -252,7 +288,7 @@ export function MotoCard() {
             className="button button--primary"
             onClick={() => (briefing ? begin() : again())}
           >
-            {briefing ? 'On the grid' : 'Race again'}
+            {t(briefing ? 'On the grid' : 'Race again')}
           </button>
           <button
             className="button"
@@ -261,7 +297,7 @@ export function MotoCard() {
               exit()
             }}
           >
-            Off the bike
+            {t('Off the bike')}
           </button>
         </div>
       </div>

@@ -3,6 +3,8 @@ import { TROPHIES } from './trophies'
 import type { Trophy } from './trophies'
 import { formatSerial, verifyUrl } from './certId'
 import { buildPdf } from './certPdf'
+import { EN, upper } from '../../shared/i18n'
+import type { Locale, Translate } from '../../shared/i18n'
 
 /**
  * The prize: a certificate, in the visitor's own name, saying they walked the
@@ -54,9 +56,12 @@ export function certFilename(name: string): string {
   return `kitsos-island-certificate-${slug}.pdf`
 }
 
-/** The date on the certificate, written out long. */
-export function certDate(on: Date = new Date()): string {
-  return on.toLocaleDateString('en-GB', {
+/**
+ * The date on the certificate, written out long, in the language the rest of
+ * it is lettered in: 27 September 2026, or 27 Σεπτεμβρίου 2026.
+ */
+export function certDate(on: Date = new Date(), locale: Locale = 'en'): string {
+  return on.toLocaleDateString(locale === 'el' ? 'el-GR' : 'en-GB', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -87,6 +92,14 @@ export interface CertificateDetail {
   trophies?: Record<string, true>
   /** The serial and its signature, as minted for this certificate. */
   serial?: { serial: number; signature: number }
+  /**
+   * The language to letter it in. English unless told otherwise: a visitor
+   * who walked the island in Greek gets the certificate in Greek, the same
+   * card they have been reading all along.
+   */
+  t?: Translate
+  /** And the language the date is written out in, to match. */
+  locale?: Locale
 }
 
 export function drawCertificate(
@@ -98,6 +111,7 @@ export function drawCertificate(
   const W = CERT_WIDTH
   const H = CERT_HEIGHT
   const mid = W / 2
+  const t = detail.t ?? EN
 
   /* Parchment, with the lighthouse's own amber in the border. */
   ctx.fillStyle = '#fbf6ea'
@@ -117,15 +131,15 @@ export function drawCertificate(
 
   ctx.fillStyle = '#8a6a3a'
   ctx.font = '600 34px Georgia, "Times New Roman", serif'
-  ctx.fillText(CERT_TEXT.kicker.toUpperCase(), mid, 330)
+  ctx.fillText(upper(t(CERT_TEXT.kicker)), mid, 330)
 
   ctx.fillStyle = '#2f3a44'
   ctx.font = 'bold 76px Georgia, "Times New Roman", serif'
-  ctx.fillText(CERT_TEXT.title, mid, 420)
+  ctx.fillText(t(CERT_TEXT.title), mid, 420)
 
   ctx.fillStyle = '#5c6670'
   ctx.font = 'italic 36px Georgia, "Times New Roman", serif'
-  ctx.fillText(CERT_TEXT.lead, mid, 510)
+  ctx.fillText(t(CERT_TEXT.lead), mid, 510)
 
   /* The name, lettered as large as the line will take it. */
   const clean = cleanName(name)
@@ -159,13 +173,20 @@ export function drawCertificate(
   ctx.font = `${citeSize}px Georgia, "Times New Roman", serif`
   while (
     citeSize > 22 &&
-    splitLines(ctx, CERT_TEXT.body, citeWidth).length > 2
+    splitLines(ctx, t(CERT_TEXT.body), citeWidth).length > 2
   ) {
     citeSize -= 2
     ctx.font = `${citeSize}px Georgia, "Times New Roman", serif`
   }
   const citeLead = Math.round(citeSize * 1.4)
-  const citeLines = wrapText(ctx, CERT_TEXT.body, mid, 706, citeWidth, citeLead)
+  const citeLines = wrapText(
+    ctx,
+    t(CERT_TEXT.body),
+    mid,
+    706,
+    citeWidth,
+    citeLead,
+  )
   const citeEnd = 706 + (citeLines - 1) * citeLead
 
   /* The stickers, in a row under the citation, whatever it came to. Their
@@ -173,7 +194,7 @@ export function drawCertificate(
      under the last baseline — but never lower than 844, past which the
      labels run into the signature band. */
   const rowY = Math.min(844, Math.max(820, citeEnd + 88))
-  drawTrophies(ctx, mid, rowY, detail.trophies ?? {})
+  drawTrophies(ctx, mid, rowY, detail.trophies ?? {}, t)
 
   /* Signed, bottom right; dated, bottom left. */
   ctx.textAlign = 'left'
@@ -187,12 +208,12 @@ export function drawCertificate(
   ctx.stroke()
   ctx.fillStyle = '#8a929a'
   ctx.font = '22px Georgia, "Times New Roman", serif'
-  ctx.fillText('Date of departure', 150, H - 116)
+  ctx.fillText(t('Date of departure'), 150, H - 116)
 
   ctx.textAlign = 'right'
   ctx.fillStyle = '#2f3a44'
   ctx.font = 'italic 40px Georgia, "Times New Roman", serif'
-  ctx.fillText(CERT_TEXT.signatory, W - 150, H - 190)
+  ctx.fillText(t(CERT_TEXT.signatory), W - 150, H - 190)
   ctx.strokeStyle = '#d8cfc0'
   ctx.beginPath()
   ctx.moveTo(W - 520, H - 176)
@@ -200,10 +221,10 @@ export function drawCertificate(
   ctx.stroke()
   ctx.fillStyle = '#5c6670'
   ctx.font = '24px Georgia, "Times New Roman", serif'
-  ctx.fillText(CERT_TEXT.signatoryRole, W - 150, H - 138)
+  ctx.fillText(t(CERT_TEXT.signatoryRole), W - 150, H - 138)
   ctx.fillStyle = '#8a929a'
   ctx.font = '22px Georgia, "Times New Roman", serif'
-  ctx.fillText('Keeper of the island', W - 150, H - 104)
+  ctx.fillText(t('Keeper of the island'), W - 150, H - 104)
 
   /*
    * The reference, centred along the very bottom.
@@ -230,7 +251,7 @@ export function drawCertificate(
     )
     ctx.fillStyle = '#b8ae9c'
     ctx.font = '15px Georgia, "Times New Roman", serif'
-    ctx.fillText(CERT_VERIFY_LINE, mid, H - 74)
+    ctx.fillText(t(CERT_VERIFY_LINE), mid, H - 74)
   }
 }
 
@@ -261,6 +282,7 @@ function drawTrophies(
   mid: number,
   y: number,
   won: Record<string, true>,
+  t: Translate,
 ): void {
   /*
    * The pitch is set by the labels, not the rings — and the row as a whole
@@ -278,11 +300,11 @@ function drawTrophies(
   ctx.textAlign = 'center'
   ctx.fillStyle = '#a89a80'
   ctx.font = '600 20px Georgia, "Times New Roman", serif'
-  ctx.fillText('ISLAND GAMES', mid, y - 50)
+  ctx.fillText(t('ISLAND GAMES'), mid, y - 50)
 
   for (let i = 0; i < TROPHIES.length; i++) {
     const trophy = TROPHIES[i]
-    drawTrophy(ctx, left + i * gap, y, trophy, Boolean(won[trophy.id]))
+    drawTrophy(ctx, left + i * gap, y, trophy, Boolean(won[trophy.id]), t)
   }
 }
 
@@ -296,6 +318,7 @@ function drawTrophy(
   y: number,
   trophy: Trophy,
   won: boolean,
+  t: Translate,
 ): void {
   /* Unwon ones stay on the sheet in outline, so the gaps are legible. */
   const ink = won ? trophy.color : '#cfc6b6'
@@ -314,7 +337,7 @@ function drawTrophy(
   /* The name under it. */
   ctx.fillStyle = won ? '#5c6670' : '#b8ae9c'
   ctx.font = `${won ? '600' : '400'} 14px Georgia, "Times New Roman", serif`
-  ctx.fillText(trophy.label, x, y + TROPHY_RADIUS + 22)
+  ctx.fillText(t(trophy.label), x, y + TROPHY_RADIUS + 22)
 }
 
 /**
@@ -537,7 +560,7 @@ export async function downloadCertificate(
   if (!ctx) return
 
   ctx.scale(PDF_SCALE, PDF_SCALE)
-  drawCertificate(ctx, name, certDate(), detail)
+  drawCertificate(ctx, name, certDate(new Date(), detail.locale), detail)
 
   const blob = await new Promise<Blob | null>((done) =>
     canvas.toBlob(done, 'image/jpeg', 0.92),
@@ -561,8 +584,8 @@ export async function downloadCertificate(
         }
       : null,
     {
-      title: `${CERT_TEXT.title} — ${clean}`,
-      author: CERT_TEXT.signatory,
+      title: `${(detail.t ?? EN)(CERT_TEXT.title)} — ${clean}`,
+      author: (detail.t ?? EN)(CERT_TEXT.signatory),
       subject: reference ?? undefined,
     },
   )

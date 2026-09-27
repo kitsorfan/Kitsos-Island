@@ -13,6 +13,8 @@ import { useGame } from '../../shared/state/store'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
 import { useScreen } from '../../shared/ui/useScreen'
 import { useT } from '../../shared/i18n/useT'
+import { fill, rich } from '../../shared/i18n'
+import type { Slots } from '../../shared/i18n'
 
 interface Readout {
   served: number
@@ -25,7 +27,7 @@ interface Readout {
   burning: boolean
   /** The nearest gathering still waiting, and what it is asking for. */
   next: { distance: number; want: Payload; label: string } | null
-  feed: { text: string; kind: 'good' | 'bad'; at: number } | null
+  feed: { text: string; slots?: Slots; kind: 'good' | 'bad'; at: number } | null
 }
 
 const EMPTY: Readout = {
@@ -131,7 +133,11 @@ export function BalloonHud() {
           </span>
           <strong key={readout.served}>{readout.served}</strong>
           {/* The balloon says what is being counted; a phone has no room to. */}
-          <em>{mobile ? `of ${CALL_TOTAL}` : `of ${CALL_TOTAL} served`}</em>
+          <em>
+            {fill(t(mobile ? 'of {total}' : 'of {total} served'), {
+              total: CALL_TOTAL,
+            })}
+          </em>
         </div>
 
         <div className="bl__bar">
@@ -142,8 +148,12 @@ export function BalloonHud() {
         </div>
 
         <div className="bl__racks">
-          <Rack kind="water" count={readout.water} label="Bombs" />
-          <Rack kind="confetti" count={readout.confetti} label="Confetti" />
+          <Rack kind="water" count={readout.water} label={t('Bombs')} />
+          <Rack
+            kind="confetti"
+            count={readout.confetti}
+            label={t('Confetti')}
+          />
         </div>
 
         <div className="bl__row">
@@ -175,8 +185,10 @@ export function BalloonHud() {
               >
                 {readout.next.want === 'water' ? '💧' : '🎉'}
               </span>
-              {readout.next.label}:{' '}
-              <strong>{Math.round(readout.next.distance)}m</strong>
+              {rich(t('{place}: <b>{metres}m</b>'), {
+                place: t(readout.next.label),
+                metres: Math.round(readout.next.distance),
+              })}
             </span>
           )}
         </div>
@@ -187,15 +199,15 @@ export function BalloonHud() {
           key={readout.feed.at}
           className={`bl__feed bl__feed--${readout.feed.kind}`}
         >
-          {readout.feed.text}
+          {fill(t(readout.feed.text), t(readout.feed.slots ?? {}))}
         </p>
       )}
 
       <p className="bl__keys">
         {coarse ? (
           <>
-            <kbd>Stick</kbd> {t('drift')} · <kbd>UP</kbd>
-            <kbd>DOWN</kbd> {t('climb and sink')} · <kbd>💧</kbd>
+            <kbd>{t('Stick')}</kbd> {t('drift')} · <kbd>{t('UP')}</kbd>
+            <kbd>{t('DOWN')}</kbd> {t('climb and sink')} · <kbd>💧</kbd>
             <kbd>🎉</kbd> {t('drop')}
           </>
         ) : (

@@ -5,6 +5,7 @@ import { useGame } from '../../shared/state/store'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
 import { useScreen } from '../../shared/ui/useScreen'
 import { useT } from '../../shared/i18n/useT'
+import { fill } from '../../shared/i18n'
 
 interface Readout {
   found: number
@@ -22,7 +23,12 @@ interface Readout {
   closest: number
   seen: boolean
   crouched: boolean
-  feed: { text: string; kind: 'good' | 'bad'; at: number } | null
+  feed: {
+    text: string
+    slots?: Record<string, string | number>
+    kind: 'good' | 'bad'
+    at: number
+  } | null
 }
 
 const EMPTY: Readout = {
@@ -115,7 +121,7 @@ export function HideHud() {
 
       <div className="hd__panel">
         <span className="hd__label">
-          {seeking ? 'Hide and seek: seeking' : 'Hide and seek: hiding'}
+          {t(seeking ? 'Hide and seek: seeking' : 'Hide and seek: hiding')}
         </span>
 
         {seeking ? (
@@ -125,7 +131,11 @@ export function HideHud() {
                 🔦
               </span>
               <strong key={readout.found}>{readout.found}</strong>
-              <em>{mobile ? `of ${COUNT}` : `of ${COUNT} found`}</em>
+              <em>
+                {fill(t(mobile ? 'of {total}' : 'of {total} found'), {
+                  total: COUNT,
+                })}
+              </em>
             </div>
             <div className="hd__bar">
               <div
@@ -134,11 +144,13 @@ export function HideHud() {
               />
             </div>
             <p className="hd__task">
-              {readout.warmth > 0.55
-                ? 'Somebody is very close.'
-                : readout.warmth > 0
-                  ? 'Something is near here.'
-                  : 'Walk up and touch them. A light is not enough.'}
+              {t(
+                readout.warmth > 0.55
+                  ? 'Somebody is very close.'
+                  : readout.warmth > 0
+                    ? 'Something is near here.'
+                    : 'Walk up and touch them. A light is not enough.',
+              )}
             </p>
             {!lit && (
               <p className="hd__warn">
@@ -155,8 +167,9 @@ export function HideHud() {
                 🌒
               </span>
               <strong>
-                {Math.ceil(readout.left)}
-                {mobile ? 's' : ''}
+                {mobile
+                  ? fill(t('{s}s'), { s: Math.ceil(readout.left) })
+                  : Math.ceil(readout.left)}
               </strong>
               {!mobile && <em>{t('seconds to hold out')}</em>}
             </div>
@@ -185,10 +198,11 @@ export function HideHud() {
               />
               <span>
                 {readout.chasers > 0
-                  ? `${readout.chasers} AFTER YOU: ${Math.round(readout.closest)}m`
-                  : readout.seen
-                    ? 'SEEN'
-                    : 'Nobody has seen you'}
+                  ? fill(t('{count} AFTER YOU: {metres}m'), {
+                      count: readout.chasers,
+                      metres: Math.round(readout.closest),
+                    })
+                  : t(readout.seen ? 'SEEN' : 'Nobody has seen you')}
               </span>
             </div>
             <div className="hd__states">
@@ -200,15 +214,19 @@ export function HideHud() {
               <span
                 className={`hd__state${lit ? ' hd__state--bad' : ' hd__state--on'}`}
               >
-                {lit ? 'Torch lit' : 'Torch out'}
+                {t(lit ? 'Torch lit' : 'Torch out')}
               </span>
             </div>
             {readout.drawing > 0 && (
               <p className="hd__warn">
-                {lit
-                  ? 'That torch is visible right across the town'
-                  : 'They can hear you moving'}{' '}
-                · anyone inside {Math.round(readout.drawing)}m is on their way
+                {fill(
+                  t(
+                    lit
+                      ? 'That torch is visible right across the town · anyone inside {metres}m is on their way'
+                      : 'They can hear you moving · anyone inside {metres}m is on their way',
+                  ),
+                  { metres: Math.round(readout.drawing) },
+                )}
               </p>
             )}
           </>
@@ -220,14 +238,15 @@ export function HideHud() {
           key={readout.feed.at}
           className={`hd__feed hd__feed--${readout.feed.kind}`}
         >
-          {readout.feed.text}
+          {fill(t(readout.feed.text), t(readout.feed.slots ?? {}))}
         </p>
       )}
 
       <p className="hd__keys">
         {coarse ? (
           <>
-            <kbd>Stick</kbd> {t('walk')} · <kbd>DUCK</kbd> {t('keep low')}
+            <kbd>{t('Stick')}</kbd> {t('walk')} · <kbd>{t('DUCK')}</kbd>{' '}
+            {t('keep low')}
           </>
         ) : (
           <>

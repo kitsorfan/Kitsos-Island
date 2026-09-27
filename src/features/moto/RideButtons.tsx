@@ -121,21 +121,21 @@ export function RidePedals() {
         label={t('Wheelie')}
         className="round-button--wheelie"
       >
-        WHEELIE
+        {t('WHEELIE')}
       </HoldButton>
       <HoldButton
         hold="brake"
         label={t('Brake')}
         className="round-button--pedal round-button--brake"
       >
-        BRAKE
+        {t('BRAKE')}
       </HoldButton>
       <HoldButton
         hold="gas"
         label={t('Gas')}
         className="round-button--pedal round-button--gas"
       >
-        GAS
+        {t('GAS')}
       </HoldButton>
     </div>
   )

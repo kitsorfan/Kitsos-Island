@@ -6,6 +6,8 @@ import { groundHeight } from './terrainLogic'
 import { keyCount, useGame } from '../../shared/state/store'
 import { BUILDING_MODELS } from './buildings/registry'
 import { TextPlane } from '../../shared/engine/TextSign'
+import { useT } from '../../shared/i18n/useT'
+import { fill } from '../../shared/i18n'
 import type { Building } from '../../types'
 
 export function Buildings() {
@@ -41,6 +43,7 @@ function BuildingPlot({ building }: { building: Building }) {
 
 /** Wooden board naming the building, planted beside its door. */
 function Signpost({ building }: { building: Building }) {
+  const t = useT()
   const [dx, dz] = building.door
   // Wide buildings need the board further out, clear of steps and columns.
   const side = Math.min(building.half[0] - 1, 10)
@@ -75,7 +78,7 @@ function Signpost({ building }: { building: Building }) {
         <meshStandardMaterial color={building.accent} roughness={0.85} />
       </mesh>
       <TextPlane
-        text={building.name}
+        text={t(building.name)}
         width={2.75}
         aspect={4.6}
         color="#ffffff"
@@ -137,6 +140,7 @@ function DoorMarker({ building }: { building: Building }) {
 
 /** Five lock slots beside the lighthouse door, lit as keys are found. */
 function LockPlate({ building }: { building: Building }) {
+  const t = useT()
   const keys = useGame((s) => s.keys)
   const open = useGame((s) => s.lighthouseOpen)
   const have = keyCount(keys)
@@ -167,7 +171,7 @@ function LockPlate({ building }: { building: Building }) {
         </mesh>
       ))}
       <TextPlane
-        text={open ? 'Open' : `${have} / 5 keys`}
+        text={open ? t('Open') : fill(t('{have} / 5 keys'), { have })}
         width={2.4}
         aspect={5}
         color={open ? '#9ff0b0' : '#ffd9a8'}

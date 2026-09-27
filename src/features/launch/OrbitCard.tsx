@@ -17,6 +17,7 @@ import { TROPHIES, trophyCount } from './trophies'
 import * as sfx from '../../shared/engine/audio'
 import { useGame } from '../../shared/state/store'
 import { useT } from '../../shared/i18n/useT'
+import { fill, rich } from '../../shared/i18n'
 
 /**
  * The end of it: the island a long way below, and the prize.
@@ -32,6 +33,7 @@ export function OrbitCard() {
   const credits = useGame((s) => s.credits)
   const flyHome = useGame((s) => s.flyHome)
   const trophies = useGame((s) => s.trophies)
+  const locale = useGame((s) => s.locale)
   /*
    * The serial, minted once when the card is first built rather than on
    * every render.
@@ -70,8 +72,8 @@ export function OrbitCard() {
     drawCertificate(
       ctx,
       ready ? cleanName(name) : t('your name here'),
-      certDate(),
-      { trophies, serial: stamp },
+      certDate(new Date(), locale),
+      { trophies, serial: stamp, t },
     )
     /*
      * `showing` is in here because the canvas does not exist until it is
@@ -84,12 +86,12 @@ export function OrbitCard() {
      * has changed, so without `showing` the effect never runs again and the
      * certificate stays blank until the first keystroke paints it.
      */
-  }, [name, ready, t, showing, trophies, stamp])
+  }, [name, ready, t, locale, showing, trophies, stamp])
 
   const take = () => {
     if (!ready) return
     sfx.jingle()
-    void downloadCertificate(name, { trophies, serial: stamp })
+    void downloadCertificate(name, { trophies, serial: stamp, t, locale })
     setSaved(true)
   }
 
@@ -183,11 +185,18 @@ export function OrbitCard() {
               ? t(
                   'No stickers on this one — the island games are still down there.',
                 )
-              : `${trophyCount(trophies)} / ${TROPHIES.length} ${t('island games won, and on the certificate.')}`}
+              : fill(
+                  t(
+                    '{count} / {total} island games won, and on the certificate.',
+                  ),
+                  { count: trophyCount(trophies), total: TROPHIES.length },
+                )}
         </p>
 
         <p className="orbit__signoff">
-          {t('Signed by')} <strong>{CERT_TEXT.signatory}</strong>.{' '}
+          {rich(t('Signed by <b>{name}</b>.'), {
+            name: t(CERT_TEXT.signatory),
+          })}{' '}
           {t('Thanks for walking the whole of it.')}
         </p>
 

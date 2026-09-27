@@ -226,6 +226,12 @@ export interface DialogueState {
   speaker: string
   role?: string
   lines: string[]
+  /**
+   * Values for any {slots} in the lines. A line with a count in it is keyed
+   * whole and filled in once it has been translated, so the number can sit
+   * wherever the language puts it.
+   */
+  slots?: Record<string, string | number>
   page: number
   /** Shown on the last page instead of Close; picking one carries on. */
   choices?: DialogueChoice[]
@@ -256,7 +262,13 @@ export interface PaintballGame {
   hits: number
   friendlyFire: number
   /** Last thing that happened, for the line under the HUD. */
-  feed: { text: string; kind: 'good' | 'bad'; at: number } | null
+  /** A sentence with {slots}, translated whole on the way to the screen. */
+  feed: {
+    text: string
+    slots?: Record<string, string | number>
+    kind: 'good' | 'bad'
+    at: number
+  } | null
   /** Bumped each match so the HUD can restart its animations. */
   round: number
 }
@@ -429,6 +441,8 @@ interface GameState {
   toast: {
     title: string
     body: string
+    /** Values for the {slots} in the body, filled after it is translated. */
+    slots?: Record<string, string | number>
     kind: 'journal' | 'key' | 'mission' | 'quality' | 'progress'
   } | null
 
@@ -1999,10 +2013,11 @@ export const useGame = create<GameState>((raw, get) => {
           friendlyFire: game.friendlyFire + (mine && friendly ? 1 : 0),
           feed: {
             text: friendly
-              ? `${name} was on your side!`
+              ? '{name} was on your side!'
               : mine
-                ? `You painted ${name}`
-                : `${name} is out`,
+                ? 'You painted {name}'
+                : '{name} is out',
+            slots: { name },
             kind: friendly ? 'bad' : 'good',
             at: Date.now(),
           },
@@ -2025,7 +2040,10 @@ export const useGame = create<GameState>((raw, get) => {
           feed: {
             text: lost
               ? 'Painted out.'
-              : `Hit! ${lives} ${lives === 1 ? 'life' : 'lives'} left`,
+              : lives === 1
+                ? 'Hit! {lives} life left'
+                : 'Hit! {lives} lives left',
+            slots: { lives },
             kind: 'bad',
             at: Date.now(),
           },
@@ -2369,10 +2387,11 @@ export const useGame = create<GameState>((raw, get) => {
         trophies: { ...state.trophies, [id]: true as const },
         toast: {
           title: 'Sticker earned',
-          body: `That one goes on the certificate. ${trophyCount({
-            ...state.trophies,
-            [id]: true,
-          })} of ${TROPHIES.length}.`,
+          body: 'That one goes on the certificate. {count} of {total}.',
+          slots: {
+            count: trophyCount({ ...state.trophies, [id]: true }),
+            total: TROPHIES.length,
+          },
           kind: 'progress',
         },
       }))
@@ -2627,9 +2646,12 @@ export const useGame = create<GameState>((raw, get) => {
           : s.missions,
         toast: {
           title: key.name,
-          body: mission
-            ? `${mission.done} ${Object.keys(s.keys).length + 1} of ${TOTAL_KEYS} keys.`
-            : 'Key taken.',
+          body: mission ? '{done} {count} of {total} keys.' : 'Key taken.',
+          slots: {
+            done: mission?.done ?? '',
+            count: Object.keys(s.keys).length + 1,
+            total: TOTAL_KEYS,
+          },
           kind: 'key',
         },
       }))

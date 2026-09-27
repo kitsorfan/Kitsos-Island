@@ -156,7 +156,7 @@ export function TouchControls() {
             }}
             aria-label={t('Wide pulse')}
           >
-            PULSE
+            {t('PULSE')}
           </button>
         ) : flying ? (
           <>
@@ -225,7 +225,7 @@ export function TouchControls() {
               }}
               aria-label={t('Get down')}
             >
-              DUCK
+              {t('DUCK')}
             </button>
             <button
               className="round-button round-button--fire"
@@ -245,7 +245,7 @@ export function TouchControls() {
               }}
               aria-label={t('Shoot paint')}
             >
-              FIRE
+              {t('FIRE')}
             </button>
           </>
         ) : sailing ? null : (

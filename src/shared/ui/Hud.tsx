@@ -18,6 +18,8 @@ import {
 import { BalloonHud } from '../../features/balloon/BalloonHud'
 import { SettingsCard } from './SettingsCard'
 import { useT } from '../i18n/useT'
+import { fill, rich } from '../i18n'
+import type { Translate } from '../i18n'
 import { HideHud } from '../../features/hide/HideHud'
 import { HoldMeter } from './HoldMeter'
 import { Minimap } from '../../features/map/Minimap'
@@ -67,9 +69,37 @@ function ZoomButton({
   )
 }
 
+/**
+ * What the prompt says: the verb, and the thing it is done to in bold.
+ *
+ * The two are keyed as one phrase — 'Talk to <b>Mayor Vasilis</b>' — rather
+ * than a verb and a name translated apart, because Greek changes the name to
+ * suit the verb: you talk to τον Δήμαρχο Βασίλη, go into το Σπίτι, read την
+ * πινακίδα. A verb set down in front of a name that has not changed for it
+ * reads like a machine talking.
+ *
+ * A thing whose name is translated but whose phrase is not shows the name on
+ * its own, which is terse but never wrong. English, and anything nobody has
+ * translated yet, keeps the layout it always had.
+ */
+function promptText(verb: string, label: string, t: Translate) {
+  const phrase = `${verb} <b>${label}</b>`
+  const said = t(phrase)
+  if (said !== phrase) return rich(said)
+  const name = t(label)
+  if (name !== label) return <strong>{name}</strong>
+  return (
+    <>
+      {verb} <strong>{label}</strong>
+    </>
+  )
+}
+
 export function Hud() {
   const t = useT()
-  const nearby = t(useGame((s) => s.nearby))
+  /* Untranslated as well as translated: the prompt is keyed on the English. */
+  const target = useGame((s) => s.nearby)
+  const nearby = t(target)
   const mode = useGame((s) => s.mode)
   const area = useGame((s) => s.area)
   const found = useGame((s) => s.entries.length)
@@ -333,9 +363,18 @@ export function Hud() {
                 <div className="badge__fill" style={{ width: `${percent}%` }} />
               </div>
               <span className="badge__count">
-                {found}/{TOTAL_ENTRIES} {t('discovered')}
+                {fill(t('{found}/{total} discovered'), {
+                  found,
+                  total: TOTAL_ENTRIES,
+                })}
               </span>
-              <div className="keyring" title={`${have} of ${TOTAL_KEYS} keys`}>
+              <div
+                className="keyring"
+                title={fill(t('{have} of {total} keys'), {
+                  have,
+                  total: TOTAL_KEYS,
+                })}
+              >
                 {KEYS.map((key) => (
                   <span
                     key={key.id}
@@ -484,8 +523,11 @@ export function Hud() {
             <kbd>{coarse ? 'A' : 'Enter'}</kbd>
           )}
           <span>
-            {nearby.silent ? '' : nearby.verb ? `${nearby.verb} ` : ''}
-            <strong>{nearby.label}</strong>
+            {nearby.silent || !target?.verb ? (
+              <strong>{nearby.label}</strong>
+            ) : (
+              promptText(target.verb, target.label, t)
+            )}
             {nearby.blocked ? ` · ${t('locked')}` : ''}
           </span>
         </div>

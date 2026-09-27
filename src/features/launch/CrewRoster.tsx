@@ -1,5 +1,6 @@
 import { useGame } from '../../shared/state/store'
 import { useT } from '../../shared/i18n/useT'
+import { fill } from '../../shared/i18n'
 import type { Npc } from '../../types'
 import { CREW, STORIED } from './crew'
 
@@ -22,8 +23,10 @@ export function CrewRoster() {
   return (
     <div className="crew">
       <p className="crew__count">
-        {t('Met')} {met} {t('of the')} {STORIED.length}{' '}
-        {t('with a story to tell.')}
+        {fill(t('Met {met} of the {total} with a story to tell.'), {
+          met,
+          total: STORIED.length,
+        })}
       </p>
       {groups.map((group) => (
         <section key={group.id} className="panel__section crew__group">

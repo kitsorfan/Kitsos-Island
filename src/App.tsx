@@ -27,10 +27,14 @@ import { Toast } from './shared/ui/Toast'
 import { TouchControls } from './features/player/TouchControls'
 import { useKeyboard } from './features/player/useKeyboard'
 import { useGame } from './shared/state/store'
+import { useT } from './shared/i18n/useT'
 import { setMuted, setSfxLevel } from './shared/engine/audio'
 import type { Mood } from './features/radio/music'
 import { setMood, setMusicEnabled, setMusicLevel } from './features/radio/music'
 import { FEAST_AREA } from './features/party/feast'
+
+/** What the tab says, in English; index.html starts it off the same. */
+const TITLE = 'Kitsos Island - Playable CV'
 
 /** Covers the canvas while a new area builds its scene graph. */
 function Curtain() {
@@ -56,7 +60,17 @@ export default function App() {
   const hide = useGame((s) => s.hide?.status)
   const rescue = useGame((s) => s.rescue?.status)
   const launch = useGame((s) => s.launch)
+  const locale = useGame((s) => s.locale)
+  const t = useT()
   useKeyboard()
+
+  // The tab and the page's own language follow the one chosen, so a Greek
+  // visitor's tab is in Greek and a screen reader reads the Greek as Greek
+  // rather than spelling it out with English rules.
+  useEffect(() => {
+    document.documentElement.lang = locale
+    document.title = t(TITLE)
+  }, [locale, t])
 
   useEffect(() => {
     setMuted(muted)

@@ -57,6 +57,40 @@ const KEPT = [
   'University of Michigan',
   'arXiv, Cornell University',
   'Java · Spring Boot · React · AWS',
+  'Java 17–25',
+  'Java (17–25)',
+  'JavaScript',
+  'TypeScript',
+  'Python',
+  'C++',
+  'Spring',
+  'RAG',
+  'Angular',
+  'HTML',
+  'CSS',
+  'Tailwind',
+  'Tailwind CSS',
+  'Flyway',
+  'Git',
+  'Bitbucket',
+  'Graylog',
+  'Graylog · ELK',
+  'Sentry',
+  'JUnit',
+  'Mockito',
+  'JaCoCo',
+  'Figma',
+  'UML',
+  'SRS',
+  'Agile/Scrum',
+  'UKG',
+  'JWT',
+  'SAML · ADFS · JWT',
+  'AWS',
+  'AWS EC2',
+  'AWS S3',
+  'AWS SES',
+  'AWS SNS',
 ]
 
 const AS_WRITTEN: Record<string, string> = Object.fromEntries(
@@ -71,7 +105,7 @@ export const PROFILE: Record<string, string> = {
     'Senior Software Engineer & Technical Lead',
   'Trainer card': 'Κάρτα εκπαιδευτή',
   'Senior Software Engineer and Technical Lead based in Athens, Greece. I build cloud-native healthcare products end to end, Java and Spring Boot on the backend, React on the front, AWS underneath, and I lead the teams that ship them into hospitals.':
-    'Senior Software Engineer και Technical Lead με έδρα την Αθήνα. Φτιάχνω cloud-native προϊόντα υγείας από άκρη σε άκρη, Java και Spring Boot στο backend, React μπροστά, AWS από κάτω, και ηγούμαι των ομάδων που τα βγάζουν στα νοσοκομεία.',
+    'Senior Software Engineer και Technical Lead με έδρα την Αθήνα. Φτιάχνω cloud-native προϊόντα υγείας από την αρχή ως το τέλος: Java και Spring Boot στο backend, React στο frontend, AWS από κάτω, και ηγούμαι των ομάδων που τα βγάζουν στα νοσοκομεία.',
   'Athens, Greece': 'Αθήνα, Ελλάδα',
   Nationality: 'Υπηκοότητα',
   Greek: 'Ελληνική',
@@ -80,7 +114,7 @@ export const PROFILE: Record<string, string> = {
   Currently: 'Αυτή τη στιγμή',
   'Senior Software Engineer': 'Senior Software Engineer',
   Languages: 'Γλώσσες',
-  'Off the clock': 'Εκτός ωραρίου',
+  'Off the clock': 'Εκτός δουλειάς',
   'Leading volunteer at the Christian Youth Foundation "Pantokrator" in Paleo Faliro, and a blood donor since 2017.':
     'Επικεφαλής εθελοντής στο Χριστιανικό Ίδρυμα Νεότητας «Παντοκράτωρ» στο Παλαιό Φάληρο, και αιμοδότης από το 2017.',
   'Greek, native speaker': 'Ελληνικά, μητρική γλώσσα',
@@ -105,7 +139,7 @@ export const PROFILE: Record<string, string> = {
   'Thesis: compliance analysis of movement exercises using machine learning, supervised by Prof. Panagiotis Tsanakas, Dean of the School, graded with distinction, and later published on arXiv.':
     'Διπλωματική: ανάλυση συμμόρφωσης ασκήσεων κίνησης με μηχανική μάθηση, με επιβλέποντα τον καθηγητή Παναγιώτη Τσανάκα, Κοσμήτορα της Σχολής, βαθμολογήθηκε με άριστα, και αργότερα δημοσιεύτηκε στο arXiv.',
   'Coursework with the Dean included Operating Systems and Software Service Technologies.':
-    'Στα μαθήματα με τον Κοσμήτορα περιλαμβάνονταν τα Λειτουργικά Συστήματα και οι Τεχνολογίες Υπηρεσιών Λογισμικού.',
+    'Με τον Κοσμήτορα είχε, μεταξύ άλλων, Λειτουργικά Συστήματα και Τεχνολογίες Υπηρεσιών Λογισμικού.',
   'IBM graduate program (2024)': 'Πρόγραμμα αποφοίτων IBM (2024)',
   'Agile & Enterprise Design Thinking bootcamp, Hamburg (2024)':
     'Bootcamp Agile & Enterprise Design Thinking, Αμβούργο (2024)',
@@ -125,7 +159,7 @@ export const PROFILE: Record<string, string> = {
 
   /* ------------------------------ Ionidios ---------------------------- */
   'The oldest school in Piraeus, founded in 1847, and one of the four public Model schools in Greece. Evangeliki, which he had just left, is another. Another entrance exam, and he ranked 1st in it again.':
-    'Το παλαιότερο σχολείο του Πειραιά, από το 1847, και ένα από τα τέσσερα δημόσια Πρότυπα σχολεία της Ελλάδας. Η Ευαγγελική, από την οποία μόλις είχε φύγει, είναι ένα ακόμη. Άλλες μία εισαγωγικές εξετάσεις, και βγήκε ξανά 1ος.',
+    'Το παλαιότερο σχολείο του Πειραιά, από το 1847, και ένα από τα τέσσερα δημόσια Πρότυπα σχολεία της Ελλάδας. Η Ευαγγελική, απ’ όπου μόλις είχε φύγει, είναι ένα ακόμα. Άλλη μια φορά εισαγωγικές εξετάσεις, κι άλλη μια φορά 1ος.',
   'Graduating grade': 'Βαθμός απολυτηρίου',
   'Excellence award': 'Αριστείο',
   Honours: 'Διακρίσεις',
@@ -133,12 +167,12 @@ export const PROFILE: Record<string, string> = {
   'The Piraeus prize for the top graduating grade of the year, on leaving in 2017 with 19.9 out of 20.':
     'Το βραβείο του Πειραιά για το πρώτο απολυτήριο της χρονιάς, αποφοιτώντας το 2017 με 19,9 στα 20.',
   'First in performance in his class, year after year. His biology teacher put it in writing.':
-    'Πρώτος σε επίδοση στο τμήμα του, χρόνο με τον χρόνο. Η καθηγήτριά του στη Βιολογία το έβαλε γραπτώς.',
+    'Πρώτος σε επίδοση στο τμήμα του, χρόνο με τον χρόνο. Η καθηγήτριά του της Βιολογίας το έγραψε και σε επιστολή.',
   'Contests and the bench': 'Διαγωνισμοί και ο πάγκος',
   '2nd among about 1,650 entrants in the Panhellenic Biology Competition, 2016.':
     '2ος σε περίπου 1.650 συμμετέχοντες στον Πανελλήνιο Διαγωνισμό Βιολογίας, 2016.',
   'Notable awards in Mathematics and Programming.':
-    'Αξιοσημείωτα βραβεία σε Μαθηματικά και Προγραμματισμό.',
+    'Σημαντικές διακρίσεις σε Μαθηματικά και Προγραμματισμό.',
   'Captain of the school’s EUSO team, the European Union Science Olympiad, where three students share one bench of experiments.':
     'Αρχηγός της ομάδας EUSO του σχολείου, της Ολυμπιάδας Φυσικών Επιστημών της Ευρωπαϊκής Ένωσης, όπου τρεις μαθητές μοιράζονται έναν πάγκο πειραμάτων.',
   'Summer School of the University of Piraeus, on his informatics teacher’s recommendation, and C++ on his own from the age of sixteen.':
@@ -235,11 +269,11 @@ export const PROFILE: Record<string, string> = {
     '7ο βραβείο σε ανοιχτό διαγωνισμό λογοτεχνίας, ο μόνος ανήλικος που βραβεύτηκε.',
   'The extra classes': 'Τα επιπλέον μαθήματα',
   'A Model school keeps going after the timetable ends. He took four of the extra classes, and the habit never left him.':
-    'Ένα Πρότυπο σχολείο συνεχίζει και μετά το πρόγραμμα. Παρακολούθησε τέσσερα από τα επιπλέον μαθήματα, και η συνήθεια δεν τον άφησε ποτέ.',
+    'Ένα Πρότυπο σχολείο δεν τελειώνει με το κουδούνι. Πήγε σε τέσσερα από τα απογευματινά μαθήματα, και η συνήθεια του έμεινε για πάντα.',
   'Programming, in Pascal': 'Προγραμματισμός, σε Pascal',
   'From the age of 13': 'Από τα 13',
   'Every extra exercise set, and then small games of his own, with graphics.':
-    'Κάθε έξτρα άσκηση, και μετά μικρά παιχνίδια δικά του, με γραφικά.',
+    'Κάθε έξτρα άσκηση λυμένη, και μετά μικρά δικά του παιχνίδια, με γραφικά.',
   Astronomy: 'Αστρονομία',
   'After-school class': 'Απογευματινό μάθημα',
   'Built a sundial and a small planetarium, both to correct scale.':
@@ -258,12 +292,12 @@ export const PROFILE: Record<string, string> = {
     'An M-Health Algorithmic Approach to Identify and Assess Physiotherapy Exercises in Real Time',
   '11 December 2025': '11 Δεκεμβρίου 2025',
   'Applicable to remote physiotherapy supervision: the patient’s own phone does the assessment, so nothing leaves the device.':
-    'Εφαρμόσιμο σε απομακρυσμένη επίβλεψη φυσικοθεραπείας: την αξιολόγηση την κάνει το ίδιο το κινητό του ασθενούς, οπότε τίποτα δεν φεύγει από τη συσκευή.',
+    'Χρήσιμο για απομακρυσμένη παρακολούθηση φυσικοθεραπείας: την αξιολόγηση την κάνει το ίδιο το κινητό του ασθενή, οπότε τίποτα δεν φεύγει από τη συσκευή.',
   'Diploma thesis, 2022': 'Διπλωματική εργασία, 2022',
   'Compliance analysis of movement exercises using machine learning: a system that watches how a movement is performed and judges it against how it should be performed. Supervised by Prof. Panagiotis Tsanakas, Dean of the School of ECE, who called it "marked by scientific soundness and technological originality" and graded it with distinction. Three years later it became a published paper.':
-    'Ανάλυση συμμόρφωσης ασκήσεων κίνησης με μηχανική μάθηση: ένα σύστημα που παρακολουθεί πώς εκτελείται μια κίνηση και την κρίνει απέναντι στο πώς θα έπρεπε να εκτελεστεί. Με επιβλέποντα τον καθηγητή Παναγιώτη Τσανάκα, Κοσμήτορα της Σχολής ΗΜΜΥ, ο οποίος την χαρακτήρισε «άρτια επιστημονικά και τεχνολογικά πρωτότυπη» και τη βαθμολόγησε με άριστα. Τρία χρόνια αργότερα έγινε δημοσιευμένη εργασία.',
+    'Ανάλυση συμμόρφωσης ασκήσεων κίνησης με μηχανική μάθηση: ένα σύστημα που παρακολουθεί πώς γίνεται μια κίνηση και τη συγκρίνει με το πώς θα έπρεπε να γίνεται. Με επιβλέποντα τον καθηγητή Παναγιώτη Τσανάκα, Κοσμήτορα της Σχολής ΗΜΜΥ, ο οποίος τη χαρακτήρισε «άρτια επιστημονικά και τεχνολογικά πρωτότυπη» και τη βαθμολόγησε με άριστα. Τρία χρόνια αργότερα έγινε δημοσιευμένη εργασία.',
   'Grew out of the NTUA thesis: judging how a physiotherapy movement is actually performed against how it should be.':
-    'Προέκυψε από τη διπλωματική στο ΕΜΠ: να κρίνεις πώς εκτελείται στην πράξη μια κίνηση φυσικοθεραπείας απέναντι στο πώς θα έπρεπε.',
+    'Βγήκε από τη διπλωματική στο ΕΜΠ: να συγκρίνεις πώς γίνεται στην πράξη μια άσκηση φυσικοθεραπείας με το πώς θα έπρεπε να γίνεται.',
   'Reads a movement as a sequence of static poses, estimated from a phone camera by a pose-estimation neural network.':
     'Διαβάζει μια κίνηση ως ακολουθία στατικών στάσεων, που εκτιμώνται από την κάμερα του κινητού με νευρωνικό δίκτυο εκτίμησης στάσης.',
   'Turns body keypoints into trigonometric angle features and classifies them with lightweight supervised models, giving per-frame pose predictions and accuracy scores.':
@@ -278,11 +312,11 @@ export const PROFILE: Record<string, string> = {
   'Levenshtein distance': 'Απόσταση Levenshtein',
   'm-Health': 'm-Health',
   'Machine learning over motion data rather than hand-written rules':
-    'Μηχανική μάθηση πάνω σε δεδομένα κίνησης αντί για χειρόγραφους κανόνες',
+    'Μηχανική μάθηση πάνω σε δεδομένα κίνησης αντί για κανόνες γραμμένους με το χέρι',
   'The engineering lesson that stuck: a model is only as good as the pipeline feeding it':
     'Το μάθημα μηχανικής που έμεινε: ένα μοντέλο αξίζει όσο το pipeline που το τροφοδοτεί',
   'First real taste of shipping something a non-engineer has to trust':
-    'Η πρώτη πραγματική γεύση του να βγάζεις κάτι που πρέπει να το εμπιστευτεί κάποιος που δεν είναι μηχανικός',
+    'Η πρώτη πραγματική γεύση του να φτιάχνεις κάτι που πρέπει να το εμπιστευτεί κάποιος που δεν είναι μηχανικός',
 
   /* --------------------------- Contests & certs ----------------------- */
   'Contests & awards': 'Διαγωνισμοί & διακρίσεις',
@@ -370,11 +404,11 @@ export const PROFILE: Record<string, string> = {
 
   /* ----------------------------- Campus life -------------------------- */
   'Five-year integrated Master of Engineering in the School of Electrical and Computer Engineering, the most competitive school in Greece to get into, where only the top entrance-exam grades make it.':
-    'Πενταετές ενιαίο δίπλωμα Master of Engineering στη Σχολή Ηλεκτρολόγων Μηχανικών και Μηχανικών Υπολογιστών, η πιο ανταγωνιστική σχολή της Ελλάδας στην εισαγωγή, όπου περνούν μόνο οι κορυφαίες βαθμολογίες των πανελληνίων.',
+    'Πενταετές ενιαίο και αδιάσπαστο δίπλωμα (Integrated Master) στη Σχολή Ηλεκτρολόγων Μηχανικών και Μηχανικών Υπολογιστών, την πιο δύσκολη σχολή της Ελλάδας για να περάσεις, όπου μπαίνουν μόνο οι κορυφαίες βαθμολογίες των Πανελληνίων.',
   'Finished in the five years the programme is designed for; the average student takes about seven and a half.':
     'Ολοκληρώθηκε στα πέντε χρόνια που προβλέπει το πρόγραμμα· ο μέσος φοιτητής χρειάζεται περίπου εφτάμισι.',
   'Worked alongside the degree from the third year: part-time at first, then full-time as Director of the "Pantokrator" Foundation through the fourth and fifth.':
-    'Δούλευε παράλληλα με τις σπουδές από το τρίτο έτος: μερική απασχόληση στην αρχή, μετά πλήρης ως Διευθυντής του Ιδρύματος «Παντοκράτωρ» στο τέταρτο και το πέμπτο.',
+    'Δούλευε παράλληλα με τις σπουδές από το τρίτο έτος: στην αρχή με μερική απασχόληση, και στο τέταρτο και πέμπτο έτος με πλήρη, ως Διευθυντής του Ιδρύματος «Παντοκράτωρ».',
   'The Independent movement': 'Το Ανεξάρτητο κίνημα',
   'In his third year, party-political groups ran the faculty assemblies and students’ own problems went unheard. He co-founded an independent movement of ECE students to win real representation by democratic means.':
     'Στο τρίτο του έτος τις Γενικές Συνελεύσεις της Σχολής τις κρατούσαν κομματικές παρατάξεις και τα πραγματικά προβλήματα των φοιτητών δεν ακούγονταν. Συνίδρυσε ένα ανεξάρτητο κίνημα φοιτητών ΗΜΜΥ, για πραγματική εκπροσώπηση με δημοκρατικά μέσα.',
@@ -391,7 +425,7 @@ export const PROFILE: Record<string, string> = {
   /* --------------------------- The Survival Guide --------------------- */
   'The Survival Guide': 'Ο Οδηγός Επιβίωσης',
   'A hundred and ten pages for new students: what each compulsory course is, how it is run, how it is examined, and how to get through it, written while he was getting through it himself. Years later it is still passed from year to year, and some of the students reading it are not sure the author was real.':
-    'Εκατόν δέκα σελίδες για τους νέους φοιτητές: τι είναι κάθε υποχρεωτικό μάθημα, πώς γίνεται, πώς εξετάζεται, και πώς το περνάς, γραμμένες όσο το περνούσε ο ίδιος. Χρόνια μετά δίνεται ακόμη από έτος σε έτος, και κάποιοι από όσους τον διαβάζουν δεν είναι σίγουροι ότι ο συγγραφέας υπήρξε.',
+    'Εκατόν δέκα σελίδες για τους νέους φοιτητές: τι είναι κάθε υποχρεωτικό μάθημα, πώς γίνεται, πώς εξετάζεται, και πώς το περνάς, γραμμένες όσο το περνούσε ο ίδιος. Χρόνια μετά δίνεται ακόμη από έτος σε έτος, και κάποιοι από όσους τον διαβάζουν δεν είναι σίγουροι ότι ο συγγραφέας υπάρχει στ’ αλήθεια.',
   Pages: 'Σελίδες',
   Courses: 'Μαθήματα',
   'Every compulsory one': 'Κάθε υποχρεωτικό',
@@ -491,7 +525,7 @@ export const PROFILE: Record<string, string> = {
   'May 2026 – present': 'Μάιος 2026 – σήμερα',
   'Full-stack Software Engineer': 'Full-stack Software Engineer',
   'May 2024 – May 2026': 'Μάιος 2024 – Μάιος 2026',
-  'What I shipped': 'Τι παρέδωσα',
+  'What I shipped': 'Τι έφτιαξα',
   'Secure and scalable, or it does not ship.':
     'Ασφαλές και κλιμακώσιμο, αλλιώς δεν βγαίνει.',
   Observability: 'Παρατηρησιμότητα',
@@ -499,11 +533,11 @@ export const PROFILE: Record<string, string> = {
   Testing: 'Δοκιμές',
   'Before the startup': 'Πριν από τη startup',
   'DevOps Engineer': 'DevOps Engineer',
-  'IBM · Athens, on-site': 'IBM · Αθήνα, με φυσική παρουσία',
+  'IBM · Athens, on-site': 'IBM · Αθήνα, στο γραφείο',
   'November 2023 – May 2024': 'Νοέμβριος 2023 – Μάιος 2024',
   'Project lead on three projects.': 'Υπεύθυνος σε τρία έργα.',
   'Leads cross-functional teams of 5–10 developers: architecture, technical decisions, code reviews, sprint planning and customer delivery.':
-    'Ηγείται διαλειτουργικών ομάδων 5–10 προγραμματιστών: αρχιτεκτονική, τεχνικές αποφάσεις, code reviews, sprint planning και παράδοση στον πελάτη.',
+    'Καθοδηγεί ομάδες 5–10 προγραμματιστών: αρχιτεκτονική, τεχνικές αποφάσεις, code reviews, sprint planning και παράδοση στον πελάτη.',
   'Mentors engineers, runs technical interviews and coordinates distributed international teams.':
     'Καθοδηγεί μηχανικούς, διεξάγει τεχνικές συνεντεύξεις και συντονίζει κατανεμημένες διεθνείς ομάδες.',
   'Works with Product, Design, QA and DevOps to deliver weekly production releases.':
@@ -511,15 +545,15 @@ export const PROFILE: Record<string, string> = {
   'One of the company’s first engineers; built the flagship Nurse Scheduling platform from concept to production.':
     'Ένας από τους πρώτους μηχανικούς της εταιρείας· έχτισε τη ναυαρχίδα της, την πλατφόρμα Nurse Scheduling, από τη σύλληψη ως την παραγωγή.',
   'Led production deployments across major U.S. hospitals, working directly with hospital stakeholders.':
-    'Ηγήθηκε των εγκαταστάσεων σε παραγωγή σε μεγάλα νοσοκομεία των ΗΠΑ, σε άμεση συνεργασία με τους εμπλεκόμενους των νοσοκομείων.',
+    'Έτρεξε τις εγκαταστάσεις σε παραγωγή σε μεγάλα νοσοκομεία των ΗΠΑ, δουλεύοντας απευθείας με τους ανθρώπους των νοσοκομείων.',
   'Modernized legacy applications: Agile practices, engineering standards, CI/CD pipelines, documentation, automated testing and incremental refactoring.':
     'Εκσυγχρόνισε παλαιές εφαρμογές: Agile πρακτικές, πρότυπα μηχανικής, pipelines CI/CD, τεκμηρίωση, αυτοματοποιημένες δοκιμές και σταδιακό refactoring.',
   'Also the software lead at Holistic Hospital Optimization, its sister company in the Dynamic Ideas group: AI-powered applications for U.S. hospitals, from nurse scheduling to length-of-stay optimization and SMART on FHIR integrations.':
     'Επίσης επικεφαλής λογισμικού στη Holistic Hospital Optimization, την αδελφή της εταιρεία στον όμιλο Dynamic Ideas: εφαρμογές με τεχνητή νοημοσύνη για νοσοκομεία των ΗΠΑ, από τον προγραμματισμό βαρδιών νοσηλευτών ως τη βελτιστοποίηση διάρκειας νοσηλείας και τις ενσωματώσεις SMART on FHIR.',
   'The flagship Nurse Scheduling platform, live in major U.S. hospitals.':
-    'Η ναυαρχίδα πλατφόρμα Nurse Scheduling, σε παραγωγή σε μεγάλα νοσοκομεία των ΗΠΑ.',
+    'Η κύρια πλατφόρμα της εταιρείας, το Nurse Scheduling, σε λειτουργία σε μεγάλα νοσοκομεία των ΗΠΑ.',
   'Technical lead on every one of these: the architecture, the decisions, the reviews and the delivery into the hospital.':
-    'Technical lead σε κάθε ένα από αυτά: η αρχιτεκτονική, οι αποφάσεις, οι ανασκοπήσεις και η παράδοση μέσα στο νοσοκομείο.',
+    'Technical lead σε κάθε ένα από αυτά: η αρχιτεκτονική, οι αποφάσεις, τα reviews και η παράδοση μέσα στο νοσοκομείο.',
   'A React Native mobile app for the nurses themselves: their schedule, their shift preferences and the rest of the platform on their phone, not only on the web.':
     'Εφαρμογή κινητού σε React Native για τους ίδιους τους νοσηλευτές: το πρόγραμμά τους, οι προτιμήσεις βαρδιών τους και η υπόλοιπη πλατφόρμα στο κινητό τους, όχι μόνο στο web.',
   'An AI-powered documentation assistant built on Spring AI, retrieval-augmented generation and agentic AI.':
@@ -527,7 +561,7 @@ export const PROFILE: Record<string, string> = {
   'A SMART on FHIR application embedded inside Epic EHR.':
     'Εφαρμογή SMART on FHIR ενσωματωμένη μέσα στο Epic EHR.',
   'A Length of Stay analytics plugin delivered into Epic EHR through SMART on FHIR.':
-    'Plugin αναλυτικής διάρκειας νοσηλείας, παραδοτέο στο Epic EHR μέσω SMART on FHIR.',
+    'Plugin analytics για τη διάρκεια νοσηλείας (Length of Stay), μέσα στο Epic EHR μέσω SMART on FHIR.',
   'Integration with UKG workforce management systems.':
     'Ενσωμάτωση με συστήματα διαχείρισης προσωπικού UKG.',
   'SAML 2.0 single sign-on against Microsoft ADFS.':
@@ -547,7 +581,7 @@ export const PROFILE: Record<string, string> = {
   'Designed integration architecture for both the transitional coexistence state and the target state.':
     'Σχεδίασε την αρχιτεκτονική ενσωμάτωσης τόσο για το μεταβατικό στάδιο συνύπαρξης όσο και για το τελικό.',
   'Supported DevOps operations: ticket deployments and CI/CD pipeline automation.':
-    'Υποστήριξε τις λειτουργίες DevOps: εγκαταστάσεις αιτημάτων και αυτοματοποίηση pipelines CI/CD.',
+    'Υποστήριξε τις εργασίες DevOps: deployments μέσω tickets και αυτοματοποίηση pipelines CI/CD.',
   'Represented IBM Greece at an international Agile & Enterprise Design Thinking bootcamp in Hamburg, February 2024.':
     'Εκπροσώπησε την IBM Ελλάδος σε διεθνές bootcamp Agile & Enterprise Design Thinking στο Αμβούργο, Φεβρουάριος 2024.',
 
@@ -569,7 +603,7 @@ export const PROFILE: Record<string, string> = {
   'September 2022 – 22 November 2023': 'Σεπτέμβριος 2022 – 22 Νοεμβρίου 2023',
   'What the job actually was': 'Τι ήταν στην πραγματικότητα η δουλειά',
   'Same discipline, different terrain: stand-ups instead of formations, on-call instead of watch.':
-    'Ίδια πειθαρχία, άλλο έδαφος: stand-up αντί για ζυγίσματα, on-call αντί για σκοπιά.',
+    'Ίδια πειθαρχία, άλλο έδαφος: stand-up αντί για αναφορά, on-call αντί για σκοπιά.',
   'Basic training at the Center of Special Forces, Nea Peramos.':
     'Βασική εκπαίδευση στο Κέντρο Εκπαίδευσης Ειδικών Δυνάμεων, Νέα Πέραμος.',
   'Graduated 3rd in class from the Infantry Reserve Officers School, Heraklion.':
@@ -587,7 +621,7 @@ export const PROFILE: Record<string, string> = {
   'Coordinated logistics, weaponry and readiness for company-level exercises.':
     'Συντόνισε τον εφοδιασμό, τον οπλισμό και την ετοιμότητα για ασκήσεις επιπέδου λόχου.',
   'Held the line on discipline, operational efficiency and safety compliance.':
-    'Κράτησε τη γραμμή στην πειθαρχία, την επιχειρησιακή αποτελεσματικότητα και την τήρηση της ασφάλειας.',
+    'Φρόντιζε για την πειθαρχία, την επιχειρησιακή αποτελεσματικότητα και την τήρηση των κανόνων ασφαλείας.',
   'Acted as liaison between commanding officers and enlisted troops.':
     'Λειτούργησε ως σύνδεσμος μεταξύ των διοικούντων αξιωματικών και των οπλιτών.',
 
@@ -597,7 +631,7 @@ export const PROFILE: Record<string, string> = {
   'Christian Youth Foundation "Pantokrator" · Paleo Faliro':
     'Χριστιανικό Ίδρυμα Νεότητας «Παντοκράτωρ» · Παλαιό Φάληρο',
   'February 2021 – September 2022': 'Φεβρουάριος 2021 – Σεπτέμβριος 2022',
-  'Still going': 'Συνεχίζονται',
+  'Still going': 'Συνεχίζεται ακόμα',
   'Appointed by the foundation’s council after years as a volunteer, while finishing the degree. The Vice-President approached him directly to fill the vacancy.':
     'Διορίστηκε από το συμβούλιο του ιδρύματος μετά από χρόνια ως εθελοντής, ενώ τελείωνε τη σχολή. Ο Αντιπρόεδρος απευθύνθηκε προσωπικά σε αυτόν για να καλύψει τη θέση.',
   'Renovated, upgraded and modernised the building infrastructure and the foundation’s day-to-day operations.':
@@ -623,7 +657,7 @@ export const PROFILE: Record<string, string> = {
   'Leading volunteer at the same foundation, 2017–2021 and 2023 to today':
     'Επικεφαλής εθελοντής στο ίδιο ίδρυμα, 2017–2021 και από το 2023 ως σήμερα',
   'Children’s tutor in Robotics at Citylab, Alimos, 2020–2021':
-    'Εκπαιδευτής παιδιών στη Ρομποτική στο Citylab, Άλιμος, 2020–2021',
+    'Δάσκαλος ρομποτικής για παιδιά στο Citylab, Άλιμος, 2020–2021',
   'Blood donor since 2017': 'Αιμοδότης από το 2017',
 
   /* ------------------------------ The radio --------------------------- */
@@ -633,11 +667,11 @@ export const PROFILE: Record<string, string> = {
 
   /* -------------------------- The keeper’s logbook -------------------- */
   'Senior full-stack engineer and technical lead with a track record of taking healthcare products from concept to production. Java and Spring Boot on the backend, React on the front, AWS underneath, and teams of 5–10 engineers across three countries shipping weekly into U.S. hospitals under HIPAA.':
-    'Senior full-stack μηχανικός και technical lead, με πορεία στο να πηγαίνει προϊόντα υγείας από τη σύλληψη ως την παραγωγή. Java και Spring Boot στο backend, React στο front, AWS από κάτω, και ομάδες 5–10 μηχανικών σε τρεις χώρες που παραδίδουν κάθε εβδομάδα σε νοσοκομεία των ΗΠΑ, με συμμόρφωση στο HIPAA.',
+    'Senior full-stack μηχανικός και technical lead, που έχει βγάλει προϊόντα υγείας από την ιδέα ως την παραγωγή. Java και Spring Boot στο backend, React στο front, AWS από κάτω, και ομάδες 5–10 μηχανικών σε τρεις χώρες που παραδίδουν κάθε εβδομάδα σε νοσοκομεία των ΗΠΑ, με συμμόρφωση στο HIPAA.',
   Now: 'Τώρα',
   'Senior Software Engineer, Veltiston AI':
     'Senior Software Engineer, Veltiston AI',
-  'Core stack': 'Βασική στοίβα',
+  'Core stack': 'Βασικές τεχνολογίες',
   Team: 'Ομάδα',
   '5–10 engineers, 3 countries': '5–10 μηχανικοί, 3 χώρες',
   Cadence: 'Ρυθμός',
@@ -645,13 +679,13 @@ export const PROFILE: Record<string, string> = {
   'What I am actually good at': 'Σε τι είμαι πραγματικά καλός',
   'What I am looking for': 'Τι ψάχνω',
   'Hard problems with real users attached, a team that reviews each other honestly, and enough ownership to fix the root cause instead of the symptom. Remote, hybrid or Athens-based.':
-    'Δύσκολα προβλήματα με πραγματικούς χρήστες από πίσω, μια ομάδα που κάνει ειλικρινή review ο ένας στον άλλο, και αρκετή ιδιοκτησία ώστε να διορθώνεις την αιτία αντί για το σύμπτωμα. Εξ αποστάσεως, υβριδικά ή στην Αθήνα.',
+    'Δύσκολα προβλήματα με πραγματικούς χρήστες από πίσω, μια ομάδα που κάνει ειλικρινή review ο ένας στον άλλο, και αρκετή ελευθερία ώστε να διορθώνω την αιτία κι όχι το σύμπτωμα. Εξ αποστάσεως, υβριδικά ή στην Αθήνα.',
   'If the island convinced you, the Radio Center is a two-minute walk south.':
     'Αν σε έπεισε το νησί, το Ραδιοφωνικό Κέντρο απέχει δύο λεπτά με τα πόδια προς τον νότο.',
   'Owning a system end to end (schema, service, API, UI, pipeline, dashboard) instead of one slice of it.':
-    'Να έχω ένα σύστημα από άκρη σε άκρη (σχήμα, υπηρεσία, API, διεπαφή, pipeline, dashboard) αντί για μία φέτα του.',
+    'Να έχω ένα σύστημα από άκρη σε άκρη (σχήμα, υπηρεσία, API, διεπαφή, pipeline, dashboard) αντί για ένα μόνο κομμάτι του.',
   'Taking a legacy codebase nobody wants to touch and making it shippable again, in increments, without a rewrite.':
-    'Να παίρνω έναν παλιό κώδικα που κανείς δεν θέλει να αγγίξει και να τον ξανακάνω παραδοτέο, σταδιακά, χωρίς να τον ξαναγράψω.',
+    'Να παίρνω έναν παλιό κώδικα που κανείς δεν θέλει να αγγίξει και να τον κάνω ξανά να βγαίνει στην παραγωγή, σιγά σιγά, χωρίς να τον ξαναγράψω από την αρχή.',
   'Leading engineers across time zones: reviews that teach, sprints that finish, decisions that are written down.':
     'Να ηγούμαι μηχανικών σε διαφορετικές ζώνες ώρας: review που διδάσκουν, sprint που τελειώνουν, αποφάσεις που καταγράφονται.',
   'Working where correctness is not negotiable: healthcare data, HIPAA, audit trails, Epic and FHIR integrations.':
@@ -679,9 +713,9 @@ export const PROFILE: Record<string, string> = {
   'Tools on the board, bench along the back wall, car nosed at the shutter and the bicycle against the other. Half the furniture upstairs was built on this bench.':
     'Εργαλεία στο ταμπλό, πάγκος στον πίσω τοίχο, το αυτοκίνητο με τη μούρη στο ρολό και το ποδήλατο στον απέναντι. Τα μισά έπιπλα του πάνω ορόφου φτιάχτηκαν σε αυτόν τον πάγκο.',
   'DIY is the same loop as engineering, with a shorter feedback cycle and worse consequences: measure, cut, discover the wall is not square, adapt. Nothing teaches you to respect a tolerance like a shelf that will not sit level.':
-    'Τα μαστορέματα είναι ο ίδιος βρόχος με τη μηχανική, με πιο σύντομο κύκλο ανατροφοδότησης και χειρότερες συνέπειες: μέτρα, κόψε, ανακάλυψε ότι ο τοίχος δεν είναι ίσιος, προσαρμόσου. Τίποτα δεν σου μαθαίνει να σέβεσαι μια ανοχή όσο ένα ράφι που δεν κάθεται αλφάδι.',
+    'Τα μαστορέματα ακολουθούν τον ίδιο κύκλο με τη μηχανική, μόνο με πιο γρήγορη ανατροφοδότηση και χειρότερες συνέπειες: μετράς, κόβεις, ανακαλύπτεις ότι ο τοίχος δεν είναι γωνία, προσαρμόζεσαι. Τίποτα δεν σου μαθαίνει να σέβεσαι τις ανοχές όσο ένα ράφι που δεν κάθεται αλφάδι.',
   'The rest of the hobbies live somewhere between here and the front door: running and cycling, where the thinking happens somewhere around kilometre six; hiking and camping, usually somewhere with no signal; chess, badly but stubbornly; and theater, from the audience these days.':
-    'Τα υπόλοιπα ενδιαφέροντα ζουν κάπου ανάμεσα σε εδώ και την εξώπορτα: τρέξιμο και ποδήλατο, όπου η σκέψη γίνεται κάπου στο έκτο χιλιόμετρο· πεζοπορία και κάμπινγκ, συνήθως κάπου χωρίς σήμα· σκάκι, άσχημα αλλά πεισματικά· και θέατρο, από την πλατεία πια.',
+    'Τα υπόλοιπα χόμπι βρίσκονται κάπου ανάμεσα σε αυτό το γκαράζ και την εξώπορτα: τρέξιμο και ποδήλατο, όπου η σκέψη γίνεται κάπου στο έκτο χιλιόμετρο· πεζοπορία και κάμπινγκ, συνήθως κάπου χωρίς σήμα· σκάκι, άσχημα αλλά πεισματικά· και θέατρο, από την πλατεία πια.',
   'Wood, mostly: shelving, tables, whatever the flat needs':
     'Ξύλο, κυρίως: ράφια, τραπέζια, ό,τι χρειάζεται το σπίτι',
   'The bicycle gets stripped and rebuilt more often than it strictly needs':
@@ -693,13 +727,13 @@ export const PROFILE: Record<string, string> = {
   'A mini server in the corner running Linux, and enough electronics on the bench to make something blink by the end of an evening. It is not a showpiece. It is where I try the thing before I trust it at work.':
     'Ένας μικρός σέρβερ στη γωνία με Linux, και αρκετά ηλεκτρονικά στον πάγκο ώστε να κάνεις κάτι να αναβοσβήνει μέχρι το τέλος του βραδιού. Δεν είναι βιτρίνα. Είναι εκεί που δοκιμάζω κάτι πριν το εμπιστευτώ στη δουλειά.',
   'Everything I know about operations I learned by breaking my own machine at eleven at night with nobody to escalate to. You read the logs because there is no one else to read them.':
-    'Ό,τι ξέρω για τη λειτουργία συστημάτων το έμαθα χαλώντας το δικό μου μηχάνημα στις έντεκα το βράδυ, χωρίς κανέναν να κλιμακώσω. Διαβάζεις τα logs επειδή δεν υπάρχει κανείς άλλος να τα διαβάσει.',
+    'Ό,τι ξέρω για τη λειτουργία συστημάτων το έμαθα χαλώντας το δικό μου μηχάνημα στις έντεκα το βράδυ, χωρίς κανέναν να φωνάξω για βοήθεια. Διαβάζεις τα logs, γιατί δεν υπάρχει κανείς άλλος να τα διαβάσει.',
   'One small Linux box, doing more jobs than it was ever sold to do':
-    'Ένα μικρό κουτί με Linux, που κάνει περισσότερες δουλειές απ’ όσες πουλήθηκε να κάνει',
+    'Ένα μικρό κουτί με Linux, που κάνει πολύ περισσότερες δουλειές απ’ όσες υποσχόταν όταν το αγόρασα',
   'Microcontrollers, a soldering iron, and a drawer of components sorted with real optimism':
     'Μικροελεγκτές, ένα κολλητήρι, και ένα συρτάρι εξαρτημάτων ταξινομημένο με πραγματική αισιοδοξία',
   'The place where a bad idea gets to be a bad idea cheaply':
-    'Το μέρος όπου μια κακή ιδέα προλαβαίνει να είναι κακή ιδέα φθηνά',
+    'Το μέρος όπου μια κακή ιδέα αποδεικνύεται κακή χωρίς να κοστίσει πολύ',
 
   /* ------------------------------ Bookshelf --------------------------- */
   'Not many books, and none of them here by accident. These are the ones I have gone back to. Verne is on the shelf across the room, where he has always been.':
@@ -707,24 +741,24 @@ export const PROFILE: Record<string, string> = {
   'The Gambler': 'Ο Παίκτης',
   'Fyodor Dostoevsky': 'Φιόντορ Ντοστογιέφσκι',
   'On wanting the wrong thing, clearly':
-    'Για το να θέλεις καθαρά το λάθος πράγμα',
+    'Για το να θέλεις το λάθος πράγμα, με καθαρό μυαλό',
   'Les Misérables': 'Οι Άθλιοι',
   'Victor Hugo': 'Βίκτωρ Ουγκώ',
   'On mercy being a decision, not a feeling':
-    'Για το ότι το έλεος είναι απόφαση, όχι συναίσθημα',
+    'Το έλεος είναι απόφαση, όχι συναίσθημα',
   'Surely You’re Joking, Mr. Feynman!': 'Σίγουρα Αστειεύεστε, κύριε Φάινμαν!',
   'Richard Feynman': 'Ρίτσαρντ Φάινμαν',
-  'On refusing to be impressed': 'Για την άρνηση να εντυπωσιαστείς',
+  'On refusing to be impressed': 'Για το να μην εντυπωσιάζεσαι εύκολα',
   'George Orwell': 'Τζορτζ Όργουελ',
   'On what language is for': 'Για το σε τι χρησιμεύει η γλώσσα',
   'All Quiet on the Western Front': 'Ουδέν Νεότερον από το Δυτικόν Μέτωπον',
   'Erich Maria Remarque': 'Έριχ Μαρία Ρεμάρκ',
-  'On who is actually sent': 'Για το ποιος στέλνεται τελικά',
+  'On who is actually sent': 'Για το ποιοι στέλνονται τελικά στο μέτωπο',
   'The Grapes of Wrath': 'Τα Σταφύλια της Οργής',
   'John Steinbeck': 'Τζον Στάινμπεκ',
-  'On a family holding together': 'Για μια οικογένεια που κρατιέται μαζί',
+  'On a family holding together': 'Για μια οικογένεια που μένει ενωμένη',
   'These were first. Read as a boy in a house with five children in it, which meant reading in whatever chair was going and with the argument still running in the next room. I got very good at concentrating.':
-    'Αυτά ήταν πρώτα. Διαβασμένα μικρός, σε σπίτι με πέντε παιδιά, που σήμαινε διάβασμα σε όποια καρέκλα έμενε ελεύθερη και με τον καβγά να συνεχίζεται στο διπλανό δωμάτιο. Έγινα πολύ καλός στη συγκέντρωση.',
+    'Αυτά ήρθαν πρώτα. Τα διάβασα μικρός, σε ένα σπίτι με πέντε παιδιά, δηλαδή σε όποια καρέκλα έμενε ελεύθερη και με τον καβγά να συνεχίζεται στο διπλανό δωμάτιο. Έμαθα να συγκεντρώνομαι πολύ καλά.',
   'Written to pay off a gambling debt, about a man ruined by gambling. Nobody has ever been more honest about their own worst habit.':
     'Γραμμένο για να ξοφλήσει ένα χαρτοπαικτικό χρέος, για έναν άνθρωπο που καταστράφηκε από τον τζόγο. Κανείς δεν υπήρξε ποτέ πιο ειλικρινής για τη χειρότερη συνήθειά του.',
   'A thousand pages to say that a man can be more than his record, and worth every one of them.':
@@ -732,11 +766,11 @@ export const PROFILE: Record<string, string> = {
   'The engineer’s book on this shelf. Take the thing apart, ask the stupid question out loud, and never mistake the jargon for the understanding.':
     'Το βιβλίο του μηχανικού σε αυτό το ράφι. Λύσε το πράγμα σε κομμάτια, κάνε τη χαζή ερώτηση φωναχτά, και ποτέ μην μπερδέψεις την ορολογία με την κατανόηση.',
   'Read at the right age it is a thriller. Read again later it is a manual, and you start noticing the vocabulary.':
-    'Διαβασμένο στη σωστή ηλικία είναι θρίλερ. Διαβασμένο ξανά αργότερα είναι εγχειρίδιο, και αρχίζεις να προσέχεις το λεξιλόγιο.',
+    'Στη σωστή ηλικία είναι θρίλερ. Αν το ξαναδιαβάσεις αργότερα, είναι εγχειρίδιο, και αρχίζεις να προσέχεις τις λέξεις.',
   'I read this before my own service and again after it. It is a different book on the far side.':
     'Το διάβασα πριν από τη δική μου θητεία και ξανά μετά. Είναι άλλο βιβλίο από την άλλη μεριά.',
   'A big family on a bad road, keeping each other alive. It landed somewhere personal and it has stayed there.':
-    'Μια μεγάλη οικογένεια σε έναν κακό δρόμο, που κρατάει ο ένας τον άλλο ζωντανό. Χτύπησε κάπου προσωπικά και εκεί έμεινε.',
+    'Μια μεγάλη οικογένεια σε έναν κακό δρόμο, που κρατάει ο ένας τον άλλο ζωντανό. Με άγγιξε κάπου πολύ προσωπικά, και εκεί έμεινε.',
 
   /* ----------------------------- Verne shelf -------------------------- */
   'Five Weeks in a Balloon': 'Πέντε Εβδομάδες σε Αερόστατο',
@@ -757,10 +791,11 @@ export const PROFILE: Record<string, string> = {
   'Dick Sand: A Captain at Fifteen':
     'Ντικ Σαντ: Ένας Δεκαπεντάχρονος Πλοίαρχος',
   'Jules Verne, 1878': 'Ιούλιος Βερν, 1878',
-  'On being handed it early': 'Για το να σου το δίνουν νωρίς',
+  'On being handed it early':
+    'Για τις ευθύνες που σου δίνουν πριν είσαι έτοιμος',
   'A Drama in Livonia': 'Ένα Δράμα στη Λιβονία',
   'Jules Verne, 1904': 'Ιούλιος Βερν, 1904',
-  'The one with nothing to build': 'Αυτό όπου δεν υπάρχει τίποτα να χτιστεί',
+  'The one with nothing to build': 'Αυτό όπου δεν έχεις τίποτα να φτιάξεις',
   'Anything one man can imagine, other men can make real. He wrote that in 1873 and it has been quoted at every engineer since, and it is still true.':
     'Ό,τι μπορεί να φανταστεί ένας άνθρωπος, άλλοι άνθρωποι μπορούν να το κάνουν πραγματικότητα. Το έγραψε το 1873 και το λένε σε κάθε μηχανικό από τότε, και εξακολουθεί να ισχύει.',
   'Three men cross a continent in a balloon they cannot steer, on the theory that you can still choose your altitude. Which is most of engineering: you rarely get to pick the wind.':
@@ -772,31 +807,30 @@ export const PROFILE: Record<string, string> = {
   'Nemo is an engineer with a grievance and unlimited budget. I have met the type.':
     'Ο Νέμο είναι μηχανικός με παράπονο και απεριόριστο προϋπολογισμό. Έχω συναντήσει τον τύπο.',
   'Five men land on a rock with nothing and end up with brick, iron, glass, a telegraph and a boat. It is four hundred pages of working out what you can make from what is actually to hand.':
-    'Πέντε άντρες ξεβράζονται σε έναν βράχο χωρίς τίποτα και καταλήγουν με τούβλο, σίδερο, γυαλί, τηλέγραφο και βάρκα. Είναι τετρακόσιες σελίδες υπολογισμού του τι μπορείς να φτιάξεις από ό,τι έχεις πραγματικά στα χέρια σου.',
+    'Πέντε άντρες ξεβράζονται σε έναν βράχο χωρίς τίποτα και καταλήγουν με τούβλο, σίδερο, γυαλί, τηλέγραφο και βάρκα. Τετρακόσιες σελίδες όπου λύνουν το πρόβλημα του τι φτιάχνεις με ό,τι έχεις πραγματικά στα χέρια σου.',
   'If there is one book on either shelf that explains the workbench in this cellar, it is this one.':
     'Αν υπάρχει ένα βιβλίο σε οποιοδήποτε από τα δύο ράφια που εξηγεί τον πάγκο εργασίας σε αυτό το υπόγειο, είναι αυτό.',
   'A fifteen-year-old ends up in command because everybody senior is gone. He is not ready and he does it anyway.':
     'Ένας δεκαπεντάχρονος βρίσκεται στη διοίκηση επειδή όλοι οι ανώτεροι έχουν φύγει. Δεν είναι έτοιμος και το κάνει έτσι κι αλλιώς.',
   'Read at about that age, in a big family, where being handed something before you are ready is simply Tuesday.':
-    'Διαβασμένο περίπου σε εκείνη την ηλικία, σε μια μεγάλη οικογένεια, όπου το να σου δίνουν κάτι πριν είσαι έτοιμος είναι απλώς μια συνηθισμένη Τρίτη.',
+    'Διαβασμένο περίπου σε εκείνη την ηλικία, σε μια μεγάλη οικογένεια, όπου το να σου αναθέτουν κάτι πριν είσαι έτοιμος είναι απλώς μια συνηθισμένη μέρα.',
   'Late Verne, and the odd one out on this shelf: no balloon, no submarine, no island. A murder in the frozen Baltic, and a man convicted of it on circumstance while the reader knows perfectly well he did not do it.':
     'Ύστερος Βερν, και το παράταιρο του ραφιού: χωρίς αερόστατο, χωρίς υποβρύχιο, χωρίς νησί. Ένας φόνος στην παγωμένη Βαλτική, και ένας άνθρωπος που καταδικάζεται γι’ αυτόν από τις περιστάσεις ενώ ο αναγνώστης ξέρει πολύ καλά ότι δεν το έκανε.',
   'A Slav schoolmaster against the German merchant families who own the province, and a verdict that arrives long before the evidence does. It is really about how fast everyone agrees on the wrong answer when they already wanted to.':
     'Ένας Σλάβος δάσκαλος απέναντι στις γερμανικές εμπορικές οικογένειες που ορίζουν την επαρχία, και μια ετυμηγορία που φτάνει πολύ πριν από τα στοιχεία. Στην πραγματικότητα μιλάει για το πόσο γρήγορα συμφωνούν όλοι στη λάθος απάντηση όταν την ήθελαν ήδη.',
   'The only one here where nobody can engineer their way out. That is why I remember it.':
-    'Το μόνο εδώ όπου κανείς δεν μπορεί να βγει με τη μηχανική. Γι’ αυτό το θυμάμαι.',
+    'Το μόνο εδώ όπου κανείς δεν γλιτώνει με μια έξυπνη κατασκευή. Γι’ αυτό το θυμάμαι.',
 
   /* ------------------------------ Playroom ---------------------------- */
   'Behind a shelf in the library. A television, a Switch docked under it, two beanbags and the posters I have never grown out of.':
     'Πίσω από ένα ράφι στη βιβλιοθήκη. Μια τηλεόραση, ένα Switch στη βάση του από κάτω, δύο πουφ και οι αφίσες που ποτέ δεν ξεπέρασα.',
   'Every house should have one room that is nobody’s business.':
     'Κάθε σπίτι πρέπει να έχει ένα δωμάτιο που δεν αφορά κανέναν.',
-  'Mario, still, and no apology for it':
-    'Ακόμη Mario, και καμία απολογία γι’ αυτό',
+  'Mario, still, and no apology for it': 'Ακόμα Mario, και δεν ζητάω συγγνώμη',
   'Star Wars, the whole thing, arguments about the ordering included':
     'Star Wars, όλο, μαζί με τους καβγάδες για τη σειρά',
   'The Marvel run, watched properly and in sequence like a serious person':
-    'Όλο το Marvel, δει σωστά και με τη σειρά σαν σοβαρός άνθρωπος',
+    'Όλο το Marvel, με τη σωστή σειρά, όπως κάνει κάθε σοβαρός άνθρωπος',
   'Clinical Research': 'Κλινική έρευνα',
   'Artificial Neural Networks': 'Τεχνητά νευρωνικά δίκτυα',
   'And anything well made: give me a good film and I will give you the evening':
@@ -807,8 +841,80 @@ export const PROFILE: Record<string, string> = {
   'The globe in the corner': 'Η υδρόγειος στη γωνία',
   'Where the globe has been stopped': 'Πού έχει σταματήσει η υδρόγειος',
   'The astronomy corner had a globe, and a boy who spun it more than he studied it. Six of the countries on it he has since stood in.':
-    'Η γωνιά της αστρονομίας είχε μια υδρόγειο, και ένα παιδί που την έστρεφε περισσότερο από όσο τη μελέτησε. Σε έξι από τις χώρες της έχει έκτοτε σταθεί.',
+    'Η γωνιά της αστρονομίας είχε μια υδρόγειο, κι ένα παιδί που τη γύριζε πιο πολύ απ’ όσο τη μελετούσε. Από τότε έχει πατήσει σε έξι από τις χώρες της.',
   Greece: 'Ελλάδα',
+
+  /* ------------------ The Work District: ground floor ---------------- */
+  'A senior full-stack engineer who leads: designs the architecture, writes the hard parts himself, and takes the team and the customer along with him. Java and Spring Boot on the back, React on the front, AWS underneath, and a production release most weeks.':
+    'Senior full-stack μηχανικός που ηγείται: σχεδιάζει την αρχιτεκτονική, γράφει ο ίδιος τα δύσκολα κομμάτια και παίρνει μαζί του και την ομάδα και τον πελάτη. Java και Spring Boot στο backend, React στο frontend, AWS από κάτω, και νέα έκδοση στην παραγωγή σχεδόν κάθε εβδομάδα.',
+  'Takes a product from concept to production, then keeps it alive in front of real users.':
+    'Πηγαίνει ένα προϊόν από την ιδέα στην παραγωγή, και μετά το κρατάει ζωντανό μπροστά σε πραγματικούς χρήστες.',
+  'Leads cross-functional teams of 5–10 across three time zones without slowing any of them down.':
+    'Καθοδηγεί ομάδες 5–10 ατόμων από διαφορετικές ειδικότητες, σε τρεις ζώνες ώρας, χωρίς να καθυστερεί καμία.',
+  'Designs for security and compliance first, because hospitals are the customer.':
+    'Σχεδιάζει με πρώτη την ασφάλεια και τη συμμόρφωση, γιατί πελάτης είναι τα νοσοκομεία.',
+  'Modernises legacy systems in slices, with the lights on, rather than by rewrite.':
+    'Εκσυγχρονίζει παλιά συστήματα κομμάτι κομμάτι, χωρίς να τα σταματήσει, αντί να τα ξαναγράψει από την αρχή.',
+  'Runs the technical interviews, the mentoring and the onboarding.':
+    'Κάνει τις τεχνικές συνεντεύξεις, την καθοδήγηση και το onboarding των νέων.',
+  'Talks to the people paying for it in their language, not in ours.':
+    'Μιλάει σε όσους πληρώνουν στη δική τους γλώσσα, όχι στη δική μας.',
+  'While he was still a student': 'Όσο ήταν ακόμα φοιτητής',
+  'Three jobs held alongside the degree at NTUA, from the third year on. None of them were engineering. All of them were being handed a room and made answerable for it.':
+    'Τρεις δουλειές δίπλα στις σπουδές στο ΕΜΠ, από το τρίτο έτος και μετά. Καμία δεν είχε σχέση με τη μηχανική. Σε όλες όμως σου έδιναν έναν χώρο και ήσουν υπεύθυνος γι’ αυτόν.',
+  'Offered the post directly by the Vice-President while still an undergraduate, after years as a volunteer there.':
+    'Του πρότεινε τη θέση απευθείας ο Αντιπρόεδρος όσο ήταν ακόμα προπτυχιακός, μετά από χρόνια εθελοντισμού εκεί.',
+  'Ran the building, the staff, the volunteers, the budget and the programme of events.':
+    'Είχε την ευθύνη για το κτίριο, το προσωπικό, τους εθελοντές, τον προϋπολογισμό και το πρόγραμμα των εκδηλώσεων.',
+  'Renovated and modernised the premises and the foundation’s day-to-day operations.':
+    'Ανακαίνισε και εκσυγχρόνισε τις εγκαταστάσεις και την καθημερινή λειτουργία του ιδρύματος.',
+  'Left when the degree finished and the army called.':
+    'Έφυγε όταν τελείωσαν οι σπουδές και τον κάλεσε ο στρατός.',
+  Facilities: 'Εγκαταστάσεις',
+  Budget: 'Προϋπολογισμός',
+  Events: 'Εκδηλώσεις',
+  'Robotics tutor': 'Εκπαιδευτής ρομποτικής',
+  'Citylab · Alimos': 'Citylab · Άλιμος',
+  'Taught robotics to children, in classes of his own.':
+    'Δίδασκε ρομποτική σε παιδιά, σε δικά του τμήματα.',
+  'Explaining a machine to a ten-year-old is the same skill as explaining an architecture to a stakeholder, and harder.':
+    'Το να εξηγήσεις μια μηχανή σε ένα δεκάχρονο είναι η ίδια δεξιότητα με το να εξηγήσεις μια αρχιτεκτονική σε έναν πελάτη, μόνο πιο δύσκολη.',
+  Teaching: 'Διδασκαλία',
+  'Private mathematics tutor': 'Ιδιαίτερα μαθήματα μαθηματικών',
+  'Self-employed · Athens': 'Ελεύθερος επαγγελματίας · Αθήνα',
+  'During the degree': 'Στη διάρκεια των σπουδών',
+  'One-to-one mathematics with schoolchildren, at their kitchen tables.':
+    'Ιδιαίτερα μαθηματικών σε μαθητές, στο τραπέζι της κουζίνας τους.',
+  Mathematics: 'Μαθηματικά',
+
+  /* ------------------- The Veltiston floor: the stack ----------------- */
+  Core: 'Πυρήνας',
+  'Vector search': 'Διανυσματική αναζήτηση',
+  'LLM tooling': 'Εργαλεία LLM',
+  Front: 'Frontend',
+  Data: 'Δεδομένα',
+  Cloud: 'Cloud',
+  'Watching it': 'Παρακολούθηση',
+  'Proving it': 'Δοκιμές',
+  'Hospital side': 'Στο νοσοκομείο',
+  'Neural networks': 'Νευρωνικά δίκτυα',
+  'The pace, and who is on the other end of it':
+    'Ο ρυθμός, και ποιος είναι στην άλλη άκρη',
+  'A production release most weeks, on a platform major U.S. hospitals run their nursing rosters on. The people using it are charge nurses at shift change, not beta testers. That is the whole argument for why the standards are what they are.':
+    'Νέα έκδοση στην παραγωγή σχεδόν κάθε εβδομάδα, σε μια πλατφόρμα όπου μεγάλα νοσοκομεία των ΗΠΑ φτιάχνουν τις βάρδιες των νοσηλευτών τους. Όσοι τη χρησιμοποιούν είναι προϊστάμενες την ώρα της αλλαγής βάρδιας, όχι beta testers. Γι’ αυτό ακριβώς ο πήχης είναι τόσο ψηλά.',
+  'Live in': 'Σε λειτουργία σε',
+  'Major U.S. hospitals': 'Μεγάλα νοσοκομεία των ΗΠΑ',
+  Releases: 'Εκδόσεις',
+  'Weekly, to production': 'Κάθε εβδομάδα, στην παραγωγή',
+  Teams: 'Ομάδες',
+  'Greece · Boston · Morocco': 'Ελλάδα · Βοστώνη · Μαρόκο',
+  Since: 'Από',
+  'May 2024, founding engineer': 'Μάιος 2024, ιδρυτικός μηχανικός',
+  'If the roster is wrong on Monday morning, a ward is short. You do not get to call that a P2.':
+    'Αν το πρόγραμμα βγει λάθος τη Δευτέρα το πρωί, μια κλινική μένει χωρίς κόσμο. Αυτό δεν το λες «P2».',
+  'Christos (Kitsos) Orfanopoulos': 'Χρήστος (Κίτσος) Ορφανόπουλος',
+  Christos: 'Χρήστος',
+  Orfanopoulos: 'Ορφανόπουλος',
   Cyprus: 'Κύπρος',
   Germany: 'Γερμανία',
   France: 'Γαλλία',

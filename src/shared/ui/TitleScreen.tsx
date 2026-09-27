@@ -22,7 +22,7 @@ export function TitleScreen() {
           <span>{t('KITSOS')}</span>
           <span>{t('ISLAND')}</span>
         </h1>
-        <p className="title__name">{NAME}</p>
+        <p className="title__name">{t(NAME)}</p>
         <p className="title__role">
           {t(PROFILE.title)} · {t(PROFILE.location)}
         </p>

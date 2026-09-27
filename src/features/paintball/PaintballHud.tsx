@@ -5,6 +5,7 @@ import { useGame } from '../../shared/state/store'
 import { useCoarsePointer } from '../../shared/ui/useCoarsePointer'
 import { useScreen } from '../../shared/ui/useScreen'
 import { useT } from '../../shared/i18n/useT'
+import { fill, rich } from '../../shared/i18n'
 
 /**
  * The clock before the whistle, and whether he is flat on the ground. Both
@@ -117,19 +118,27 @@ export function PaintballHud() {
           />
           <span>
             {reloading
-              ? `Refilling: ${Math.ceil(left * (RELOAD_MS / 1000))}s`
-              : `${game.ammo} of ${MAG_SIZE} rounds`}
+              ? fill(t('Refilling: {s}s'), {
+                  s: Math.ceil(left * (RELOAD_MS / 1000)),
+                })
+              : fill(t('{ammo} of {max} rounds'), {
+                  ammo: game.ammo,
+                  max: MAG_SIZE,
+                })}
           </span>
         </div>
 
         <div className="pb__row pb__row--tally">
           {/* Shorter on a phone, where the scoreboard shares its line. */}
           <span>
-            <strong>{standing}</strong> {mobile ? 'left' : 'against you'}
+            {rich(
+              t(mobile ? '<b>{count}</b> left' : '<b>{count}</b> against you'),
+              {
+                count: standing,
+              },
+            )}
           </span>
-          <span>
-            <strong>{game.hits}</strong> painted
-          </span>
+          <span>{rich(t('<b>{count}</b> painted'), { count: game.hits })}</span>
         </div>
       </div>
 
@@ -138,14 +147,15 @@ export function PaintballHud() {
           key={game.feed.at}
           className={`pb__feed pb__feed--${game.feed.kind}`}
         >
-          {game.feed.text}
+          {fill(t(game.feed.text), t(game.feed.slots ?? {}))}
         </p>
       )}
 
       <p className="pb__keys">
         {coarse ? (
           <>
-            <kbd>FIRE</kbd> {t('shoot')} · <kbd>DUCK</kbd> {t('get down')}
+            <kbd>{t('FIRE')}</kbd> {t('shoot')} · <kbd>{t('DUCK')}</kbd>{' '}
+            {t('get down')}
           </>
         ) : (
           <>

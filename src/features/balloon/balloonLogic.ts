@@ -94,7 +94,7 @@ const SPOTS: Omit<Call, 'y' | 'crowd'>[] = [
     want: 'water',
     x: 1,
     z: -36,
-    label: 'Halfway up Motivation Road',
+    label: 'Halfway up Inspiration Road',
   },
   { id: 'academy', want: 'confetti', x: 0, z: -59, label: 'The Academy steps' },
   {
@@ -279,8 +279,17 @@ export const BALLOON = {
   wrong: 0,
   elapsed: 0,
   done: false,
-  /** Last thing that happened below, polled by the HUD. */
-  feed: null as { text: string; kind: 'good' | 'bad'; at: number } | null,
+  /**
+   * Last thing that happened below, polled by the HUD. The text is a
+   * sentence with {slots}, translated whole and filled in on the way to the
+   * screen, so the numbers can sit wherever the language puts them.
+   */
+  feed: null as {
+    text: string
+    slots?: Record<string, string | number>
+    kind: 'good' | 'bad'
+    at: number
+  } | null,
 }
 
 export function openFlight() {
@@ -617,10 +626,8 @@ export function stepBalloon(delta: number, input: BalloonInput): BalloonEvents {
     const last = events.served[events.served.length - 1]
     const left = CALL_TOTAL - BALLOON.count
     BALLOON.feed = {
-      text:
-        left === 0
-          ? 'Every one of them served.'
-          : `${last.label}: ${left} to go`,
+      text: left === 0 ? 'Every one of them served.' : '{place}: {left} to go',
+      slots: { place: last.label, left },
       kind: 'good',
       at: Date.now(),
     }

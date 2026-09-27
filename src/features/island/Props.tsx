@@ -13,6 +13,7 @@ import {
 } from './terrainLogic'
 import { useGame } from '../../shared/state/store'
 import { TextPlane } from '../../shared/engine/TextSign'
+import { useT } from '../../shared/i18n/useT'
 
 export function Props() {
   return (
@@ -311,6 +312,7 @@ function SignpostMesh({
   pos: [number, number]
   facing: number
 }) {
+  const t = useT()
   const board = useRef<Group>(null)
   const active = useGame((s) => s.nearby?.id === id)
 
@@ -343,7 +345,7 @@ function SignpostMesh({
           <meshStandardMaterial color="#5c4326" roughness={0.9} />
         </mesh>
         <TextPlane
-          text={label}
+          text={t(label)}
           width={1.95}
           aspect={4.4}
           color="#ffe9c4"
@@ -480,6 +482,7 @@ function VolunteerTent() {
 
 /** The cloth banner slung across the back of the canopy. */
 function KioskBanner() {
+  const t = useT()
   return (
     <group position={[0, 1.95, -1.94]}>
       <mesh castShadow>
@@ -500,7 +503,7 @@ function KioskBanner() {
         </group>
       ))}
       <TextPlane
-        text="GIVE BLOOD / SIGN UP"
+        text={t('GIVE BLOOD / SIGN UP')}
         width={2.7}
         aspect={7.5}
         color="#fff3e2"
@@ -716,6 +719,7 @@ function KioskCrates() {
  * far, chalked up five to a row. It faces out across the green.
  */
 function KioskDonorBoard() {
+  const t = useT()
   return (
     <group position={[-2.35, 0, 2.35]} rotation={[0, 0.18, 0]}>
       <mesh position={[0, 0.85, 0]} castShadow>
@@ -732,7 +736,7 @@ function KioskDonorBoard() {
           <meshStandardMaterial color="#2f4a3e" roughness={0.95} />
         </mesh>
         <TextPlane
-          text="VOLUNTEERS"
+          text={t('VOLUNTEERS')}
           width={1.2}
           aspect={6}
           color="#ffe9c4"

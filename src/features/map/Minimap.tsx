@@ -53,7 +53,7 @@ export function Minimap() {
       aria-label={t('Open the map')}
     >
       <canvas ref={canvas} style={{ width: SIZE, height: SIZE }} />
-      <span className="minimap__north">N</span>
+      <span className="minimap__north">{t('N')}</span>
       <span className="minimap__hint">
         <kbd>M</kbd>
       </span>

@@ -49,10 +49,10 @@ export const FEAST: Record<string, string> = {
   Month: 'Μήνας',
   'Hang it back up': 'Κρέμασέ το πίσω',
   'Everyone is downstairs. Both families, the tree, and the meal he has hosted every year of his life.':
-    'Είναι όλοι κάτω. Και οι δύο οικογένειες, το δέντρο, και το τραπέζι που φιλοξενεί κάθε χρόνο της ζωής του.',
+    'Είναι όλοι κάτω. Και οι δύο οικογένειες, το δέντρο, και το τραπέζι που στρώνεται εδώ κάθε χρόνο, όσο θυμάται τον εαυτό του.',
   'Christmas in the basement': 'Χριστούγεννα στο υπόγειο',
   'Turn the calendar to the twenty-fifth of December and the basement is dressed, the tree is up and both families are round the table. It is his nameday as well as Christmas, and the meal has always been hosted here.':
-    'Γύρνα το ημερολόγιο στις είκοσι πέντε Δεκεμβρίου και το υπόγειο είναι στολισμένο, το δέντρο στημένο και οι δύο οικογένειες γύρω από το τραπέζι. Είναι η γιορτή του όσο και Χριστούγεννα, και το τραπέζι γινόταν πάντα εδώ.',
+    'Γύρνα το ημερολόγιο στις είκοσι πέντε Δεκεμβρίου και το υπόγειο είναι στολισμένο, το δέντρο στημένο και οι δύο οικογένειες γύρω από το τραπέζι. Είναι και Χριστούγεννα και η γιορτή του, και το τραπέζι γινόταν πάντα εδώ.',
 
   /* ------------------------- round the table, his side ---------------- */
   'Sit, sit. Everyone is here, both sides of the table, and the food is going cold while I talk.':
@@ -80,7 +80,7 @@ export const FEAST: Record<string, string> = {
   'This is the one day I stop being the youngest of five and go back to being the youngest of everybody.':
     'Είναι η μόνη μέρα που παύω να είμαι η μικρότερη από πέντε και ξαναγίνομαι η μικρότερη από όλους.',
   'Chronia polla, my love. Your nameday, and both our families in one room for it.':
-    'Χρόνια πολλά, αγάπη μου. Η γιορτή σου, και οι δύο οικογένειές μας σε ένα δωμάτιο για αυτήν.',
+    'Χρόνια πολλά, αγάπη μου. Η γιορτή σου, και για χάρη της οι δύο οικογένειές μας στο ίδιο δωμάτιο.',
   'My mother and father are here, and my sister. Go on. They have been waiting all year to see you.':
     'Η μητέρα και ο πατέρας μου είναι εδώ, και η αδελφή μου. Πήγαινε. Σε περιμένουν όλη τη χρονιά.',
   'This is the happiest day of the year in this house. It is the same every year, and I would not change a thing about it.':

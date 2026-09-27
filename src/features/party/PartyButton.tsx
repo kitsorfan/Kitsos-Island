@@ -6,6 +6,7 @@ import { partyBeat } from './partyLogic'
 import { groundHeight } from '../island/terrainLogic'
 import { useGame } from '../../shared/state/store'
 import { TextPlane } from '../../shared/engine/TextSign'
+import { useT } from '../../shared/i18n/useT'
 
 /**
  * The big red button, across Collaboration Road from the games board.
@@ -15,6 +16,7 @@ import { TextPlane } from '../../shared/engine/TextSign'
  * to switch on after dark.
  */
 export function PartyButton() {
+  const t = useT()
   const [x, z] = PARTY_BUTTON.position
   const y = groundHeight(x, z)
   const night = useGame((s) => s.night)
@@ -76,7 +78,7 @@ export function PartyButton() {
         <meshStandardMaterial color="#1d2028" roughness={0.8} />
       </mesh>
       <TextPlane
-        text={party ? 'PRESS TO STOP' : 'PARTY'}
+        text={t(party ? 'PRESS TO STOP' : 'PARTY')}
         width={1.36}
         aspect={7}
         color={night ? '#ffd166' : '#8b8577'}

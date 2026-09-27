@@ -25,7 +25,7 @@ export const INTERIORS: Record<string, string> = {
   'the trainer card': 'η κάρτα του εκπαιδευτή',
   'Who lives here': 'Ποιος μένει εδώ',
   'Athens-based senior full stack engineer and technical lead: Java, Spring Boot, React and AWS, with the teams to match.':
-    'Senior full stack μηχανικός και technical lead με έδρα την Αθήνα: Java, Spring Boot, React και AWS, με τις ανάλογες ομάδες.',
+    'Senior full stack μηχανικός και technical lead με έδρα την Αθήνα: Java, Spring Boot, React και AWS, και οι ομάδες που τα κάνουν πράξη.',
   'the shelf by the chessboard': 'το ράφι δίπλα στη σκακιέρα',
 
   /* ------------------------------ Basement ---------------------------- */
@@ -51,7 +51,7 @@ export const INTERIORS: Record<string, string> = {
   'the server': 'ο σέρβερ',
   'The home lab': 'Το εργαστήριο του σπιτιού',
   'A mini server on Linux and a bench of electronics. Everything he knows about running things he learned breaking his own machine at eleven at night, with nobody to escalate to.':
-    'Ένας μικρός σέρβερ σε Linux και ένας πάγκος με ηλεκτρονικά. Ό,τι ξέρει για τη λειτουργία συστημάτων το έμαθε χαλώντας το δικό του μηχάνημα στις έντεκα το βράδυ, χωρίς κανέναν να κλιμακώσει.',
+    'Ένας μικρός σέρβερ σε Linux και ένας πάγκος με ηλεκτρονικά. Ό,τι ξέρει για τη λειτουργία συστημάτων το έμαθε χαλώντας το δικό του μηχάνημα στις έντεκα το βράδυ, χωρίς κανέναν να φωνάξει για βοήθεια.',
 
   /* ------------------------------ Library ----------------------------- */
   'The library': 'Η βιβλιοθήκη',
@@ -68,7 +68,7 @@ export const INTERIORS: Record<string, string> = {
   'Four boards of things nobody ever put away. Most of it has not moved in twenty years.':
     'Τέσσερα ράφια με πράγματα που κανείς δεν μάζεψε ποτέ. Τα περισσότερα δεν έχουν κουνηθεί εδώ και είκοσι χρόνια.',
   'Pick things up. Nothing on this shelf minds being handled.':
-    'Πιάσε ό,τι θέλεις. Τίποτα σε αυτό το ράφι δεν πειράζεται να το ακουμπήσουν.',
+    'Πιάσε ό,τι θέλεις. Σε αυτό το ράφι τίποτα δεν χαλάει αν το αγγίξεις.',
   'A handful of bricks': 'Μια χούφτα τουβλάκια',
   'A tin rocket': 'Ένας τενεκεδένιος πύραυλος',
   'The ball that never went back in the box':
@@ -83,17 +83,17 @@ export const INTERIORS: Record<string, string> = {
   'Pick one up.': 'Πιάσε ένα.',
   'just a toy.': 'απλώς ένα παιχνίδι.',
   'The helicopter goes down under your thumb, and somewhere in the wall something lets go.':
-    'Το ελικόπτερο κατεβαίνει κάτω από τον αντίχειρά σου, και κάπου μέσα στον τοίχο κάτι ελευθερώνεται.',
+    'Το ελικόπτερο βουλιάζει κάτω από τον αντίχειρά σου, και κάπου μέσα στον τοίχο κάτι κάνει «κλικ».',
   'The helicopter': 'Το ελικόπτερο',
   'A toy shelf in the library, and one toy on it that is a switch. Press the helicopter and the panel at the back of the room lets go.':
-    'Ένα ράφι με παιχνίδια στη βιβλιοθήκη, και ένα παιχνίδι πάνω του που είναι διακόπτης. Πάτα το ελικόπτερο και το ταμπλό στο βάθος του δωματίου ελευθερώνεται.',
+    'Ένα ράφι με παιχνίδια στη βιβλιοθήκη, και ένα παιχνίδι πάνω του που είναι διακόπτης. Πάτα το ελικόπτερο και το πάνελ στο βάθος του δωματίου ανοίγει.',
   'The shelf moves': 'Το ράφι κουνιέται',
   'The helicopter presses down further than a toy should. There is a hinge behind the middle shelf. There is a room behind that.':
     'Το ελικόπτερο πατιέται πιο βαθιά από όσο θα έπρεπε ένα παιχνίδι. Πίσω από το μεσαίο ράφι υπάρχει μεντεσές. Και πίσω από αυτόν, ένα δωμάτιο.',
   'the Verne shelf': 'το ράφι του Βερν',
   'The Verne shelf': 'Το ράφι του Βερν',
   'Five Weeks in a Balloon, Journey to the Centre of the Earth, Twenty Thousand Leagues, The Mysterious Island, A Captain at Fifteen, and A Drama in Livonia. Mostly people somewhere impossible, building their way out, which turned out to be a career.':
-    'Πέντε Εβδομάδες σε Αερόστατο, Ταξίδι στο Κέντρο της Γης, Είκοσι Χιλιάδες Λεύγες, Το Μυστηριώδες Νησί, Ένας Δεκαπεντάχρονος Πλοίαρχος, και Ένα Δράμα στη Λιβονία. Ως επί το πλείστον άνθρωποι κάπου αδύνατα, που χτίζουν τον δρόμο τους προς τα έξω, που τελικά αποδείχθηκε επάγγελμα.',
+    'Πέντε Εβδομάδες σε Αερόστατο, Ταξίδι στο Κέντρο της Γης, Είκοσι Χιλιάδες Λεύγες, Το Μυστηριώδες Νησί, Ένας Δεκαπεντάχρονος Πλοίαρχος, και Ένα Δράμα στη Λιβονία. Κυρίως άνθρωποι σε μέρη όπου δεν θα έπρεπε να βρίσκονται, που φτιάχνουν μόνοι τους τον δρόμο της επιστροφής — κάτι που, όπως αποδείχτηκε, είναι και επάγγελμα.',
 
   /* ------------------------------ Landing ----------------------------- */
   'The landing': 'Το πλατύσκαλο',
@@ -114,7 +114,7 @@ export const INTERIORS: Record<string, string> = {
   'The playroom': 'Το δωμάτιο των παιχνιδιών',
   'Mario, still': 'Ακόμη Mario',
   'A Switch docked under the television, two beanbags, and the posters he never grew out of: Star Wars in order, the Marvel run in sequence.':
-    'Ένα Switch στη βάση του κάτω από την τηλεόραση, δύο πουφ, και οι αφίσες που ποτέ δεν ξεπέρασε: Star Wars με τη σειρά, όλο το Marvel στη σειρά του.',
+    'Ένα Switch στη βάση του κάτω από την τηλεόραση, δύο πουφ, και οι αφίσες που ποτέ δεν ξεπέρασε: Star Wars με τη σειρά, κι όλες οι ταινίες της Marvel με τη σειρά τους.',
 
   /* ---------------------------- The Polytechnic ----------------------- */
   'Lecture hall': 'Αμφιθέατρο',
@@ -136,7 +136,7 @@ export const INTERIORS: Record<string, string> = {
     'Η αναλυτική, μάθημα προς μάθημα: πενήντα πέντε με μέσο όρο 7,94, δέκα σε κάθε μάθημα προγραμματισμού από το πρώτο εξάμηνο ως το τελευταίο, 10 στη διπλωματική, και 8,35 γενικός μέσος όρος, στα πέντε χρόνια που προβλέπει το πρόγραμμα.',
   'the Survival Guide': 'ο Οδηγός Επιβίωσης',
   'A hundred and ten pages for new students on how to get through every compulsory course in the School, written while he was getting through them himself. Years later the year below still passes it round.':
-    'Εκατόν δέκα σελίδες για τους νέους φοιτητές για το πώς περνάς κάθε υποχρεωτικό μάθημα της Σχολής, γραμμένες όσο τα περνούσε ο ίδιος. Χρόνια μετά το μικρότερο έτος τον δίνει ακόμη χέρι με χέρι.',
+    'Εκατόν δέκα σελίδες για τους νέους φοιτητές για το πώς περνάς κάθε υποχρεωτικό μάθημα της Σχολής, γραμμένες όσο τα περνούσε ο ίδιος. Χρόνια μετά, οι νεότεροι ακόμα τον δίνουν χέρι χέρι.',
   'The council room': 'Η αίθουσα του συμβουλίου',
   'the petition': 'το ψήφισμα',
   'Seven hundred signatures': 'Εφτακόσιες υπογραφές',
@@ -178,7 +178,7 @@ export const INTERIORS: Record<string, string> = {
   Third: 'Τρίτος',
   'Empty. Waiting on an offer': 'Άδειος. Περιμένει μια πρόταση',
   'The lift has a button for the third floor. Press it and nothing lights, because nobody has decided yet what that floor is — which is the honest position of a senior engineer who is good at this and is listening to offers. If you are reading this because you are hiring, you are the one who gets to name it.':
-    'Το ασανσέρ έχει κουμπί για τον τρίτο όροφο. Το πατάς και δεν ανάβει τίποτα, γιατί κανείς δεν έχει αποφασίσει ακόμη τι είναι αυτός ο όροφος — που είναι η ειλικρινής θέση ενός senior μηχανικού που είναι καλός σε αυτό και ακούει προτάσεις. Αν το διαβάζεις επειδή προσλαμβάνεις, εσύ είσαι που θα του δώσει όνομα.',
+    'Το ασανσέρ έχει κουμπί για τον τρίτο όροφο. Το πατάς και δεν ανάβει τίποτα, γιατί κανείς δεν έχει αποφασίσει ακόμη τι είναι αυτός ο όροφος — που είναι η ειλικρινής θέση ενός senior μηχανικού που είναι καλός σε αυτό και ακούει προτάσεις. Αν το διαβάζεις επειδή ψάχνεις άνθρωπο, εσύ θα του δώσεις όνομα.',
   'A floor per employer: IBM 2023–2024 on the first, Veltiston AI 2024–present on the second. The third floor is built and empty, and what goes on it has not been decided.':
     'Ένας όροφος ανά εργοδότη: IBM 2023–2024 στον πρώτο, Veltiston AI από το 2024 ως σήμερα στον δεύτερο. Ο τρίτος όροφος είναι χτισμένος και άδειος, και δεν έχει αποφασιστεί τι θα μπει σε αυτόν.',
   'the capabilities board': 'ο πίνακας των ικανοτήτων',
@@ -218,7 +218,7 @@ export const INTERIORS: Record<string, string> = {
   Barracks: 'Θάλαμος',
   'the service record': 'το φύλλο μητρώου',
   'Reservist Second Lieutenant, Marine Special Forces, 2022–2023, a unit to plan for, train and look after.':
-    'Έφεδρος Ανθυπολοχαγός, Πεζοναύτες Ειδικών Δυνάμεων, 2022–2023, μια μονάδα να σχεδιάζεις, να εκπαιδεύεις και να φροντίζεις.',
+    'Έφεδρος Ανθυπολοχαγός, Πεζοναύτες Ειδικών Δυνάμεων, 2022–2023: μια μονάδα για την οποία έπρεπε να σχεδιάζει, να την εκπαιδεύει και να τη φροντίζει.',
   'the commander’s letter': 'η επιστολή του διοικητή',
   'The commander’s letter': 'Η επιστολή του διοικητή',
   'Commander’s reference': 'Σύσταση του διοικητή',
@@ -325,7 +325,6 @@ export const INTERIORS: Record<string, string> = {
   'Get in touch': 'Επικοινώνησε',
   'The message desk composes an email straight to Kitsos, with no operator in between.':
     'Το γραφείο μηνυμάτων συντάσσει email κατευθείαν προς τον Κίτσο, χωρίς κανέναν χειριστή στη μέση.',
-  'Summit room': 'Το δωμάτιο της κορυφής',
   'the keeper’s logbook': 'το ημερολόγιο του φαροφύλακα',
   'The shelf swings out on a hinge nobody fitted by accident.':
     'Το ράφι ανοίγει σε έναν μεντεσέ που δεν τον έβαλε κανείς κατά λάθος.',
@@ -340,8 +339,24 @@ export const INTERIORS: Record<string, string> = {
   'The globe in the astronomy corner at Evangeliki: Greece, Cyprus, Germany, France, Italy and Switzerland, stood in rather than pointed at.':
     'Η υδρόγειος στη γωνιά της αστρονομίας στην Ευαγγελική: Ελλάδα, Κύπρος, Γερμανία, Γαλλία, Ιταλία και Ελβετία — χώρες όχι δειγμένες μα πατημένες.',
   'Flight deck': 'Θάλαμος πτήσης',
+  'the departure notice': 'η ανακοίνωση αναχώρησης',
+  'The departure notice': 'Η ανακοίνωση αναχώρησης',
+  'PRE-FLIGHT — read it in order, there is no second try.':
+    'ΠΡΙΝ ΑΠΟ ΤΗΝ ΠΤΗΣΗ — διάβασέ τα με τη σειρά, δεύτερη ευκαιρία δεν υπάρχει.',
+  'One. The suit is on the rack behind you. Put it on; the console will not answer a man in shirtsleeves.':
+    'Ένα. Η στολή είναι στην κρεμάστρα πίσω σου. Φόρεσέ τη· η κονσόλα δεν ακούει κανέναν με το πουκάμισο.',
+  'Two. The button is under the glass on the console. Press it and the count starts.':
+    'Δύο. Το κουμπί είναι κάτω από το τζάμι της κονσόλας. Πάτα το και ξεκινάει η αντίστροφη μέτρηση.',
+  'Three. There is no abort. Once the gantry lets go you are going up.':
+    'Τρία. Ακύρωση δεν υπάρχει. Μόλις σε αφήσει το ικρίωμα, ανεβαίνεις.',
+  'Signed, the keeper. He has done it once and says the view is worth it.':
+    'Υπογραφή: ο φαροφύλακας. Το έχει κάνει μία φορά και λέει ότι η θέα αξίζει.',
+  'The lighthouse is a gantry and the summit room is a flight deck. The suit goes on first, then the button under the glass. There is no abort.':
+    'Ο φάρος είναι ικρίωμα εκτόξευσης και το δωμάτιο της κορυφής θάλαμος πτήσης. Πρώτα φοράς τη στολή, μετά πατάς το κουμπί κάτω από το τζάμι. Ακύρωση δεν υπάρχει.',
+  /* The heading over the tech wall on the Veltiston floor. */
+  'Everything it is built out of': 'Από τι είναι φτιαγμένο',
   'the crew screen': 'η οθόνη του πληρώματος',
-  'Meet the characters': 'Γνωρίστε τους χαρακτήρες',
+  'Meet the characters': 'Γνώρισε τους χαρακτήρες',
   'The crew screen': 'Η οθόνη του πληρώματος',
   'A screen on the flight deck with everybody on the island on it, and a tick against each one he stopped to hear.':
     'Μια οθόνη στον θάλαμο πτήσης με όλους όσοι ζουν στο νησί, και ένα τικ δίπλα σε όποιον στάθηκε να ακούσει.',

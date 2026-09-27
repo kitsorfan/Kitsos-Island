@@ -107,7 +107,7 @@ export function CreditsRoll() {
                   key={`${entry.role}-${i}`}
                 >
                   {entry.role && <dt>{t(entry.role)}</dt>}
-                  <dd>{entry.who}</dd>
+                  <dd>{t(entry.who)}</dd>
                 </div>
               ))}
             </dl>

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { PROFILE } from '../cv/profile'
 import * as sfx from '../../shared/engine/audio'
 import { useT } from '../../shared/i18n/useT'
+import { fill } from '../../shared/i18n'
 import { Turnstile } from './Turnstile'
 import {
   SUBJECTS,
@@ -167,7 +168,7 @@ export function RadioConsole() {
           onClick={() => copy('email', PROFILE.email)}
         >
           <span className="channel__band">{t('Clipboard')}</span>
-          <strong>{copied === 'email' ? 'Copied ✓' : 'Copy address'}</strong>
+          <strong>{t(copied === 'email' ? 'Copied ✓' : 'Copy address')}</strong>
         </button>
 
         <a
@@ -185,7 +186,7 @@ export function RadioConsole() {
           onClick={() => copy('link', PROFILE.linkedin)}
         >
           <span className="channel__band">{t('Clipboard')}</span>
-          <strong>{copied === 'link' ? 'Copied ✓' : 'Copy profile'}</strong>
+          <strong>{t(copied === 'link' ? 'Copied ✓' : 'Copy profile')}</strong>
         </button>
       </div>
 
@@ -229,8 +230,13 @@ export function RadioConsole() {
             value={subject}
             onChange={(e) => setSubject(e.target.value as Subject)}
           >
+            {/* The value stays in English whatever the label says: it is
+                what the Worker checks the subject against, and what lands
+                in the inbox. */}
             {SUBJECTS.map((s) => (
-              <option key={s}>{s}</option>
+              <option key={s} value={s}>
+                {t(s)}
+              </option>
             ))}
           </select>
         </label>
@@ -284,7 +290,7 @@ export function RadioConsole() {
               copy('message', `${PROFILE.email}\n\n${body}`)
             }}
           >
-            {copied === 'message' ? 'Copied ✓' : 'Copy message'}
+            {t(copied === 'message' ? 'Copied ✓' : 'Copy message')}
           </button>
         </div>
 
@@ -295,8 +301,12 @@ export function RadioConsole() {
         )}
         {status.at === 'mailed' && (
           <p className="radio__status" role="status">
-            Signal sent to your mail client. If nothing opened, copy the message
-            instead. The address is {PROFILE.email}.
+            {fill(
+              t(
+                'Signal sent to your mail client. If nothing opened, copy the message instead. The address is {email}.',
+              ),
+              { email: PROFILE.email },
+            )}
           </p>
         )}
         {failed && (

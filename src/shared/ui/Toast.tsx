@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useGame } from '../state/store'
 import * as sfx from '../engine/audio'
 import { useT } from '../i18n/useT'
+import { fill } from '../i18n'
 import { useScreen } from './useScreen'
 
 const LABEL = {
@@ -38,8 +39,8 @@ export function Toast() {
   return (
     <div className={`toast toast--${toast.kind}`} role="status">
       <span className="toast__label">{t(LABEL[toast.kind])}</span>
-      <strong>{toast.title}</strong>
-      <p>{toast.body}</p>
+      <strong>{fill(toast.title, toast.slots)}</strong>
+      <p>{fill(toast.body, toast.slots)}</p>
     </div>
   )
 }

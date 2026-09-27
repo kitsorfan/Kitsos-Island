@@ -17,6 +17,7 @@ import {
   slideDoor,
 } from '../../interior/doors'
 import { TextPlane } from '../../../shared/engine/TextSign'
+import { useT } from '../../../shared/i18n/useT'
 import { GreekFlag } from '../../interior/InteriorProps'
 import {
   IbmMark,
@@ -673,6 +674,7 @@ function Cypress({ x, z, h = 6.4 }: { x: number; z: number; h?: number }) {
 }
 
 export function UniversityModel() {
+  const t = useT()
   const W = 20.8
   const D = 12.8
   const H = 7
@@ -833,7 +835,7 @@ export function UniversityModel() {
             top of that — between them you could not read a word of it. The
             cornice is trimmed back above and the letters stand well clear. */}
         <TextPlane
-          text="NATIONAL TECHNICAL UNIVERSITY OF ATHENS"
+          text={t('NATIONAL TECHNICAL UNIVERSITY OF ATHENS')}
           width={10.2}
           aspect={18}
           color="#2f5fa8"

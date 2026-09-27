@@ -230,6 +230,9 @@ export const INTERIORS: Record<string, string> = {
   /* ---------------------------- Radio Center -------------------------- */
   'the release notes': 'οι σημειώσεις έκδοσης',
   'Release notes': 'Σημειώσεις έκδοσης',
+  'Version 1.4 · 2026-09-27': 'Έκδοση 1.4 · 2026-09-27',
+  'Once your message is through, the message desk folds away into a card that says so and names the address the reply will go to, with a button to send another.':
+    'Μόλις φύγει το μήνυμά σου, η φόρμα κλείνει και σου λέει ότι έφτασε και σε ποια διεύθυνση θα σου απαντήσω, με ένα κουμπί για να στείλεις κι άλλο.',
   'Version 1.3 · 2026-09-27': 'Έκδοση 1.3 · 2026-09-27',
   'The motorbike rides on a touch screen, with the bars under one thumb and the pedals under the other; the island speaks Greek all the way through; and Motivation Road is now Inspiration Road.':
     'Η μηχανή οδηγείται σε οθόνη αφής, με το τιμόνι κάτω από τον έναν αντίχειρα και τα πεντάλ κάτω από τον άλλο· το νησί μιλάει ελληνικά από την αρχή ως το τέλος· και η Οδός Κινήτρου λέγεται πια Οδός Έμπνευσης.',
@@ -241,8 +244,8 @@ export const INTERIORS: Record<string, string> = {
     'Ένα βιογραφικό PDF δύο σελίδων, τυπωμένο από το νησί, για λήψη από το πλήρες βιογραφικό.',
   'Version 1.0 · 2026-09-25': 'Έκδοση 1.0 · 2026-09-25',
   'First working version.': 'Η πρώτη λειτουργική έκδοση.',
-  'Version 1.3, 2026-09-27: a motorbike you can ride on a touch screen, Greek all the way through, and Inspiration Road. Version 1.2: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.':
-    'Έκδοση 1.3, 2026-09-27: μια μηχανή που οδηγείται σε οθόνη αφής, ελληνικά από την αρχή ως το τέλος, και η Οδός Έμπνευσης. Έκδοση 1.2: παίζεται σε κινητό, πιστοποιητικό με σύνδεσμο για να επαληθευτεί, και γραφείο μηνυμάτων που εκπέμπει. Έκδοση 1.1: ένα βιογραφικό PDF δύο σελίδων, για λήψη από το πλήρες βιογραφικό. Έκδοση 1.0: η πρώτη λειτουργική έκδοση του νησιού.',
+  'Version 1.4, 2026-09-27: the message desk says plainly when your message is on its way. Version 1.3: a motorbike you can ride on a touch screen, Greek all the way through, and Inspiration Road. Version 1.2: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.':
+    'Έκδοση 1.4, 2026-09-27: το γραφείο μηνυμάτων σού λέει καθαρά ότι το μήνυμά σου έφυγε. Έκδοση 1.3: μια μηχανή που οδηγείται σε οθόνη αφής, ελληνικά από την αρχή ως το τέλος, και η Οδός Έμπνευσης. Έκδοση 1.2: παίζεται σε κινητό, πιστοποιητικό με σύνδεσμο για να επαληθευτεί, και γραφείο μηνυμάτων που εκπέμπει. Έκδοση 1.1: ένα βιογραφικό PDF δύο σελίδων, για λήψη από το πλήρες βιογραφικό. Έκδοση 1.0: η πρώτη λειτουργική έκδοση του νησιού.',
 
   /* The officers' door, and the room behind it. */
   'Operations room': 'Αίθουσα επιχειρήσεων',

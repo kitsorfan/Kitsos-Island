@@ -479,6 +479,138 @@ canvas {
   }
 }
 
+/* Day or night, Live and the sky it is showing, with the card that sets it
+   opening upwards over them rather than down off the bottom of the screen. */
+.hud__sky {
+  position: relative;
+}
+
+/* Over the island rather than in the row, so a tall card never pushes the
+   buttons that close it off the bottom of the screen. */
+.hud__sky .settings-card {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 0.6rem);
+  margin-top: 0;
+  max-height: min(34rem, calc(100dvh - 8.5rem));
+}
+
+/* A label over its controls takes the height it needs and no more. */
+.live-card .setting--stacked .setting__name {
+  flex: none;
+}
+
+/* ------------------------------ live sky ------------------------------ */
+
+.live-card__where {
+  margin: 0 0 0.25rem;
+  font-size: 0.86rem;
+}
+
+.live-card__where span {
+  font-size: 0.74rem;
+  color: var(--ink-soft);
+}
+
+.live-card__now {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.3rem;
+  font-size: 0.74rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+.live-card__now strong {
+  color: var(--ink);
+}
+
+.live-card__icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+/* Six of them, three to a row, so the names have room to be read. */
+.live-card__places {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.3rem;
+}
+
+.live-card__places .chip {
+  padding-inline: 0.15rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.live-card__search {
+  width: 100%;
+  padding: 0.4rem 0.55rem;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--ink);
+  background: #fff;
+  border: 2px solid var(--line);
+  border-radius: 9px;
+}
+
+.live-card__search:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.live-card__found {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.live-card__found p {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.live-card__result {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.76rem;
+  text-align: left;
+  color: var(--ink);
+  border: 2px solid var(--line);
+  border-radius: 9px;
+  background: rgba(253, 247, 233, 0.94);
+}
+
+.live-card__result span {
+  font-size: 0.66rem;
+  color: var(--ink-soft);
+}
+
+.live-card__time {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.live-card__time .chip {
+  flex: 0 0 auto;
+  padding-inline: 0.7rem;
+}
+
+.live-card__credit {
+  margin: 0.55rem 0 0;
+  font-size: 0.66rem;
+  text-align: right;
+}
+
+.live-card__credit a {
+  color: #2f6bb3;
+}
+
 /* ---------------------------- hud on a phone --------------------------- */
 
 /* Three buttons have the room to say what they are, so they do. */

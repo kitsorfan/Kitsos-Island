@@ -14,6 +14,8 @@ import * as trophies from '../../features/launch/trophies'
 import * as army from '../../features/army/army'
 import * as balloon from '../../features/balloon/balloonLogic'
 import * as moto from '../../features/moto/motoLogic'
+import * as places from '../../features/live/places'
+import * as weather from '../../features/live/weatherLogic'
 import { residentsOf } from '../../features/party/feast'
 
 /**
@@ -76,6 +78,7 @@ const WIRING = new Set([
   'model',
   'mark',
   'code',
+  'timezone',
 ])
 
 /** Prose, as opposed to an id: it has a space in it or starts in capitals. */
@@ -124,6 +127,8 @@ describe('the Greek island', () => {
         army,
         balloon,
         moto,
+        places,
+        weather,
       }),
     ).toEqual([])
   })

@@ -20,6 +20,8 @@ import { swimmingPlayer } from '../rescue/swimLogic'
 import { Terrain } from './Terrain'
 import { Water } from './Water'
 import { useGame } from '../../shared/state/store'
+import { Weather } from '../live/Weather'
+import { useConditions } from '../live/haze'
 
 export function Island() {
   const match = useGame((s) => s.paintball !== null)
@@ -33,9 +35,12 @@ export function Island() {
   const proposal = useGame((s) => s.proposal)
   /** Keyed on the round, so asking her again is a scene and not a repaint. */
   const round = useGame((s) => s.proposalRound)
+  /* Fair, unless Live has brought the weather of somewhere real. */
+  const weather = useConditions()
   return (
     <>
-      <Daylight night={night} />
+      <Daylight night={night} weather={weather} />
+      <Weather weather={weather} night={night} />
 
       <Terrain />
       <Water />

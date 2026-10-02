@@ -1,8 +1,10 @@
 /**
  * @vitest-environment jsdom
  */
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { isInteractive, nextObjective, resetReveal, useGame } from './store'
+import { ATHENS, PRESETS } from '../../features/live/places'
+import type { Reading } from '../../features/live/forecast'
 import { KEYS, MISSIONS, PLAYER_START } from '../../features/island/world'
 import { BIRTHDAY, FEAST } from '../../features/calendar/calendar'
 import { INTERIORS } from '../../features/interior/interiors'
@@ -357,6 +359,170 @@ describe('the night', () => {
     const was = state().night
     state().toggleNight()
     expect(state().night).toBe(!was)
+  })
+})
+
+describe('the live sky', () => {
+  /** 2 October 2026 in Athens: 13:00 is midday, 03:00 the dead of night. */
+  const ATHENS_NOON = Date.UTC(2026, 9, 2, 10, 0)
+  const ATHENS_3AM = Date.UTC(2026, 9, 2, 0, 0)
+  const at = (moment: number) => vi.spyOn(Date, 'now').mockReturnValue(moment)
+  const TOKYO = PRESETS.find((p) => p.name === 'Tokyo')!
+  const rain: Reading = {
+    at: ATHENS_NOON,
+    code: 63,
+    temperature: 17,
+    cloud: 100,
+    precipitation: 2,
+    wind: 7,
+    windFrom: 200,
+  }
+
+  afterEach(() => vi.restoreAllMocks())
+
+  it('starts off, over Athens', () => {
+    expect(state().live).toBe(false)
+    expect(state().livePlace).toEqual(ATHENS)
+    expect(state().weather).toBeNull()
+  })
+
+  it('puts the island in the dark when it is dark in Athens', () => {
+    at(ATHENS_3AM)
+    state().toggleLive()
+    expect(state().live).toBe(true)
+    expect(state().night).toBe(true)
+  })
+
+  it('and in the light when the sun is up there', () => {
+    at(ATHENS_NOON)
+    useGame.setState({ night: true })
+    state().toggleLive()
+    expect(state().night).toBe(false)
+  })
+
+  it('is remembered for the next visit, and where it was', () => {
+    state().toggleLive()
+    state().setLivePlace(TOKYO)
+    const saved = JSON.parse(localStorage.getItem('island.settings')!)
+    expect(saved).toMatchObject({ live: true, livePlace: TOKYO })
+  })
+
+  it('cannot be switched mid-game, any more than the light can', () => {
+    useGame.setState({ moto: {} as never })
+    state().toggleLive()
+    expect(state().live).toBe(false)
+  })
+
+  it('keeps the light where it was when it is switched off, and drops the weather', () => {
+    at(ATHENS_3AM)
+    state().toggleLive()
+    state().syncLive(rain, 'ready')
+    state().toggleLive()
+    expect(state().live).toBe(false)
+    expect(state().night).toBe(true)
+    expect(state().weather).toBeNull()
+  })
+
+  it('gives way to the light switch, which takes it off', () => {
+    at(ATHENS_3AM)
+    state().toggleLive()
+    state().syncLive(rain, 'ready')
+    state().toggleNight()
+    expect(state().live).toBe(false)
+    expect(state().night).toBe(false)
+    expect(state().weather).toBeNull()
+  })
+
+  it('brings the weather in with each report', () => {
+    at(ATHENS_NOON)
+    state().toggleLive()
+    state().syncLive(rain, 'ready')
+    expect(state().weather).toBe(rain)
+    expect(state().liveStatus).toBe('ready')
+  })
+
+  it('takes no report while it is off', () => {
+    state().syncLive(rain, 'ready')
+    expect(state().weather).toBeNull()
+  })
+
+  it('turns the lights off at sunset, on the report after it', () => {
+    at(ATHENS_NOON)
+    state().toggleLive()
+    expect(state().night).toBe(false)
+    at(Date.UTC(2026, 9, 2, 17, 0)) // 20:00 in Athens
+    state().syncLive(null, 'ready')
+    expect(state().night).toBe(true)
+  })
+
+  it('waits for a party to finish before the sun comes up on it', () => {
+    at(ATHENS_3AM)
+    state().toggleLive()
+    useGame.setState({ party: true })
+    at(ATHENS_NOON)
+    state().syncLive(rain, 'ready')
+    expect(state().night).toBe(true)
+    expect(state().party).toBe(true)
+    expect(state().weather).toBeNull()
+  })
+
+  it('reads the sky of another place', () => {
+    // Midday in Athens is seven in the evening in Tokyo, after dark.
+    at(ATHENS_NOON)
+    state().toggleLive()
+    state().syncLive(rain, 'ready')
+    state().setLivePlace(TOKYO)
+    expect(state().night).toBe(true)
+    // Athens' rain is not Tokyo's.
+    expect(state().weather).toBeNull()
+    expect(state().liveStatus).toBe('loading')
+  })
+
+  it('holds a time of day, and lets it go again', () => {
+    at(ATHENS_NOON)
+    state().toggleLive()
+    state().setLiveClock(22 * 60)
+    expect(state().liveClock).toBe(22 * 60)
+    expect(state().night).toBe(true)
+    state().setLiveClock(null)
+    expect(state().night).toBe(false)
+  })
+
+  it('keeps a held time inside the day', () => {
+    state().setLiveClock(25 * 60)
+    expect(state().liveClock).toBe(60)
+    state().setLiveClock(-30)
+    expect(state().liveClock).toBe(23 * 60 + 30)
+  })
+
+  it('ends the party when it is held at an hour in daylight', () => {
+    at(ATHENS_3AM)
+    state().toggleLive()
+    useGame.setState({ party: true })
+    state().setLiveClock(12 * 60)
+    expect(state().night).toBe(false)
+    expect(state().party).toBe(false)
+  })
+
+  it('comes back on, over the place it was left on, on the next visit', async () => {
+    localStorage.setItem(
+      'island.settings',
+      JSON.stringify({ live: true, livePlace: TOKYO }),
+    )
+    vi.resetModules()
+    const { useGame: next } = await import('./store')
+    expect(next.getState().live).toBe(true)
+    expect(next.getState().livePlace).toEqual(TOKYO)
+  })
+
+  it('comes back over Athens from a place that does not read', async () => {
+    localStorage.setItem(
+      'island.settings',
+      JSON.stringify({ live: true, livePlace: { name: 'Atlantis' } }),
+    )
+    vi.resetModules()
+    const { useGame: next } = await import('./store')
+    expect(next.getState().livePlace).toEqual(ATHENS)
   })
 })
 

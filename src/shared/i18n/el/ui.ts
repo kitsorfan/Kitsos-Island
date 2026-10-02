@@ -91,6 +91,56 @@ export const UI: Record<string, string> = {
   'The lights stay out until the game is over':
     'Τα φώτα μένουν σβηστά μέχρι να τελειώσει το παιχνίδι',
   'Day or night (L)': 'Μέρα ή νύχτα (L)',
+
+  /* ------------------------------ Live sky ---------------------------- */
+  /* Το όνομα του τόπου μπαίνει μόνο του, πίσω από άνω και κάτω τελεία:
+     η Αθήνα, το Τόκιο και το Ρέικιαβικ θέλουν άλλο άρθρο το καθένα, κι ένα
+     «πάνω από» μπροστά σε όνομα που δεν άλλαξε διαβάζεται σαν μηχανή. */
+  Live: 'Ζωντανά',
+  'Live sky': 'Ζωντανός ουρανός',
+  'The real sky, right now: {place}': 'Ο αληθινός ουρανός, τώρα: {place}',
+  'Back to the island’s own sky': 'Πίσω στον ουρανό του νησιού',
+  'Day or night by hand, which ends Live (L)':
+    'Μέρα ή νύχτα με το χέρι, που κλείνει το Ζωντανά (L)',
+  'Change the place or the time': 'Άλλαξε τόπο ή ώρα',
+  'The sky stays as it is until the game is over':
+    'Ο ουρανός μένει όπως είναι μέχρι να τελειώσει το παιχνίδι',
+  Place: 'Τόπος',
+  Time: 'Ώρα',
+  'Search for a town…': 'Ψάξε μια πόλη…',
+  'Search for a town': 'Ψάξε μια πόλη',
+  'Looking…': 'Ψάχνω…',
+  'The search could not be reached.':
+    'Η αναζήτηση δεν απαντάει αυτή τη στιγμή.',
+  'Nowhere by that name.': 'Δεν υπάρχει μέρος με αυτό το όνομα.',
+  'Time of day in {place}': 'Ώρα της ημέρας: {place}',
+  'Keeping time with {place}.': 'Κρατάει την ώρα του τόπου: {place}.',
+  'Held at this hour. The weather is the forecast for it.':
+    'Σταματημένο σε αυτή την ώρα. Ο καιρός είναι η πρόγνωση για τότε.',
+  'Reading the sky…': 'Διαβάζω τον ουρανό…',
+  'No forecast reached the island, so the sky stays fair. The clock still keeps time.':
+    'Δεν έφτασε πρόγνωση ως το νησί, οπότε ο καιρός μένει καλός. Η ώρα πάντως μετράει κανονικά.',
+  'Wind {speed} km/h': 'Άνεμος {speed} χλμ/ώ',
+  'Weather by Open-Meteo.com': 'Ο καιρός από το Open-Meteo.com',
+  Clear: 'Καθαρός',
+  'Mostly clear': 'Σχεδόν καθαρός',
+  'Partly cloudy': 'Λίγα σύννεφα',
+  Overcast: 'Συννεφιά',
+  Fog: 'Ομίχλη',
+  Drizzle: 'Ψιχάλα',
+  Rain: 'Βροχή',
+  Snow: 'Χιόνι',
+  Thunderstorm: 'Καταιγίδα',
+  Athens: 'Αθήνα',
+  Hamburg: 'Αμβούργο',
+  London: 'Λονδίνο',
+  'New York': 'Νέα Υόρκη',
+  Tokyo: 'Τόκιο',
+  Reykjavík: 'Ρέικιαβικ',
+  'United Kingdom': 'Ηνωμένο Βασίλειο',
+  'United States': 'ΗΠΑ',
+  Japan: 'Ιαπωνία',
+  Iceland: 'Ισλανδία',
   'Drag the stick to walk, tap A to interact':
     'Σύρε τον μοχλό για να περπατήσεις, πάτα A για να μιλήσεις ή να ανοίξεις κάτι',
   'WASD to walk · Shift to sprint · M for the map':

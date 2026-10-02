@@ -81,6 +81,7 @@ export default defineConfig({
         'src/features/rescue/lifeboatHull.ts',
         'src/features/lecture/Slides.tsx',
         'src/features/arcade/GamesBoard.tsx',
+        'src/features/live/Weather.tsx',
         'src/features/cv/TechMarks.tsx',
         'src/main.tsx',
         'src/types.ts',

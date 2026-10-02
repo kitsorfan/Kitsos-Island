@@ -4,6 +4,7 @@ import { KEYS } from '../../features/island/world'
 import {
   TOTAL_ENTRIES,
   TOTAL_KEYS,
+  inGame as gameOn,
   keyCount,
   nextObjective,
   useGame,
@@ -30,6 +31,8 @@ import { TurnButtons } from '../../features/player/TurnButtons'
 import { LiftButtons } from '../../features/balloon/LiftButtons'
 import { useCoarsePointer } from './useCoarsePointer'
 import { useScreen } from './useScreen'
+import { LiveCard } from '../../features/live/LiveCard'
+import { conditionsOf, skyIcon } from '../../features/live/weatherLogic'
 
 /**
  * One notch on the way down, and then it keeps going while you hold it.
@@ -116,6 +119,10 @@ export function Hud() {
   const firstPerson = useGame((s) => s.firstPerson)
   const toggleFirstPerson = useGame((s) => s.toggleFirstPerson)
   const toggleNight = useGame((s) => s.toggleNight)
+  const live = useGame((s) => s.live)
+  const toggleLive = useGame((s) => s.toggleLive)
+  const livePlace = useGame((s) => s.livePlace)
+  const weather = useGame((s) => s.weather)
   const handLight = useGame((s) => s.handLight)
   const toggleHandLight = useGame((s) => s.toggleHandLight)
   const party = useGame((s) => s.party)
@@ -131,9 +138,7 @@ export function Hud() {
    * the day-night switch is locked against, rather than only the minutes
    * you are actually playing.
    */
-  const inGame = useGame((s) =>
-    Boolean(s.hide || s.paintball || s.moto || s.balloon || s.rescue),
-  )
+  const inGame = useGame(gameOn)
   const openArcade = useGame((s) => s.openArcade)
   const exitPaintball = useGame((s) => s.exitPaintball)
   const exitMoto = useGame((s) => s.exitMoto)
@@ -141,8 +146,10 @@ export function Hud() {
   const exitHide = useGame((s) => s.exitHide)
   const exitRescue = useGame((s) => s.exitRescue)
   const playing = fighting || riding || flying || hiding || sailing
-  /** One card open under the buttons at a time, never both. */
-  const [card, setCard] = useState<'settings' | 'controls' | null>(null)
+  /** One card open under the buttons at a time, never two. */
+  const [card, setCard] = useState<'settings' | 'controls' | 'live' | null>(
+    null,
+  )
   const [sprint, setSprint] = useState(sprintLock.on)
   const coarse = useCoarsePointer()
   const { mobile, portrait } = useScreen()
@@ -157,7 +164,13 @@ export function Hud() {
     setCardMode(mode)
     if (card === 'controls') setCard(null)
   }
-  const toggleCard = (which: 'settings' | 'controls') => {
+  /* Live switched off takes its card with it: there is no sky to set. */
+  const [cardLive, setCardLive] = useState(live)
+  if (cardLive !== live) {
+    setCardLive(live)
+    if (!live && card === 'live') setCard(null)
+  }
+  const toggleCard = (which: 'settings' | 'controls' | 'live') => {
     sfx.confirm()
     setCard((open) => (open === which ? null : which))
   }
@@ -238,11 +251,51 @@ export function Hud() {
           ? t('The lights stay out until the game is over')
           : inGame
             ? t('The light stays as it is until the game is over')
-            : t('Day or night (L)')
+            : live
+              ? t('Day or night by hand, which ends Live (L)')
+              : t('Day or night (L)')
       }
     >
       {night ? '🌙' : '☀️'}
       <span>{t(night ? 'Night' : 'Day')}</span>
+    </button>
+  )
+
+  /* Live: the sky over Athens, or wherever it has been moved to. */
+  const liveButton = (
+    <button
+      className={`icon-button${live ? ' icon-button--live' : ''}`}
+      aria-pressed={live}
+      onClick={toggleLive}
+      disabled={inGame}
+      title={
+        inGame
+          ? t('The light stays as it is until the game is over')
+          : live
+            ? t('Back to the island’s own sky')
+            : fill(t('The real sky, right now: {place}'), {
+                place: t(livePlace.name),
+              })
+      }
+    >
+      📡<span>{t('Live')}</span>
+    </button>
+  )
+
+  /* And while it is on, what it says out there, which opens the card. */
+  const sky = weather ? conditionsOf(weather).sky : null
+  const skyButton = live && (
+    <button
+      className={`icon-button${card === 'live' ? ' icon-button--live' : ''}`}
+      aria-expanded={card === 'live'}
+      onClick={() => toggleCard('live')}
+      title={t('Change the place or the time')}
+    >
+      {sky ? skyIcon(sky, night) : '📍'}
+      <span>
+        {t(livePlace.name)}
+        {weather?.temperature != null && ` ${Math.round(weather.temperature)}°`}
+      </span>
     </button>
   )
 
@@ -444,22 +497,33 @@ export function Hud() {
               {journalButton}
               {gamesButton}
               {dayButton}
+              {liveButton}
+              {skyButton}
               {walkingButtons}
             </div>
           )}
 
           {card === 'settings' && <SettingsCard />}
+          {mobile && card === 'live' && <LiveCard />}
 
           {!indoors && !coarse && !mobile && <Minimap />}
         </div>
       </div>
 
       {/* Day or night sits bottom left, out from under the badge and
-          opposite the rest of the walking controls. On a phone both ends
-          are in the controls card instead. */}
+          opposite the rest of the walking controls, with Live beside it and
+          its card opening upwards over them. On a phone both ends are in the
+          controls card instead. */}
       {!mobile && (
         <div className="hud__bottom">
-          <div className="hud__buttons">{dayButton}</div>
+          <div className="hud__sky">
+            {card === 'live' && <LiveCard />}
+            <div className="hud__buttons">
+              {dayButton}
+              {liveButton}
+              {skyButton}
+            </div>
+          </div>
           {walkingButtons && (
             <div className="hud__buttons">{walkingButtons}</div>
           )}

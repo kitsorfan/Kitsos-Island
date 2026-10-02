@@ -26,6 +26,7 @@ import { TitleScreen } from './shared/ui/TitleScreen'
 import { Toast } from './shared/ui/Toast'
 import { TouchControls } from './features/player/TouchControls'
 import { useKeyboard } from './features/player/useKeyboard'
+import { useLiveSky } from './features/live/useLiveSky'
 import { useGame } from './shared/state/store'
 import { useT } from './shared/i18n/useT'
 import { setMuted, setSfxLevel } from './shared/engine/audio'
@@ -63,6 +64,7 @@ export default function App() {
   const locale = useGame((s) => s.locale)
   const t = useT()
   useKeyboard()
+  useLiveSky()
 
   // The tab and the page's own language follow the one chosen, so a Greek
   // visitor's tab is in Greek and a screen reader reads the Greek as Greek

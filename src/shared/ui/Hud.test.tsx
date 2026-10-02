@@ -71,6 +71,39 @@ describe('the HUD on a big screen', () => {
   })
 })
 
+describe('the live sky on the HUD', () => {
+  it('sits beside the day and night', () => {
+    render(<Hud />)
+    expect(button(/Live/)).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('switches on, and shows what it says out there', () => {
+    render(<Hud />)
+    expect(button(/Athens/)).not.toBeInTheDocument()
+    fireEvent.click(button(/Live/)!)
+    expect(useGame.getState().live).toBe(true)
+    expect(button(/Live/)).toHaveAttribute('aria-pressed', 'true')
+    expect(button(/Athens/)).toBeInTheDocument()
+  })
+
+  it('opens its card from there, and folds it away when Live goes off', () => {
+    render(<Hud />)
+    fireEvent.click(button(/Live/)!)
+    fireEvent.click(button(/Athens/)!)
+    expect(screen.getByText('Live sky')).toBeInTheDocument()
+    fireEvent.click(button(/Live/)!)
+    expect(screen.queryByText('Live sky')).not.toBeInTheDocument()
+  })
+
+  it('cannot be touched in the middle of a game', () => {
+    act(() => {
+      useGame.setState({ balloon: {} as never })
+    })
+    render(<Hud />)
+    expect(button(/Live/)).toBeDisabled()
+  })
+})
+
 describe('the turn buttons', () => {
   afterEach(() => clearKeys())
 

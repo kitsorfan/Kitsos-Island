@@ -10,6 +10,8 @@ import {
 import { WATER_LEVEL } from './terrainLogic'
 import { useGame } from '../../shared/state/store'
 import { SWELL_GLSL } from './sea'
+import { hazeColor, useConditions, weatherHaze } from '../live/haze'
+import { overcast } from '../live/weatherLogic'
 
 /** The sea by day, and the same sea under a moon. */
 const PALETTE = {
@@ -29,6 +31,29 @@ const PALETTE = {
     horizon: '#0b1a2e',
     sky: '#20406a',
     glint: '#cfd9f5',
+  },
+}
+
+/**
+ * The same two seas under a sky that is all cloud, which is where Live's
+ * weather takes them. A grey sky makes a grey sea — it is mostly the sky in
+ * the water that you are looking at — and the horizon goes the colour of
+ * the haze, so the fog and the sea meet without a seam.
+ */
+const GREY = {
+  day: {
+    shallow: '#5e9497',
+    deep: '#28465a',
+    foam: '#e4ecf0',
+    sky: '#b3bdc7',
+    glint: '#dfe5ea',
+  },
+  night: {
+    shallow: '#103a4c',
+    deep: '#05121f',
+    foam: '#7d97a5',
+    sky: '#16263a',
+    glint: '#8090a8',
   },
 }
 
@@ -69,6 +94,8 @@ const fragmentShader = /* glsl */ `
   uniform vec3 uGlint;
   uniform vec3 uSun;
   uniform float uGloss;
+  uniform vec3 uHaze;
+  uniform float uThick;
   varying vec3 vWorld;
   varying float vWave;
 
@@ -129,6 +156,11 @@ const fragmentShader = /* glsl */ `
     float horizon = smoothstep(400.0, 1050.0, r);
     col = mix(col, uHorizon, horizon * 0.85);
 
+    // And into the weather's haze, the same way the scene's fog takes the
+    // land, so the sea does not stay sharp in a fog that has the shore.
+    float lost = 1.0 - exp(-pow(uThick * range, 2.0));
+    col = mix(col, uHaze, lost);
+
     gl_FragColor = vec4(col, mix(0.82, 1.0, depth));
     #include <colorspace_fragment>
   }
@@ -137,6 +169,8 @@ const fragmentShader = /* glsl */ `
 export function Water() {
   const material = useRef<ShaderMaterial>(null)
   const night = useGame((s) => s.night)
+  const weather = useConditions()
+  const grey = overcast(weather)
 
   const geometry = useMemo(() => {
     const geo = new PlaneGeometry(2400, 2400, 240, 240)
@@ -156,22 +190,36 @@ export function Water() {
       uGlint: { value: new Color(PALETTE.day.glint) },
       uSun: { value: SUN.day.clone() },
       uGloss: { value: 1 },
+      uHaze: { value: new Color(PALETTE.day.horizon) },
+      uThick: { value: 0 },
     }),
     [],
   )
 
   useEffect(() => {
     const colors = night ? PALETTE.night : PALETTE.day
-    uniforms.uShallow.value.set(colors.shallow)
-    uniforms.uDeep.value.set(colors.deep)
-    uniforms.uFoam.value.set(colors.foam)
-    uniforms.uHorizon.value.set(colors.horizon)
-    uniforms.uSky.value.set(colors.sky)
-    uniforms.uGlint.value.set(colors.glint)
+    const under = night ? GREY.night : GREY.day
+    const toward = new Color()
+    const tint = (uniform: { value: Color }, fair: string, cloud: string) =>
+      uniform.value.set(fair).lerp(toward.set(cloud), grey)
+    tint(uniforms.uShallow, colors.shallow, under.shallow)
+    tint(uniforms.uDeep, colors.deep, under.deep)
+    tint(uniforms.uFoam, colors.foam, under.foam)
+    tint(uniforms.uSky, colors.sky, under.sky)
+    tint(uniforms.uGlint, colors.glint, under.glint)
+    // Only once there is weather: the island's own horizon is its own.
+    uniforms.uHorizon.value
+      .set(colors.horizon)
+      .lerp(hazeColor(weather, night), Math.max(grey, weather.fog))
     uniforms.uSun.value.copy(night ? SUN.night : SUN.day)
-    // A moon lays a road on the water too, but a far dimmer one.
-    uniforms.uGloss.value = night ? 0.4 : 1
-  }, [night, uniforms])
+    // A moon lays a road on the water too, but a far dimmer one — and
+    // neither of them lays one through cloud.
+    uniforms.uGloss.value = (night ? 0.4 : 1) * (1 - grey * 0.85)
+    // Only the weather's share: the island's own night haze never reached
+    // the sea, and Live off leaves it exactly as it was.
+    uniforms.uHaze.value.copy(hazeColor(weather, night))
+    uniforms.uThick.value = weatherHaze(weather)
+  }, [night, uniforms, grey, weather])
 
   // Off the scene clock rather than an accumulator of its own, because the
   // hull of the lifeboat samples the same swell from the same clock and the

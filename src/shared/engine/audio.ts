@@ -184,6 +184,62 @@ export function fizz() {
   tone(1568, 0.1, 'triangle', 0.026, 0.08)
 }
 
+/* -------------------------------- thunder -------------------------------- */
+
+/** Made once and played again: three seconds of noise is not free to make. */
+let rumble: AudioBuffer | null = null
+
+/**
+ * Thunder: noise again, like the applause below, but red rather than white
+ * — each sample a small step on from the last, which is what makes it roll
+ * instead of hiss — and given the best part of three seconds to grumble
+ * away. A crack at the front, then the low end, then nothing.
+ *
+ * The delay is the distance. Lightning is seen at once and heard later, and
+ * the further off it struck the longer the wait.
+ */
+export function thunder(delay = 0) {
+  if (muted || level === 0) return
+  const ac = audioContext()
+  if (!ac) return
+  const span = 2.8
+  if (!rumble || rumble.sampleRate !== ac.sampleRate) {
+    const length = Math.floor(ac.sampleRate * span)
+    rumble = ac.createBuffer(1, length, ac.sampleRate)
+    const data = rumble.getChannelData(0)
+    let last = 0
+    let loudest = 0
+    for (let i = 0; i < length; i++) {
+      last = (last + (Math.random() * 2 - 1) * 0.05) * 0.996
+      data[i] = last
+      loudest = Math.max(loudest, Math.abs(last))
+    }
+    for (let i = 0; i < length; i++) data[i] /= loudest || 1
+  }
+
+  const start = ac.currentTime + delay
+  const source = ac.createBufferSource()
+  source.buffer = rumble
+  // No two the same: a little faster or slower is a nearer or bigger one.
+  source.playbackRate.value = 0.8 + Math.random() * 0.35
+
+  const low = ac.createBiquadFilter()
+  low.type = 'lowpass'
+  low.frequency.setValueAtTime(1100, start)
+  low.frequency.exponentialRampToValueAtTime(120, start + span)
+
+  const gain = ac.createGain()
+  const loud = 0.5 * scale()
+  gain.gain.setValueAtTime(0.0001, start)
+  gain.gain.exponentialRampToValueAtTime(loud, start + 0.05)
+  gain.gain.exponentialRampToValueAtTime(loud * 0.4, start + 0.7)
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + span)
+
+  source.connect(low).connect(gain).connect(ac.destination)
+  source.start(start)
+  source.stop(start + span + 0.05)
+}
+
 /* ------------------------------- applause -------------------------------- */
 
 /**

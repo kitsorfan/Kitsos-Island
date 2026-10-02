@@ -208,6 +208,7 @@ src/
     map/          the minimap and the full map overlay
     arcade/       the games board and the list it offers
     paintball/  moto/  balloon/  hide/  rescue/     one minigame each
+    live/         the live sky: the sun over Athens, the weather, the card
     lecture/  party/  proposal/  calendar/  radio/  toys/
   shared/
     engine/       the r3f scene, collision, audio, signage, quality
@@ -231,7 +232,27 @@ Some notes on how it hangs together:
 - **Nothing is fetched.** Terrain, water, characters, buildings, furniture and
   props are all procedural geometry; signage text is drawn to a canvas at runtime
   (`shared/engine/TextSign.tsx`). The fonts are self-hosted (`@fontsource`), so
-  nothing is requested from anywhere else.
+  nothing is requested from anywhere else — until the visitor presses **Live**,
+  which is the one thing on the island that asks another site for anything.
+- **Live keeps a real sky.** The 📡 button beside Day / Night puts the island
+  under Athens as it is right now: dark after sunset there, and raining when
+  it rains. Day or night is worked out, not fetched — `features/live/sun.ts`
+  is the almanac's formula for the sun's height, good to a minute on a
+  sunrise, and the time anywhere is the visitor's own clock read in that
+  place's zone — so the lights go out at the right minute even offline. The
+  weather is [Open-Meteo](https://open-meteo.com/) (free, no key, CORS open),
+  asked from the browser every fifteen minutes; its two hosts are the only
+  additions to `connect-src` in `public/_headers`, and a test holds the two
+  together. `weatherLogic.ts` turns its WMO codes into amounts of cloud,
+  rain, snow and haze, and `Weather.tsx` draws them: cloud that throws its
+  shadow across the island as it drifts downwind, rain and snow falling in a
+  box carried in front of the camera, lightning with thunder after it, and a
+  sea and a sky that go grey together. The card behind the sky button moves
+  it — six places one tap away, a search for anywhere else, and a slider
+  that holds the time of day — and the setting is remembered between visits.
+  A game, a party or the candles keep the light they started in: the sun
+  coming up over Athens waits for them to finish. Pressing Day / Night by
+  hand takes Live off.
 - **The music is composed in code**, not shipped as a file — a I–V–vi–IV loop in
   D major with a pad, bass, arpeggio, melody and light percussion, scheduled a
   bar and a half ahead of the audio clock. Original by construction, so there is

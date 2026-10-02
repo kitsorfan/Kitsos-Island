@@ -101,6 +101,11 @@ import {
   landingSpot,
   openFlight,
 } from '../../features/balloon/balloonLogic'
+import { ATHENS, checkPlace, samePlace } from '../../features/live/places'
+import type { Place } from '../../features/live/places'
+import type { Reading } from '../../features/live/forecast'
+import { DAY_MINUTES, liveMoment } from '../../features/live/clock'
+import { isNight } from '../../features/live/sun'
 
 /**
  * The settings worth remembering between visits. Someone who had to turn
@@ -120,6 +125,9 @@ interface Settings {
   locale: Locale
   /** What the calendar on the basement wall is turned to. */
   calendar: CalendarDate
+  /** Whether the island keeps the live sky, and where it reads it from. */
+  live: boolean
+  livePlace: Place
 }
 
 const DEFAULTS: Settings = {
@@ -131,6 +139,10 @@ const DEFAULTS: Settings = {
   // made from the browser’s language.
   locale: 'en',
   calendar: { ...BIRTHDAY },
+  // Off until asked for: Live is the one thing on the island that reaches
+  // out to another site, so nobody's visit does that unless they press it.
+  live: false,
+  livePlace: ATHENS,
 }
 
 function clampLevel(value: unknown, fallback: number): number {
@@ -154,6 +166,8 @@ function storedSettings(): Settings {
       sfxLevel: clampLevel(saved.sfxLevel, DEFAULTS.sfxLevel),
       locale: saved.locale === 'el' ? 'el' : DEFAULTS.locale,
       calendar: clampDate(saved.calendar),
+      live: saved.live === true,
+      livePlace: checkPlace(saved.livePlace) ?? DEFAULTS.livePlace,
     }
   } catch {
     return DEFAULTS
@@ -168,7 +182,32 @@ function remember(settings: Settings) {
   }
 }
 
+/**
+ * The settings as they stand, for a setter to change one of and remember.
+ * Picked out in one place so a setting added later is kept by every setter
+ * rather than quietly reset by the ones nobody remembered to update.
+ */
+function settingsOf(s: Settings): Settings {
+  return {
+    quality: s.quality,
+    musicLevel: s.musicLevel,
+    sfxLevel: s.sfxLevel,
+    locale: s.locale,
+    calendar: s.calendar,
+    live: s.live,
+    livePlace: s.livePlace,
+  }
+}
+
 const SAVED = storedSettings()
+
+/** Asking, heard, or no answer: the island stays fair in the last case. */
+export type LiveStatus = 'loading' | 'ready' | 'offline'
+
+/** Whether it is dark at the live place, now or at the time pinned there. */
+function liveNight(place: Place, clock: number | null, now = Date.now()) {
+  return isNight(place, liveMoment(place.timezone, clock, now))
+}
 
 export type Mode =
   | 'title'
@@ -493,6 +532,24 @@ interface GameState {
   /** Lights out: the island after dark. */
   night: boolean
   /**
+   * Live: the island keeps a real place's sky — dark when the sun is down
+   * there, and raining when it rains. Off, it keeps its own, fair weather
+   * and the light switch.
+   */
+  live: boolean
+  /** Where Live reads its sky from. Athens, unless the visitor moves it. */
+  livePlace: Place
+  /**
+   * A time of day pinned at that place, in minutes after its midnight, or
+   * null to keep to its clock. Not remembered between visits: a sky set to
+   * nine in the evening is something to try, not a setting to come back to.
+   */
+  liveClock: number | null
+  /** The weather there and then, or null: Live off, or not heard yet. */
+  weather: Reading | null
+  /** Whether the forecast has come in, which the live card says. */
+  liveStatus: LiveStatus
+  /**
    * When the whole table last stood at its places, or null. The toast reads
    * it and takes itself off the screen three seconds later.
    */
@@ -656,6 +713,17 @@ interface GameState {
   setSfxLevel: (level: number) => void
   setLocale: (locale: Locale) => void
   toggleNight: () => void
+  /** Live on and off. Off keeps the light as it is and clears the weather. */
+  toggleLive: () => void
+  setLivePlace: (place: Place) => void
+  /** Pins a time of day at the live place, or null to go back to its clock. */
+  setLiveClock: (minutes: number | null) => void
+  /**
+   * The live sky's report, every half minute while Live is on: the weather
+   * it has for the place and moment, and whether it heard any. The store
+   * works out the light itself, from the sun.
+   */
+  syncLive: (weather: Reading | null, status: LiveStatus) => void
   toggleFirstPerson: () => void
   toggleHandLight: () => void
   setSwimming: (value: boolean) => void
@@ -1025,7 +1093,14 @@ export const useGame = create<GameState>((raw, get) => {
     musicLevel: SAVED.musicLevel,
     sfxLevel: SAVED.sfxLevel,
     locale: SAVED.locale,
-    night: false,
+    // A visitor who left Live on comes back to the sky as it is now, rather
+    // than to a morning that switches itself off a moment after loading.
+    night: SAVED.live && liveNight(SAVED.livePlace, null),
+    live: SAVED.live,
+    livePlace: SAVED.livePlace,
+    liveClock: null,
+    weather: null,
+    liveStatus: 'loading',
     cheer: null,
     lecture: null,
     lift: null,
@@ -1181,8 +1256,7 @@ export const useGame = create<GameState>((raw, get) => {
      * no-op that leaves the island stuck where one bad patch left it.
      */
     setQuality: (quality) => {
-      const { musicLevel, sfxLevel, locale, calendar } = get()
-      remember({ quality, musicLevel, sfxLevel, locale, calendar })
+      remember({ ...settingsOf(get()), quality })
       set({ quality, autoDropped: false })
     },
 
@@ -1193,16 +1267,14 @@ export const useGame = create<GameState>((raw, get) => {
      */
     setMusicLevel: (level) => {
       const musicLevel = Math.max(0, Math.min(LEVELS, Math.round(level)))
-      const { quality, sfxLevel, locale, calendar } = get()
-      remember({ quality, musicLevel, sfxLevel, locale, calendar })
+      remember({ ...settingsOf(get()), musicLevel })
       applyMusicLevel(musicLevel)
       set({ musicLevel })
     },
 
     setSfxLevel: (level) => {
       const sfxLevel = Math.max(0, Math.min(LEVELS, Math.round(level)))
-      const { quality, musicLevel, locale, calendar } = get()
-      remember({ quality, musicLevel, sfxLevel, locale, calendar })
+      remember({ ...settingsOf(get()), sfxLevel })
       applySfxLevel(sfxLevel)
       set({ sfxLevel })
       // Let them hear what they just chose.
@@ -1214,8 +1286,7 @@ export const useGame = create<GameState>((raw, get) => {
      * only marks the verdict, and a visitor who disagrees can overrule it.
      */
     setLocale: (locale) => {
-      const { quality, musicLevel, sfxLevel, calendar } = get()
-      remember({ quality, musicLevel, sfxLevel, locale, calendar })
+      remember({ ...settingsOf(get()), locale })
       set({ locale })
     },
 
@@ -1245,25 +1316,95 @@ export const useGame = create<GameState>((raw, get) => {
       // rest: hide-and-seek is played in it, and a race, a flight, a match or
       // a rescue lit differently halfway through is a different one. The
       // switch is out of bounds while any of them is on.
-      if (game.hide || game.paintball || game.moto) return
-      if (game.balloon || game.rescue) return
+      if (inGame(game)) return
       sfx.confirm()
-      // The candles and the party both belong to the dark. Putting the sun
-      // back up ends whichever of them is going on.
-      set((s) => {
-        const night = !s.night
-        if (night) return { night }
-        if (s.party) stopParty()
-        if (s.proposal) endProposal()
-        if (!s.party && !s.proposal) return { night }
-        return {
-          night,
-          party: false,
-          proposal: null,
-          amaliaHere: false,
-          outfit: 'islander',
-        }
-      })
+      // Choosing the light by hand is choosing the island's own sky over the
+      // live one, so the switch takes Live off on its way. Otherwise the
+      // next half-minute's report would quietly put the light back.
+      if (game.live) remember({ ...settingsOf(game), live: false })
+      set((s) => ({
+        ...(s.live ? { live: false, weather: null } : {}),
+        ...lightsTo(s, !s.night),
+      }))
+    },
+
+    /**
+     * Refused mid-game for the same reason the light switch is: Live can
+     * move the light, and so can turning it on.
+     */
+    toggleLive: () => {
+      const game = get()
+      if (inGame(game)) return
+      sfx.confirm()
+      const live = !game.live
+      remember({ ...settingsOf(game), live })
+      if (!live) {
+        // The light stays where Live left it — switching it off is not
+        // asking for the sun — but the weather was only ever on loan.
+        set({ live: false, weather: null })
+        return
+      }
+      // The light is the sun's to say, and that needs no network: it is
+      // right from the moment the button is pressed. The weather follows
+      // as soon as the forecast is in.
+      set((s) => ({
+        live: true,
+        liveStatus: 'loading',
+        ...lightsTo(s, liveNight(s.livePlace, s.liveClock)),
+      }))
+    },
+
+    setLivePlace: (place) => {
+      const game = get()
+      if (inGame(game)) return
+      remember({ ...settingsOf(game), livePlace: place })
+      // The same place found again, in another language, say: same sky.
+      if (samePlace(place, game.livePlace)) {
+        set({ livePlace: place })
+        return
+      }
+      set((s) => ({
+        livePlace: place,
+        // Athens' rain is not Tokyo's. Fair until Tokyo's own forecast lands,
+        // which is usually before anybody has looked up from the card.
+        weather: null,
+        liveStatus: 'loading',
+        ...(s.live ? lightsTo(s, liveNight(place, s.liveClock)) : {}),
+      }))
+    },
+
+    setLiveClock: (minutes) => {
+      if (inGame(get())) return
+      const clock =
+        minutes === null
+          ? null
+          : ((Math.round(minutes) % DAY_MINUTES) + DAY_MINUTES) % DAY_MINUTES
+      set((s) => ({
+        liveClock: clock,
+        ...(s.live ? lightsTo(s, liveNight(s.livePlace, clock)) : {}),
+      }))
+    },
+
+    syncLive: (weather, status) => {
+      const s = get()
+      if (!s.live) return
+      // A game, a party or the candles began in one light and keep it to
+      // the end: the sun coming up over Athens is not a reason to stop the
+      // music. The report is heard all the same, and the sky catches up the
+      // moment they are over.
+      if (liveHeld(s)) {
+        if (s.liveStatus !== status) set({ liveStatus: status })
+        return
+      }
+      const night = liveNight(s.livePlace, s.liveClock)
+      if (
+        night === s.night &&
+        weather === s.weather &&
+        status === s.liveStatus
+      ) {
+        return
+      }
+      set({ weather, liveStatus: status, ...lightsTo(s, night) })
     },
 
     toggleParty: () => {
@@ -1455,8 +1596,7 @@ export const useGame = create<GameState>((raw, get) => {
     setCalendar: (next) => {
       const calendar = clampDate(next)
       const christmas = isFeast(calendar)
-      const { quality, musicLevel, sfxLevel, locale } = get()
-      remember({ quality, musicLevel, sfxLevel, locale, calendar })
+      remember({ ...settingsOf(get()), calendar })
       const arriving = christmas && !get().christmas
       if (arriving) sfx.jingle()
       else sfx.blip()
@@ -1502,8 +1642,7 @@ export const useGame = create<GameState>((raw, get) => {
 
     resetCalendar: () => {
       const calendar = { ...BIRTHDAY }
-      const { quality, musicLevel, sfxLevel, locale } = get()
-      remember({ quality, musicLevel, sfxLevel, locale, calendar })
+      remember({ ...settingsOf(get()), calendar })
       set({ calendar, christmas: false })
     },
 
@@ -2712,6 +2851,41 @@ export const useGame = create<GameState>((raw, get) => {
 function plainClothes(s: GameState): GameState['outfit'] {
   if (s.outfit !== 'officer') return s.outfit
   return s.starShirt ? 'star' : 'islander'
+}
+
+/**
+ * Any game at all, briefing card and result card included, rather than only
+ * the minutes it is actually being played. The light a game began in is
+ * part of the game, so this is what the light switch is locked against —
+ * and Live, which moves the light too.
+ */
+export const inGame = (s: GameState) =>
+  Boolean(s.hide || s.paintball || s.moto || s.balloon || s.rescue)
+
+/**
+ * What the live sky waits for before it moves the light or the weather: a
+ * game, and the two things on the island that belong to the dark.
+ */
+export const liveHeld = (s: GameState) =>
+  inGame(s) || s.party || s.proposal !== null
+
+/**
+ * The patch that puts the island in the light asked for. The candles and
+ * the party both belong to the dark, so putting the sun back up ends
+ * whichever of them is going on.
+ */
+function lightsTo(s: GameState, night: boolean): Partial<GameState> {
+  if (night) return { night }
+  if (s.party) stopParty()
+  if (s.proposal) endProposal()
+  if (!s.party && !s.proposal) return { night }
+  return {
+    night,
+    party: false,
+    proposal: null,
+    amaliaHere: false,
+    outfit: 'islander',
+  }
 }
 
 /** Everything a save holds, and nothing else the store happens to keep. */

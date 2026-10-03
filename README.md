@@ -99,6 +99,33 @@ The rest of what crawlers read is in `index.html`: the Open Graph tags, a
 island, and a JSON-LD `Person` that the build writes from the CV data.
 `public/robots.txt` and `public/sitemap.xml` list what is worth finding.
 
+### The trailer
+
+A minute of the island, cut to its own music: the title over the island from
+the air, the day, the Mayor, the five keys, the party and the games after dark,
+and the lighthouse he finally has the keys to, cut the moment he notices
+something is wrong with it. It is shot
+in the game rather than mocked up beside it, so it is recorded again rather
+than edited when the island changes:
+
+```bash
+npm run trailer             # writes trailer/kitsos-island-trailer.mp4, 1080p60
+npm run trailer -- --stills # three frames from every shot, to check the cut
+```
+
+It needs ffmpeg as well as a browser. It finds one on the `PATH` or where
+winget, Chocolatey, Scoop or Homebrew put it (see `config/ffmpeg.ts`); name
+any other with `FFMPEG=<path>`. It takes ten minutes or so. Open the island at `/?trailer`
+to watch the same cut play live, which is the quick way to look at a change.
+
+The shots are in `src/features/trailer/shots.ts`, measured in bars of the
+soundtrack so that every cut lands on the beat. A hidden director (fetched only
+for `/?trailer`) sets each one up, walks him on the touch stick, holds the
+camera and brings up the cards; the score is the island's own music rendered
+offline over the same bars. The recorder (`config/trailer.ts`) runs the page on
+a clock of its own, a sixtieth of a second per frame however long a frame took
+to draw, and pipes every frame to ffmpeg. The film itself is not committed.
+
 ## Deploying
 
 [www.kitsorfan.com](https://www.kitsorfan.com) is a Cloudflare Worker with static assets, set out in

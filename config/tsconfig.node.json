@@ -26,6 +26,8 @@
     "cv-pdf.ts",
     "check-cv-pdf.ts",
     "og-image.ts",
+    "trailer.ts",
+    "ffmpeg.ts",
     "browser.ts",
     "resumeFont.ts"
   ]

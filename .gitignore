@@ -15,6 +15,9 @@ dist-ssr
 # Written by `npm run test:coverage`
 coverage
 
+# Written by `npm run trailer`: the film, and the stills it checks the cut with
+/trailer/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

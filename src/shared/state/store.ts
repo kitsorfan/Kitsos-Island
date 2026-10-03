@@ -43,6 +43,7 @@ import type { CalendarDate } from '../../features/calendar/calendar'
 import type { Locale } from '../i18n'
 import { forgetProgress, isEmpty, loadProgress, saveProgress } from './save'
 import type { SavedProgress } from './save'
+import { TRAILER } from '../../features/trailer/rig'
 import { setMusicLevel as applyMusicLevel } from '../../features/radio/music'
 import {
   callAmalia,
@@ -151,6 +152,9 @@ function clampLevel(value: unknown, fallback: number): number {
 }
 
 function storedSettings(): Settings {
+  // The trailer is shot on the island as it ships, whatever this browser
+  // was last set to.
+  if (TRAILER) return DEFAULTS
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return DEFAULTS
@@ -175,6 +179,7 @@ function storedSettings(): Settings {
 }
 
 function remember(settings: Settings) {
+  if (TRAILER) return
   try {
     localStorage.setItem(KEY, JSON.stringify(settings))
   } catch {

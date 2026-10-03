@@ -1,0 +1,215 @@
+/*
+ * The trailer: the island's own interface stood down, and the cards that go
+ * over the pictures instead. Fetched with the director, so nobody who is
+ * not watching the trailer downloads a byte of it.
+ *
+ * The body says how much of the game's interface a shot keeps: none of it,
+ * a conversation, a conversation with the keyring and the news of a key,
+ * or the map.
+ */
+
+body[data-trailer='clean'] .app > :not(:first-child):not(.trailer-stage),
+body[data-trailer='talk']
+  .app
+  > :not(:first-child):not(.trailer-stage):not(.dialogue-layer),
+body[data-trailer='keys']
+  .app
+  > :not(:first-child):not(.trailer-stage):not(.dialogue-layer):not(.toast):not(
+    .hud
+  ),
+body[data-trailer='keys'] .hud > :not(.hud__top),
+body[data-trailer='keys'] .hud__top > :not(.hud__left),
+body[data-trailer='keys'] .hud__left > :not(.badge),
+body[data-trailer='map']
+  .app
+  > :not(:first-child):not(.trailer-stage):not(.overlay) {
+  display: none !important;
+}
+
+/*
+ * Sized in pixels of a 1920-wide frame, whatever the page is laid out at,
+ * so the cards come out the same size in the film however it was recorded.
+ */
+.trailer-stage {
+  --u: calc(100vw / 1920);
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.trailer-slate {
+  position: absolute;
+  inset: 0;
+  background: #0e0b14;
+}
+
+.trailer-card {
+  --p: 0;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.trailer__kicker {
+  font-family: var(--font-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------- the title ------------------------------ */
+
+.trailer-card--title {
+  align-content: center;
+  gap: calc(26 * var(--u));
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(14, 11, 20, 0.4),
+    transparent 62%
+  );
+}
+
+.trailer-card--title > * {
+  transform: translateY(calc((1 - var(--p)) * 26 * var(--u)))
+    scale(calc(0.94 + var(--p) * 0.06));
+}
+
+.trailer__logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(28 * var(--u));
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: calc(104 * var(--u));
+  line-height: 1;
+  color: #2f6bb3;
+  -webkit-text-stroke: calc(3 * var(--u)) var(--line);
+  paint-order: stroke fill;
+  text-shadow:
+    calc(7 * var(--u)) calc(7 * var(--u)) 0 #ffd166,
+    calc(13 * var(--u)) calc(13 * var(--u)) 0 rgba(42, 32, 51, 0.55);
+}
+
+.trailer__logo span:last-child {
+  color: #e0574a;
+}
+
+.trailer-card--title .trailer__kicker {
+  margin: 0;
+  padding: calc(13 * var(--u)) calc(22 * var(--u)) calc(11 * var(--u));
+  font-size: calc(22 * var(--u));
+  color: var(--paper);
+  background: var(--line);
+  border-radius: calc(12 * var(--u));
+}
+
+/* ------------------------------ the captions ---------------------------- */
+
+.trailer-card--caption {
+  align-items: end;
+  padding-bottom: calc(92 * var(--u));
+}
+
+.trailer-card--top {
+  align-items: start;
+  padding: calc(80 * var(--u)) 0 0;
+}
+
+.trailer__caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(14 * var(--u));
+  padding: calc(26 * var(--u)) calc(48 * var(--u)) calc(24 * var(--u));
+  background: var(--paper);
+  border: calc(5 * var(--u)) solid var(--line);
+  border-radius: calc(24 * var(--u));
+  box-shadow:
+    0 calc(9 * var(--u)) 0 var(--line),
+    0 calc(26 * var(--u)) calc(60 * var(--u)) rgba(14, 11, 20, 0.4);
+  transform: translateY(calc((1 - var(--p)) * 34 * var(--u)))
+    scale(calc(0.96 + var(--p) * 0.04));
+}
+
+.trailer-card--top .trailer__caption {
+  transform: translateY(calc((var(--p) - 1) * 34 * var(--u)))
+    scale(calc(0.96 + var(--p) * 0.04));
+}
+
+.trailer__caption .trailer__kicker {
+  font-size: calc(17 * var(--u));
+  color: var(--accent);
+}
+
+.trailer__caption strong {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: calc(64 * var(--u));
+  line-height: 1;
+  color: var(--ink);
+}
+
+/* -------------------------------- the end ------------------------------- */
+
+.trailer-card--end {
+  background: rgba(14, 11, 20, calc(var(--p) * 0.5));
+  backdrop-filter: blur(calc(var(--p) * 5 * var(--u)));
+}
+
+.trailer__end {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(52 * var(--u)) calc(70 * var(--u)) calc(48 * var(--u));
+  background: var(--paper);
+  border: calc(6 * var(--u)) solid var(--line);
+  border-radius: calc(30 * var(--u));
+  box-shadow:
+    0 calc(12 * var(--u)) 0 var(--line),
+    0 calc(40 * var(--u)) calc(90 * var(--u)) rgba(14, 11, 20, 0.5);
+  transform: translateY(calc((1 - var(--p)) * 40 * var(--u)))
+    scale(calc(0.95 + var(--p) * 0.05));
+}
+
+.trailer__end .trailer__logo {
+  font-size: calc(84 * var(--u));
+  -webkit-text-stroke: 0;
+  text-shadow:
+    calc(6 * var(--u)) calc(6 * var(--u)) 0 #ffd166,
+    calc(11 * var(--u)) calc(11 * var(--u)) 0 rgba(42, 32, 51, 0.22);
+}
+
+.trailer__name {
+  margin: calc(42 * var(--u)) 0 calc(5 * var(--u));
+  font-size: calc(48 * var(--u));
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.trailer__role {
+  margin: 0;
+  font-size: calc(27 * var(--u));
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.trailer__url {
+  display: flex;
+  align-items: center;
+  gap: calc(18 * var(--u));
+  margin: calc(36 * var(--u)) 0 0;
+  font-size: calc(32 * var(--u));
+  font-weight: 700;
+}
+
+.trailer__pill {
+  padding: calc(6 * var(--u)) calc(18 * var(--u)) calc(3 * var(--u));
+  background: #ffd166;
+  border: calc(4 * var(--u)) solid var(--line);
+  border-radius: calc(16 * var(--u));
+  box-shadow: 0 calc(5 * var(--u)) 0 var(--line);
+  font-weight: 800;
+}

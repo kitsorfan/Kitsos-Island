@@ -83,6 +83,7 @@ export default defineConfig({
         'src/features/arcade/GamesBoard.tsx',
         'src/features/live/Weather.tsx',
         'src/features/cv/TechMarks.tsx',
+        'src/features/trailer/Director.tsx',
         'src/main.tsx',
         'src/types.ts',
         'src/test/**',

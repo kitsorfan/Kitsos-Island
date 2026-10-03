@@ -38,6 +38,7 @@ import {
 import type { Collider } from '../island/terrainLogic'
 import { resolveCollisions, type Bounds } from '../../shared/engine/collision'
 import { examine } from '../interior/examine'
+import { RIG } from '../trailer/rig'
 import {
   AUTO_DOOR_REACH,
   DOOR_ADMIT,
@@ -1807,6 +1808,7 @@ export function Player() {
 
     const lens = firstPerson ? LENS.first : LENS.third
     if (
+      !RIG.camera &&
       'isPerspectiveCamera' in camera &&
       (camera.fov !== lens.fov || camera.near !== lens.near)
     ) {
@@ -1816,7 +1818,11 @@ export function Player() {
       camera.updateProjectionMatrix()
     }
 
-    if (firstPerson) {
+    if (RIG.camera) {
+      // The trailer's director has the lens, and the shot is its business.
+      // Handing it back cuts to his shoulder rather than sweeping there.
+      camReady.current = false
+    } else if (firstPerson) {
       // The walk cycle. Two footfalls to a stride, so the head rises and
       // falls at twice the rate it swings side to side, which is what stops
       // a bob reading as a bounce on a pogo stick.

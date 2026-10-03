@@ -1299,3 +1299,85 @@ export function setMood(next: Mood) {
   bus.gain.setTargetAtTime(target(), ac.currentTime, 0.5)
   filter.frequency.setTargetAtTime(TRACKS[next].cutoff, ac.currentTime, 0.5)
 }
+
+/* ------------------------------- offline ------------------------------ */
+
+/** A piece, and the bar it comes in on. */
+export interface Cue {
+  bar: number
+  mood: Mood
+}
+
+/**
+ * A fixed run of bars of the soundtrack, rendered to samples rather than
+ * played.
+ *
+ * The trailer cuts on the bar lines of this music, so it takes its
+ * soundtrack from here: the same pieces on the same voices, scheduled into an
+ * offline context against the bar each cue comes in on. A change of piece
+ * lands on its bar line and starts at its own bar one, as it does on the
+ * island, but turns over in a beat rather than half a second — a cut is
+ * sharper than a door.
+ *
+ * The live loop is left alone. The voices write to whatever filter is in the
+ * slot, so this borrows the slot for as long as the scheduling takes, which
+ * is no time at all, and puts it back.
+ */
+export function renderScore(
+  cues: Cue[],
+  bars: number,
+  rate = 48000,
+  tail = 3,
+): Promise<AudioBuffer> {
+  const ac = new OfflineAudioContext(
+    2,
+    Math.ceil((bars * BAR + tail) * rate),
+    rate,
+  )
+  const lowpass = ac.createBiquadFilter()
+  lowpass.type = 'lowpass'
+  lowpass.Q.setValueAtTime(0.6, 0)
+  const gain = ac.createGain()
+  // The same ceiling the live mix has, for the same reason.
+  const ceiling = ac.createDynamicsCompressor()
+  ceiling.threshold.setValueAtTime(-7, 0)
+  ceiling.knee.setValueAtTime(6, 0)
+  ceiling.ratio.setValueAtTime(12, 0)
+  ceiling.attack.setValueAtTime(0.004, 0)
+  ceiling.release.setValueAtTime(0.18, 0)
+  lowpass.connect(gain).connect(ceiling).connect(ac.destination)
+
+  const order = [...cues].sort((a, b) => a.bar - b.bar)
+  const playing = filter
+  filter = lowpass
+  try {
+    let from = 0
+    let current: Mood | null = null
+    for (let b = 0; b < bars; b++) {
+      const cue = order.findLast((c) => c.bar <= b)
+      if (!cue) continue
+      const at = b * BAR
+      if (cue.mood !== current) {
+        const track = TRACKS[cue.mood]
+        if (current === null) {
+          gain.gain.setValueAtTime(track.gain, at)
+          lowpass.frequency.setValueAtTime(track.cutoff, at)
+        } else {
+          gain.gain.setTargetAtTime(track.gain, at - BEAT / 4, BEAT / 4)
+          lowpass.frequency.setTargetAtTime(
+            track.cutoff,
+            at - BEAT / 4,
+            BEAT / 4,
+          )
+        }
+        current = cue.mood
+        from = b
+      }
+      /* Every factory the voices call is on the offline context too. */
+      TRACKS[cue.mood].play(ac as unknown as AudioContext, b - from, at)
+    }
+  } finally {
+    filter = playing
+  }
+  return ac.startRendering()
+}

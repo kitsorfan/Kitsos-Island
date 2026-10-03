@@ -16,6 +16,8 @@
  * whatever language is chosen on the day, and never carries a copy of the CV.
  */
 
+import { TRAILER } from '../../features/trailer/rig'
+
 const KEY = 'island.progress'
 
 /** Bumped when the saved shape changes past what the reader below can take. */
@@ -143,6 +145,9 @@ export function isEmpty(progress: SavedProgress): boolean {
  * of those are a reason not to draw the island, so all three end the same way.
  */
 export function loadProgress(): SavedProgress | null {
+  // The trailer starts from an island nobody has walked, and leaves the one
+  // this browser has walked exactly as it was.
+  if (TRAILER) return null
   try {
     const blob = localStorage.getItem(KEY)
     if (!blob) return null
@@ -172,6 +177,7 @@ export function loadProgress(): SavedProgress | null {
 }
 
 export function saveProgress(progress: SavedProgress) {
+  if (TRAILER) return
   try {
     if (isEmpty(progress)) {
       localStorage.removeItem(KEY)

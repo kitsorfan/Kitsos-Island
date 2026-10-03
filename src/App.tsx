@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { AdaptiveQuality } from './shared/engine/AdaptiveQuality'
 import { Scene } from './shared/engine/Scene'
@@ -33,6 +33,18 @@ import { setMuted, setSfxLevel } from './shared/engine/audio'
 import type { Mood } from './features/radio/music'
 import { setMood, setMusicEnabled, setMusicLevel } from './features/radio/music'
 import { FEAST_AREA } from './features/party/feast'
+import { TRAILER } from './features/trailer/rig'
+
+/**
+ * The trailer's director and its cards, fetched only for /?trailer: nobody
+ * walking the island downloads the camera crew.
+ */
+const Director = lazy(() =>
+  import('./features/trailer/Director').then((m) => ({ default: m.Director })),
+)
+const Cards = lazy(() =>
+  import('./features/trailer/Cards').then((m) => ({ default: m.Cards })),
+)
 
 /** What the tab says, in English; index.html starts it off the same. */
 const TITLE = 'Kitsos Island - Playable CV'
@@ -171,6 +183,11 @@ export default function App() {
         <Suspense fallback={null}>
           <Scene />
         </Suspense>
+        {TRAILER && (
+          <Suspense fallback={null}>
+            <Director />
+          </Suspense>
+        )}
       </Canvas>
 
       <Curtain />
@@ -205,6 +222,12 @@ export default function App() {
       )}
 
       {mode === 'greeting' && <Greeting />}
+
+      {TRAILER && (
+        <Suspense fallback={null}>
+          <Cards />
+        </Suspense>
+      )}
     </div>
   )
 }

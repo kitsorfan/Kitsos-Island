@@ -2010,6 +2010,15 @@ export const INTERIORS: Interior[] = [
               blocks: [
                 {
                   type: 'text',
+                  text: 'A trailer: a minute of the island, filmed in the game itself and cut to its own music. Add ?trailer to the address and the island plays it for you.',
+                },
+              ],
+            },
+            {
+              heading: 'Version 1.5 · 2026-10-02',
+              blocks: [
+                {
+                  type: 'text',
                   text: 'Live, beside Day and Night: the island keeps the real sky over Athens, or anywhere else you send it. The lights go out when the sun sets there, and its weather comes to the island — cloud and its shadows, rain, snow, fog and thunder. A card beside the button moves it to another place, or holds a time of day.',
                 },
               ],
@@ -2058,7 +2067,7 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'Release notes',
-          body: `Version ${LATEST_RELEASE.version}, ${LATEST_RELEASE.date}: the island keeps the real sky over Athens, weather and all. Version 1.4: the message desk says plainly when your message is on its way. Version 1.3: a motorbike you can ride on a touch screen, Greek all the way through, and Inspiration Road. Version 1.2: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.`,
+          body: `Version ${LATEST_RELEASE.version}, ${LATEST_RELEASE.date}: a trailer, filmed in the game and cut to its own music. Version 1.5: the island keeps the real sky over Athens, weather and all. Version 1.4: the message desk says plainly when your message is on its way. Version 1.3: a motorbike you can ride on a touch screen, Greek all the way through, and Inspiration Road. Version 1.2: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.`,
         },
       },
     ],

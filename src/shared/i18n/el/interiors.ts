@@ -230,6 +230,9 @@ export const INTERIORS: Record<string, string> = {
   /* ---------------------------- Radio Center -------------------------- */
   'the release notes': 'οι σημειώσεις έκδοσης',
   'Release notes': 'Σημειώσεις έκδοσης',
+  'Version 1.6 · 2026-10-03': 'Έκδοση 1.6 · 2026-10-03',
+  'A trailer: a minute of the island, filmed in the game itself and cut to its own music. Add ?trailer to the address and the island plays it for you.':
+    'Ένα τρέιλερ: ένα λεπτό από το νησί, γυρισμένο μέσα στο ίδιο το παιχνίδι και μονταρισμένο πάνω στη δική του μουσική. Πρόσθεσε ?trailer στη διεύθυνση και το νησί θα σου το παίξει.',
   'Version 1.5 · 2026-10-02': 'Έκδοση 1.5 · 2026-10-02',
   'Live, beside Day and Night: the island keeps the real sky over Athens, or anywhere else you send it. The lights go out when the sun sets there, and its weather comes to the island — cloud and its shadows, rain, snow, fog and thunder. A card beside the button moves it to another place, or holds a time of day.':
     'Ζωντανά, δίπλα στη Μέρα και τη Νύχτα: το νησί κρατάει τον αληθινό ουρανό της Αθήνας, ή όποιου άλλου τόπου το στείλεις. Τα φώτα σβήνουν όταν δύει εκεί ο ήλιος, κι ο καιρός του έρχεται στο νησί — σύννεφα με τις σκιές τους, βροχή, χιόνι, ομίχλη και μπουμπουνητά. Μια κάρτα δίπλα στο κουμπί το πάει σε άλλο τόπο ή σταματάει την ώρα της ημέρας.',
@@ -247,8 +250,8 @@ export const INTERIORS: Record<string, string> = {
     'Ένα βιογραφικό PDF δύο σελίδων, τυπωμένο από το νησί, για λήψη από το πλήρες βιογραφικό.',
   'Version 1.0 · 2026-09-25': 'Έκδοση 1.0 · 2026-09-25',
   'First working version.': 'Η πρώτη λειτουργική έκδοση.',
-  'Version 1.5, 2026-10-02: the island keeps the real sky over Athens, weather and all. Version 1.4: the message desk says plainly when your message is on its way. Version 1.3: a motorbike you can ride on a touch screen, Greek all the way through, and Inspiration Road. Version 1.2: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.':
-    'Έκδοση 1.5, 2026-10-02: το νησί κρατάει τον αληθινό ουρανό της Αθήνας, μαζί με τον καιρό του. Έκδοση 1.4: το γραφείο μηνυμάτων σού λέει καθαρά ότι το μήνυμά σου έφυγε. Έκδοση 1.3: μια μηχανή που οδηγείται σε οθόνη αφής, ελληνικά από την αρχή ως το τέλος, και η Οδός Έμπνευσης. Έκδοση 1.2: παίζεται σε κινητό, πιστοποιητικό με σύνδεσμο για να επαληθευτεί, και γραφείο μηνυμάτων που εκπέμπει. Έκδοση 1.1: ένα βιογραφικό PDF δύο σελίδων, για λήψη από το πλήρες βιογραφικό. Έκδοση 1.0: η πρώτη λειτουργική έκδοση του νησιού.',
+  'Version 1.6, 2026-10-03: a trailer, filmed in the game and cut to its own music. Version 1.5: the island keeps the real sky over Athens, weather and all. Version 1.4: the message desk says plainly when your message is on its way. Version 1.3: a motorbike you can ride on a touch screen, Greek all the way through, and Inspiration Road. Version 1.2: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.':
+    'Έκδοση 1.6, 2026-10-03: ένα τρέιλερ, γυρισμένο μέσα στο παιχνίδι και μονταρισμένο πάνω στη δική του μουσική. Έκδοση 1.5: το νησί κρατάει τον αληθινό ουρανό της Αθήνας, μαζί με τον καιρό του. Έκδοση 1.4: το γραφείο μηνυμάτων σού λέει καθαρά ότι το μήνυμά σου έφυγε. Έκδοση 1.3: μια μηχανή που οδηγείται σε οθόνη αφής, ελληνικά από την αρχή ως το τέλος, και η Οδός Έμπνευσης. Έκδοση 1.2: παίζεται σε κινητό, πιστοποιητικό με σύνδεσμο για να επαληθευτεί, και γραφείο μηνυμάτων που εκπέμπει. Έκδοση 1.1: ένα βιογραφικό PDF δύο σελίδων, για λήψη από το πλήρες βιογραφικό. Έκδοση 1.0: η πρώτη λειτουργική έκδοση του νησιού.',
 
   /* The officers' door, and the room behind it. */
   'Operations room': 'Αίθουσα επιχειρήσεων',

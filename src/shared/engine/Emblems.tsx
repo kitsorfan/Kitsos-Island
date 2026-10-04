@@ -8,10 +8,11 @@ import {
 } from 'three'
 
 /**
- * Institution marks. Each one prefers a real file from `public/marks/` and
- * falls back to a version drawn in code, so the island renders with or without
- * the artwork. The fallbacks are deliberately stylised — they stand in for the
- * official marks rather than imitating them.
+ * Institution marks. The IBM and Veltiston wordmarks are only ever drawn in
+ * code: deliberately stylised stand-ins rather than the official artwork, with
+ * nothing to fetch. The NTUA seal is too finely engraved to draw well, so it
+ * prefers the real file in `public/marks/` and falls back to a drawn version
+ * only if that file is missing.
  */
 
 const FONT = '"Baloo 2", "Trebuchet MS", "Segoe UI", system-ui, sans-serif'
@@ -67,7 +68,7 @@ function squareToPowerOfTwo(image: HTMLImageElement) {
   return canvas
 }
 
-/** The real artwork, if someone has dropped it into public/marks/. */
+/** The real artwork from public/marks/, if the file is there. */
 function useSuppliedTexture(file: string) {
   const [texture, setTexture] = useState<Texture | null>(null)
 
@@ -346,16 +347,11 @@ export function IbmMark({
   rotation?: [number, number, number]
 }) {
   const drawn = useDrawnTexture(drawIbmMark, 512, 256, 'ibm')
-  const supplied = useSuppliedTexture('ibm.png')
 
   return (
     <mesh position={position} rotation={rotation}>
       <planeGeometry args={[width, width / 2]} />
-      <meshBasicMaterial
-        map={supplied ?? drawn}
-        transparent
-        depthWrite={false}
-      />
+      <meshBasicMaterial map={drawn} transparent depthWrite={false} />
     </mesh>
   )
 }
@@ -423,16 +419,11 @@ export function VeltistonMark({
   rotation?: [number, number, number]
 }) {
   const drawn = useDrawnTexture(drawVeltiston, 1024, 256, 'veltiston')
-  const supplied = useSuppliedTexture('veltiston.png')
 
   return (
     <mesh position={position} rotation={rotation}>
       <planeGeometry args={[width, width / 4]} />
-      <meshBasicMaterial
-        map={supplied ?? drawn}
-        transparent
-        depthWrite={false}
-      />
+      <meshBasicMaterial map={drawn} transparent depthWrite={false} />
     </mesh>
   )
 }

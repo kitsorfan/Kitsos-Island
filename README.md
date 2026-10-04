@@ -435,10 +435,11 @@ Scans of the originals go in `public/letters/` (see the README there for the
 filenames). Any that are absent simply do not render, so the transcripts always
 stand on their own.
 
-Institution marks work the same way. `public/marks/ntua.png`, `ibm.png` and
-`veltiston.png` are used on the Academy's foundation stone and the Work
-District's tenant board when present; without them, `src/shared/engine/Emblems.tsx`
-draws stylised stand-ins so the island always renders.
+The NTUA seal works the same way. `public/marks/ntua.png` is used on the
+Academy's foundation stone when present; without it,
+`src/shared/engine/Emblems.tsx` draws a stylised stand-in so the island always
+renders. The IBM and Veltiston wordmarks on the Work District are only ever
+drawn there, with no file behind them.
 
 Adding a townsperson is one entry in `NPCS` — the model, marker, dialogue,
 journal slot and map dot follow automatically. Adding a new exhibit to a room is

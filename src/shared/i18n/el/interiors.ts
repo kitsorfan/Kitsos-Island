@@ -230,6 +230,9 @@ export const INTERIORS: Record<string, string> = {
   /* ---------------------------- Radio Center -------------------------- */
   'the release notes': 'οι σημειώσεις έκδοσης',
   'Release notes': 'Σημειώσεις έκδοσης',
+  'Version 1.6.1 · 2026-10-04': 'Έκδοση 1.6.1 · 2026-10-04',
+  'Lighter signs: the IBM and Veltiston wordmarks are drawn on the island with nothing to download, and the NTUA seal arrives at the size it is shown.':
+    'Ελαφρύτερες πινακίδες: τα λογότυπα της IBM και της Veltiston σχεδιάζονται πάνω στο νησί χωρίς να κατεβαίνει τίποτα, και η σφραγίδα του ΕΜΠ έρχεται στο μέγεθος που εμφανίζεται.',
   'Version 1.6 · 2026-10-03': 'Έκδοση 1.6 · 2026-10-03',
   'A trailer: a minute of the island, filmed in the game itself and cut to its own music. Add ?trailer to the address and the island plays it for you.':
     'Ένα τρέιλερ: ένα λεπτό από το νησί, γυρισμένο μέσα στο ίδιο το παιχνίδι και μονταρισμένο πάνω στη δική του μουσική. Πρόσθεσε ?trailer στη διεύθυνση και το νησί θα σου το παίξει.',
@@ -250,8 +253,8 @@ export const INTERIORS: Record<string, string> = {
     'Ένα βιογραφικό PDF δύο σελίδων, τυπωμένο από το νησί, για λήψη από το πλήρες βιογραφικό.',
   'Version 1.0 · 2026-09-25': 'Έκδοση 1.0 · 2026-09-25',
   'First working version.': 'Η πρώτη λειτουργική έκδοση.',
-  'Version 1.6, 2026-10-03: a trailer, filmed in the game and cut to its own music. Version 1.5: the island keeps the real sky over Athens, weather and all. Version 1.4: the message desk says plainly when your message is on its way. Version 1.3: a motorbike you can ride on a touch screen, Greek all the way through, and Inspiration Road. Version 1.2: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.':
-    'Έκδοση 1.6, 2026-10-03: ένα τρέιλερ, γυρισμένο μέσα στο παιχνίδι και μονταρισμένο πάνω στη δική του μουσική. Έκδοση 1.5: το νησί κρατάει τον αληθινό ουρανό της Αθήνας, μαζί με τον καιρό του. Έκδοση 1.4: το γραφείο μηνυμάτων σού λέει καθαρά ότι το μήνυμά σου έφυγε. Έκδοση 1.3: μια μηχανή που οδηγείται σε οθόνη αφής, ελληνικά από την αρχή ως το τέλος, και η Οδός Έμπνευσης. Έκδοση 1.2: παίζεται σε κινητό, πιστοποιητικό με σύνδεσμο για να επαληθευτεί, και γραφείο μηνυμάτων που εκπέμπει. Έκδοση 1.1: ένα βιογραφικό PDF δύο σελίδων, για λήψη από το πλήρες βιογραφικό. Έκδοση 1.0: η πρώτη λειτουργική έκδοση του νησιού.',
+  'Version 1.6.1, 2026-10-04: lighter signs, with nothing downloaded for the wordmarks. Version 1.6: a trailer, filmed in the game and cut to its own music. Version 1.5: the island keeps the real sky over Athens, weather and all. Version 1.4: the message desk says plainly when your message is on its way. Version 1.3: a motorbike you can ride on a touch screen, Greek all the way through, and Inspiration Road. Version 1.2: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.':
+    'Έκδοση 1.6.1, 2026-10-04: ελαφρύτερες πινακίδες, χωρίς να κατεβαίνει τίποτα για τα λογότυπα. Έκδοση 1.6: ένα τρέιλερ, γυρισμένο μέσα στο παιχνίδι και μονταρισμένο πάνω στη δική του μουσική. Έκδοση 1.5: το νησί κρατάει τον αληθινό ουρανό της Αθήνας, μαζί με τον καιρό του. Έκδοση 1.4: το γραφείο μηνυμάτων σού λέει καθαρά ότι το μήνυμά σου έφυγε. Έκδοση 1.3: μια μηχανή που οδηγείται σε οθόνη αφής, ελληνικά από την αρχή ως το τέλος, και η Οδός Έμπνευσης. Έκδοση 1.2: παίζεται σε κινητό, πιστοποιητικό με σύνδεσμο για να επαληθευτεί, και γραφείο μηνυμάτων που εκπέμπει. Έκδοση 1.1: ένα βιογραφικό PDF δύο σελίδων, για λήψη από το πλήρες βιογραφικό. Έκδοση 1.0: η πρώτη λειτουργική έκδοση του νησιού.',
 
   /* The officers' door, and the room behind it. */
   'Operations room': 'Αίθουσα επιχειρήσεων',

@@ -7,6 +7,7 @@ import { FEAST } from './feast'
 import { LECTURE } from './lecture'
 import { GAMES } from './games'
 import { PROMPTS } from './prompts'
+import { SHOWCASE } from './showcase'
 
 /**
  * The Greek dictionary, split by where its English comes from so that two thousand-odd
@@ -23,4 +24,5 @@ export const EL: Record<string, string> = {
   ...LECTURE,
   ...GAMES,
   ...PROMPTS,
+  ...SHOWCASE,
 }

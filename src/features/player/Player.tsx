@@ -1065,7 +1065,13 @@ export function Player() {
           id: exhibit.id,
           kind: toy ? 'toy' : 'exhibit',
           label: exhibit.label,
-          verb: toy ? 'Look at' : 'Examine',
+          // A side project is not looked at, it is tried: the card it opens
+          // leads with the live thing.
+          verb: toy
+            ? 'Look at'
+            : exhibit.kind === 'project'
+              ? 'Try'
+              : 'Examine',
           x: exhibit.position[0],
           z: exhibit.position[1],
           // The technology wall is a wall, not an object: it runs most of the

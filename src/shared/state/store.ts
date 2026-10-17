@@ -287,6 +287,8 @@ export interface PanelPayload {
   sections: PanelSection[]
   accent: string
   kind: ExhibitKind
+  /** Which project, for a 'project' panel: its screenshot and its links. */
+  project?: string
 }
 
 export type PaintballStatus = 'briefing' | 'playing' | 'won' | 'lost'

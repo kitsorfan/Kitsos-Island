@@ -21,6 +21,8 @@ import { CrewScreen } from '../launch/CrewScreen'
 import { LAUNCH_AREA } from '../launch/launch'
 import { ARMY_AREA, admits } from '../army/army'
 import { Barracks } from '../army/Barracks'
+import { ProjectScreen, ShowcaseFrame } from '../showcase/ProjectScreen'
+import { SHOWCASE } from '../showcase/projects'
 import { liftPhase } from '../lift/lift'
 import { useGame } from '../../shared/state/store'
 import { useT } from '../../shared/i18n/useT'
@@ -129,6 +131,8 @@ export function Interior({ id }: { id: string }) {
       {id === LAUNCH_AREA && <FlightDeck />}
       {/* The kit on its locker, the duty bell, and whoever it calls in. */}
       {id === ARMY_AREA && <Barracks />}
+      {/* The banner over the side projects, and the posts it hangs from. */}
+      {id === SHOWCASE.area && <ShowcaseFrame />}
       {(interior.links ?? []).map((link) => (
         <LinkPiece
           key={link.id}
@@ -427,6 +431,8 @@ function ExhibitPiece({
           <TechWall accent={accent} />
         ) : exhibit.kind === 'crew' ? (
           <CrewScreen />
+        ) : exhibit.kind === 'project' ? (
+          <ProjectScreen id={exhibit.id} />
         ) : exhibit.kind === 'toy' || exhibit.kind === 'prop' ? null : (
           <NoticeBoard accent={accent} />
         )}

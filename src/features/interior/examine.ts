@@ -30,6 +30,8 @@ export function examine(
       sections: exhibit.panel.sections,
       accent,
       kind: exhibit.kind,
+      // A project's screen: the card puts its screenshot and links up top.
+      project: exhibit.kind === 'project' ? exhibit.id : undefined,
     })
   } else if (exhibit.lines) {
     state.talk({ speaker: exhibit.label, lines: exhibit.lines })

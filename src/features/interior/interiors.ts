@@ -1,5 +1,6 @@
 import type { Interior, LiftStop } from '../../types'
 import { LATEST_RELEASE } from '../radio/release'
+import { PROJECT_EXHIBITS } from '../showcase/projects'
 import {
   ARMY_SECTIONS,
   CERTIFICATIONS_SECTIONS,
@@ -1223,6 +1224,9 @@ export const INTERIORS: Interior[] = [
           body: 'Kyriakos Oikonomou, retired Justice of the Hellenic Supreme Court and Vice-President of the "Pantokrator" Foundation, who appointed him Director in 2021: his contribution "had far exceeded our expectations" — renovation, events, volunteers and digital media.',
         },
       },
+      /* The side projects, a screen apiece on the open floor by the
+         certification wall, facing the door. See features/showcase. */
+      ...PROJECT_EXHIBITS,
     ],
   },
 
@@ -2010,6 +2014,15 @@ export const INTERIORS: Interior[] = [
               blocks: [
                 {
                   type: 'text',
+                  text: 'Side projects: a screen apiece on the ground floor of the Work District, each showing the thing running. Step up to one to try it live or read its source. The first is a dental CBCT viewer that runs entirely in the browser.',
+                },
+              ],
+            },
+            {
+              heading: 'Version 1.6.1 · 2026-10-04',
+              blocks: [
+                {
+                  type: 'text',
                   text: 'Lighter signs: the IBM and Veltiston wordmarks are drawn on the island with nothing to download, and the NTUA seal arrives at the size it is shown.',
                 },
               ],
@@ -2076,7 +2089,7 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'Release notes',
-          body: `Version ${LATEST_RELEASE.version}, ${LATEST_RELEASE.date}: lighter signs, with nothing downloaded for the wordmarks. Version 1.6: a trailer, filmed in the game and cut to its own music. Version 1.5: the island keeps the real sky over Athens, weather and all. Version 1.4: the message desk says plainly when your message is on its way. Version 1.3: a motorbike you can ride on a touch screen, Greek all the way through, and Inspiration Road. Version 1.2: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.`,
+          body: `Version ${LATEST_RELEASE.version}, ${LATEST_RELEASE.date}: side projects on the ground floor of the Work District, starting with a dental CBCT viewer. Version 1.6.1: lighter signs, with nothing downloaded for the wordmarks. Version 1.6: a trailer, filmed in the game and cut to its own music. Version 1.5: the island keeps the real sky over Athens, weather and all. Version 1.4: the message desk says plainly when your message is on its way. Version 1.3: a motorbike you can ride on a touch screen, Greek all the way through, and Inspiration Road. Version 1.2: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.`,
         },
       },
     ],

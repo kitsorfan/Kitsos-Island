@@ -5,6 +5,7 @@ import * as sfx from '../engine/audio'
 import { RadioConsole } from '../../features/radio/RadioConsole'
 import { ToyShelfCase } from '../../features/toys/ToyShelfCase'
 import { CrewRoster } from '../../features/launch/CrewRoster'
+import { ProjectHero } from '../../features/showcase/ProjectHero'
 import { Flag } from './Flag'
 import { TechIcon } from '../../features/cv/TechIcon'
 import { hasTechIcon } from '../../features/cv/techMarkIcons'
@@ -80,6 +81,12 @@ export function Panel() {
         </header>
 
         <div className="panel__body" ref={body}>
+          {/* A project leads with the thing itself: the screenshot and the
+              way to it, ahead of anything said about it. */}
+          {panel.kind === 'project' && (
+            <ProjectHero key={panel.project} id={panel.project} />
+          )}
+
           {panel.sections.map((section) => (
             <section key={section.heading} className="panel__section">
               <h3 className="panel__heading">{section.heading}</h3>

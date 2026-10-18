@@ -16,6 +16,7 @@ import * as balloon from '../../features/balloon/balloonLogic'
 import * as moto from '../../features/moto/motoLogic'
 import * as places from '../../features/live/places'
 import * as weather from '../../features/live/weatherLogic'
+import * as showcase from '../../features/showcase/projects'
 import { residentsOf } from '../../features/party/feast'
 
 /**
@@ -129,6 +130,7 @@ describe('the Greek island', () => {
         moto,
         places,
         weather,
+        showcase,
       }),
     ).toEqual([])
   })
@@ -163,7 +165,9 @@ describe('the Greek island', () => {
               ? 'Check'
               : e.kind === 'toy'
                 ? 'Look at'
-                : 'Examine'
+                : e.kind === 'project'
+                  ? 'Try'
+                  : 'Examine'
         phrases.push(`${verb} <b>${e.label}</b>`)
       }
       for (const link of room.links ?? []) {

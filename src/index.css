@@ -2396,6 +2396,87 @@ canvas {
   color: var(--ink-soft);
 }
 
+/* A side project's card leads with the thing running, and the way to it. */
+.project {
+  margin-bottom: 1.6rem;
+}
+
+.project__figure {
+  margin: 0 0 1rem;
+}
+
+.project__shot {
+  display: block;
+  border-radius: 12px;
+  border: 3px solid var(--line);
+  background: #0e171f;
+  box-shadow: 0 4px 0 rgba(42, 32, 51, 0.22);
+  overflow: hidden;
+  line-height: 0;
+  transition: transform 0.1s ease;
+}
+
+.project__shot:hover {
+  transform: translateY(-2px);
+}
+
+.project__shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* On a short window the buttons stay in view; the picture letterboxes. */
+  max-height: 46vh;
+  object-fit: contain;
+}
+
+.project__credit {
+  margin: 0.45rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.project__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.project__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* Said to a screen reader, and nobody else: the arrow says it to the eye. */
+.project__new-tab {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .project__link {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project__shot {
+    transition: none;
+  }
+
+  .project__shot:hover {
+    transform: none;
+  }
+}
+
 /* The crew screen's roster: a card per islander, grouped by where they are. */
 .crew__count {
   margin: 0 0 0.4rem;

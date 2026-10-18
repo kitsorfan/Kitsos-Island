@@ -8,6 +8,7 @@ import type {
 import type { Collider } from '../island/terrainLogic'
 import { CONSOLE } from '../launch/deck'
 import { LAUNCH_AREA } from '../launch/launch'
+import { SHOWCASE, showcaseCollider } from '../showcase/projects'
 
 /** Half-extents each furniture kind occupies on the floor, before rotation. */
 export const PROP_FOOTPRINT: Record<PropKind, Vec2> = {
@@ -93,6 +94,8 @@ const EXHIBIT_FOOTPRINT: Record<string, Vec2> = {
   toy: [0, 0],
   /* Likewise: the prop it hangs on brings its own footprint. */
   prop: [0, 0],
+  /* Standing in the showcase's frame, which the room adds as one piece. */
+  project: [0, 0],
 }
 
 function rotated(half: Vec2, rotation = 0): Vec2 {
@@ -317,6 +320,13 @@ export function interiorColliders(
   if (interior.id === LAUNCH_AREA) {
     out.push({ x: CONSOLE[0], z: CONSOLE[1], hx: 2.5, hz: 0.72 })
   }
+
+  /*
+   * The row of side-project screens in the Work District lobby, posts and
+   * all. The screens are exhibits, one per project, but the frame they stand
+   * in belongs to none of them, so it is solid here as one piece.
+   */
+  if (interior.id === SHOWCASE.area) out.push(showcaseCollider())
 
   for (const link of interior.links ?? []) {
     if (link.kind === 'stairsUp') {

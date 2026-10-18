@@ -767,7 +767,7 @@ export const WORK_DIRECTORY_SECTIONS: PanelSection[] = [
         stats: [
           {
             label: 'Ground',
-            value: 'Capabilities, certifications, student jobs',
+            value: 'Capabilities, certifications, student jobs, side projects',
           },
           { label: 'First', value: 'IBM · 2023–2024' },
           { label: 'Second', value: 'Veltiston AI · 2024–present' },

@@ -383,6 +383,11 @@ export type ExhibitKind =
    * panel draws the roster itself, from the world's own list of people.
    */
   | 'crew'
+  /**
+   * A side project on its screen in the Work District lobby. Its id is the
+   * project's, and its panel leads with the screenshot and the links out.
+   */
+  | 'project'
 
 export interface Exhibit {
   id: string

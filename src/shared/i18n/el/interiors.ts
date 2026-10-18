@@ -169,8 +169,8 @@ export const INTERIORS: Record<string, string> = {
   'Two employers, one floor each, in the order he worked them. Everything on the ground floor is the part that came before either of them, or runs underneath both.':
     'Δύο εργοδότες, ένας όροφος στον καθένα, με τη σειρά που τους δούλεψε. Ό,τι υπάρχει στο ισόγειο είναι το κομμάτι που προηγήθηκε και των δύο, ή που τρέχει από κάτω τους.',
   Ground: 'Ισόγειο',
-  'Capabilities, certifications, student jobs':
-    'Ικανότητες, πιστοποιήσεις, φοιτητικές δουλειές',
+  'Capabilities, certifications, student jobs, side projects':
+    'Ικανότητες, πιστοποιήσεις, φοιτητικές δουλειές, προσωπικά project',
   First: 'Πρώτος',
   'IBM · 2023–2024': 'IBM · 2023–2024',
   Second: 'Δεύτερος',
@@ -230,6 +230,9 @@ export const INTERIORS: Record<string, string> = {
   /* ---------------------------- Radio Center -------------------------- */
   'the release notes': 'οι σημειώσεις έκδοσης',
   'Release notes': 'Σημειώσεις έκδοσης',
+  'Version 1.7 · 2026-10-18': 'Έκδοση 1.7 · 2026-10-18',
+  'Side projects: a screen apiece on the ground floor of the Work District, each showing the thing running. Step up to one to try it live or read its source. The first is a dental CBCT viewer that runs entirely in the browser.':
+    'Προσωπικά project: μια οθόνη για το καθένα στο ισόγειο της Συνοικίας Εργασίας, που το δείχνει να τρέχει. Πλησίασε σε μία για να το δοκιμάσεις ζωντανά ή να δεις τον κώδικά του. Το πρώτο είναι ένα πρόγραμμα προβολής οδοντιατρικών εξετάσεων CBCT που τρέχει ολόκληρο μέσα στον browser.',
   'Version 1.6.1 · 2026-10-04': 'Έκδοση 1.6.1 · 2026-10-04',
   'Lighter signs: the IBM and Veltiston wordmarks are drawn on the island with nothing to download, and the NTUA seal arrives at the size it is shown.':
     'Ελαφρύτερες πινακίδες: τα λογότυπα της IBM και της Veltiston σχεδιάζονται πάνω στο νησί χωρίς να κατεβαίνει τίποτα, και η σφραγίδα του ΕΜΠ έρχεται στο μέγεθος που εμφανίζεται.',
@@ -253,8 +256,8 @@ export const INTERIORS: Record<string, string> = {
     'Ένα βιογραφικό PDF δύο σελίδων, τυπωμένο από το νησί, για λήψη από το πλήρες βιογραφικό.',
   'Version 1.0 · 2026-09-25': 'Έκδοση 1.0 · 2026-09-25',
   'First working version.': 'Η πρώτη λειτουργική έκδοση.',
-  'Version 1.6.1, 2026-10-04: lighter signs, with nothing downloaded for the wordmarks. Version 1.6: a trailer, filmed in the game and cut to its own music. Version 1.5: the island keeps the real sky over Athens, weather and all. Version 1.4: the message desk says plainly when your message is on its way. Version 1.3: a motorbike you can ride on a touch screen, Greek all the way through, and Inspiration Road. Version 1.2: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.':
-    'Έκδοση 1.6.1, 2026-10-04: ελαφρύτερες πινακίδες, χωρίς να κατεβαίνει τίποτα για τα λογότυπα. Έκδοση 1.6: ένα τρέιλερ, γυρισμένο μέσα στο παιχνίδι και μονταρισμένο πάνω στη δική του μουσική. Έκδοση 1.5: το νησί κρατάει τον αληθινό ουρανό της Αθήνας, μαζί με τον καιρό του. Έκδοση 1.4: το γραφείο μηνυμάτων σού λέει καθαρά ότι το μήνυμά σου έφυγε. Έκδοση 1.3: μια μηχανή που οδηγείται σε οθόνη αφής, ελληνικά από την αρχή ως το τέλος, και η Οδός Έμπνευσης. Έκδοση 1.2: παίζεται σε κινητό, πιστοποιητικό με σύνδεσμο για να επαληθευτεί, και γραφείο μηνυμάτων που εκπέμπει. Έκδοση 1.1: ένα βιογραφικό PDF δύο σελίδων, για λήψη από το πλήρες βιογραφικό. Έκδοση 1.0: η πρώτη λειτουργική έκδοση του νησιού.',
+  'Version 1.7, 2026-10-18: side projects on the ground floor of the Work District, starting with a dental CBCT viewer. Version 1.6.1: lighter signs, with nothing downloaded for the wordmarks. Version 1.6: a trailer, filmed in the game and cut to its own music. Version 1.5: the island keeps the real sky over Athens, weather and all. Version 1.4: the message desk says plainly when your message is on its way. Version 1.3: a motorbike you can ride on a touch screen, Greek all the way through, and Inspiration Road. Version 1.2: plays on a phone, a certificate with a link to verify it, and a message desk that transmits. Version 1.1: a two-page PDF CV, to download from the full CV. Version 1.0: the first working version of the island.':
+    'Έκδοση 1.7, 2026-10-18: προσωπικά project στο ισόγειο της Συνοικίας Εργασίας, ξεκινώντας από ένα πρόγραμμα προβολής οδοντιατρικών εξετάσεων CBCT. Έκδοση 1.6.1: ελαφρύτερες πινακίδες, χωρίς να κατεβαίνει τίποτα για τα λογότυπα. Έκδοση 1.6: ένα τρέιλερ, γυρισμένο μέσα στο παιχνίδι και μονταρισμένο πάνω στη δική του μουσική. Έκδοση 1.5: το νησί κρατάει τον αληθινό ουρανό της Αθήνας, μαζί με τον καιρό του. Έκδοση 1.4: το γραφείο μηνυμάτων σού λέει καθαρά ότι το μήνυμά σου έφυγε. Έκδοση 1.3: μια μηχανή που οδηγείται σε οθόνη αφής, ελληνικά από την αρχή ως το τέλος, και η Οδός Έμπνευσης. Έκδοση 1.2: παίζεται σε κινητό, πιστοποιητικό με σύνδεσμο για να επαληθευτεί, και γραφείο μηνυμάτων που εκπέμπει. Έκδοση 1.1: ένα βιογραφικό PDF δύο σελίδων, για λήψη από το πλήρες βιογραφικό. Έκδοση 1.0: η πρώτη λειτουργική έκδοση του νησιού.',
 
   /* The officers' door, and the room behind it. */
   'Operations room': 'Αίθουσα επιχειρήσεων',

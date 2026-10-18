@@ -229,8 +229,8 @@ export const WORLD: Record<string, string> = {
     'Πρόγραμμα αποφοίτων IBM (2024), Agile bootcamp στο Αμβούργο (2024), Arduino IEEE Workshop στο ΕΜΠ (2018). 2ος στον Πανελλήνιο Διαγωνισμό Βιολογίας (2016) και διακρίσεις σε Φυσική, Μαθηματικά, Πληροφορική και Λογοτεχνία. Εθελοντής στη Βραδιά του Ερευνητή (2019) και στα 100 χρόνια ΗΜΜΥ (2017).',
   /* Τα ημερολόγια της Συνοικίας Εργασίας. */
   'How the building reads': 'Πώς διαβάζεται το κτίριο',
-  'The Work District is laid out as an argument rather than a list: the ground floor is capabilities, certifications and the student jobs; the first floor is IBM 2023–2024; the second is Veltiston AI 2024–present. The third floor is built, empty and unnamed — what goes on it depends on who is hiring.':
-    'Η Συνοικία Εργασίας είναι στημένη σαν επιχείρημα και όχι σαν λίστα: το ισόγειο έχει τις ικανότητες, τις πιστοποιήσεις και τις φοιτητικές δουλειές· ο πρώτος όροφος είναι η IBM 2023–2024· ο δεύτερος η Veltiston AI από το 2024 ως σήμερα. Ο τρίτος όροφος είναι χτισμένος, άδειος και χωρίς όνομα — το τι θα μπει σε αυτόν εξαρτάται από το ποιος προσλαμβάνει.',
+  'The Work District is laid out as an argument rather than a list: the ground floor is capabilities, certifications, the student jobs and the side projects; the first floor is IBM 2023–2024; the second is Veltiston AI 2024–present. The third floor is built, empty and unnamed — what goes on it depends on who is hiring.':
+    'Η Συνοικία Εργασίας είναι στημένη σαν επιχείρημα και όχι σαν λίστα: το ισόγειο έχει τις ικανότητες, τις πιστοποιήσεις, τις φοιτητικές δουλειές και τα προσωπικά project· ο πρώτος όροφος είναι η IBM 2023–2024· ο δεύτερος η Veltiston AI από το 2024 ως σήμερα. Ο τρίτος όροφος είναι χτισμένος, άδειος και χωρίς όνομα — το τι θα μπει σε αυτόν εξαρτάται από το ποιος προσλαμβάνει.',
   'Retired Justice of the Hellenic Supreme Court and Vice-President of the "Pantokrator" Foundation, who personally offered Kitsos the Directorship in 2021 while he was still an NTUA undergraduate — and judged what he left behind to have exceeded expectations.':
     'Επίτιμος Αρεοπαγίτης και Αντιπρόεδρος του Ιδρύματος «Παντοκράτωρ», που πρόσφερε προσωπικά στον Κίτσο τη θέση του Διευθυντή το 2021, όσο ήταν ακόμη προπτυχιακός φοιτητής στο ΕΜΠ — και έκρινε ότι όσα άφησε πίσω του ξεπέρασαν τις προσδοκίες.',
   'Three floors': 'Τρεις όροφοι',
@@ -595,6 +595,8 @@ export const WORLD: Record<string, string> = {
     'Οι περισσότεροι μηχανικοί είναι χειρότεροι στο να περιγράφουν τι έφτιαξαν απ’ ό,τι στο να το φτιάχνουν. Ένα βιογραφικό δεν είναι απόδειξη για τον χρόνο σου — είναι ένα επιχείρημα για το τι μπορείς να κάνεις μετά.',
   'So this building is laid out as an argument. Ground floor: what he is good at, what he is certified in, and the jobs he held before any of it was software.':
     'Γι’ αυτό το κτίριο είναι στημένο σαν επιχείρημα. Ισόγειο: σε τι είναι καλός, τι πιστοποιήσεις έχει, και οι δουλειές που έκανε πριν γίνει τίποτα απ’ όλα αυτά λογισμικό.',
+  'The screens by the certificates are the part nobody paid for: what he builds after hours. They are real and they run. Try one.':
+    'Οι οθόνες δίπλα στα πιστοποιητικά είναι το κομμάτι που δεν πλήρωσε κανείς: όσα φτιάχνει μετά τη δουλειά. Είναι αληθινά και δουλεύουν. Δοκίμασε κάποιο.',
   'First floor, IBM. Second floor, Veltiston AI. Take the stairs in the corner or the lift, whichever you prefer. The lift is slower and worth it.':
     'Πρώτος όροφος, IBM. Δεύτερος όροφος, Veltiston AI. Πάρε τη σκάλα στη γωνία ή το ασανσέρ, ό,τι προτιμάς. Το ασανσέρ είναι πιο αργό και αξίζει.',
   'And the third floor? Built, empty, unnamed. He is good at this and he is listening — so what goes up there depends on who walks in.':
@@ -893,6 +895,8 @@ export const WORLD: Record<string, string> = {
     'Πέντε χρόνια. Κανείς δεν τον ανάγκασε να τελειώσει· αυτό ακριβώς σημαίνει το όνομα.',
   'DISCIPLINE ROAD: the Work District. Veltiston.AI and IBM Consulting.':
     'ΟΔΟΣ ΠΕΙΘΑΡΧΙΑΣ: η Συνοικία Εργασίας. Veltiston.AI και IBM Consulting.',
+  'On the ground floor, on screens of their own: what he builds after hours. Walk in and try one.':
+    'Στο ισόγειο, στις δικές τους οθόνες: όσα φτιάχνει μετά τη δουλειά. Μπες μέσα και δοκίμασε κάποιο.',
   'Deploys on Thursdays. Coffee is free, the incidents are not.':
     'Deploy κάθε Πέμπτη. Ο καφές είναι δωρεάν, τα περιστατικά όχι.',
   'Shipping the same standard on a bad week as on a good one is the whole trick.':

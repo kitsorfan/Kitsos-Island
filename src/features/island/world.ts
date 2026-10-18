@@ -1101,13 +1101,14 @@ export const NPCS: Npc[] = [
       'I am Robin. I am here because somebody has to say the unglamorous part out loud: the work does not speak for itself. It never has.',
       'Most engineers are worse at describing what they built than at building it. A CV is not a receipt for your time — it is an argument about what you can do next.',
       'So this building is laid out as an argument. Ground floor: what he is good at, what he is certified in, and the jobs he held before any of it was software.',
+      'The screens by the certificates are the part nobody paid for: what he builds after hours. They are real and they run. Try one.',
       'First floor, IBM. Second floor, Veltiston AI. Take the stairs in the corner or the lift, whichever you prefer. The lift is slower and worth it.',
       'And the third floor? Built, empty, unnamed. He is good at this and he is listening — so what goes up there depends on who walks in.',
       'You have walked in.',
     ],
     journal: {
       title: 'How the building reads',
-      body: 'The Work District is laid out as an argument rather than a list: the ground floor is capabilities, certifications and the student jobs; the first floor is IBM 2023–2024; the second is Veltiston AI 2024–present. The third floor is built, empty and unnamed — what goes on it depends on who is hiring.',
+      body: 'The Work District is laid out as an argument rather than a list: the ground floor is capabilities, certifications, the student jobs and the side projects; the first floor is IBM 2023–2024; the second is Veltiston AI 2024–present. The third floor is built, empty and unnamed — what goes on it depends on who is hiring.',
     },
   },
 
@@ -1827,6 +1828,7 @@ export const SIGNS: SignPost[] = [
     label: 'Discipline Road',
     lines: [
       'DISCIPLINE ROAD: the Work District. Veltiston.AI and IBM Consulting.',
+      'On the ground floor, on screens of their own: what he builds after hours. Walk in and try one.',
       'Deploys on Thursdays. Coffee is free, the incidents are not.',
       'Shipping the same standard on a bad week as on a good one is the whole trick.',
     ],

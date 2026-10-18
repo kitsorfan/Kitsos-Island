@@ -1,5 +1,6 @@
 import type { Interior, LiftStop } from '../../types'
 import { LATEST_RELEASE } from '../radio/release'
+import { PROJECT_EXHIBITS } from '../showcase/projects'
 import {
   ARMY_SECTIONS,
   CERTIFICATIONS_SECTIONS,
@@ -1223,6 +1224,9 @@ export const INTERIORS: Interior[] = [
           body: 'Kyriakos Oikonomou, retired Justice of the Hellenic Supreme Court and Vice-President of the "Pantokrator" Foundation, who appointed him Director in 2021: his contribution "had far exceeded our expectations" — renovation, events, volunteers and digital media.',
         },
       },
+      /* The side projects, a screen apiece on the open floor by the
+         certification wall, facing the door. See features/showcase. */
+      ...PROJECT_EXHIBITS,
     ],
   },
 

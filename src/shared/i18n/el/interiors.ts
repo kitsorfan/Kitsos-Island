@@ -169,8 +169,8 @@ export const INTERIORS: Record<string, string> = {
   'Two employers, one floor each, in the order he worked them. Everything on the ground floor is the part that came before either of them, or runs underneath both.':
     'Δύο εργοδότες, ένας όροφος στον καθένα, με τη σειρά που τους δούλεψε. Ό,τι υπάρχει στο ισόγειο είναι το κομμάτι που προηγήθηκε και των δύο, ή που τρέχει από κάτω τους.',
   Ground: 'Ισόγειο',
-  'Capabilities, certifications, student jobs':
-    'Ικανότητες, πιστοποιήσεις, φοιτητικές δουλειές',
+  'Capabilities, certifications, student jobs, side projects':
+    'Ικανότητες, πιστοποιήσεις, φοιτητικές δουλειές, προσωπικά project',
   First: 'Πρώτος',
   'IBM · 2023–2024': 'IBM · 2023–2024',
   Second: 'Δεύτερος',

@@ -8,7 +8,7 @@ import type {
 import type { Collider } from '../island/terrainLogic'
 import { CONSOLE } from '../launch/deck'
 import { LAUNCH_AREA } from '../launch/launch'
-import { SHOWCASE, showcaseCollider } from '../showcase/projects'
+import { SHOWCASE, showcaseColliders } from '../showcase/projects'
 
 /** Half-extents each furniture kind occupies on the floor, before rotation. */
 export const PROP_FOOTPRINT: Record<PropKind, Vec2> = {
@@ -322,11 +322,12 @@ export function interiorColliders(
   }
 
   /*
-   * The row of side-project screens in the Work District lobby, posts and
-   * all. The screens are exhibits, one per project, but the frame they stand
-   * in belongs to none of them, so it is solid here as one piece.
+   * The side-project stand in the Work District lobby, a row at a time,
+   * posts and all. The screens are exhibits, one per project, but the frame
+   * they stand in belongs to none of them, so each row is solid here as one
+   * piece.
    */
-  if (interior.id === SHOWCASE.area) out.push(showcaseCollider())
+  if (interior.id === SHOWCASE.area) out.push(...showcaseColliders())
 
   for (const link of interior.links ?? []) {
     if (link.kind === 'stairsUp') {

@@ -446,10 +446,12 @@ The side projects are one list, `PROJECTS` in
 `src/features/showcase/projects.ts`: a name, the links out, the card's
 sections and a journal entry. Each becomes an exhibit on the Work District's
 ground floor, a screen showing a 16:9 screenshot from `public/projects/` (see
-the README there), and the row grows sideways from its middle. Nothing in the
-room stops a longer row walking into the bookshelves or across somebody's
-spot, so `src/features/showcase/projects.test.ts` says so instead, and by how
-much.
+the README there). The screens stand in rows of four, each growing sideways
+from its middle, and the fifth project starts a row behind. Nothing in the
+room stops the stand walking into the bookshelves or across somebody's spot,
+so `src/features/showcase/projects.test.ts` says so instead, and by how much.
+It holds the stand both as it is and at two full rows, so there is room for
+eight before anything has to move.
 
 Adding a townsperson is one entry in `NPCS` — the model, marker, dialogue,
 journal slot and map dot follow automatically. Adding a new exhibit to a room is

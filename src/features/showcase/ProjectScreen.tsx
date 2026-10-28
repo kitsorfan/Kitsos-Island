@@ -7,7 +7,10 @@ import {
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
   SHOWCASE,
+  rowAt,
+  rowCount,
   rowHalf,
+  screensIn,
 } from './projects'
 import type { Project } from './projects'
 import { TextPlane } from '../../shared/engine/TextSign'
@@ -24,12 +27,12 @@ const BEZEL = '#1b2530'
 const GLASS_FOOT = 1.1
 const GLASS_MID = GLASS_FOOT + SCREEN_HEIGHT / 2
 /** The frame round the glass. */
-const RIM = 0.08
+const RIM = 0.07
 /** The strip under the glass with the project's name on it. */
-const CHIN = 0.32
+const CHIN = 0.28
 const CHIN_MID = GLASS_FOOT - RIM - CHIN / 2
-const BANNER_MID = GLASS_FOOT + SCREEN_HEIGHT + 0.7
-const BANNER_HEIGHT = 0.56
+const BANNER_MID = GLASS_FOOT + SCREEN_HEIGHT + 0.6
+const BANNER_HEIGHT = 0.5
 
 /**
  * One project's screen, on its column, with its name on the chin: drawn at
@@ -54,7 +57,7 @@ function Screen({ project }: { project: Project }) {
     <group>
       {/* The column, and a foot for it to stand on */}
       <mesh position={[0, 0.06, 0]} castShadow>
-        <boxGeometry args={[0.9, 0.12, 0.6]} />
+        <boxGeometry args={[0.8, 0.12, 0.55]} />
         <meshStandardMaterial color={STEEL} flatShading roughness={0.6} />
       </mesh>
       <mesh position={[0, CHIN_MID / 2, -0.05]} castShadow>
@@ -87,16 +90,27 @@ function Screen({ project }: { project: Project }) {
 }
 
 /**
- * What the screens stand in: a post at each end of the row and a banner
- * across the top saying what they are, over a mat on the floor in front.
+ * What the screens stand in: a post at each end of every row and a rail
+ * across the top, over a mat on the floor in front. The front row's rail is
+ * the banner saying what they are.
  *
  * Drawn by the room rather than by any one screen, because it spans all of
- * them and grows with the row.
+ * them and grows with the stand.
  */
 export function ShowcaseFrame() {
+  return (
+    <>
+      {Array.from({ length: rowCount() }, (_, row) => (
+        <RowFrame key={row} row={row} />
+      ))}
+    </>
+  )
+}
+
+function RowFrame({ row }: { row: number }) {
   const t = useT()
-  const [x, z] = SHOWCASE.position
-  const half = rowHalf()
+  const [x, z] = rowAt(row)
+  const half = rowHalf(screensIn(row))
 
   return (
     <group position={[x, 0, z]}>
@@ -116,21 +130,24 @@ export function ShowcaseFrame() {
         <boxGeometry args={[half * 2, BANNER_HEIGHT, 0.2]} />
         <meshStandardMaterial color={PANEL} flatShading roughness={0.7} />
       </mesh>
-      {/* Read from either side: the row stands out on the floor */}
+      {/* Read from either side: the stand is out on the floor, and the
+          front row's banner is the one a row behind looks up at too */}
       {[0, Math.PI].map((turn) => (
         <group key={turn} rotation={[0, turn, 0]}>
           <mesh position={[0, BANNER_MID - BANNER_HEIGHT / 2 + 0.05, 0.105]}>
             <planeGeometry args={[half * 2, 0.06]} />
             <meshBasicMaterial color={TEAL} />
           </mesh>
-          <TextPlane
-            text={upper(t(SHOWCASE.label))}
-            width={Math.min(half * 2 - 0.4, 3.2)}
-            aspect={8}
-            color="#ffffff"
-            outline=""
-            position={[0, BANNER_MID + 0.03, 0.11]}
-          />
+          {row === 0 && (
+            <TextPlane
+              text={upper(t(SHOWCASE.label))}
+              width={Math.min(half * 2 - 0.4, 3.2)}
+              aspect={8}
+              color="#ffffff"
+              outline=""
+              position={[0, BANNER_MID + 0.03, 0.11]}
+            />
+          )}
         </group>
       ))}
     </group>

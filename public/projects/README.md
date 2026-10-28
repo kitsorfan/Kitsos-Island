@@ -7,6 +7,7 @@ project.
 | File                     | Project            |
 | ------------------------ | ------------------ |
 | `dental-cbct-viewer.jpg` | Dental CBCT Viewer |
+| `oxi-1940.jpg`           | OXI 1940           |
 
 **16:9, at 1280 × 720.** The screen and the card are both drawn at that ratio,
 so anything else is stretched on one and letterboxed on the other. 1280 wide is
@@ -20,4 +21,6 @@ every project's file is here, so it does not go missing quietly.
 
 If the screenshot shows somebody else's material, say whose in the project's
 `credit`, and the card prints it under the picture. The Dental CBCT Viewer's is
-an anonymised public scan under CC BY 4.0.
+an anonymised public scan under CC BY 4.0. OXI 1940's is the quiz's own phone
+screenshots, padded to 16:9 in their background colour; on them are a public
+domain photo and a CC BY-SA 3.0 relief map from Wikimedia Commons.

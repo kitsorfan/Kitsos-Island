@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { PROJECT_BY_ID } from './projects'
 import { useT } from '../../shared/i18n/useT'
-import { fill } from '../../shared/i18n'
 
 /**
  * The top of a project's card: the screenshot and the ways out to the real
@@ -32,7 +31,7 @@ export function ProjectHero({ id }: { id?: string }) {
           >
             <img
               src={`${import.meta.env.BASE_URL}projects/${project.image}`}
-              alt={fill(t('{name}, open on a scan'), { name: project.name })}
+              alt={project.alt}
               width={1280}
               height={720}
               onError={() => setMissing(true)}

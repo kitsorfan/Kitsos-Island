@@ -523,7 +523,7 @@ export const PROFILE: Record<string, string> = {
     'Μπήκε σε μια startup τεχνητής νοημοσύνης για την υγεία, ιδρυμένη από τον καθηγητή του MIT Δημήτρη Μπερτσιμά, ως ένας από τους πρώτους μηχανικούς της, και εξελίχθηκε σε Technical Lead της ναυαρχίδας της, της πλατφόρμας Nurse Scheduling, από τη σύλληψη ως την παραγωγή, με ομάδες σε Ελλάδα, Βοστώνη και Μαρόκο.',
   'Veltiston AI · Athens, hybrid': 'Veltiston AI · Αθήνα, υβριδικά',
   'May 2026 – present': 'Μάιος 2026 – σήμερα',
-  'Full-stack Software Engineer': 'Full-stack Software Engineer',
+  'Founding Engineer': 'Founding Engineer',
   'May 2024 – May 2026': 'Μάιος 2024 – Μάιος 2026',
   'What I shipped': 'Τι έφτιαξα',
   'Secure and scalable, or it does not ship.':

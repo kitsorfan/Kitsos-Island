@@ -648,10 +648,7 @@ export const VELTISTON_SECTIONS: PanelSection[] = [
             meta: 'May 2026 – present',
             steps: [
               { title: 'Senior Software Engineer', meta: 'May 2026 – present' },
-              {
-                title: 'Full-stack Software Engineer',
-                meta: 'May 2024 – May 2026',
-              },
+              { title: 'Founding Engineer', meta: 'May 2024 – May 2026' },
             ],
             bullets: [
               'One of the company’s first engineers; built the flagship Nurse Scheduling platform from concept to production.',

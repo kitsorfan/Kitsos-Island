@@ -1419,7 +1419,7 @@ export const INTERIORS: Interior[] = [
         },
         journal: {
           title: 'Veltiston AI',
-          body: 'One of the first engineers from May 2024, then Senior Software Engineer from May 2026 and project lead on three projects. Technical lead of the Nurse Scheduling platform, concept to production.',
+          body: 'Founding Engineer from May 2024, then Senior Software Engineer from May 2026 and project lead on three projects. Technical lead of the Nurse Scheduling platform, concept to production.',
         },
       },
       {

@@ -5,7 +5,7 @@
  * pulling in every room on the island to find out.
  */
 export const LATEST_RELEASE = {
-  version: '1.8.1',
+  version: '1.9',
   /** ISO date, as the release notes print it. */
-  date: '2026-11-01',
+  date: '2026-11-06',
 } as const

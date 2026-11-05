@@ -271,6 +271,112 @@ export const PROJECTS: Project[] = [
       body: 'A side project, free and open source: a history quiz for Ochi Day, in English and Greek. A hundred questions on 1940–1945 with real photos and maps, four helps, and a medal and a certificate for 18 out of 20 or better. Live at kitsorfan.github.io/oxi-1940.',
     },
   },
+  {
+    id: 'emporio-dental',
+    name: 'Orfanopoulos Dental Clinic',
+    kicker: 'Side project · 2026',
+    image: 'emporio-dental.jpg',
+    alt: 'The clinic’s home page in Greek: dental care in Emporio, Santorini, with the call button and a photo of the treatment room',
+    credit: 'On screen: the clinic’s own photo of its treatment room.',
+    links: [
+      {
+        label: 'Visit the site',
+        href: 'https://emporio-dentist-ortho.gr/en/',
+        primary: true,
+      },
+      {
+        label: 'See it in Greek',
+        href: 'https://emporio-dentist-ortho.gr/',
+      },
+    ],
+    sections: [
+      {
+        heading: 'What it is',
+        blocks: [
+          {
+            type: 'text',
+            text: 'The website of a dental practice on the provincial road in Emporio, Santorini: dentist Alexios Orfanopoulos, working with orthodontist Maria Syrigou. It is live at emporio-dentist-ortho.gr, in Greek and English, for the people who live on the island and the ones visiting it.',
+          },
+          {
+            type: 'text',
+            text: 'Most patients find it on a phone, so it is made for one. The number is a tap away on every page and the map gives directions to the door. There is no form and no online booking, at the clinic’s request: patients call.',
+          },
+        ],
+      },
+      {
+        heading: 'What it does',
+        blocks: [
+          {
+            type: 'list',
+            items: [
+              'Four pages: the practice and its services, the dentist, the orthodontist, and how to reach them, with phones, emails and a map.',
+              'Greek and English, each at its own address, Greek at the root and English under /en. The flag in the header goes to the same page in the other language.',
+              'Tap-to-call on every page, and on a phone a call button that floats over the page.',
+              'A light and a dark theme that follow the device’s own setting, and a button to pick one, which the site remembers.',
+              'Photos of the practice that open full screen and page through with the arrows, the arrow keys or a swipe.',
+            ],
+          },
+        ],
+      },
+      {
+        heading: 'Made to be found',
+        blocks: [
+          {
+            type: 'list',
+            items: [
+              'Every page is prerendered to plain HTML at build time, so search engines and link previews read it without running any JavaScript, and React takes over in the browser.',
+              'Each page in each language has its own title, description, canonical link and link-preview tags, with hreflang links between the two languages, and the build writes the sitemap.',
+              'Tests keep every title to 60 characters and every description to 160, so search results show them whole.',
+              'An address that does not exist gets a real 404 page, kept out of search results.',
+            ],
+          },
+        ],
+      },
+      {
+        heading: 'How it is built',
+        blocks: [
+          {
+            type: 'stats',
+            stats: [
+              { label: 'Pages', value: '4, each in Greek and English' },
+              { label: 'Languages', value: 'English · Ελληνικά' },
+              { label: 'Hosting', value: 'Static, on Cloudflare' },
+              { label: 'Running cost', value: 'The domain, and nothing else' },
+            ],
+          },
+          {
+            type: 'text',
+            text: 'React, TypeScript and Vite. The build also makes a server bundle of the same app, and a small script renders every page to HTML with it, so what a crawler reads and what a visitor sees come from the same code.',
+          },
+          {
+            type: 'text',
+            text: 'Every text lives in one file in both languages, and a test fails if the Greek and the English ever stop matching, so an edit cannot leave a page half translated.',
+          },
+          {
+            type: 'text',
+            text: 'A Content Security Policy lets in only the site’s own scripts, styles and images, the response headers stop other sites from framing it, and the map is sandboxed so it cannot take the page away. Every push to main and every pull request goes through the formatting, lint, type and unit checks in GitHub Actions, and the site deploys only once they pass.',
+          },
+          {
+            type: 'tags',
+            groups: [
+              {
+                label: 'Built with',
+                tags: ['React', 'TypeScript', 'Vite', 'React Router', 'Vitest'],
+              },
+              {
+                label: 'Shipped with',
+                tags: ['GitHub Actions', 'Cloudflare Workers'],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    journal: {
+      title: 'Orfanopoulos Dental Clinic',
+      body: 'A side project: the website of a dental practice in Emporio, Santorini, in Greek and English. Prerendered for search engines, a tap to call from every page, a light and a dark theme, and free to host. Live at emporio-dentist-ortho.gr.',
+    },
+  },
 ]
 
 export const PROJECT_BY_ID = new Map(PROJECTS.map((p) => [p.id, p]))

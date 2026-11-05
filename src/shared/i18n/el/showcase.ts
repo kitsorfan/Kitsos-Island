@@ -16,8 +16,10 @@ const KEPT = [
   'Canvas',
   'Web Audio',
   'DICOM',
+  'React Router',
   'GitHub Actions',
   'GitHub Pages',
+  'Cloudflare Workers',
   'MIT',
 ]
 
@@ -32,6 +34,8 @@ export const SHOWCASE: Record<string, string> = {
   'Side Projects': 'Προσωπικά Project',
   'Try <b>Dental CBCT Viewer</b>': 'Δοκίμασε το <b>Dental CBCT Viewer</b>',
   'Try <b>OXI 1940</b>': 'Παίξε το <b>ΟΧΙ 1940</b>',
+  'Try <b>Orfanopoulos Dental Clinic</b>':
+    'Δες το site του <b>Οδοντιατρείου Ορφανόπουλου</b>',
   'opens in a new tab': 'ανοίγει σε νέα καρτέλα',
 
   /* ------------------------- Dental CBCT Viewer ----------------------- */
@@ -143,4 +147,55 @@ export const SHOWCASE: Record<string, string> = {
 
   'A side project, free and open source: a history quiz for Ochi Day, in English and Greek. A hundred questions on 1940–1945 with real photos and maps, four helps, and a medal and a certificate for 18 out of 20 or better. Live at kitsorfan.github.io/oxi-1940.':
     'Ένα προσωπικό project, δωρεάν και ανοιχτού κώδικα: ένα κουίζ ιστορίας για την επέτειο του «ΟΧΙ», στα ελληνικά και στα αγγλικά. Εκατό ερωτήσεις για το 1940–1945 με αληθινές φωτογραφίες και χάρτες, τέσσερις βοήθειες, και μετάλλιο και δίπλωμα για 18 στα 20 και πάνω. Online στο kitsorfan.github.io/oxi-1940.',
+
+  /* --------------------- Orfanopoulos Dental Clinic ------------------- */
+  /* As the clinic calls itself on its Greek pages. */
+  'Orfanopoulos Dental Clinic': 'Οδοντιατρείο Ορφανόπουλου',
+  'The clinic’s home page in Greek: dental care in Emporio, Santorini, with the call button and a photo of the treatment room':
+    'Η αρχική σελίδα του οδοντιατρείου στα ελληνικά: οδοντιατρική φροντίδα στο Εμπορείο Σαντορίνης, με το κουμπί κλήσης και μια φωτογραφία από τον χώρο θεραπείας',
+  'On screen: the clinic’s own photo of its treatment room.':
+    'Στην οθόνη: ο χώρος θεραπείας, σε φωτογραφία του ίδιου του οδοντιατρείου.',
+  'Visit the site': 'Επισκέψου το site',
+  'See it in Greek': 'Δες το στα ελληνικά',
+
+  'The website of a dental practice on the provincial road in Emporio, Santorini: dentist Alexios Orfanopoulos, working with orthodontist Maria Syrigou. It is live at emporio-dentist-ortho.gr, in Greek and English, for the people who live on the island and the ones visiting it.':
+    'Το site ενός οδοντιατρείου στην Επαρχιακή Οδό του Εμπορείου, στη Σαντορίνη: του οδοντιάτρου Αλέξιου Ορφανόπουλου, που συνεργάζεται με την ορθοδοντικό Μαρία Συρίγου. Είναι online στο emporio-dentist-ortho.gr, στα ελληνικά και στα αγγλικά, για όσους ζουν στο νησί και για όσους το επισκέπτονται.',
+  'Most patients find it on a phone, so it is made for one. The number is a tap away on every page and the map gives directions to the door. There is no form and no online booking, at the clinic’s request: patients call.':
+    'Οι περισσότεροι ασθενείς το βρίσκουν από το κινητό τους, γι’ αυτό είναι φτιαγμένο πρώτα απ’ όλα για κινητό. Σε κάθε σελίδα το τηλέφωνο είναι ένα πάτημα μακριά, και ο χάρτης σε πηγαίνει ως την πόρτα. Φόρμα επικοινωνίας και online ραντεβού δεν υπάρχουν, όπως ζήτησε το ιατρείο: οι ασθενείς απλώς τηλεφωνούν.',
+
+  'Four pages: the practice and its services, the dentist, the orthodontist, and how to reach them, with phones, emails and a map.':
+    'Τέσσερις σελίδες: το ιατρείο και οι υπηρεσίες του, ο οδοντίατρος, η ορθοδοντικός, και πώς θα τους βρεις, με τηλέφωνα, email και χάρτη.',
+  'Greek and English, each at its own address, Greek at the root and English under /en. The flag in the header goes to the same page in the other language.':
+    'Ελληνικά και αγγλικά, η κάθε γλώσσα στη δική της διεύθυνση: τα ελληνικά στη ρίζα του site και τα αγγλικά κάτω από το /en. Η σημαία στο πάνω μέρος σε πηγαίνει στην ίδια σελίδα, στην άλλη γλώσσα.',
+  'Tap-to-call on every page, and on a phone a call button that floats over the page.':
+    'Κλήση με ένα πάτημα από κάθε σελίδα, και στο κινητό ένα κουμπί κλήσης που μένει πάντα πάνω από τη σελίδα.',
+  'A light and a dark theme that follow the device’s own setting, and a button to pick one, which the site remembers.':
+    'Φωτεινό και σκοτεινό θέμα, ανάλογα με τη ρύθμιση της συσκευής, κι ένα κουμπί για να διαλέξεις όποιο θέλεις· το site θυμάται την επιλογή σου.',
+  'Photos of the practice that open full screen and page through with the arrows, the arrow keys or a swipe.':
+    'Φωτογραφίες του ιατρείου που ανοίγουν σε πλήρη οθόνη, και τις ξεφυλλίζεις με τα βελάκια, με τα βέλη του πληκτρολογίου ή σέρνοντας το δάχτυλο.',
+
+  'Made to be found': 'Φτιαγμένο για να το βρίσκουν',
+  'Every page is prerendered to plain HTML at build time, so search engines and link previews read it without running any JavaScript, and React takes over in the browser.':
+    'Κάθε σελίδα βγαίνει έτοιμη σε απλό HTML την ώρα του build, οπότε οι μηχανές αναζήτησης και οι προεπισκοπήσεις συνδέσμων τη διαβάζουν χωρίς να τρέξουν καθόλου JavaScript, και μέσα στον browser αναλαμβάνει μετά το React.',
+  'Each page in each language has its own title, description, canonical link and link-preview tags, with hreflang links between the two languages, and the build writes the sitemap.':
+    'Κάθε σελίδα, σε κάθε γλώσσα, έχει δικό της τίτλο, περιγραφή, canonical link και tags για την προεπισκόπηση συνδέσμων, με συνδέσμους hreflang ανάμεσα στις δύο γλώσσες, και το build γράφει μόνο του το sitemap.',
+  'Tests keep every title to 60 characters and every description to 160, so search results show them whole.':
+    'Τα tests κρατούν κάθε τίτλο ως 60 χαρακτήρες και κάθε περιγραφή ως 160, ώστε τα αποτελέσματα αναζήτησης να τα δείχνουν ολόκληρα.',
+  'An address that does not exist gets a real 404 page, kept out of search results.':
+    'Μια διεύθυνση που δεν υπάρχει παίρνει κανονική σελίδα 404, που μένει έξω από τα αποτελέσματα αναζήτησης.',
+
+  '4, each in Greek and English': '4, η καθεμία στα ελληνικά και στα αγγλικά',
+  Hosting: 'Φιλοξενία',
+  'Static, on Cloudflare': 'Στατική, στο Cloudflare',
+  'Running cost': 'Κόστος λειτουργίας',
+  'The domain, and nothing else': 'Μόνο το domain',
+  'React, TypeScript and Vite. The build also makes a server bundle of the same app, and a small script renders every page to HTML with it, so what a crawler reads and what a visitor sees come from the same code.':
+    'React, TypeScript και Vite. Το build φτιάχνει και μια έκδοση της ίδιας εφαρμογής για server, κι ένα μικρό script βγάζει με αυτήν κάθε σελίδα σε HTML. Έτσι, ό,τι διαβάζει ένας crawler κι ό,τι βλέπει ένας επισκέπτης βγαίνουν από τον ίδιο κώδικα.',
+  'Every text lives in one file in both languages, and a test fails if the Greek and the English ever stop matching, so an edit cannot leave a page half translated.':
+    'Όλα τα κείμενα, και στις δύο γλώσσες, βρίσκονται σε ένα αρχείο, κι ένα test αποτυγχάνει μόλις τα ελληνικά και τα αγγλικά πάψουν να ταιριάζουν. Έτσι καμία αλλαγή δεν αφήνει μια σελίδα μισομεταφρασμένη.',
+  'A Content Security Policy lets in only the site’s own scripts, styles and images, the response headers stop other sites from framing it, and the map is sandboxed so it cannot take the page away. Every push to main and every pull request goes through the formatting, lint, type and unit checks in GitHub Actions, and the site deploys only once they pass.':
+    'Ένα Content Security Policy αφήνει να φορτώσουν μόνο τα scripts, τα styles και οι εικόνες του ίδιου του site, τα headers της απόκρισης δεν αφήνουν άλλα sites να το βάλουν μέσα σε frame, και ο χάρτης τρέχει σε sandbox, για να μην μπορεί να πάρει τη σελίδα αλλού. Κάθε push στο main και κάθε pull request περνάει από ελέγχους μορφοποίησης, lint, τύπων και unit tests στο GitHub Actions, και το site ανεβαίνει μόνο όταν περάσουν όλοι.',
+
+  'A side project: the website of a dental practice in Emporio, Santorini, in Greek and English. Prerendered for search engines, a tap to call from every page, a light and a dark theme, and free to host. Live at emporio-dentist-ortho.gr.':
+    'Ένα προσωπικό project: το site ενός οδοντιατρείου στο Εμπορείο της Σαντορίνης, στα ελληνικά και στα αγγλικά. Έτοιμες σελίδες HTML για τις μηχανές αναζήτησης, κλήση με ένα πάτημα από κάθε σελίδα, φωτεινό και σκοτεινό θέμα, και φιλοξενία χωρίς κόστος. Online στο emporio-dentist-ortho.gr.',
 }

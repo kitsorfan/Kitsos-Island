@@ -23,6 +23,7 @@ const KEPT = [
   'MIT',
   'Ram Altman',
   'Playwright',
+  'Accelerating Education',
 ]
 
 const AS_WRITTEN: Record<string, string> = Object.fromEntries(
@@ -39,6 +40,8 @@ export const SHOWCASE: Record<string, string> = {
   'Try <b>Orfanopoulos Dental Clinic</b>':
     'Δες το site του <b>Οδοντιατρείου Ορφανόπουλου</b>',
   'Try <b>Ram Altman</b>': 'Παίξε το <b>Ram Altman</b>',
+  'Try <b>Accelerating Education</b>':
+    'Δοκίμασε το <b>Accelerating Education</b>',
   'opens in a new tab': 'ανοίγει σε νέα καρτέλα',
 
   /* ------------------------- Dental CBCT Viewer ----------------------- */
@@ -241,4 +244,45 @@ export const SHOWCASE: Record<string, string> = {
 
   'A side project, free and open source: a parody arcade game about the race for AI hardware. Hoard RAM before the AI bubble bursts, against four rivals with strategies of their own and breaking news that changes the rules. On a keyboard or a phone. Live at kitsorfan.github.io/RamAltman.':
     'Ένα προσωπικό project, δωρεάν και ανοιχτού κώδικα: ένα arcade παιχνίδι-παρωδία για την κούρσα του AI και τη μάχη για hardware. Μάζεψε RAM πριν σκάσει η φούσκα του AI, απέναντι σε τέσσερις αντιπάλους με τη δική τους στρατηγική ο καθένας και σε έκτακτα δελτία που αλλάζουν τους κανόνες. Με πληκτρολόγιο ή στο κινητό. Online στο kitsorfan.github.io/RamAltman.',
+
+  /* ------------------------ Accelerating Education -------------------- */
+  'The momentum lesson part way through a run: the empty truck A has stopped at 22.5 m while the loaded truck B is still rolling, with the sliders for mass, speed and friction beside the road':
+    'Το μάθημα για την ορμή στη μέση ενός πειράματος: το άδειο φορτηγό Α έχει σταματήσει στα 22,5 m, ενώ το φορτωμένο Β κυλάει ακόμα, με τα ρυθμιστικά για μάζα, ταχύτητα και τριβή δίπλα στον δρόμο',
+  'Open the lesson': 'Άνοιξε το μάθημα',
+
+  'Interactive physics lessons by Dr. Kontokostas George, in English and Greek, made to be shown in class. The teacher explains, and the page shows the experiment, the numbers and the formulas. They run in the browser, with nothing to install.':
+    'Διαδραστικά μαθήματα φυσικής του Dr. Kontokostas George, στα ελληνικά και στα αγγλικά, φτιαγμένα για να τα δείχνεις μέσα στην τάξη. Ο καθηγητής εξηγεί, και η σελίδα δείχνει το πείραμα, τα νούμερα και τους τύπους. Τρέχουν στον browser, χωρίς να χρειάζεται να εγκαταστήσεις τίποτα.',
+  'The first lesson is momentum. Two trucks drive side by side at the same speed, one empty and one loaded. Which one is harder to stop?':
+    'Το πρώτο μάθημα είναι η ορμή. Δύο φορτηγά τρέχουν δίπλα δίπλα με την ίδια ταχύτητα, το ένα άδειο και το άλλο φορτωμένο. Ποιο από τα δύο σταματάει πιο δύσκολα;',
+
+  'Four steps, a click apart and each with a link of its own: the simulation, the graph, the calculations and a challenge.':
+    'Τέσσερα βήματα, ένα κλικ το ένα από το άλλο, και το καθένα με τον δικό του σύνδεσμο: η προσομοίωση, το διάγραμμα, οι υπολογισμοί και μια πρόκληση.',
+  'Sliders for each truck’s mass and speed and for the friction on both. The crates pile up with the cargo, and each truck’s momentum arrow is drawn to scale.':
+    'Ρυθμιστικά για τη μάζα και την ταχύτητα κάθε φορτηγού, και για την τριβή που δέχονται και τα δύο. Τα κιβώτια στοιβάζονται όσο μεγαλώνει το φορτίο, και το βέλος της ορμής κάθε φορτηγού σχεδιάζεται υπό κλίμακα.',
+  'The p–t graph and a table of how each run went, with the comparison written as formulas: five times the momentum, five times the time, five times the distance.':
+    'Το διάγραμμα p–t κι ένας πίνακας με το πώς πήγε κάθε πείραμα, με τη σύγκριση γραμμένη σε τύπους: πενταπλάσια ορμή, πενταπλάσιος χρόνος, πενταπλάσια απόσταση.',
+  'The calculations, p = m·v and F·Δt = Δp, worked through with the numbers from the run.':
+    'Οι υπολογισμοί, p = m·υ και F·Δt = Δp, λυμένοι με τα νούμερα του πειράματος.',
+  'A challenge on a road where friction is μ·m·g. Four questions, each with its trap: which truck needs more distance to stop, which needs more time, which has more momentum, and which feels more friction. Answer first, then run it to check, and every new problem deals new trucks.':
+    'Μια πρόκληση σε δρόμο όπου η τριβή είναι T = μ·m·g. Τέσσερις ερωτήσεις, η καθεμία με την παγίδα της: ποιο φορτηγό θέλει μεγαλύτερη απόσταση για να σταματήσει, ποιο περισσότερο χρόνο, ποιο έχει μεγαλύτερη ορμή και ποιο δέχεται μεγαλύτερη τριβή. Πρώτα απαντάς και μετά τρέχεις το πείραμα για να δεις αν το βρήκες, και κάθε νέο πρόβλημα φέρνει καινούργια φορτηγά.',
+  'English and Greek, a light and a dark theme, and Space, R, F and N on the keyboard. The Greek follows the school textbook: υ for velocity, T for friction, and decimal commas.':
+    'Ελληνικά και αγγλικά, φωτεινό και σκοτεινό θέμα, και τα πλήκτρα Space, R, F και N για όσους δουλεύουν με πληκτρολόγιο. Τα ελληνικά ακολουθούν το σχολικό βιβλίο: υ για την ταχύτητα, T για την τριβή, και κόμμα για υποδιαστολή.',
+
+  'Why the same force': 'Γιατί η ίδια δύναμη',
+  'If friction were μ·m·g, the heavier truck would feel a proportionally bigger force, and both trucks would stop at the same spot. That would hide the very difference the lesson is about, so the experiment brakes both trucks with the same force, and μ·m·g becomes the challenge.':
+    'Αν η τριβή ήταν μ·m·g, το βαρύτερο φορτηγό θα δεχόταν αναλογικά μεγαλύτερη δύναμη και τα δύο θα σταματούσαν στο ίδιο σημείο. Έτσι θα κρυβόταν ακριβώς η διαφορά που θέλει να δείξει το μάθημα. Γι’ αυτό το πείραμα φρενάρει και τα δύο φορτηγά με την ίδια δύναμη, και το μ·m·g γίνεται η πρόκληση.',
+
+  Lessons: 'Μαθήματα',
+  'One so far, momentum': 'Ένα μέχρι στιγμής, η ορμή',
+  Screens: 'Οθόνες',
+  'Laptop, large screen, phone': 'Laptop, μεγάλη οθόνη, κινητό',
+  'TypeScript and Vite, with no framework. The trucks’ motion is worked out exactly rather than step by step, so they stop on screen exactly where the formulas say, and the road, the trucks and the graph are drawn on a canvas.':
+    'TypeScript και Vite, χωρίς framework. Η κίνηση των φορτηγών υπολογίζεται ακριβώς και όχι βήμα βήμα, οπότε στην οθόνη σταματούν εκεί ακριβώς που λένε οι τύποι. Ο δρόμος, τα φορτηγά και το διάγραμμα ζωγραφίζονται σε canvas.',
+  'Unit tests check the physics and the answer to every challenge question, and keep the English and the Greek in step. End-to-end tests use it in a real browser, and check that the simulation and the challenge fit a 15.6-inch laptop without scrolling and that every step fits a phone.':
+    'Τα unit tests ελέγχουν τη φυσική και την απάντηση σε κάθε ερώτηση της πρόκλησης, και κρατούν τα ελληνικά και τα αγγλικά πάντα συγχρονισμένα. Τα end-to-end tests το δουλεύουν σε αληθινό browser και ελέγχουν ότι η προσομοίωση και η πρόκληση χωράνε σε laptop 15,6 ιντσών χωρίς scroll, κι ότι κάθε βήμα χωράει σε κινητό.',
+  'No analytics, cookies, CDNs or web fonts, under a strict Content Security Policy. All it keeps is your choice of language and theme.':
+    'Ούτε analytics, ούτε cookies, ούτε CDN ή web fonts, και αυστηρό Content Security Policy. Το μόνο που θυμάται είναι τη γλώσσα και το θέμα που διάλεξες.',
+
+  'A side project: interactive physics lessons by Dr. Kontokostas George, in English and Greek. The first is momentum: two trucks, one empty and one loaded, with a graph, the calculations, and a challenge of four questions, each with its trap. Live at kitsorfan.github.io/AcceleratingEducation.':
+    'Ένα προσωπικό project: διαδραστικά μαθήματα φυσικής του Dr. Kontokostas George, στα ελληνικά και στα αγγλικά. Το πρώτο είναι η ορμή: δύο φορτηγά, το ένα άδειο και το άλλο φορτωμένο, με διάγραμμα, υπολογισμούς και μια πρόκληση με τέσσερις ερωτήσεις, την καθεμία με την παγίδα της. Online στο kitsorfan.github.io/AcceleratingEducation.',
 }

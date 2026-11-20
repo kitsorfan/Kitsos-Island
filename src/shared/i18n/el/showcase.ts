@@ -21,6 +21,9 @@ const KEPT = [
   'GitHub Pages',
   'Cloudflare Workers',
   'MIT',
+  'Ram Altman',
+  'Playwright',
+  'Accelerating Education',
 ]
 
 const AS_WRITTEN: Record<string, string> = Object.fromEntries(
@@ -36,6 +39,9 @@ export const SHOWCASE: Record<string, string> = {
   'Try <b>OXI 1940</b>': 'Παίξε το <b>ΟΧΙ 1940</b>',
   'Try <b>Orfanopoulos Dental Clinic</b>':
     'Δες το site του <b>Οδοντιατρείου Ορφανόπουλου</b>',
+  'Try <b>Ram Altman</b>': 'Παίξε το <b>Ram Altman</b>',
+  'Try <b>Accelerating Education</b>':
+    'Δοκίμασε το <b>Accelerating Education</b>',
   'opens in a new tab': 'ανοίγει σε νέα καρτέλα',
 
   /* ------------------------- Dental CBCT Viewer ----------------------- */
@@ -198,4 +204,85 @@ export const SHOWCASE: Record<string, string> = {
 
   'A side project: the website of a dental practice in Emporio, Santorini, in Greek and English. Prerendered for search engines, a tap to call from every page, a light and a dark theme, and free to host. Live at emporio-dentist-ortho.gr.':
     'Ένα προσωπικό project: το site ενός οδοντιατρείου στο Εμπορείο της Σαντορίνης, στα ελληνικά και στα αγγλικά. Έτοιμες σελίδες HTML για τις μηχανές αναζήτησης, κλήση με ένα πάτημα από κάθε σελίδα, φωτεινό και σκοτεινό θέμα, και φιλοξενία χωρίς κόστος. Online στο emporio-dentist-ortho.gr.',
+
+  /* ------------------------------ Ram Altman -------------------------- */
+  'Ram Altman’s title screen: Dario, Elon, Gemini and the Chinese Labs line up as the rivals, with Sam and Jensen on the desert below and a button to start':
+    'Η αρχική οθόνη του Ram Altman: ο Dario, ο Elon, το Gemini και τα Chinese Labs στη σειρά ως αντίπαλοι, με τον Sam και τον Jensen στην έρημο από κάτω και ένα κουμπί για να ξεκινήσεις',
+  'Play the game': 'Παίξε το παιχνίδι',
+
+  'A parody arcade game about the race for AI hardware. You play Sam, hoarding RAM before the AI bubble bursts, while Dario, Elon, Gemini and the Chinese Labs go after the same supply. The desert is dark, you run hot, and water and energy are hard to find.':
+    'Ένα arcade παιχνίδι-παρωδία για την κούρσα του AI και τη μάχη για hardware. Είσαι ο Sam και μαζεύεις όση RAM προλαβαίνεις πριν σκάσει η φούσκα του AI, ενώ ο Dario, ο Elon, το Gemini και τα Chinese Labs κυνηγάνε τα ίδια αποθέματα. Η έρημος είναι σκοτεινή, ζεσταίνεσαι συνέχεια, και νερό κι ενέργεια δύσκολα βρίσκεις.',
+  'It plays in the browser with a keyboard, or on a phone or a tablet held sideways: a stick under the left thumb, and the buttons fanned out under the right.':
+    'Παίζεται στον browser με πληκτρολόγιο, ή σε κινητό και tablet γυρισμένο οριζόντια: ένα joystick κάτω από τον αριστερό αντίχειρα και τα κουμπιά απλωμένα γύρω από τον δεξί.',
+
+  'Every series has a RAM target to hit before the bubble pops. Chain the pickups for a combo of up to ×8, and grab GPUs for 1,000 points each, though they make you run hotter.':
+    'Κάθε γύρος χρηματοδότησης έχει έναν στόχο σε RAM, που πρέπει να τον πιάσεις πριν σκάσει η φούσκα. Μάζευε το ένα μετά το άλλο για combo ως ×8, κι άρπαζε GPU για 1.000 πόντους την καθεμία, μόνο που σε ζεσταίνουν ακόμα περισσότερο.',
+  'Heat climbs all the time and only water cools you down, and every oasis shrinks as you use it and turns up somewhere else. Energy drains too, and with it how far you can see.':
+    'Η θερμοκρασία σου ανεβαίνει συνέχεια και μόνο το νερό σε δροσίζει, ενώ κάθε όαση μικραίνει όσο τη χρησιμοποιείς και ξεπροβάλλει κάπου αλλού. Πέφτει και η ενέργεια, και μαζί της το πόσο μακριά βλέπεις.',
+  'Every trick has a price. A shove stuns a rival and knocks their RAM loose, but costs energy and bad press and sends them after you. A hype tweet stops every rival nearby to read it, and inflates the bubble.':
+    'Κάθε κόλπο έχει το τίμημά του. Ένα σπρώξιμο ζαλίζει τον αντίπαλο και του ρίχνει RAM, αλλά σου κοστίζει ενέργεια και κακή δημοσιότητα, και τον βάζει να σε κυνηγάει. Ένα tweet για hype κάνει όσους αντιπάλους είναι κοντά να σταματήσουν να το διαβάσουν, αλλά φουσκώνει κι άλλο τη φούσκα.',
+  'Four rivals, each with a strategy of its own: Dario steers clear of you and stops for safety evals, Elon winds up and dashes to steal, Gemini pulls pickups towards him and teleports, and the Chinese Labs guess where you are heading and get there first.':
+    'Τέσσερις αντίπαλοι, ο καθένας με τη δική του στρατηγική: ο Dario σε αποφεύγει και σταματάει για ελέγχους ασφαλείας, ο Elon παίρνει φόρα και ορμάει να σου κλέψει, το Gemini τραβάει ό,τι βρει κοντά του και κάνει τηλεμεταφορά, και τα Chinese Labs μαντεύουν πού πας και φτάνουν εκεί πρώτα.',
+  'Jensen drops by with a keynote that throws free GPUs around, or with a loan to buy his chips with. Take it and the GPUs are yours, and the bubble jumps.':
+    'Ο Jensen περνάει πότε με ένα keynote όπου μοιράζει δωρεάν GPU δεξιά κι αριστερά, πότε με ένα δάνειο για να αγοράσεις τα δικά του chips. Αν το δεχτείς, οι GPU είναι δικές σου, αλλά η φούσκα φουσκώνει απότομα.',
+  'Breaking news every half a minute changes the rules for a while: a data-centre fire sale, a DeepSeek moment, a heatwave, Elon suing, an AI safety summit, an alleged spy, and Jensen stepping down.':
+    'Κάθε μισό λεπτό ένα έκτακτο δελτίο αλλάζει για λίγο τους κανόνες: ξεπούλημα σε ένα data center, μια «στιγμή DeepSeek», καύσωνας, ο Elon που σε μηνύει, μια σύνοδος για την ασφάλεια του AI, ένας υποτιθέμενος κατάσκοπος, κι ο Jensen που παραιτείται.',
+
+  'Plays on': 'Παίζεται',
+  'Keyboard, phone or tablet': 'Με πληκτρολόγιο, σε κινητό ή σε tablet',
+  'All made in the browser': 'Φτιάχνεται όλος μέσα στον browser',
+  'One, the pixel font': 'Μία, η pixel γραμματοσειρά',
+  'TypeScript on a canvas, with no game engine and no framework. Every number the rules run on sits in one tuning file, and the sound effects and the soundtrack are synthesised on the spot with Web Audio.':
+    'TypeScript πάνω σε canvas, χωρίς game engine και χωρίς framework. Όλα τα νούμερα των κανόνων βρίσκονται σε ένα αρχείο ρυθμίσεων, και τα ηχητικά εφέ και η μουσική φτιάχνονται επιτόπου με το Web Audio.',
+  'Unit tests cover the rules, from every rival’s strategy to Jensen’s visits and the breaking news. End-to-end tests play it in a real browser, on a keyboard and on an emulated phone held sideways, two thumbs on the glass.':
+    'Τα unit tests καλύπτουν τους κανόνες, από τη στρατηγική κάθε αντιπάλου ως τις επισκέψεις του Jensen και τα έκτακτα δελτία. Τα end-to-end tests το παίζουν σε αληθινό browser, με πληκτρολόγιο αλλά και σε προσομοιωμένο κινητό γυρισμένο οριζόντια, με δύο αντίχειρες στην οθόνη.',
+  'Everything, the font included, comes from the game’s own address, under a strict Content Security Policy. No analytics, no cookies, and the only thing it keeps is your high score, in your own browser.':
+    'Τα πάντα, ακόμα και η γραμματοσειρά, έρχονται από τη διεύθυνση του ίδιου του παιχνιδιού, με αυστηρό Content Security Policy. Ούτε analytics ούτε cookies, και το μόνο που κρατάει είναι το καλύτερο σκορ σου, στον δικό σου browser.',
+
+  'A work of parody. It is not affiliated with, endorsed by or sponsored by any company or person it depicts.':
+    'Πρόκειται για παρωδία. Δεν συνδέεται με καμία εταιρεία και κανένα πρόσωπο απ’ όσα εμφανίζει, ούτε έχει την έγκριση ή τη χορηγία τους.',
+
+  'A side project, free and open source: a parody arcade game about the race for AI hardware. Hoard RAM before the AI bubble bursts, against four rivals with strategies of their own and breaking news that changes the rules. On a keyboard or a phone. Live at kitsorfan.github.io/RamAltman.':
+    'Ένα προσωπικό project, δωρεάν και ανοιχτού κώδικα: ένα arcade παιχνίδι-παρωδία για την κούρσα του AI και τη μάχη για hardware. Μάζεψε RAM πριν σκάσει η φούσκα του AI, απέναντι σε τέσσερις αντιπάλους με τη δική τους στρατηγική ο καθένας και σε έκτακτα δελτία που αλλάζουν τους κανόνες. Με πληκτρολόγιο ή στο κινητό. Online στο kitsorfan.github.io/RamAltman.',
+
+  /* ------------------------ Accelerating Education -------------------- */
+  'The momentum lesson part way through a run: the empty truck A has stopped at 22.5 m while the loaded truck B is still rolling, with the sliders for mass, speed and friction beside the road':
+    'Το μάθημα για την ορμή στη μέση ενός πειράματος: το άδειο φορτηγό Α έχει σταματήσει στα 22,5 m, ενώ το φορτωμένο Β κυλάει ακόμα, με τα ρυθμιστικά για μάζα, ταχύτητα και τριβή δίπλα στον δρόμο',
+  'Open the lesson': 'Άνοιξε το μάθημα',
+
+  'Interactive physics lessons by Dr. Kontokostas George, in English and Greek, made to be shown in class. The teacher explains, and the page shows the experiment, the numbers and the formulas. They run in the browser, with nothing to install.':
+    'Διαδραστικά μαθήματα φυσικής του Dr. Kontokostas George, στα ελληνικά και στα αγγλικά, φτιαγμένα για να τα δείχνεις μέσα στην τάξη. Ο καθηγητής εξηγεί, και η σελίδα δείχνει το πείραμα, τα νούμερα και τους τύπους. Τρέχουν στον browser, χωρίς να χρειάζεται να εγκαταστήσεις τίποτα.',
+  'The first lesson is momentum. Two trucks drive side by side at the same speed, one empty and one loaded. Which one is harder to stop?':
+    'Το πρώτο μάθημα είναι η ορμή. Δύο φορτηγά τρέχουν δίπλα δίπλα με την ίδια ταχύτητα, το ένα άδειο και το άλλο φορτωμένο. Ποιο από τα δύο σταματάει πιο δύσκολα;',
+
+  'Four steps, a click apart and each with a link of its own: the simulation, the graph, the calculations and a challenge.':
+    'Τέσσερα βήματα, ένα κλικ το ένα από το άλλο, και το καθένα με τον δικό του σύνδεσμο: η προσομοίωση, το διάγραμμα, οι υπολογισμοί και μια πρόκληση.',
+  'Sliders for each truck’s mass and speed and for the friction on both. The crates pile up with the cargo, and each truck’s momentum arrow is drawn to scale.':
+    'Ρυθμιστικά για τη μάζα και την ταχύτητα κάθε φορτηγού, και για την τριβή που δέχονται και τα δύο. Τα κιβώτια στοιβάζονται όσο μεγαλώνει το φορτίο, και το βέλος της ορμής κάθε φορτηγού σχεδιάζεται υπό κλίμακα.',
+  'The p–t graph and a table of how each run went, with the comparison written as formulas: five times the momentum, five times the time, five times the distance.':
+    'Το διάγραμμα p–t κι ένας πίνακας με το πώς πήγε κάθε πείραμα, με τη σύγκριση γραμμένη σε τύπους: πενταπλάσια ορμή, πενταπλάσιος χρόνος, πενταπλάσια απόσταση.',
+  'The calculations, p = m·v and F·Δt = Δp, worked through with the numbers from the run.':
+    'Οι υπολογισμοί, p = m·υ και F·Δt = Δp, λυμένοι με τα νούμερα του πειράματος.',
+  'A challenge on a road where friction is μ·m·g. Four questions, each with its trap: which truck needs more distance to stop, which needs more time, which has more momentum, and which feels more friction. Answer first, then run it to check, and every new problem deals new trucks.':
+    'Μια πρόκληση σε δρόμο όπου η τριβή είναι T = μ·m·g. Τέσσερις ερωτήσεις, η καθεμία με την παγίδα της: ποιο φορτηγό θέλει μεγαλύτερη απόσταση για να σταματήσει, ποιο περισσότερο χρόνο, ποιο έχει μεγαλύτερη ορμή και ποιο δέχεται μεγαλύτερη τριβή. Πρώτα απαντάς και μετά τρέχεις το πείραμα για να δεις αν το βρήκες, και κάθε νέο πρόβλημα φέρνει καινούργια φορτηγά.',
+  'English and Greek, a light and a dark theme, and Space, R, F and N on the keyboard. The Greek follows the school textbook: υ for velocity, T for friction, and decimal commas.':
+    'Ελληνικά και αγγλικά, φωτεινό και σκοτεινό θέμα, και τα πλήκτρα Space, R, F και N για όσους δουλεύουν με πληκτρολόγιο. Τα ελληνικά ακολουθούν το σχολικό βιβλίο: υ για την ταχύτητα, T για την τριβή, και κόμμα για υποδιαστολή.',
+
+  'Why the same force': 'Γιατί η ίδια δύναμη',
+  'If friction were μ·m·g, the heavier truck would feel a proportionally bigger force, and both trucks would stop at the same spot. That would hide the very difference the lesson is about, so the experiment brakes both trucks with the same force, and μ·m·g becomes the challenge.':
+    'Αν η τριβή ήταν μ·m·g, το βαρύτερο φορτηγό θα δεχόταν αναλογικά μεγαλύτερη δύναμη και τα δύο θα σταματούσαν στο ίδιο σημείο. Έτσι θα κρυβόταν ακριβώς η διαφορά που θέλει να δείξει το μάθημα. Γι’ αυτό το πείραμα φρενάρει και τα δύο φορτηγά με την ίδια δύναμη, και το μ·m·g γίνεται η πρόκληση.',
+
+  Lessons: 'Μαθήματα',
+  'One so far, momentum': 'Ένα μέχρι στιγμής, η ορμή',
+  Screens: 'Οθόνες',
+  'Laptop, large screen, phone': 'Laptop, μεγάλη οθόνη, κινητό',
+  'TypeScript and Vite, with no framework. The trucks’ motion is worked out exactly rather than step by step, so they stop on screen exactly where the formulas say, and the road, the trucks and the graph are drawn on a canvas.':
+    'TypeScript και Vite, χωρίς framework. Η κίνηση των φορτηγών υπολογίζεται ακριβώς και όχι βήμα βήμα, οπότε στην οθόνη σταματούν εκεί ακριβώς που λένε οι τύποι. Ο δρόμος, τα φορτηγά και το διάγραμμα ζωγραφίζονται σε canvas.',
+  'Unit tests check the physics and the answer to every challenge question, and keep the English and the Greek in step. End-to-end tests use it in a real browser, and check that the simulation and the challenge fit a 15.6-inch laptop without scrolling and that every step fits a phone.':
+    'Τα unit tests ελέγχουν τη φυσική και την απάντηση σε κάθε ερώτηση της πρόκλησης, και κρατούν τα ελληνικά και τα αγγλικά πάντα συγχρονισμένα. Τα end-to-end tests το δουλεύουν σε αληθινό browser και ελέγχουν ότι η προσομοίωση και η πρόκληση χωράνε σε laptop 15,6 ιντσών χωρίς scroll, κι ότι κάθε βήμα χωράει σε κινητό.',
+  'No analytics, cookies, CDNs or web fonts, under a strict Content Security Policy. All it keeps is your choice of language and theme.':
+    'Ούτε analytics, ούτε cookies, ούτε CDN ή web fonts, και αυστηρό Content Security Policy. Το μόνο που θυμάται είναι τη γλώσσα και το θέμα που διάλεξες.',
+
+  'A side project: interactive physics lessons by Dr. Kontokostas George, in English and Greek. The first is momentum: two trucks, one empty and one loaded, with a graph, the calculations, and a challenge of four questions, each with its trap. Live at kitsorfan.github.io/AcceleratingEducation.':
+    'Ένα προσωπικό project: διαδραστικά μαθήματα φυσικής του Dr. Kontokostas George, στα ελληνικά και στα αγγλικά. Το πρώτο είναι η ορμή: δύο φορτηγά, το ένα άδειο και το άλλο φορτωμένο, με διάγραμμα, υπολογισμούς και μια πρόκληση με τέσσερις ερωτήσεις, την καθεμία με την παγίδα της. Online στο kitsorfan.github.io/AcceleratingEducation.',
 }

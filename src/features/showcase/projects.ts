@@ -485,6 +485,111 @@ export const PROJECTS: Project[] = [
       body: 'A side project, free and open source: a parody arcade game about the race for AI hardware. Hoard RAM before the AI bubble bursts, against four rivals with strategies of their own and breaking news that changes the rules. On a keyboard or a phone. Live at kitsorfan.github.io/RamAltman.',
     },
   },
+  {
+    id: 'accelerating-education',
+    name: 'Accelerating Education',
+    kicker: 'Side project · 2026',
+    image: 'accelerating-education.jpg',
+    alt: 'The momentum lesson part way through a run: the empty truck A has stopped at 22.5 m while the loaded truck B is still rolling, with the sliders for mass, speed and friction beside the road',
+    links: [
+      {
+        label: 'Open the lesson',
+        href: 'https://kitsorfan.github.io/AcceleratingEducation/',
+        primary: true,
+      },
+      {
+        label: 'See it in Greek',
+        href: 'https://kitsorfan.github.io/AcceleratingEducation/?lang=el',
+      },
+      {
+        label: 'Source on GitHub',
+        href: 'https://github.com/kitsorfan/AcceleratingEducation',
+      },
+    ],
+    sections: [
+      {
+        heading: 'What it is',
+        blocks: [
+          {
+            type: 'text',
+            text: 'Interactive physics lessons by Dr. Kontokostas George, in English and Greek, made to be shown in class. The teacher explains, and the page shows the experiment, the numbers and the formulas. They run in the browser, with nothing to install.',
+          },
+          {
+            type: 'text',
+            text: 'The first lesson is momentum. Two trucks drive side by side at the same speed, one empty and one loaded. Which one is harder to stop?',
+          },
+        ],
+      },
+      {
+        heading: 'What it does',
+        blocks: [
+          {
+            type: 'list',
+            items: [
+              'Four steps, a click apart and each with a link of its own: the simulation, the graph, the calculations and a challenge.',
+              'Sliders for each truck’s mass and speed and for the friction on both. The crates pile up with the cargo, and each truck’s momentum arrow is drawn to scale.',
+              'The p–t graph and a table of how each run went, with the comparison written as formulas: five times the momentum, five times the time, five times the distance.',
+              'The calculations, p = m·v and F·Δt = Δp, worked through with the numbers from the run.',
+              'A challenge on a road where friction is μ·m·g. Four questions, each with its trap: which truck needs more distance to stop, which needs more time, which has more momentum, and which feels more friction. Answer first, then run it to check, and every new problem deals new trucks.',
+              'English and Greek, a light and a dark theme, and Space, R, F and N on the keyboard. The Greek follows the school textbook: υ for velocity, T for friction, and decimal commas.',
+            ],
+          },
+        ],
+      },
+      {
+        heading: 'Why the same force',
+        blocks: [
+          {
+            type: 'text',
+            text: 'If friction were μ·m·g, the heavier truck would feel a proportionally bigger force, and both trucks would stop at the same spot. That would hide the very difference the lesson is about, so the experiment brakes both trucks with the same force, and μ·m·g becomes the challenge.',
+          },
+        ],
+      },
+      {
+        heading: 'How it is built',
+        blocks: [
+          {
+            type: 'stats',
+            stats: [
+              { label: 'Lessons', value: 'One so far, momentum' },
+              { label: 'Languages', value: 'English · Ελληνικά' },
+              { label: 'Dependencies', value: 'None' },
+              { label: 'Screens', value: 'Laptop, large screen, phone' },
+            ],
+          },
+          {
+            type: 'text',
+            text: 'TypeScript and Vite, with no framework. The trucks’ motion is worked out exactly rather than step by step, so they stop on screen exactly where the formulas say, and the road, the trucks and the graph are drawn on a canvas.',
+          },
+          {
+            type: 'text',
+            text: 'Unit tests check the physics and the answer to every challenge question, and keep the English and the Greek in step. End-to-end tests use it in a real browser, and check that the simulation and the challenge fit a 15.6-inch laptop without scrolling and that every step fits a phone.',
+          },
+          {
+            type: 'text',
+            text: 'No analytics, cookies, CDNs or web fonts, under a strict Content Security Policy. All it keeps is your choice of language and theme.',
+          },
+          {
+            type: 'tags',
+            groups: [
+              {
+                label: 'Built with',
+                tags: ['TypeScript', 'Vite', 'Canvas', 'Vitest', 'Playwright'],
+              },
+              {
+                label: 'Shipped with',
+                tags: ['GitHub Actions', 'GitHub Pages'],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    journal: {
+      title: 'Accelerating Education',
+      body: 'A side project: interactive physics lessons by Dr. Kontokostas George, in English and Greek. The first is momentum: two trucks, one empty and one loaded, with a graph, the calculations, and a challenge of four questions, each with its trap. Live at kitsorfan.github.io/AcceleratingEducation.',
+    },
+  },
 ]
 
 export const PROJECT_BY_ID = new Map(PROJECTS.map((p) => [p.id, p]))

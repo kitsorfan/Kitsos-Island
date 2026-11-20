@@ -21,6 +21,8 @@ const KEPT = [
   'GitHub Pages',
   'Cloudflare Workers',
   'MIT',
+  'Ram Altman',
+  'Playwright',
 ]
 
 const AS_WRITTEN: Record<string, string> = Object.fromEntries(
@@ -36,6 +38,7 @@ export const SHOWCASE: Record<string, string> = {
   'Try <b>OXI 1940</b>': 'Παίξε το <b>ΟΧΙ 1940</b>',
   'Try <b>Orfanopoulos Dental Clinic</b>':
     'Δες το site του <b>Οδοντιατρείου Ορφανόπουλου</b>',
+  'Try <b>Ram Altman</b>': 'Παίξε το <b>Ram Altman</b>',
   'opens in a new tab': 'ανοίγει σε νέα καρτέλα',
 
   /* ------------------------- Dental CBCT Viewer ----------------------- */
@@ -198,4 +201,44 @@ export const SHOWCASE: Record<string, string> = {
 
   'A side project: the website of a dental practice in Emporio, Santorini, in Greek and English. Prerendered for search engines, a tap to call from every page, a light and a dark theme, and free to host. Live at emporio-dentist-ortho.gr.':
     'Ένα προσωπικό project: το site ενός οδοντιατρείου στο Εμπορείο της Σαντορίνης, στα ελληνικά και στα αγγλικά. Έτοιμες σελίδες HTML για τις μηχανές αναζήτησης, κλήση με ένα πάτημα από κάθε σελίδα, φωτεινό και σκοτεινό θέμα, και φιλοξενία χωρίς κόστος. Online στο emporio-dentist-ortho.gr.',
+
+  /* ------------------------------ Ram Altman -------------------------- */
+  'Ram Altman’s title screen: Dario, Elon, Gemini and the Chinese Labs line up as the rivals, with Sam and Jensen on the desert below and a button to start':
+    'Η αρχική οθόνη του Ram Altman: ο Dario, ο Elon, το Gemini και τα Chinese Labs στη σειρά ως αντίπαλοι, με τον Sam και τον Jensen στην έρημο από κάτω και ένα κουμπί για να ξεκινήσεις',
+  'Play the game': 'Παίξε το παιχνίδι',
+
+  'A parody arcade game about the race for AI hardware. You play Sam, hoarding RAM before the AI bubble bursts, while Dario, Elon, Gemini and the Chinese Labs go after the same supply. The desert is dark, you run hot, and water and energy are hard to find.':
+    'Ένα arcade παιχνίδι-παρωδία για την κούρσα του AI και τη μάχη για hardware. Είσαι ο Sam και μαζεύεις όση RAM προλαβαίνεις πριν σκάσει η φούσκα του AI, ενώ ο Dario, ο Elon, το Gemini και τα Chinese Labs κυνηγάνε τα ίδια αποθέματα. Η έρημος είναι σκοτεινή, ζεσταίνεσαι συνέχεια, και νερό κι ενέργεια δύσκολα βρίσκεις.',
+  'It plays in the browser with a keyboard, or on a phone or a tablet held sideways: a stick under the left thumb, and the buttons fanned out under the right.':
+    'Παίζεται στον browser με πληκτρολόγιο, ή σε κινητό και tablet γυρισμένο οριζόντια: ένα joystick κάτω από τον αριστερό αντίχειρα και τα κουμπιά απλωμένα γύρω από τον δεξί.',
+
+  'Every series has a RAM target to hit before the bubble pops. Chain the pickups for a combo of up to ×8, and grab GPUs for 1,000 points each, though they make you run hotter.':
+    'Κάθε γύρος χρηματοδότησης έχει έναν στόχο σε RAM, που πρέπει να τον πιάσεις πριν σκάσει η φούσκα. Μάζευε το ένα μετά το άλλο για combo ως ×8, κι άρπαζε GPU για 1.000 πόντους την καθεμία, μόνο που σε ζεσταίνουν ακόμα περισσότερο.',
+  'Heat climbs all the time and only water cools you down, and every oasis shrinks as you use it and turns up somewhere else. Energy drains too, and with it how far you can see.':
+    'Η θερμοκρασία σου ανεβαίνει συνέχεια και μόνο το νερό σε δροσίζει, ενώ κάθε όαση μικραίνει όσο τη χρησιμοποιείς και ξεπροβάλλει κάπου αλλού. Πέφτει και η ενέργεια, και μαζί της το πόσο μακριά βλέπεις.',
+  'Every trick has a price. A shove stuns a rival and knocks their RAM loose, but costs energy and bad press and sends them after you. A hype tweet stops every rival nearby to read it, and inflates the bubble.':
+    'Κάθε κόλπο έχει το τίμημά του. Ένα σπρώξιμο ζαλίζει τον αντίπαλο και του ρίχνει RAM, αλλά σου κοστίζει ενέργεια και κακή δημοσιότητα, και τον βάζει να σε κυνηγάει. Ένα tweet για hype κάνει όσους αντιπάλους είναι κοντά να σταματήσουν να το διαβάσουν, αλλά φουσκώνει κι άλλο τη φούσκα.',
+  'Four rivals, each with a strategy of its own: Dario steers clear of you and stops for safety evals, Elon winds up and dashes to steal, Gemini pulls pickups towards him and teleports, and the Chinese Labs guess where you are heading and get there first.':
+    'Τέσσερις αντίπαλοι, ο καθένας με τη δική του στρατηγική: ο Dario σε αποφεύγει και σταματάει για ελέγχους ασφαλείας, ο Elon παίρνει φόρα και ορμάει να σου κλέψει, το Gemini τραβάει ό,τι βρει κοντά του και κάνει τηλεμεταφορά, και τα Chinese Labs μαντεύουν πού πας και φτάνουν εκεί πρώτα.',
+  'Jensen drops by with a keynote that throws free GPUs around, or with a loan to buy his chips with. Take it and the GPUs are yours, and the bubble jumps.':
+    'Ο Jensen περνάει πότε με ένα keynote όπου μοιράζει δωρεάν GPU δεξιά κι αριστερά, πότε με ένα δάνειο για να αγοράσεις τα δικά του chips. Αν το δεχτείς, οι GPU είναι δικές σου, αλλά η φούσκα φουσκώνει απότομα.',
+  'Breaking news every half a minute changes the rules for a while: a data-centre fire sale, a DeepSeek moment, a heatwave, Elon suing, an AI safety summit, an alleged spy, and Jensen stepping down.':
+    'Κάθε μισό λεπτό ένα έκτακτο δελτίο αλλάζει για λίγο τους κανόνες: ξεπούλημα σε ένα data center, μια «στιγμή DeepSeek», καύσωνας, ο Elon που σε μηνύει, μια σύνοδος για την ασφάλεια του AI, ένας υποτιθέμενος κατάσκοπος, κι ο Jensen που παραιτείται.',
+
+  'Plays on': 'Παίζεται',
+  'Keyboard, phone or tablet': 'Με πληκτρολόγιο, σε κινητό ή σε tablet',
+  'All made in the browser': 'Φτιάχνεται όλος μέσα στον browser',
+  'One, the pixel font': 'Μία, η pixel γραμματοσειρά',
+  'TypeScript on a canvas, with no game engine and no framework. Every number the rules run on sits in one tuning file, and the sound effects and the soundtrack are synthesised on the spot with Web Audio.':
+    'TypeScript πάνω σε canvas, χωρίς game engine και χωρίς framework. Όλα τα νούμερα των κανόνων βρίσκονται σε ένα αρχείο ρυθμίσεων, και τα ηχητικά εφέ και η μουσική φτιάχνονται επιτόπου με το Web Audio.',
+  'Unit tests cover the rules, from every rival’s strategy to Jensen’s visits and the breaking news. End-to-end tests play it in a real browser, on a keyboard and on an emulated phone held sideways, two thumbs on the glass.':
+    'Τα unit tests καλύπτουν τους κανόνες, από τη στρατηγική κάθε αντιπάλου ως τις επισκέψεις του Jensen και τα έκτακτα δελτία. Τα end-to-end tests το παίζουν σε αληθινό browser, με πληκτρολόγιο αλλά και σε προσομοιωμένο κινητό γυρισμένο οριζόντια, με δύο αντίχειρες στην οθόνη.',
+  'Everything, the font included, comes from the game’s own address, under a strict Content Security Policy. No analytics, no cookies, and the only thing it keeps is your high score, in your own browser.':
+    'Τα πάντα, ακόμα και η γραμματοσειρά, έρχονται από τη διεύθυνση του ίδιου του παιχνιδιού, με αυστηρό Content Security Policy. Ούτε analytics ούτε cookies, και το μόνο που κρατάει είναι το καλύτερο σκορ σου, στον δικό σου browser.',
+
+  'A work of parody. It is not affiliated with, endorsed by or sponsored by any company or person it depicts.':
+    'Πρόκειται για παρωδία. Δεν συνδέεται με καμία εταιρεία και κανένα πρόσωπο απ’ όσα εμφανίζει, ούτε έχει την έγκριση ή τη χορηγία τους.',
+
+  'A side project, free and open source: a parody arcade game about the race for AI hardware. Hoard RAM before the AI bubble bursts, against four rivals with strategies of their own and breaking news that changes the rules. On a keyboard or a phone. Live at kitsorfan.github.io/RamAltman.':
+    'Ένα προσωπικό project, δωρεάν και ανοιχτού κώδικα: ένα arcade παιχνίδι-παρωδία για την κούρσα του AI και τη μάχη για hardware. Μάζεψε RAM πριν σκάσει η φούσκα του AI, απέναντι σε τέσσερις αντιπάλους με τη δική τους στρατηγική ο καθένας και σε έκτακτα δελτία που αλλάζουν τους κανόνες. Με πληκτρολόγιο ή στο κινητό. Online στο kitsorfan.github.io/RamAltman.',
 }
